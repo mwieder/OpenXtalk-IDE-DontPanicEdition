@@ -1426,7 +1426,8 @@ end revEnsurePath
 # Function to return license type in 6.0
 function revLicenseType
    if the environment is "development" then
-      return tolower(value("line 3 of revLicenseInfo"))
+      --return tolower(value("line 3 of revLicenseInfo"))
+		return "commercial"
    end if
    return the environment
 end revLicenseType

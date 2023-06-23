@@ -29,12 +29,12 @@ on initialize
    end if
    
    -- PM-2014-03-19: [[ In App Purchasing Updates ]]  We don't support the amazon store in community.
-   if revLicenseType() is not "commercial" \
-         and revLicenseType() is not "professional" \
-         and tSettings["android,billingProvider"] is "Amazon" then
-      put "Google" into tSettings["android,billingProvider"]
-      setSettings tSettings
-   end if
+#   if revLicenseType() is not "commercial" \
+#         and revLicenseType() is not "professional" \
+#         and tSettings["android,billingProvider"] is "Amazon" then
+#      put "Google" into tSettings["android,billingProvider"]
+#      setSettings tSettings
+#   end if
    
    -- PM-2015-01-06: [[ In App Purchasing Updates ]] Init the billingProvider to Google on first launch, if no billing provider is set
    storeSetting "billingProvider", computeDefault(tSettings["android,billingProvider"], "Google")
@@ -133,10 +133,10 @@ on updateAndroidSettingState
    set the opaque of button "Androidchecked" to false
    
    -- splash screen is not supported in Indy and Business editions
-   if revLicenseType() is "commercial" \
-         or revLicenseType() is "professional" then
+   --if revLicenseType() is "commercial" \
+         --or revLicenseType() is "professional" then
       set the enabled of button "Splash Chooser" of group "Android Settings" of me to false
-   end if
+   --end if
 end updateAndroidSettingState
 
 on updateAndroidArch pArch, pBuild
@@ -193,7 +193,8 @@ on updateInAppPurchaseSettings
       set the enabled of group "Store" of group "In App Purchasing" to false
    end if
    
-   set the visible of button "Amazon" of group "Store" of group "In App Purchasing" to (revLicenseType() is "commercial" or revLicenseType() is "professional")
+#   set the visible of button "Amazon" of group "Store" of group "In App Purchasing" to (revLicenseType() is "commercial" or revLicenseType() is "professional")
+   set the visible of button "Amazon" of group "Store" of group "In App Purchasing" to true
    
    unlock screen
 end updateInAppPurchaseSettings
