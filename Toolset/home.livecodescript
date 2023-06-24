@@ -1,5 +1,7 @@
 ﻿script "home"
 constant kImportantTextColor = "#569e54"
+constant kEdition = "commercial"
+#constant kEdition = "OpenXTalk"
 
 on startup
    revSetTestEnvironment($TRAVIS is true)
@@ -254,7 +256,7 @@ on revInternal__openStack
       -- MM-2011-09-27: The new auto update process is handled entirely by the installer.
       -- Luanch the installer in update mode to begin update process.
       --
-      if line 3 of revLicenseInfo is not "evaluation" then
+      --if line 3 of revLicenseInfo is not "evaluation" then
          local tCommand, tOldPath
          put $PATH into tOldPath
          set the itemdelimiter to "/"
@@ -280,7 +282,7 @@ on revInternal__openStack
          set the itemDel to comma
          open process tCommand for neither
          put tOldPath into $PATH
-      end if
+      --end if
       
       close stack "revSplash"
       
@@ -298,11 +300,11 @@ end revInternal__setSplashStatus
 
 
 local sLicensePlatform
-local sLicenseClass
+--local sLicenseClass
 local sLicenseVersion
-local sLicenseName
-local sLicenseOrganization
-local sLicenseMultiplicity
+--local sLicenseName
+--local sLicenseOrganization
+--local sLicenseMultiplicity
 
 -- This is the path to the folder containing the IDE's folders
 local sToolsPath
@@ -341,14 +343,14 @@ constant kProductName = "LiveCode"
 private command revInternal__SetupLicense 
    revInternal__Log "Enter", "License Setup"
    
-   put line 1 of the revLicenseInfo into sLicenseName
-   put line 2 of the revLicenseInfo into sLicenseOrganization
-   put line 3 of the revLicenseInfo into sLicenseClass
-   put line 4 of the revLicenseInfo into sLicenseMultiplicity
+   --put line 1 of the revLicenseInfo into sLicenseName
+   --put line 2 of the revLicenseInfo into sLicenseOrganization
+   --put line 3 of the revLicenseInfo into sLicenseClass
+   --put line 4 of the revLicenseInfo into sLicenseMultiplicity
    
-   if sLicenseMultiplicity is empty then
-      put 1 into sLicenseMultiplicity
-   end if
+   --if sLicenseMultiplicity is empty then
+      --put 1 into sLicenseMultiplicity
+   --end if
    
    put the version && "build" && the buildnumber into sLicenseVersion
    
@@ -431,7 +433,8 @@ private command revInternal__SetupPaths
    
    # The docs cache is per-version and edition
    local tEdition
-   put tolower(sLicenseClass) into tEdition
+   --put tolower(sLicenseClass) into tEdition
+	put lower(kEdition) into tEdition
    
    local tVersion
    put the version into tVersion
@@ -1952,7 +1955,7 @@ function revEnvironmentEditionProperty pProp, pEdition
          end switch
          break
       case "indy"
-      case "commercial"
+      case kEdition
          switch pProp
             case "name"
                return "Indy"
@@ -1973,11 +1976,11 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "open_source_required"
                return false
             case "splash_strap"
-               if revLicenseInfo["com.livecode.norevenuelimit"] is not empty then
+               --if revLicenseInfo["com.livecode.norevenuelimit"] is not empty then
                   return empty
-               else
-                  return "<p>This Indy license is only valid for organizations with annual revenues of $500,000 USD or less</p>"
-               end if
+               --else
+                  --return "<p>This Indy license is only valid for organizations with annual revenues of $500,000 USD or less</p>"
+               --end if
             case "upgrade_mini_url"
                return empty
             case "upgrade_url"
