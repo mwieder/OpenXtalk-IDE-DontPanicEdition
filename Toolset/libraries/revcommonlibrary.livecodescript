@@ -51,9 +51,12 @@ on revGoPDF pFilename
   launch document pFilename
 end revGoPDF
 
-# TH-2008-06-27 :: Bug 6521/6432, have seperated revMail into two alternative handlers.  revMailUnicode
+# TH-2008-06-27 :: Bug 6521/6432, have separated revMail into two alternative handlers.  revMailUnicode
 # should be ussed by people sending unicode characters, the original revMail can be used otherwise
+# mdw 2023.06.25 fix bug https://quality.livecode.com/show_bug.cgi?id=24240
 command revMail pTo, pCC, pSubject, pBody
+	replace space with "%20" in pTo
+	replace space with "%20" in pCC
    if the environment is "mobile" then
       mobileComposeMail pSubject, pTo, pCC, , pBody
    else
