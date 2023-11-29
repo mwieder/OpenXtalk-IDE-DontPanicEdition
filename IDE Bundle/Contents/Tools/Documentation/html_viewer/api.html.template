@@ -10,12 +10,6 @@
 	<link href="[[tDocsCSSFolder]]/bootstrap.min.css" rel="stylesheet">
 	<link href="[[tDocsCSSFolder]]/lcdoc.css" rel="stylesheet">
 	<link href="[[tDocsCSSFolder]]/codestyle.css" rel="stylesheet">
-
-	<!--block the enterKey -->
-	<script type="text/javascript">
-	window.addEventListener('keydown',function(e){if(e.keyIdentifier=='U+000A'||e.keyIdentifier=='Enter'||e.keyCode==13){if(e.target.nodeName=='INPUT'&&e.target.type=='text'){e.preventDefault();return false;}}},true);
-	</script>
-
 </head>
 <body>
 
@@ -66,8 +60,7 @@
 		</ul>
 		<form class="navbar-form navbar-right col-md-4">
 			<div class="form-group" id="filter_box">
-			  <!-- input id="ui_filer" type="text" require pattern="[A-Z][a-z][0-9]" class="form-control input-sm" spellcheck="false" placeholder="Search" -->
-				<input id="ui_filer" type="text" class="form-control input-sm" spellcheck="false" placeholder="Search">
+			  <input id="ui_filer" type="text" class="form-control input-sm" spellcheck="false" placeholder="Search">
 			</div>
 			<button type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></button>
 		</form>

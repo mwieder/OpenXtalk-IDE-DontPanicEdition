@@ -286,8 +286,8 @@
 				"com.livecode.widget"
 			],
 			"associations":["com.livecode.widget"],
-			"summary":"This library consists of the operations on widgets provided by LiveCode Builder.",
-			"description":"This library consists of the operations on widgets provided by LiveCode Builder."
+			"summary":"This library consists of the operations on widgets provided by Extension Builder.",
+			"description":"This library consists of the operations on widgets provided by Extension Builder."
 		},{
 			"id":"builder-17",
 			"name":"propertyofwidget",
@@ -859,7 +859,7 @@
 			"associations":["com.livecode.widget"],
 			"summary":"Sent when the widget geometry changed.",
 			"examples":[{
-				"script":"private variable mLabel as String\n\npublic handler OnGeometryChanged()\n\tif my width is not my height then\n\t\tput \"Rectangle\" into mLabel\n\telse\n\t\tput \"Square\" into mLabel\n\tend if\n\tredraw all\t\nend handler"
+				"script":"private variable mLabel as String\n\npublic handler OnGeometryChanged()\n\tif my width is not my height then\n\t\tput \"Rectangle\" into mLabel\n\telse\n\t\tput \"Square\" into mLabel\n\tend if\n\tredraw all\nend handler"
 			}],
 			"description":"Handle the <OnGeometryChanged> message to perform specific actions that depend on the geometry of the widget, for example the locations on the canvas where parts of the widget are drawn.",
 			"tags":["widget"]
@@ -1927,7 +1927,7 @@
 			},{
 				"script":"private variable mSelf as Widget\nhandler TextChangedCallback()\n\tUpdateTextProperty()\n\ttrigger all in mSelf\nend handler"
 			}],
-			"description":"Use trigger all to cause all triggers for all a widget's properties to \nbe fired, for example when user action causes a native widget's \nproperties to change, to signal the property change to the IDE.",
+			"description":"Use trigger all to cause all triggers for all a widget's properties to\nbe fired, for example when user action causes a native widget's\nproperties to change, to signal the property change to the IDE.",
 			"tags":["widget"]
 		},{
 			"id":"builder-94",
@@ -2254,7 +2254,7 @@
 				"type":"",
 				"description":"Returns true if <Needle> can be found among the keys of <Target>."
 			}],
-			"description":"The keys of an array are case insensitive. Thus\n``` tVar is among the keys of tArray``` \nis not equivalent to \n``` tVar is in (the keys of tArray) ```\nas the latter <IsInList> operation *is* case sensitive.",
+			"description":"The keys of an array are case insensitive. Thus\n``` tVar is among the keys of tArray```\nis not equivalent to\n``` tVar is in (the keys of tArray) ```\nas the latter <IsInList> operation *is* case sensitive.",
 			"references":{
 				"operator":["IsInList"]
 			},
@@ -2280,7 +2280,7 @@
 				"description":"An expression which evaluates to an array."
 			}],
 			"examples":[{
-				"script":"variable tArray as Array\nput the empty array into tArray\nput \"value1\" into tArray[\"key1\"]\nput \"value2\" into tArray[\"key2\"]\nput \"value3\" into tArray[\"key3\"]\n\nvariable tKeys as List\nput the keys of tArray into tKeys\nsort tKeys in ascending order\n\nvariable tKeysString as String\ncombine tKeys with \",\" into tKeysString \n// tKeysString is \"key1,key2,key3\""
+				"script":"variable tArray as Array\nput the empty array into tArray\nput \"value1\" into tArray[\"key1\"]\nput \"value2\" into tArray[\"key2\"]\nput \"value3\" into tArray[\"key3\"]\n\nvariable tKeys as List\nput the keys of tArray into tKeys\nsort tKeys in ascending order\n\nvariable tKeysString as String\ncombine tKeys with \",\" into tKeysString\n// tKeysString is \"key1,key2,key3\""
 			}],
 			"value":[{
 				"name":"return",
@@ -2350,7 +2350,7 @@
 				"type":"",
 				"description":"Returns true if <Needle> can be found among the elements of <Target>."
 			}],
-			"description":"Elements are compared using the default comparison for that type. Thus for a string, ```tString```, \n```tString is among the elements of tArray``` \nis a case sensitive search.",
+			"description":"Elements are compared using the default comparison for that type. Thus for a string, ```tString```,\n```tString is among the elements of tArray```\nis a case sensitive search.",
 			"tags":["arrays"]
 		},{
 			"id":"builder-110",
@@ -2387,8 +2387,8 @@
 				"com.livecode.array"
 			],
 			"associations":["com.livecode.array"],
-			"summary":"This library consists of the operations on arrays included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on arrays included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on arrays included in the standard library of Extension Builder.",
+			"description":"This library consists of the operations on arrays included in the standard library of Extension Builder."
 		},{
 			"id":"builder-112",
 			"name":"pointerfromjobject",
@@ -3209,7 +3209,7 @@
 			"examples":[{
 				"script":"variable sKeyIndex as Number\n\nprivate handler CompareListsByElement(in pLeft as any, in pRight as any) returns Integer\n   variable tLeft as Number\n   variable tRight as Number\n   put pLeft[sKeyIndex] into tLeft\n   put pRight[sKeyIndex] into tRight\n\n   if tLeft > tRight then\n      return 1\n   else if tLeft < tRight then\n      return -1\n   else\n      return 0\n   end if\nend handler\n\n-- Sort lists according to value at specified index of each list\npublic handler TestSortListOfLists(in pList as List, in pKeyIndex as Number) returns List\n   put pKeyIndex into sKeyIndex\n   sort pList using handler CompareListsByElement\n   return pList\nend handler"
 			}],
-			"description":"<SortListUsingHandler> sorts a list by comparing the elements of a list according to the \ncomparison implemented by the <Handler> argument.\n\n>*Note:* Supplying an inconsistent comparison operator to <SortListUsingHandler> causes \nundefined behavior.",
+			"description":"<SortListUsingHandler> sorts a list by comparing the elements of a list according to the\ncomparison implemented by the <Handler> argument.\n\n>*Note:* Supplying an inconsistent comparison operator to <SortListUsingHandler> causes\nundefined behavior.",
 			"tags":["sorting"]
 		},{
 			"id":"builder-146",
@@ -3393,8 +3393,8 @@
 				"com.livecode.sort"
 			],
 			"associations":["com.livecode.sort"],
-			"summary":"This library consists of the sorting operations provided by the standard library of LiveCode Builder.",
-			"description":"This library consists of the sorting operations provided by the standard library of LiveCode Builder."
+			"summary":"This library consists of the sorting operations provided by the standard library of Extension Builder.",
+			"description":"This library consists of the sorting operations provided by the standard library of Extension Builder."
 		},{
 			"id":"builder-154",
 			"name":"pathoperationaddpath",
@@ -4257,8 +4257,8 @@
 				"com.livecode.canvas"
 			],
 			"associations":["com.livecode.canvas"],
-			"summary":"This module specifies the syntax definitions and bindings for canvas drawing operations in modular LiveCode.",
-			"description":"This module specifies the syntax definitions and bindings for canvas drawing operations in modular LiveCode."
+			"summary":"This module specifies the syntax definitions and bindings for canvas drawing operations in Extension Builder.",
+			"description":"This module specifies the syntax definitions and bindings for canvas drawing operations in Extension Builder."
 		},{
 			"id":"builder-186",
 			"name":"transformmakeskew",
@@ -8402,8 +8402,8 @@
 				"com.livecode.binary"
 			],
 			"associations":["com.livecode.binary"],
-			"summary":"This library consists of the operations on binary strings provided by the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on binary strings provided by the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on binary strings provided by the standard library of Extension Builder.",
+			"description":"This library consists of the operations on binary strings provided by the standard library of Extension Builder."
 		},{
 			"id":"builder-328",
 			"name":"byteisindata",
@@ -8716,8 +8716,8 @@
 				"com.livecode.byte"
 			],
 			"associations":["com.livecode.byte"],
-			"summary":"This library consists of the operations on bytes included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on bytes included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on bytes included in the standard library of Extension Builder.",
+			"description":"This library consists of the operations on bytes included in the standard library of Extension Builder."
 		},{
 			"id":"builder-340",
 			"name":"beginswithbytes",
@@ -9967,8 +9967,8 @@
 				"com.livecode.typeconvert"
 			],
 			"associations":["com.livecode.typeconvert"],
-			"summary":"This library consists of the operations for performing complex type conversion in LiveCode Builder.",
-			"description":"This library consists of the operations for performing complex type conversion in LiveCode Builder."
+			"summary":"This library consists of the operations for performing complex type conversion in Extension Builder.",
+			"description":"This library consists of the operations for performing complex type conversion in Extension Builder."
 		},{
 			"id":"builder-402",
 			"name":"stringsplitby",
@@ -10017,7 +10017,7 @@
 				"combine <i>Target</i> with <i>Delimiter</i>"
 			],
 			"associations":["com.livecode.typeconvert"],
-			"summary":"Combines the list of strings in <Target>, using <Delimiter>\n                as the delimiter. ",
+			"summary":"Combines the list of strings in <Target>, using <Delimiter>\n                as the delimiter.",
 			"parameters":[{
 				"name":"Target",
 				"type":"",
@@ -10200,7 +10200,7 @@
 				"refparam":"false",
 				"description":"An error message describing the reason for the failure."
 			}],
-			"description":"The <browserFrameDocumentLoadFailed> message is sent to the widget's \nscript object when a new document has failed to load in a frame of the \nbrowser. The <pUrl> parameter contains the URL of the document, and the \n<pError> parameter gives the reason for the failure."
+			"description":"The <browserFrameDocumentLoadFailed> message is sent to the widget's\nscript object when a new document has failed to load in a frame of the\nbrowser. The <pUrl> parameter contains the URL of the document, and the\n<pError> parameter gives the reason for the failure."
 		},{
 			"id":"builder-413",
 			"name":"browsernavigatebegin",
@@ -10221,7 +10221,7 @@
 				"refparam":"false",
 				"description":"The URL of the new page."
 			}],
-			"description":"The <browserNavigateBegin> message is sent to the widget's script object \nwhen the browser begins navigation to a new page. This can be triggered \nby launching a URL in the browser, or clicking a link within the \nbrowser. The <pUrl> parameter contains the URL of the new page."
+			"description":"The <browserNavigateBegin> message is sent to the widget's script object\nwhen the browser begins navigation to a new page. This can be triggered\nby launching a URL in the browser, or clicking a link within the\nbrowser. The <pUrl> parameter contains the URL of the new page."
 		},{
 			"id":"builder-414",
 			"name":"browserframedocumentloadbegin",
@@ -10242,7 +10242,7 @@
 				"refparam":"false",
 				"description":"The URL of the loading document."
 			}],
-			"description":"The <browserFrameDocumentLoadBegin> message is sent to the widget's \nscript object when a new document begins to load in a frame of the \nbrowser. This will happen whenever the browser navigates to a new page \nwith multiple frames. The <pUrl> parameter contains the URL of the \nloading document."
+			"description":"The <browserFrameDocumentLoadBegin> message is sent to the widget's\nscript object when a new document begins to load in a frame of the\nbrowser. This will happen whenever the browser navigates to a new page\nwith multiple frames. The <pUrl> parameter contains the URL of the\nloading document."
 		},{
 			"id":"builder-415",
 			"name":"allowuserinteraction",
@@ -10283,7 +10283,7 @@
 				"refparam":"false",
 				"description":"The URL of the loading document."
 			}],
-			"description":"The <browserDocumentLoadBegin> message is sent to the widget's script \nobject when a new document begins to load in the browser. This will \nhappen whenever the browser navigates to a new page. The <pUrl> \nparameter contains the URL of the loading document."
+			"description":"The <browserDocumentLoadBegin> message is sent to the widget's script\nobject when a new document begins to load in the browser. This will\nhappen whenever the browser navigates to a new page. The <pUrl>\nparameter contains the URL of the loading document."
 		},{
 			"id":"builder-417",
 			"name":"com.livecode.widget.browser",
@@ -10294,8 +10294,8 @@
 				"com.livecode.widget.browser"
 			],
 			"associations":["com.livecode.widget.browser"],
-			"summary":"This widget displays web content within a native web browser view.\n\nThe browser widget can display HTML content generated in LiveCode, or\nfetch content over the Internet.  It supports JavaScript and allows\nfor interaction between LiveCode scripts and JavaScript code.\n\nThe [browser SVG icon](https://www.iconfinder.com/icons/309064/browser_globe_international_internet_web_world_icon)\nis copyright ¬© Ivan Boyko, and is licensed under the terms of the\n[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/).",
-			"description":"This widget displays web content within a native web browser view.\n\nThe browser widget can display HTML content generated in LiveCode, or\nfetch content over the Internet.  It supports JavaScript and allows\nfor interaction between LiveCode scripts and JavaScript code.\n\nThe [browser SVG icon](https://www.iconfinder.com/icons/309064/browser_globe_international_internet_web_world_icon)\nis copyright ¬© Ivan Boyko, and is licensed under the terms of the\n[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/)."
+			"summary":"This widget displays web content within a native web browser view.\n\nThe browser widget can display HTML content generated from xTalk script, or\nfetch content over the Internet.  It supports JavaScript and allows\nfor interaction between xTalk scripts and JavaScript code.\n\nThe [browser SVG icon](https://www.iconfinder.com/icons/309064/browser_globe_international_internet_web_world_icon)\nis copyright ¬© Ivan Boyko, and is licensed under the terms of the\n[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/).",
+			"description":"This widget displays web content within a native web browser view.\n\nThe browser widget can display HTML content generated from xTalk script, or\nfetch content over the Internet.  It supports JavaScript and allows\nfor interaction between xTalk scripts and JavaScript code.\n\nThe [browser SVG icon](https://www.iconfinder.com/icons/309064/browser_globe_international_internet_web_world_icon)\nis copyright ¬© Ivan Boyko, and is licensed under the terms of the\n[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/)."
 		},{
 			"id":"builder-418",
 			"name":"browserdocumentloadfailed",
@@ -10321,7 +10321,7 @@
 				"refparam":"false",
 				"description":"An error message describing the reason for the failure."
 			}],
-			"description":"The <browserDocumentLoadFailed> message is sent to the widget's script \nobject when a new document has failed to load in the browser. The <pUrl> \nparameter contains the URL of the document, and the <pError> parameter \ngives the reason for the failure."
+			"description":"The <browserDocumentLoadFailed> message is sent to the widget's script\nobject when a new document has failed to load in the browser. The <pUrl>\nparameter contains the URL of the document, and the <pError> parameter\ngives the reason for the failure."
 		},{
 			"id":"builder-419",
 			"name":"browserdocumentloadcomplete",
@@ -10342,7 +10342,7 @@
 				"refparam":"false",
 				"description":"The URL of the loaded document."
 			}],
-			"description":"The <browserDocumentLoadComplete> message is sent to the widget's script \nobject when a new document has completed loading in the browser. The \n<pUrl> parameter contains the URL of the loaded document."
+			"description":"The <browserDocumentLoadComplete> message is sent to the widget's script\nobject when a new document has completed loading in the browser. The\n<pUrl> parameter contains the URL of the loaded document."
 		},{
 			"id":"builder-420",
 			"name":"hscrollbar",
@@ -10411,7 +10411,7 @@
 				"refparam":"false",
 				"description":"An error message describing the reason for the failure."
 			}],
-			"description":"The <browserNavigateFailed> message is sent to the widget's script \nobject when the browser has failed to navigate to a new page. The <pUrl> \nparameter contains the URL of the new page, and the <pError> parameter \ngives the reason for the failure."
+			"description":"The <browserNavigateFailed> message is sent to the widget's script\nobject when the browser has failed to navigate to a new page. The <pUrl>\nparameter contains the URL of the new page, and the <pError> parameter\ngives the reason for the failure."
 		},{
 			"id":"builder-423",
 			"name":"browsernavigatecomplete",
@@ -10432,7 +10432,7 @@
 				"refparam":"false",
 				"description":"The URL of the new page."
 			}],
-			"description":"The <browserNavigateComplete> message is sent to the widget's script \nobject when the browser successfully navigates to a new page. The <pUrl> \nparameter contains the URL of the new page."
+			"description":"The <browserNavigateComplete> message is sent to the widget's script\nobject when the browser successfully navigates to a new page. The <pUrl>\nparameter contains the URL of the new page."
 		},{
 			"id":"builder-424",
 			"name":"useragent",
@@ -10470,7 +10470,7 @@
 				"set the javascriptHandlers of <i>widget</i> to <i>pHanderList</i>"
 			],
 			"associations":["com.livecode.widget.browser"],
-			"summary":"A list of LiveCode handlers that are made available to JavaScript calls within the browser.",
+			"summary":"A list of handlers that are made available to JavaScript calls within the browser.",
 			"examples":[{
 				"script":"-- Define a handler to respond to javascript calls.\non myJSHandler pMessage, pValue\n\t-- Do appropriate actions here.\n\t-- ...\nend myJSHandler\n\n-- Set up the browser javascript handler list\n-- This code goes in a suitable setup handler\nset the javascriptHandlers to \"myJSHandler\" & return & \"myOtherJSHandler\"\n\n// Calling the handler from JavaScript within the browser\nliveCode.myJSHandler(\"myMessage\", 12345);"
 			}],
@@ -10479,7 +10479,7 @@
 				"type":"string",
 				"description":"A return-separated list of handler names."
 			}],
-			"description":"The <javascriptHandlers> is a list of LiveCode handlers that are made\navailable to JavaScript calls within the browser. The handlers will\nappear as methods attached to a global `liveCode` object. You can call\nthese methods as you would any other JavaScript function and pass\nwhatever parameters you require.\n\n>*Warning:* Setting the <javascriptHandlers> property gives JavaScript\nrunning within the Web browser permission to execute parts of your\napplication through the handlers you choose to expose. If using this\nfeature, make sure that you have complete control over the webpages\nwhich you load into the browser widget, and consider using HTTPS to\nensure that third-parties cannot inject malicious code into them."
+			"description":"The <javascriptHandlers> is a list of handlers that are made\navailable to JavaScript calls within the browser. The handlers will\nappear as methods attached to a global `liveCode` object. You can call\nthese methods as you would any other JavaScript function and pass\nwhatever parameters you require.\n\n>*Warning:* Setting the <javascriptHandlers> property gives JavaScript\nrunning within the Web browser permission to execute parts of your\napplication through the handlers you choose to expose. If using this\nfeature, make sure that you have complete control over the webpages\nwhich you load into the browser widget, and consider using HTTPS to\nensure that third-parties cannot inject malicious code into them."
 		},{
 			"id":"builder-426",
 			"name":"vscrollbar",
@@ -10524,9 +10524,9 @@
 				"description":"A string specifying a URL."
 			}],
 			"examples":[{
-				"script":"-- Navigate to livecode.com by setting the url property,\n-- keeping a copy of the previous URL\nlocal tOldUrl\nput the URL of widget \"myBrowser\" into tOldUrl\nset the URL of widget \"myBrowser\" to \"https://livecode.com\""
+				"script":"-- Navigate to openxtalk.org by setting the url property,\n-- keeping a copy of the previous URL\nlocal tOldUrl\nput the URL of widget \"myBrowser\" into tOldUrl\nset the URL of widget \"myBrowser\" to \"https://openxtalk.org\""
 			}],
-			"description":"The <URL> is the URL of the content be displayed in the browser.\n\n>*Note:* The <URL> must be a standards-compliant URL.  In particular, \n> `file:` URLs must be of the form `file://<absolute path>`, and the \n> path should be URL-encoded.  \n> See [RFC 1738, section 2.2](https://tools.ietf.org/html/rfc1738#section-2.2).\n\n>*Note:* The <URL> reflects the currently displaying page in the \n> browser, and will change when navigating to another page. Setting the \n> htmlText will result in the <URL> being empty.\n\n>*Note:* Setting the <URL> won't necessarily cause resources to be\n> reloaded unless URLs of the resources explicitly change. However, \n> you can force the browser widget to reload a page using \n> `do \"location.reload()\" in widget \"browser\"` after setting the url.\n\n>*Note:* Setting the <URL> to empty will clear the currently loaded \n> page, resulting in a blank page being displayed and the <URL> and \n> <htmlText> of the widget being empty.",
+			"description":"The <URL> is the URL of the content be displayed in the browser.\n\n>*Note:* The <URL> must be a standards-compliant URL.  In particular,\n> `file:` URLs must be of the form `file://<absolute path>`, and the\n> path should be URL-encoded.\n> See [RFC 1738, section 2.2](https://tools.ietf.org/html/rfc1738#section-2.2).\n\n>*Note:* The <URL> reflects the currently displaying page in the\n> browser, and will change when navigating to another page. Setting the\n> htmlText will result in the <URL> being empty.\n\n>*Note:* Setting the <URL> won't necessarily cause resources to be\n> reloaded unless URLs of the resources explicitly change. However,\n> you can force the browser widget to reload a page using\n> `do \"location.reload()\" in widget \"browser\"` after setting the url.\n\n>*Note:* Setting the <URL> to empty will clear the currently loaded\n> page, resulting in a blank page being displayed and the <URL> and\n> <htmlText> of the widget being empty.",
 			"references":{
 				"property":["htmlText"]
 			}
@@ -10550,7 +10550,7 @@
 				"refparam":"false",
 				"description":"The URL of the loaded document."
 			}],
-			"description":"The <browserFrameDocumentLoadComplete> message is sent to the widget's \nscript object when a new document has completed loading in a frame of \nthe browser. The <pUrl> parameter contains the URL of the loaded \ndocument."
+			"description":"The <browserFrameDocumentLoadComplete> message is sent to the widget's\nscript object when a new document has completed loading in a frame of\nthe browser. The <pUrl> parameter contains the URL of the loaded\ndocument."
 		},{
 			"id":"builder-429",
 			"name":"browserprogresschanged",
@@ -10600,7 +10600,7 @@
 			"examples":[{
 				"script":"-- Render a web page in the browser by specifying custom HTML\n-- content\nlocal tHTML\nput \"<html><head><title>My Page Title</title></head>\" & \\\n\t  \"<body>My Page Contents</body></html>\" into tHTML\nset the htmlText of widget \"myBrowser\" to tHTML"
 			}],
-			"description":"The <htmlText> is the HTML representation of the content displayed in \nthe browser.\n\n*Note:* When the <htmlText> has been set, the <URL> property will be\nempty. When the <URL> property is not empty, the <htmlText> will\ncontain the source of the current URL displayed in the browser.",
+			"description":"The <htmlText> is the HTML representation of the content displayed in\nthe browser.\n\n*Note:* When the <htmlText> has been set, the <URL> property will be\nempty. When the <URL> property is not empty, the <htmlText> will\ncontain the source of the current URL displayed in the browser.",
 			"references":{
 				"property":["URL"]
 			}
@@ -10624,7 +10624,7 @@
 				"refparam":"false",
 				"description":"The URL of the request."
 			}],
-			"description":"The <browserUnhandledLoadRequest> message is sent to the widget's script \nobject when the browser is unable to load a URL, typically due to an \nunrecognised URL scheme. The <pUrl> parameter contains the URL of the \nunhandled request."
+			"description":"The <browserUnhandledLoadRequest> message is sent to the widget's script\nobject when the browser is unable to load a URL, typically due to an\nunrecognised URL scheme. The <pUrl> parameter contains the URL of the\nunhandled request."
 		},{
 			"id":"builder-432",
 			"name":"androidpauseaudioplayinginbackground",
@@ -11384,8 +11384,8 @@
 				"com.livecode.library.canvas"
 			],
 			"associations":["com.livecode.library.canvas"],
-			"summary":"Gives access to the LiveCode Builder canvas syntax from LiveCode Script",
-			"description":"This library wraps a few simple handlers of the LiveCode Builder Canvas\nmodule to provide access to the syntax for creating and manipulating\ncanvas objects.\n\nFor example:\n\n    canvasCreate 100, 100\n\tcanvasSetColor 1, 0, 0, 1\n\tcanvasFillCircle 50, 50, 25\n\tcanvasApplyToImage \"image 1\"\n    canvasDestroy\n\nThis creates a canvas of size 100x100, fills a circle of radius 25 at\nthe centre, then copies the contents of the canvas to 'image 1' (which\nmust already exist)."
+			"summary":"Gives access to the Extension Builder canvas syntax from xTalk Script",
+			"description":"This library wraps a few simple handlers of the Extension Builder Canvas\nmodule to provide access to the syntax for creating and manipulating\ncanvas objects.\n\nFor example:\n\n    canvasCreate 100, 100\n\tcanvasSetColor 1, 0, 0, 1\n\tcanvasFillCircle 50, 50, 25\n\tcanvasApplyToImage \"image 1\"\n    canvasDestroy\n\nThis creates a canvas of size 100x100, fills a circle of radius 25 at\nthe centre, then copies the contents of the canvas to 'image 1' (which\nmust already exist)."
 		},{
 			"id":"builder-469",
 			"name":"com.livecode.widget.colorswatch",
@@ -11474,8 +11474,8 @@
 				"com.livecode.mathfoundation"
 			],
 			"associations":["com.livecode.mathfoundation"],
-			"summary":"This library consists of the foundational mathematical operations included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the foundational mathematical operations included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the foundational mathematical operations included in the standard library of Extension Builder.",
+			"description":"This library consists of the foundational mathematical operations included in the standard library of Extension Builder."
 		},{
 			"id":"builder-474",
 			"name":"ceiloperator",
@@ -11753,7 +11753,7 @@
 				"description":"An expression which evaluates to a string."
 			}],
 			"examples":[{
-				"script":"variable tVar as String\nvariable tResult as String\nput \"abcde\" into tVar\nif tVar begins with \"abc\" then\n\tput \"success\" into tResult\nend if\t"
+				"script":"variable tVar as String\nvariable tResult as String\nput \"abcde\" into tVar\nif tVar begins with \"abc\" then\n\tput \"success\" into tResult\nend if"
 			}],
 			"value":[{
 				"name":"return",
@@ -11864,7 +11864,7 @@
 				"description":"An expression which evaluates to a string."
 			}],
 			"examples":[{
-				"script":"variable tVar as Number\nvariable tSource as String\nput \"hello\" into tString\nput the number of chars in tString into tVar\n\nvariable tString as String\nput the empty string into tString\t\nrepeat tVar times\n\tput \"a\" after tString\nend repeat\n\n// tString contains \"aaaaa\""
+				"script":"variable tVar as Number\nvariable tSource as String\nput \"hello\" into tString\nput the number of chars in tString into tVar\n\nvariable tString as String\nput the empty string into tString\nrepeat tVar times\n\tput \"a\" after tString\nend repeat\n\n// tString contains \"aaaaa\""
 			}],
 			"value":[{
 				"name":"return",
@@ -11920,8 +11920,8 @@
 				"com.livecode.char"
 			],
 			"associations":["com.livecode.char"],
-			"summary":"This library consists of the operations on chars included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on chars included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on chars included in the standard library of Extension Builder.",
+			"description":"This library consists of the operations on chars included in the standard library of Extension Builder."
 		},{
 			"id":"builder-490",
 			"name":"lastcharof",
@@ -12043,7 +12043,7 @@
 				"description":"An expression which evaluates to a valid integer index of Target."
 			}],
 			"examples":[{
-				"script":"variable tVar as Number\nvariable tLastDot as Number\nvariable tAddress as String\nvariable tTLD as String\nput \"http://www.livecode.com/index.html\" into tAddress\nput the last offset of \".\" in tAddress into tLastDot\nput the offset of \".\" before tLastDot in tAddress into tVar\nput char tVar + 1 to tVar + 3 of tAddress into tTLD -- tTLD contains \"com\""
+				"script":"variable tVar as Number\nvariable tLastDot as Number\nvariable tAddress as String\nvariable tTLD as String\nput \"http://www.openxtalk.org/index.html\" into tAddress\nput the last offset of \".\" in tAddress into tLastDot\nput the offset of \".\" before tLastDot in tAddress into tVar\nput char tVar + 1 to tVar + 3 of tAddress into tTLD -- tTLD contains \"org\""
 			}],
 			"value":[{
 				"name":"return",
@@ -12078,7 +12078,7 @@
 				"description":"An expression which evaluates to a string."
 			}],
 			"examples":[{
-				"script":"variable tVar as String\nvariable tResult as String\nput \"abcde\" into tVar\nif tVar ends with \"cde\" then\n\tput \"success\" into tResult\nend if\t"
+				"script":"variable tVar as String\nvariable tResult as String\nput \"abcde\" into tVar\nif tVar ends with \"cde\" then\n\tput \"success\" into tResult\nend if"
 			}],
 			"value":[{
 				"name":"return",
@@ -12438,7 +12438,7 @@
 				"type":"string",
 				"description":"The name of a theme supported by the header bar."
 			}],
-			"description":"The <theme> controls the general appearance of the header bar.  The\nheader widget currently supports \"native\", \"iOS\" and \"Android\".  If\nthe <theme> is set to \"native\", then the header widget will use either\nthe \"iOS\" or \"Android\" theme depending on the platform that LiveCode\nis running on.\n\n>*Note*: The value of the <theme> property is not saved by the header\nbar. Set the <theme> property to preview the way the header bar will\nappear when used on an Android or iOS device.\n\n>*Warning*: The meaning and behaviour of the <theme> property is\nexperimental and is subject to change in a future release."
+			"description":"The <theme> controls the general appearance of the header bar.  The\nheader widget currently supports \"native\", \"iOS\" and \"Android\".  If\nthe <theme> is set to \"native\", then the header widget will use either\nthe \"iOS\" or \"Android\" theme depending on the platform that the engine\nis running on.\n\n>*Note*: The value of the <theme> property is not saved by the header\nbar. Set the <theme> property to preview the way the header bar will\nappear when used on an Android or iOS device.\n\n>*Warning*: The meaning and behaviour of the <theme> property is\nexperimental and is subject to change in a future release."
 		},{
 			"id":"builder-510",
 			"name":"forecolor",
@@ -12634,8 +12634,8 @@
 				"com.livecode.library.scriptitems"
 			],
 			"associations":["com.livecode.library.scriptitems"],
-			"summary":"Utility functions for LiveCode Script-compatible item lists.\n\nMany LiveCode Builder widget and library extensions expose APIs to\nLiveCode Script that use item lists.  This library provides a set of\nfunctions for converting `List` values to-and-from comma-delimited\nitem strings.",
-			"description":"Utility functions for LiveCode Script-compatible item lists.\n\nMany LiveCode Builder widget and library extensions expose APIs to\nLiveCode Script that use item lists.  This library provides a set of\nfunctions for converting `List` values to-and-from comma-delimited\nitem strings."
+			"summary":"Utility functions for xTalk Script-compatible item lists.\n\nMany Extension Builder widget and library extensions expose APIs to\nxTalk script that use item lists.  This library provides a set of\nfunctions for converting `List` values to-and-from comma-delimited\nitem strings.",
+			"description":"Utility functions for xTalk Script-compatible item lists.\n\nMany Extension Builder widget and library extensions expose APIs to\nxTalk script that use item lists.  This library provides a set of\nfunctions for converting `List` values to-and-from comma-delimited\nitem strings."
 		},{
 			"id":"builder-520",
 			"name":"parseitemsasnumberlist",
@@ -12671,7 +12671,7 @@
 				"type":"",
 				"description":"The parsed items as a list of strings"
 			}],
-			"description":"Helper function for converting a LiveCode Script \"item\" list into a\nlist of numbers, obeying the LiveCode Script rules for items.\n\nIf <pListLength> is provided, then the returned list will always\ncontain that number of elements: extra elements will be discarded, and\nmissing elements will be set to <pDefaultValue>.",
+			"description":"Helper function for converting a xTalk Script \"item\" list into a\nlist of numbers, obeying the xTalk script rules for items.\n\nIf <pListLength> is provided, then the returned list will always\ncontain that number of elements: extra elements will be discarded, and\nmissing elements will be set to <pDefaultValue>.",
 			"references":{
 				"handler":["parseItemsAsStringList","formatNumberListAsItems"]
 			}
@@ -12710,7 +12710,7 @@
 				"type":"",
 				"description":"The parsed items as a list of strings"
 			}],
-			"description":"Helper function for converting a LiveCode Script \"item\" list into list\nof strings, obeying the LiveCode Script rules for items.\n\nIf <pListLength> is provided, then the returned list will always\ncontain that number of elements: extra elements will be discarded, and\nmissing elements will be set to <pDefaultValue>.",
+			"description":"Helper function for converting a xTalk script \"item\" list into list\nof strings, obeying the xTalk script rules for items.\n\nIf <pListLength> is provided, then the returned list will always\ncontain that number of elements: extra elements will be discarded, and\nmissing elements will be set to <pDefaultValue>.",
 			"references":{
 				"handler":["parseItemsAsNumberList","formatStringListAsItems"]
 			}
@@ -12737,9 +12737,9 @@
 			"value":[{
 				"name":"return",
 				"type":"",
-				"description":"A comma-delimited LiveCode Script-compatible \"item\" string"
+				"description":"A comma-delimited xTalk script-compatible \"item\" string"
 			}],
-			"description":"Helper function for converting a list of strings into a LiveCode\nScript \"item\" list, obeying the LiveCode Script rules for items.",
+			"description":"Helper function for converting a list of strings into a LiveCode\nScript \"item\" list, obeying the xTalk script rules for items.",
 			"references":{
 				"handler":["parseItemsAsStringList","formatNumberListAsItems"]
 			}
@@ -12766,9 +12766,9 @@
 			"value":[{
 				"name":"return",
 				"type":"",
-				"description":"A comma-delimited LiveCode Script-compatible \"item\" string"
+				"description":"A comma-delimited xTalk script-compatible \"item\" string"
 			}],
-			"description":"Helper function for converting a list of numbers into a LiveCode\nScript \"item\" list, obeying the LiveCode Script rules for items.",
+			"description":"Helper function for converting a list of numbers into a LiveCode\nScript \"item\" list, obeying the xTalk script rules for items.",
 			"references":{
 				"handler":["formatStringListAsItems","parseItemsAsNumberList"]
 			}
@@ -13648,8 +13648,8 @@
 				"com.livecode.math"
 			],
 			"associations":["com.livecode.math"],
-			"summary":"This library consists of the mathematical operations included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the mathematical operations included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the mathematical operations included in the standard library of Extension Builder.",
+			"description":"This library consists of the mathematical operations included in the standard library of Extension Builder."
 		},{
 			"id":"builder-563",
 			"name":"sinoperator",
@@ -14277,7 +14277,7 @@
 				"type":"",
 				"description":"The resolved script object."
 			}],
-			"description":"Use the <ResolveScriptObject|resolve script object> statement to obtain a <ScriptObject> in LiveCode Builder, in order to interact with it.\n\n>*Note:* An error is thrown if this syntax is used in a context where access\nto script objects is not allowed.",
+			"description":"Use the <ResolveScriptObject|resolve script object> statement to obtain a <ScriptObject> in Extension Builder, in order to interact with it.\n\n>*Note:* An error is thrown if this syntax is used in a context where access\nto script objects is not allowed.",
 			"tags":["engine","script engine"]
 		},{
 			"id":"builder-587",
@@ -14292,7 +14292,7 @@
 				"ScriptObject"
 			],
 			"associations":["com.livecode.engine"],
-			"summary":"An opaque type corresponding to a LiveCode script object.",
+			"summary":"An opaque type corresponding to a script object.",
 			"description":"Use the <ResolveScriptObject|resolve script object>, or <MyScriptObject|my script object> to obtain an object of type <ScriptObject>",
 			"references":{
 				"statement":["ResolveScriptObject"],
@@ -14329,7 +14329,7 @@
 			},{
 				"script":"variable tList as List\nput [1,2,3,4] into tList\nlog tList"
 			}],
-			"description":"The log command triggers a logChanged message with the \naccumulated log messages since the logChanged message \nwas last handled.\nThis can be handled in LiveCode Script, for example:\n\n    on logChanged pLog\n        write pLog to stdout\n    end logChanged\n\nIf using the 'with arguments' form, the <Value> must be a String.\nEach occurrence of %@ in the String is replaced by a string\nrepresentation of subsequent values in the <Arguments> List.",
+			"description":"The log command triggers a logChanged message with the\naccumulated log messages since the logChanged message\nwas last handled.\nThis can be handled in xTalk Script, for example:\n\n    on logChanged pLog\n        write pLog to stdout\n    end logChanged\n\nIf using the 'with arguments' form, the <Value> must be a String.\nEach occurrence of %@ in the String is replaced by a string\nrepresentation of subsequent values in the <Arguments> List.",
 			"tags":["engine","script engine"]
 		},{
 			"id":"builder-589",
@@ -14473,7 +14473,7 @@
 				"execute script <i>Script</i> [ in <i>Object</i> ] [ with <i>Arguments</i> ]"
 			],
 			"associations":["com.livecode.engine"],
-			"summary":"Executes some LiveCode script.",
+			"summary":"Executes some xTalk script.",
 			"parameters":[{
 				"name":"Script",
 				"type":"",
@@ -14495,7 +14495,7 @@
 			},{
 				"script":"   public handler SnapshotMeAtSize(in pWidth as Integer, in pHeight as Integer) returns nothing\n\t\tvariable tVar as String\n\t\tget property \"number\" of my script object\n\t\tput the result formatted as string into tVar\n\n\t\t// Create a snapshot from the rect of the widget\n\t\texecute script \"import snapshot from me at size at size param(1),param(2)\" \\\n            with [ pWidth, pHeight ]\n\tend handler"
 			}],
-			"description":"Executes the given fragment of LiveCode script in the context of the target\nscript object. If no object is specified then execution occurs in the context of\n`this card of the defaultStack` in a library handler or the current widget\ninstance script object if in a widget handler.\n\nThe list of arguments is accessible from the script fragment using the\n`paramCount()` and `param()` functions.\n\n>*Note:* An error is thrown if this syntax is used in a context where access\nto script objects is not allowed.",
+			"description":"Executes the given fragment of xTalk script in the context of the target\nscript object. If no object is specified then execution occurs in the context of\n`this card of the defaultStack` in a library handler or the current widget\ninstance script object if in a widget handler.\n\nThe list of arguments is accessible from the script fragment using the\n`paramCount()` and `param()` functions.\n\n>*Note:* An error is thrown if this syntax is used in a context where access\nto script objects is not allowed.",
 			"tags":["engine","script engine"]
 		},{
 			"id":"builder-594",
@@ -14507,8 +14507,8 @@
 				"com.livecode.engine"
 			],
 			"associations":["com.livecode.engine"],
-			"summary":"This library provides operations for interacting with LiveCode Script from LiveCode Builder.",
-			"description":"This library provides operations for interacting with LiveCode Script from LiveCode Builder."
+			"summary":"This library provides operations for interacting with xTalk Script from Extension Builder.",
+			"description":"This library provides operations for interacting with xTalk Script from Extension Builder."
 		},{
 			"id":"builder-595",
 			"name":"messagewashandled",
@@ -14566,7 +14566,7 @@
 			"examples":[{
 				"script":"public handler NotifyMe() returns nothing\n\tpost \"notify\" to the caller\nend handler"
 			}],
-			"description":"Returns the script object which called the handler at the beginning\nof the current chain of LiveCode Builder handler execution.",
+			"description":"Returns the script object which called the handler at the beginning\nof the current chain of Extension Builder handler execution.",
 			"tags":["engine","script engine"]
 		},{
 			"id":"builder-598",
@@ -15918,10 +15918,10 @@
 			"library":"builder",
 			"type":"control structure",
 			"syntax":[
-				"if <IfCondition> then \n\t<IfStatementList> \n[else if <ElseCondition> then \n\t<ElseIfStatementList>] \n[else \n\t<ElseStatementList>]\nend if"
+				"if <IfCondition> then\n\t<IfStatementList>\n[else if <ElseCondition> then\n\t<ElseIfStatementList>]\n[else\n\t<ElseStatementList>]\nend if"
 			],
 			"display syntax":[
-				"if <i>IfCondition</i> then "
+				"if <i>IfCondition</i> then"
 			],
 			"associations":["com.livecode.language"],
 			"summary":"Executes a list of statements depending on the value of a condition.",
@@ -16001,7 +16001,7 @@
 			"examples":[{
 				"script":"\tvariable tVar as optional number\n\tput \"Z\" parsed as string into tVar\n\tif tVar is not defined then\n\t\tthrow tVar && \"is not a number\n\tend if"
 			}],
-			"description":"The throw statement causes an error to be raised. This causes execution to terminate, and the error is passed back to environment.\n\nThe Error expression must be an expression that evaluates to a string.\nNote:There is currently no try / catch mechanism in LiveCode Builder, so throwing an error will cause the error to be raised in LiveCode Script in the appropriate context."
+			"description":"The throw statement causes an error to be raised. This causes execution to terminate, and the error is passed back to environment.\n\nThe Error expression must be an expression that evaluates to a string.\nNote:There is currently no try / catch mechanism in Extension Builder, so throwing an error will cause the error to be raised in xTalk Script in the appropriate context."
 		},{
 			"id":"builder-662",
 			"name":"nextrepeat",
@@ -16231,7 +16231,7 @@
 				"description":"A set of statements."
 			}],
 			"examples":[{
-				"script":"\tpublic handler Factorial(in pOperand as integer) as number\n\t\tif pOperand < 1 then\n\t\t\treturn 0\n\t\tend if\n\n\t\tvariable tTotal as number\n\t\tput 1 into tTotal\n\n\t\tvariable tCounter as integer\n\t\trepeat with tCounter from 1 up to pOperand \n\t\t\tmultiply tTotal by tCounter\n\t\tend repeat\n\n\t\treturn tCounter\n\tend handler"
+				"script":"\tpublic handler Factorial(in pOperand as integer) as number\n\t\tif pOperand < 1 then\n\t\t\treturn 0\n\t\tend if\n\n\t\tvariable tTotal as number\n\t\tput 1 into tTotal\n\n\t\tvariable tCounter as integer\n\t\trepeat with tCounter from 1 up to pOperand\n\t\t\tmultiply tTotal by tCounter\n\t\tend repeat\n\n\t\treturn tCounter\n\tend handler"
 			}],
 			"description":"Use the repeat with <Counter> structure to execute a set of statements until the value of <Counter> reaches or crosses (depending on iteration direction) the value of <Finish>. The counter is increased (or decreased) by <Step> on each iteration of the loop."
 		},{
@@ -16270,7 +16270,7 @@
 				"description":"A set of statements."
 			}],
 			"examples":[{
-				"script":"public handler TwoToThePower(in pOperand as integer) as number\n\n\tif pOperand is 0 then\n\t\treturn 1\n\tend if\t\n\n\tvariable tCount as number\n\tput the abs of pOperand into tCount\n\n\tvariable tResult as number\n\tput 1 into tResult\n\trepeat tCount times\n\t\tmultiply tResult by 2\n\tend repeat\n\n\tif pOperand < 0 then \n\t\treturn 1 / tResult\n\tend if\n\n\treturn tResult\nend handler"
+				"script":"public handler TwoToThePower(in pOperand as integer) as number\n\n\tif pOperand is 0 then\n\t\treturn 1\n\tend if\n\n\tvariable tCount as number\n\tput the abs of pOperand into tCount\n\n\tvariable tResult as number\n\tput 1 into tResult\n\trepeat tCount times\n\t\tmultiply tResult by 2\n\tend repeat\n\n\tif pOperand < 0 then\n\t\treturn 1 / tResult\n\tend if\n\n\treturn tResult\nend handler"
 			}],
 			"description":"Use the repeat <Count> times structure to execute a set of statements a given number of times, when the statements executed do not rely on knowing which iteration the repeat loop is on."
 		},{
@@ -16309,8 +16309,8 @@
 				"com.livecode.commercial.license"
 			],
 			"associations":["com.livecode.commercial.license"],
-			"summary":"This library provides license entitlement related operations for LiveCode Builder (commercial only).",
-			"description":"This library provides license entitlement related operations for LiveCode Builder (commercial only)."
+			"summary":"This library provides license entitlement related operations for Extension Builder (commercial).\nIt remains in OpenXTalk for compatibility with LiveCode, but since this only applies to closed source usage\nit should be considered as deprecated in OpenXTalk builds and may be removed in the future.",
+			"description":"This library provides license entitlement related operations for Extension Builder (commercial).\nIt remains in OpenXTalk for compatibility with LiveCode, but since this only applies to closed source usage\nit should be considered as deprecated in OpenXTalk builds and may be removed in the future."
 		},{
 			"id":"builder-675",
 			"name":"ensurelicense",
@@ -16602,8 +16602,8 @@
 				"com.livecode.logic"
 			],
 			"associations":["com.livecode.logic"],
-			"summary":"This library consists of the logical operations included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the logical operations included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the logical operations included in the standard library of Extension Builder.",
+			"description":"This library consists of the logical operations included in the standard library of Extension Builder."
 		},{
 			"id":"builder-686",
 			"name":"firstelementof",
@@ -16636,8 +16636,8 @@
 				"com.livecode.list"
 			],
 			"associations":["com.livecode.list"],
-			"summary":"This library consists of the operations on lists included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on lists included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on lists included in the standard library of Extension Builder.",
+			"description":"This library consists of the operations on lists included in the standard library of Extension Builder."
 		},{
 			"id":"builder-688",
 			"name":"repeatforeachelementinlist",
@@ -16696,7 +16696,7 @@
 			"examples":[{
 				"script":"variable tVar as List\nput the empty list into tVar\n\nvariable tCount as Number\nput 2 into tCount\nrepeat 3 times\n\tpush tCount onto tVar\nend repeat\n\nvariable tVar2 as List\npush 1 onto tVar2\npush 5 onto tVar2\n\nsplice tVar before element 2 of tVar2 -- tVar2 contains the list [1,2,3,4,5]"
 			}],
-			"description":"Use the splice syntax to insert the elements of one list into another list. \n\n>*Note:* ```put tList before element 2 of tList2``` results in the insertion of tList **as an element**, i.e. tList2 becomes the list [element 1 of tList2,tList,element 2 of tList2, element 3 of tList2 ...]\n\n>*Note:* It is an error if <Index> is out of range.",
+			"description":"Use the splice syntax to insert the elements of one list into another list.\n\n>*Note:* ```put tList before element 2 of tList2``` results in the insertion of tList **as an element**, i.e. tList2 becomes the list [element 1 of tList2,tList,element 2 of tList2, element 3 of tList2 ...]\n\n>*Note:* It is an error if <Index> is out of range.",
 			"tags":["lists"]
 		},{
 			"id":"builder-690",
@@ -16920,7 +16920,7 @@
 				"description":"An expression which evaluates to a list."
 			}],
 			"examples":[{
-				"script":"variable tVar as List\nput [1, 2, 3, 4, 5] into tVar\n\nvariable tEnds as Boolean\n// put tList ends with tList[5] into tEnds -- error: tList[5] is not a list \n\nput tList ends with element 1 to 5 of tList into tEnds -- tEnds is true"
+				"script":"variable tVar as List\nput [1, 2, 3, 4, 5] into tVar\n\nvariable tEnds as Boolean\n// put tList ends with tList[5] into tEnds -- error: tList[5] is not a list\n\nput tList ends with element 1 to 5 of tList into tEnds -- tEnds is true"
 			}],
 			"value":[{
 				"name":"return",
@@ -17002,7 +17002,7 @@
 			"examples":[{
 				"script":"variable tVar as List\nput the empty list into tVar\n\nvariable tCount as Number\nput 1 into tCount\nrepeat 3 times\n\tpush tCount onto tVar\nend repeat\n\nvariable tVar2 as List\npush \"these\" onto tVar2\npush \"are\" onto tVar2\npush \"unwanted\" onto tVar2\npush 4 onto tVar2\n\nsplice tVar into element 1 to 3 of tVar2 -- tVar2 contains the list [1,2,3,4]"
 			}],
-			"description":"Use the splice syntax to insert the elements of one list into another list. \n\n>*Note:* ```put tList into element 1 to 3 of tList2``` results in the removal of elements 1 to 3 of tList2 and the insertion of tList **as an element**, i.e. tList2 becomes the list [tList,element 4 of tList2, element 5 of tList2 ...]\n\n>*Note:* It is an error if either <Start> or <Finish> is out of range.",
+			"description":"Use the splice syntax to insert the elements of one list into another list.\n\n>*Note:* ```put tList into element 1 to 3 of tList2``` results in the removal of elements 1 to 3 of tList2 and the insertion of tList **as an element**, i.e. tList2 becomes the list [tList,element 4 of tList2, element 5 of tList2 ...]\n\n>*Note:* It is an error if either <Start> or <Finish> is out of range.",
 			"tags":["lists"]
 		},{
 			"id":"builder-700",
@@ -17097,7 +17097,7 @@
 			"examples":[{
 				"script":"variable tVar as List\nput the empty list into tVar\n\nvariable tCount as Number\nput 1 into tCount\nrepeat 3 times\n\tpush tCount onto tVar\nend repeat\n\nvariable tVar2 as List\npush \"this is unwanted\" onto tVar2\npush 4 onto tVar2\n\nsplice tVar into element 1 of tVar2 -- tVar2 contains the list [1,2,3,4]"
 			}],
-			"description":"Use the splice syntax to insert the elements of one list into another list. \n\n>*Note:* ```put tList into element 1 of tList2``` results in the removal of element 1 of tList2 and the insertion of tList **as an element**, i.e. tList2 becomes the list [tList,element 2 of tList2, element 3 of tList2 ...]\n\n>*Note:* It is an error if <Index> is out of range.",
+			"description":"Use the splice syntax to insert the elements of one list into another list.\n\n>*Note:* ```put tList into element 1 of tList2``` results in the removal of element 1 of tList2 and the insertion of tList **as an element**, i.e. tList2 becomes the list [tList,element 2 of tList2, element 3 of tList2 ...]\n\n>*Note:* It is an error if <Index> is out of range.",
 			"tags":["lists"]
 		},{
 			"id":"builder-703",
@@ -17125,7 +17125,7 @@
 				"description":"An expression which evaluates to a list."
 			}],
 			"examples":[{
-				"script":"variable tList as List\nput [ \"a\", \"b\", \"c\", \"d\" ] into tList\n\nvariable tContains as Boolean\n\n// put tList contains tList[1] into tContains -- error: tList[1] is not a list \n\nput tList contains element 1 to 2 of tList into tContains -- tContains is true"
+				"script":"variable tList as List\nput [ \"a\", \"b\", \"c\", \"d\" ] into tList\n\nvariable tContains as Boolean\n\n// put tList contains tList[1] into tContains -- error: tList[1] is not a list\n\nput tList contains element 1 to 2 of tList into tContains -- tContains is true"
 			}],
 			"value":[{
 				"name":"return",
@@ -17468,7 +17468,7 @@
 			"examples":[{
 				"script":"variable tVar as List\nput the empty list into tVar\n\nvariable tCount as Number\nput 2 into tCount\nrepeat 3 times\n\tpush tCount onto tVar\nend repeat\n\nvariable tVar2 as List\npush 1 onto tVar2\npush 5 onto tVar2\n\nsplice tVar after element 1 of tVar2 -- tVar2 contains the list [1,2,3,4,5]"
 			}],
-			"description":"Use the splice syntax to insert the elements of one list into another list. \n\n>*Note:* ```put tList after element 1 of tList2``` results in the insertion of tList **as an element**, i.e. tList2 becomes the list [element 1 of tList2,tList,element 2 of tList2, element 3 of tList2 ...]\n\n>*Note:* It is an error if <Index> is out of range.",
+			"description":"Use the splice syntax to insert the elements of one list into another list.\n\n>*Note:* ```put tList after element 1 of tList2``` results in the insertion of tList **as an element**, i.e. tList2 becomes the list [element 1 of tList2,tList,element 2 of tList2, element 3 of tList2 ...]\n\n>*Note:* It is an error if <Index> is out of range.",
 			"tags":["lists"]
 		},{
 			"id":"builder-715",
@@ -17496,7 +17496,7 @@
 				"description":"An expression which evaluates to a list."
 			}],
 			"examples":[{
-				"script":"variable tVar as List\nput [1, 2, 3, 4, 5] into tVar\n\nvariable tBegins as Boolean\n// put tList begins with tList[1] into tBegins -- error: tList[1] is not a list \n\nput tList begins with [1, 2] into tBegins -- tBegins is true"
+				"script":"variable tVar as List\nput [1, 2, 3, 4, 5] into tVar\n\nvariable tBegins as Boolean\n// put tList begins with tList[1] into tBegins -- error: tList[1] is not a list\n\nput tList begins with [1, 2] into tBegins -- tBegins is true"
 			}],
 			"value":[{
 				"name":"return",
@@ -17971,7 +17971,7 @@
 				"HandlerAsJSFunction(<i>pHandler</i>)"
 			],
 			"associations":["com.livecode.emscripten"],
-			"summary":"Wrap a LiveCode Builder handler within a JavaScript function, suitable for passing as an event handler.",
+			"summary":"Wrap a Extension Builder handler within a JavaScript function, suitable for passing as an event handler.",
 			"parameters":[{
 				"name":"pHandler",
 				"type":"",
@@ -19324,8 +19324,8 @@
 				"com.livecode.string"
 			],
 			"associations":["com.livecode.string"],
-			"summary":"This library consists of the operations on strings included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on strings included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on strings included in the standard library of Extension Builder.",
+			"description":"This library consists of the operations on strings included in the standard library of Extension Builder."
 		},{
 			"id":"builder-789",
 			"name":"concatenatestringswithspace",
@@ -19417,7 +19417,7 @@
 				"description":"An expression which evaluates to a string."
 			}],
 			"examples":[{
-				"script":"variable tVar as Number\nvariable tSource as String\nput \"hello\" into tString\nput the number of codeunits in tString into tVar\n\nvariable tString as String\nput the empty string into tString\t\nrepeat tVar times\n\tput \"a\" after tString\nend repeat\n\n// tString contains \"aaaaa\""
+				"script":"variable tVar as Number\nvariable tSource as String\nput \"hello\" into tString\nput the number of codeunits in tString into tVar\n\nvariable tString as String\nput the empty string into tString\nrepeat tVar times\n\tput \"a\" after tString\nend repeat\n\n// tString contains \"aaaaa\""
 			}],
 			"value":[{
 				"name":"return",
@@ -19752,8 +19752,8 @@
 				"com.livecode.codeunit"
 			],
 			"associations":["com.livecode.codeunit"],
-			"summary":"This library consists of the operations on codeunits included in the standard library of LiveCode Builder.",
-			"description":"This library consists of the operations on codeunits included in the standard library of LiveCode Builder."
+			"summary":"This library consists of the operations on codeunits included in the standard library of Extension Builder.",
+			"description":"This library consists of the operations on codeunits included in the standard library of Extension Builder."
 		},{
 			"id":"builder-803",
 			"name":"deleterangecodeunitof",
@@ -19839,7 +19839,7 @@
 				"JsonImport(<i>pJson</i>)"
 			],
 			"associations":["com.livecode.library.json"],
-			"summary":"Parse JSON text into a LiveCode value.",
+			"summary":"Parse JSON text into a xTalk value.",
 			"parameters":[{
 				"name":"pJson",
 				"type":"",
@@ -19851,7 +19851,7 @@
 				"type":"",
 				"description":"The top level value.  The type depends on the JSON content."
 			}],
-			"description":"<JsonImport> is used to convert data encoded in JSON format into a LiveCode\nvalue.  It parses <pJson> and returns the first top-level value found.  If any\nsyntax errors are found in <pJson>, an error is thrown.\n\nThe return value may be any of the following types, depending on the content\nof the file:\n\n* Array (for a JSON object)\n* List  (for a JSON array)\n* String (for a JSON string)\n* Number (for any JSON number)\n* Boolean (for JSON `true` or `false`)\n* nothing (for JSON `null`)",
+			"description":"<JsonImport> is used to convert data encoded in JSON format into a xTalk\nvalue.  It parses <pJson> and returns the first top-level value found.  If any\nsyntax errors are found in <pJson>, an error is thrown.\n\nThe return value may be any of the following types, depending on the content\nof the file:\n\n* Array (for a JSON object)\n* List  (for a JSON array)\n* String (for a JSON string)\n* Number (for any JSON number)\n* Boolean (for JSON `true` or `false`)\n* nothing (for JSON `null`)",
 			"tags":["json","library","json"]
 		},{
 			"id":"builder-807",
@@ -19866,19 +19866,19 @@
 				"JsonExport(<i>pValue</i>)"
 			],
 			"associations":["com.livecode.library.json"],
-			"summary":"Format a LiveCode value as JSON text",
+			"summary":"Format a xTalk value as JSON text",
 			"parameters":[{
 				"name":"pValue",
 				"type":"",
 				"refparam":"false",
-				"description":"A LiveCode value (Array, List, String, Number, Boolean, or nothing)"
+				"description":"A xTalk value (Array, List, String, Number, Boolean, or nothing)"
 			}],
 			"value":[{
 				"name":"return",
 				"type":"",
 				"description":"A string containing JSON-formatted text."
 			}],
-			"description":"<JsonExport> is used to convert a LiveCode value into data encoded in JSON\nformat.  If <pValue> is of a type that cannot be converted to JSON, an error is\nthrown.",
+			"description":"<JsonExport> is used to convert a xTalk value into data encoded in JSON\nformat.  If <pValue> is of a type that cannot be converted to JSON, an error is\nthrown.",
 			"tags":["json","library","json"]
 		},{
 			"id":"builder-808",
@@ -20731,8 +20731,8 @@
 				"com.livecode.arithmetic"
 			],
 			"associations":["com.livecode.arithmetic"],
-			"summary":"This library consists of the basic arithmetic operations of standard library of LiveCode Builder.",
-			"description":"This library consists of the basic arithmetic operations of standard library of LiveCode Builder."
+			"summary":"This library consists of the basic arithmetic operations of standard library of Extension Builder.",
+			"description":"This library consists of the basic arithmetic operations of standard library of Extension Builder."
 		},{
 			"id":"builder-845",
 			"name":"parsestringasnumber",
@@ -20863,7 +20863,7 @@
 				"type":"",
 				"description":"If x >= 0, then x wrap y returns ((x-1) mod abs(y)) + 1.\n\t\t\tIf x < 0, then x wrap y returns -((x-1) mod abs(y)) + 1."
 			}],
-			"description":"Use wrap to ensure the value of a variable stays within a specified range. For x,y > 0, \nsuccessive values of x wrap y cycle through the sequence 1, 2, ..., y."
+			"description":"Use wrap to ensure the value of a variable stays within a specified range. For x,y > 0,\nsuccessive values of x wrap y cycle through the sequence 1, 2, ..., y."
 		},{
 			"id":"builder-849",
 			"name":"numberisnumber",
@@ -21468,11 +21468,11 @@
 				"com.livecode.unittest"
 			],
 			"associations":["com.livecode.unittest"],
-			"summary":"This library provides syntax for unit testing Builder\nprograms.  It is used by the LiveCode Builder standard library's\ntestsuite.\n\nTo use this library, write your tests in a Builder source code file.\nEach group of tests should be a public handler with a name beginning\nwith `Test`.  If possible, use one test per handler.  Otherwise, add a\n`plan N tests` statement at the start of the handler.",
+			"summary":"This library provides syntax for unit testing Builder\nprograms.  It is used by the Extension Builder standard library's\ntestsuite.\n\nTo use this library, write your tests in a Builder source code file.\nEach group of tests should be a public handler with a name beginning\nwith `Test`.  If possible, use one test per handler.  Otherwise, add a\n`plan N tests` statement at the start of the handler.",
 			"examples":[{
 				"script":"public handler TestSelf()\n\tplan 10 tests\n\n\ttest diagnostic \"Normal tests\"\n\ttest 2 > 1\n\ttest \"Basic test\" when true\n\n\ttest diagnostic \"Skipped tests\"\n\tskip test\n\tskip test \"Skipped 2\"\n\tskip test because \"Not implemented\"\n\tskip test \"Skipped 4\" because \"Not supported on this platform\"\n\n\ttest diagnostic \"Tests which are expected to fail\"\n\tbroken test false\n\tbroken test \"Failed 2\" when false\n\tbroken test false because \"broken\"\n\tbroken test \"Failed 4\" when false because \"really broken\"\nend handler\n\nThe test results are output on standard output in TAP (Test Anything\nProtocol) format."
 			}],
-			"description":"This library provides syntax for unit testing Builder\nprograms.  It is used by the LiveCode Builder standard library's\ntestsuite.\n\nTo use this library, write your tests in a Builder source code file.\nEach group of tests should be a public handler with a name beginning\nwith `Test`.  If possible, use one test per handler.  Otherwise, add a\n`plan N tests` statement at the start of the handler."
+			"description":"This library provides syntax for unit testing Builder\nprograms.  It is used by the Extension Builder standard library's\ntestsuite.\n\nTo use this library, write your tests in a Builder source code file.\nEach group of tests should be a public handler with a name beginning\nwith `Test`.  If possible, use one test per handler.  Otherwise, add a\n`plan N tests` statement at the start of the handler."
 		},{
 			"id":"builder-875",
 			"name":"unittest",
@@ -21589,8 +21589,8 @@
 				"com.livecode.file"
 			],
 			"associations":["com.livecode.file"],
-			"summary":"This module specifies the syntax definitions and bindings for\nfilesystem operations in LiveCode Builder.\n\n>*Note:* This module is currently experimental and unstable.  The\n>syntax is likely to change in future versions of LiveCode.",
-			"description":"This module specifies the syntax definitions and bindings for\nfilesystem operations in LiveCode Builder.\n\n>*Note:* This module is currently experimental and unstable.  The\n>syntax is likely to change in future versions of LiveCode."
+			"summary":"This module specifies the syntax definitions and bindings for\nfilesystem operations in Extension Builder.\n\n>*Note:* This module is currently experimental and unstable.  The\n>syntax is may change in future versions of Extension Builder.",
+			"description":"This module specifies the syntax definitions and bindings for\nfilesystem operations in Extension Builder.\n\n>*Note:* This module is currently experimental and unstable.  The\n>syntax is may change in future versions of Extension Builder."
 		},{
 			"id":"builder-881",
 			"name":"getdirectoryentries",
@@ -21843,7 +21843,7 @@
 				"name":"pProperty",
 				"type":"",
 				"refparam":"false",
-				"description":" - \"visible\" - (boolean) set to false to hide the menu. Defaults to true.\n - \"enabled\" - (boolean) set to false to make the menu appear disabled. Use in\n comination with setting the items to empty so that the menu does not show when\n the user clicks on it. Defaults to true.\n - \"tooltip\" - (string) the tooltip to show over the status menu\n - \"icongravity\" - (enum) one of \"left\", \"right\" or \"center\". Used when displaying\n both a menu title and icon\n - \"length\" - one of \"square\", \"variable\" or a number. Note \"variable\" mode does\n not appear to dynamically update the width as stated in Apple documentation.\n - \"icon\" - (string) the full path to an image file or a reference to an image object. If\n the image object has its filename set it must be a full path. If it is an imported\n image then it must be in a format supported by NSImage -initWithContentsOfFile.\n Setting the icon to empty to clear it.\n - \"title\" - (string) the title of the menu. Set to empty (the default) to only use an icon.\n - \"items\" - (string) the items of is a similar format used by LiveCode menus"
+				"description":" - \"visible\" - (boolean) set to false to hide the menu. Defaults to true.\n - \"enabled\" - (boolean) set to false to make the menu appear disabled. Use in\n comination with setting the items to empty so that the menu does not show when\n the user clicks on it. Defaults to true.\n - \"tooltip\" - (string) the tooltip to show over the status menu\n - \"icongravity\" - (enum) one of \"left\", \"right\" or \"center\". Used when displaying\n both a menu title and icon\n - \"length\" - one of \"square\", \"variable\" or a number. Note \"variable\" mode does\n not appear to dynamically update the width as stated in Apple documentation.\n - \"icon\" - (string) the full path to an image file or a reference to an image object. If\n the image object has its filename set it must be a full path. If it is an imported\n image then it must be in a format supported by NSImage -initWithContentsOfFile.\n Setting the icon to empty to clear it.\n - \"title\" - (string) the title of the menu. Set to empty (the default) to only use an icon.\n - \"items\" - (string) the items of is a similar format used by the script engines menus"
 			},{
 				"name":"pValue",
 				"type":"",
@@ -21851,9 +21851,9 @@
 				"description":"The value as described for each property"
 			}],
 			"examples":[{
-				"script":"on EnableStatusMenu pEnabled\n   macStatusMenuSet \"mymenu\", \"enabled\", pEnabled\n   if pEnabled then\n      macStatusMenuSet \"mymenu\", \"icon\", the long id of image \"enabled\"\n      macStatusMenuSet \"mymenu\", \"items\", \"Open\" & return & \"-\" & return & \"Settings\" \n   else\n      macStatusMenuSet \"mymenu\", \"icon\", the long id of image \"disabled\"\n      macStatusMenuSet \"mymenu\", \"items\", empty\n   end if\nend EnableStatusMenu"
+				"script":"on EnableStatusMenu pEnabled\n   macStatusMenuSet \"mymenu\", \"enabled\", pEnabled\n   if pEnabled then\n      macStatusMenuSet \"mymenu\", \"icon\", the long id of image \"enabled\"\n      macStatusMenuSet \"mymenu\", \"items\", \"Open\" & return & \"-\" & return & \"Settings\"\n   else\n      macStatusMenuSet \"mymenu\", \"icon\", the long id of image \"disabled\"\n      macStatusMenuSet \"mymenu\", \"items\", empty\n   end if\nend EnableStatusMenu"
 			}],
-			"description":"Specify the menu items in the following form:\n\n    [<flags>] <label> ['/' <accelerator> ['|' <tag>]]\n\nWhere <flags> may include:\n\n!c, !n, !m: the menu item has respectively, a check, no check, or a mixed state icon\n\n>**Note:** A difference between standard LiveCode menus and the macStatusMenu\n> library is that the radio button (!r) used in LiveCode menus is not supported,\n> however, the mixed state (!m) is. Additionally you can use the <macStatusMenuSetCustomIcon>\n> command to specify a custom icon.\n\n(: the menu item is disabled\n\n-: the menu item is replaced with a menu separator\n\nmultiple tab characters: the number of tabs specifes the depth of the menu item;\nuse this to create submenus \n\nThe <accelerator> can be specified as one of:\nchar:Command key + specified char\nkeyname:Named key without modifiers\nmodifiers char: Specified modifiers + character\nmodifiers keyname: Specified modifiers + named key\nIn the accelerator, modifiers is either a space separated list of: \n\n- 'command' or 'cmd'\n- 'control' or 'ctrl'\n- 'option' or 'opt', 'alt', 'shift'\n\nIn this case the keyname/char should be separated from the list by a space\n\nOr modifiers may be a sequence of characters, including:\n\n^: Command\n@: Shift\n#: Option\n%: Control\n\nIn this case no space between the sequence and keyname/char is required\n\nThe following named keys are supported:\n\nF1, F2, F3, F4, ... F15,\nLeft, Up, Right, Down,\nBackspace, Delete,\nTab, Space,\nReturn, Enter,\nHome, End, Escape,\nPgUp, PgDown\n\nA tag can be specified as a | character followed by a string of ASCII characters. \nIf such a tag is present then that tag will take the place of the menu label as \nthe parameter to the menuPick.\n\nA tag will only be recognised following the <accelerator>. To specify a menu tag \nwithout an accelerator shortcut, an empty <accelerator> can be specified using /| \nfollowed by the tag text.",
+			"description":"Specify the menu items in the following form:\n\n    [<flags>] <label> ['/' <accelerator> ['|' <tag>]]\n\nWhere <flags> may include:\n\n!c, !n, !m: the menu item has respectively, a check, no check, or a mixed state icon\n\n>**Note:** A difference between standard xTalk script engine menus and the macStatusMenu\n> library is that the radio button (!r) used in the script engine menus is not supported,\n> however, the mixed state (!m) is. Additionally you can use the <macStatusMenuSetCustomIcon>\n> command to specify a custom icon.\n\n(: the menu item is disabled\n\n-: the menu item is replaced with a menu separator\n\nmultiple tab characters: the number of tabs specifes the depth of the menu item;\nuse this to create submenus\n\nThe <accelerator> can be specified as one of:\nchar:Command key + specified char\nkeyname:Named key without modifiers\nmodifiers char: Specified modifiers + character\nmodifiers keyname: Specified modifiers + named key\nIn the accelerator, modifiers is either a space separated list of:\n\n- 'command' or 'cmd'\n- 'control' or 'ctrl'\n- 'option' or 'opt', 'alt', 'shift'\n\nIn this case the keyname/char should be separated from the list by a space\n\nOr modifiers may be a sequence of characters, including:\n\n^: Command\n@: Shift\n#: Option\n%: Control\n\nIn this case no space between the sequence and keyname/char is required\n\nThe following named keys are supported:\n\nF1, F2, F3, F4, ... F15,\nLeft, Up, Right, Down,\nBackspace, Delete,\nTab, Space,\nReturn, Enter,\nHome, End, Escape,\nPgUp, PgDown\n\nA tag can be specified as a | character followed by a string of ASCII characters.\nIf such a tag is present then that tag will take the place of the menu label as\nthe parameter to the menuPick.\n\nA tag will only be recognised following the <accelerator>. To specify a menu tag\nwithout an accelerator shortcut, an empty <accelerator> can be specified using /|\nfollowed by the tag text.",
 			"references":{
 				"handler":["macStatusMenuSetCustomIcon"]
 			}
@@ -22143,8 +22143,8 @@
 				"com.livecode.bitwise"
 			],
 			"associations":["com.livecode.bitwise"],
-			"summary":"This module specifies the bitwise operations on integers included in the standard library of LiveCode Builder.",
-			"description":"This module specifies the bitwise operations on integers included in the standard library of LiveCode Builder."
+			"summary":"This module specifies the bitwise operations on integers included in the standard library of Extension Builder.",
+			"description":"This module specifies the bitwise operations on integers included in the standard library of Extension Builder."
 		},{
 			"id":"builder-902",
 			"name":"commandname",
