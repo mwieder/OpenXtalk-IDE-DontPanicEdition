@@ -60,19 +60,23 @@ command revInternal__LoadIfLibrary pLibrary
    try
       local tAvailable, tMsg
       put the revAvailableHandlers of stack pLibrary into tAvailable
-      if tAvailable contains "extensionInitialize" then
-         put "extensionInitialize" into tMsg
-         // TODO: Remove legacy message name	            
-      else if tAvailable contains "revLoadLibrary" then 
-         put "revLoadLibrary" into tMsg
-      else
-         throw "not a library"
+          // TODO: Remove legacy message name	            
+		if tAvailable contains "revLoadLibrary" then 
+			put "revLoadLibrary" into tMsg
+		else if tAvailable contains "extensionInitialize" then
+			put "extensionInitialize" into tMsg
+		else
+			put "extensionInitialize" into tMsg
+#			throw "not a library"
       end if
-      send tMsg to stack pLibrary
+#      send tMsg to stack pLibrary
+      dispatch tMsg to stack pLibrary
       local tStackName
       put the name of stack pLibrary into tStackName
       put tStackName into sLoadedLibraries[pLibrary]
       return true
+	catch e
+#		answer e
    end try
    delete stack pLibrary
    return false

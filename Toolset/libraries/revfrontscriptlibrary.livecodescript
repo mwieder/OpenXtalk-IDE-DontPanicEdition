@@ -745,6 +745,7 @@ on propertyChanged pObject
 end propertyChanged
 
 # OK-2008-03-27 : Bug 6229. Added ability to specify a target
+# mdw 2024.04.29 use filenames instead of short names
 on revCheckStackCollision pStack
   local tTarget
   if pStack is empty then
@@ -760,8 +761,10 @@ on revCheckStackCollision pStack
   put word tOffset to -1 of tTarget into tLongStack
 
   local tStacks
+	# check just the stack names first
   put the short name of tLongStack into tStacks
   if the mainStack of tLongStack is not tStacks
+	# no collision in short names
   then exit revCheckStackCollision
 
   local tFilePath
