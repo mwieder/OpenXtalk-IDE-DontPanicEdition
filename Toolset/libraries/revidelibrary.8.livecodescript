@@ -2486,8 +2486,12 @@ function revIDEPlatformVersion
    return tSystemVersion
 end revIDEPlatformVersion
 
+function ideEditionColour
+	return revIDEColor("edition_color")
+end ideEditionColour
+
 function revIDEColor pTag
-   if pTag is "edition_color" then
+   if pTag is "edition_color" or pTag is empty then
       return revEnvironmentEditionProperty("color")
    end if
    
@@ -8020,6 +8024,8 @@ on revIDESaveAsStandalone pTarget
    //ideMessagesSupressSet "true" - This was in the old message library. In 8.0 messages can't be supressed. Might want to add this in ideMessageSend
    try
       revSaveAsStandalone tStack
+catch e
+put the executioncontexts & cr after msg
    finally
       # Bug 5111: Standalone has been built, process should now be interruptable.
       set the allowInterrupts to true

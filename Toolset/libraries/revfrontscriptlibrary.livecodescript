@@ -747,49 +747,56 @@ end propertyChanged
 # OK-2008-03-27 : Bug 6229. Added ability to specify a target
 # mdw 2024.04.29 use filenames instead of short names
 on revCheckStackCollision pStack
-  local tTarget
-  if pStack is empty then
-    put the long id of the target into tTarget
-  else
-    put pStack into tTarget
-  end if
-
-  local tOffset
-  put wordOffset("stack",tTarget) into tOffset
-
-  local tLongStack
-  put word tOffset to -1 of tTarget into tLongStack
-
-  local tStacks
-	# check just the stack names first
-  put the short name of tLongStack into tStacks
-  if the mainStack of tLongStack is not tStacks
-	# no collision in short names
-  then exit revCheckStackCollision
-
-  local tFilePath
-  put the fileName of tLongStack into tFilePath
-  if the substacks of tLongStack is not empty
-  then put cr & the substacks of tLongStack after tStacks
-
-  local tMainStacks
-  put the mainStacks into tMainStacks
-
-  local tFileInfo
-  put empty into tFileInfo
-
-  local tFilePath2, tStacks2
-  repeat for each line l in tMainStacks
-    put the fileName of stack l into tFilePath2
-    if tFilePath2 is tFilePath then next repeat
-    put l into tStacks2
-    if the substacks of stack l is not empty
-    then put cr & the substacks of stack l after tStacks2
-    repeat for each line m in tStacks2
-      if m is among the lines of tStacks then
-        if tFilePath2 is not empty then put "in file" && tFilePath2 & space into tFileInfo
-        answer warning "A stack" && quote & m & quote && tFileInfo & \
-            "is already in memory.  The LiveCode UI does not distinguish stacks which have identical names, so editing these stack files while both are in memory could result in data loss."
+   local tTarget
+   if pStack is empty then
+      put the long id of the target into tTarget
+   else
+      put pStack into tTarget
+   end if
+   
+   local tOffset
+   put wordOffset("stack",tTarget) into tOffset
+   
+   local tLongStack
+   put word tOffset to -1 of tTarget into tLongStack
+   
+   local tStacks
+   # check just the stack names first
+   put the short name of tLongStack into tStacks
+   if the mainStack of tLongStack is not tStacks then
+      # no collision in short names
+      exit revCheckStackCollision
+   end if
+   
+   local tFilePath
+   put the fileName of tLongStack into tFilePath
+   if the substacks of tLongStack is not empty then
+      put cr & the substacks of tLongStack after tStacks
+   end if
+   
+   local tMainStacks
+   put the mainStacks into tMainStacks
+   
+   local tFileInfo
+   put empty into tFileInfo
+   
+   local tFilePath2, tStacks2
+   repeat for each line l in tMainStacks
+      put the fileName of stack l into tFilePath2
+      if tFilePath2 is tFilePath then
+         next repeat
+      end if
+      put l into tStacks2
+      if the substacks of stack l is not empty then
+         put cr & the substacks of stack l after tStacks2
+      end if
+      repeat for each line m in tStacks2
+         if m is among the lines of tStacks then
+            if tFilePath2 is not empty then
+               put "in file" && tFilePath2 & space into tFileInfo
+            end if
+            answer warning "A stack" && quote & m & quote && tFileInfo & \
+                  "is already in memory.  The LiveCode UI does not distinguish stacks which have identical names, so editing these stack files while both are in memory could result in data loss."
             exit repeat
          end if
       end repeat
