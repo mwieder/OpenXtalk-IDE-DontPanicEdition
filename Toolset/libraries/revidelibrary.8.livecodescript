@@ -8025,7 +8025,7 @@ on revIDESaveAsStandalone pTarget
    try
       revSaveAsStandalone tStack
 catch e
-put the executioncontexts & cr after msg
+put tStack & cr & e & cr & the executioncontexts & cr after msg
    finally
       # Bug 5111: Standalone has been built, process should now be interruptable.
       set the allowInterrupts to true
