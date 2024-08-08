@@ -459,6 +459,7 @@ private command revInternal__SetupPaths
    revInternal__Log "Message", "Cache Path = " & sCachePath
    revInternal__Log "Message", "Crash Log Path = " & sCrashLogPath
    revInternal__Log "Message", "Binaries Path = " & sBinariesPath
+   revInternal__Log "Message", "Repositories Path = " & sRepositoryPath
    
    revInternal__Log "Leave", "Path Setup"
 end revInternal__SetupPaths
