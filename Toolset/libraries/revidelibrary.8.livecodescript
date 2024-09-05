@@ -4575,14 +4575,18 @@ function revIDEGetPaletteRectPreference pStackName
    return tRect
 end revIDEGetPaletteRectPreference
 
+# MDW 2024.08.14 fix to bug #21976
 on revIDEClearPaletteRects
-   local tPreferenceNames
-   put revIDEPreferenceNames() into tPreferenceNames
+   local tPreferenceNames, tPrefs
+
+   put the customProperties of stack "revPreferences" into tPrefs
+   put the keys of tPrefs into tPreferenceNames
    repeat for each line tPreference in tPreferenceNames
-      if tPreference begins with "palette_rect_" then
-         revIDESetPreference tPreference, "0" 
+      if tPreference begins with "palette_rect_/tmp" then
+         delete variable tPrefs[tPreference] 
       end if
    end repeat
+   set the customProperties of stack "revPreferences" to tPrefs
 end revIDEClearPaletteRects
 
 private function revIDEPaletteBarHeight pStackID
