@@ -16,39 +16,10 @@ on initialize
    if revEngineCheck?("Emscripten") then
       set the visible of tEnableHTML5Button to true
       set the visible of tEnableWASMButton to true
+      set the enabled of tEnableHTML5Button to true
+      set the enabled of tEnableWASMButton to true
    end if
-   set the hilite of tEnableHTML5Button to (tStandaloneSettingsA["Emscripten"] is true)
-   set the hilite of tEnableWASMButton to (tStandaloneSettingsA["Emscripten"] is true)
-   
-   -- Decide whether user is permitted to do HTML5 deployment
-   local tHaveLicense
-   put true into tHaveLicense
-   
-   -- Disable the checkbox if no license is available
-   set the enabled of tEnableHTML5Button to true
-   set the enabled of tEnableWASMButton to true
-   
-   -- Hide the license prompt if a license is available
-   set the visible of group "emscriptenLicenseTip" to false
-   
-   tipDisplayUpdate
+   set the hilite of tEnableHTML5Button to (tStandaloneSettingsA["EmscriptenHTML5"] is true)
+   set the hilite of tEnableWASMButton to (tStandaloneSettingsA["EmscriptenWASM"] is true)
 end initialize
 
-on tipDisplayUpdate
-   --set the backColor of graphic "emscriptenNoLicenseBackground" to ideCoreEditionColour()
-   --set the backColor of graphic "emscriptenNoLicenseBackground" to revIDEColor()
-   
-   --if the visible of group "emscriptenLicenseTip" then
-   --set the topLeft of group "emscriptenSettings" to 12,136
-   --else 
-   --set the topLeft of group "emscriptenSettings" to -1,67
-   --end if
-   --set the cSize of this card to 567,371
-   
-   --updateCardSize
-   
-end tipDisplayUpdate
-
-on emscriptenBuyNow
-   --launch url "https://livecode.com/products/livecode-platform/html5-purchase-info"
-end emscriptenBuyNow

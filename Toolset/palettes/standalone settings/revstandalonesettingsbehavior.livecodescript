@@ -40,8 +40,12 @@ private command updateTabButtons pSettings
    set the visible of button "IosChecked" of group "checks" of me to pSettings["ios"] = true
    set the visible of button "AndroidChecked" of group "checks" of me to pSettings["android"] = true
    set the visible of button "BugsChecked" of group "checks" of me to pSettings["errorDialog"] = true
-   set the visible of button "EmscriptenChecked" of group "checks" of me to pSettings["Emscripten"] = true
-   
+   --set the visible of button "EmscriptenChecked" of group "checks" of me to pSettings["Emscripten"] = true
+   if pSettings["EmscriptenHTML5"] is true or pSettings["EmscriptenWASM"] is true then
+      set the visible of button "EmscriptenChecked" of group "checks" of me to true
+   else
+      set the visible of button "EmscriptenChecked" of group "checks" of me to false
+   end if
    repeat for each item tItem in "SolIntel,SolSparc,Iris,Odt,rs6000,Linux,Bsd,Hp9k700,SPARC"
       if pSettings[tItem] then
          set the visible of button "Unixchecked" of group "checks" of me to true
@@ -91,9 +95,9 @@ private command updateTabButtons pSettings
 end updateTabButtons
 
 on buildForEnabled pPlatform
-   local tSettings
-   put getSettings() into tSettings
-   updateTabButtons tSettings
+   local tSettingsArray
+   put getSettings() into tSettingsArray
+   updateTabButtons tSettingsArray
 end buildForEnabled
 
 on helpButtons

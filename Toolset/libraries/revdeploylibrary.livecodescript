@@ -125,15 +125,18 @@ end targetBrowser
 -- target. (i.e., Test Target)
 command revIDEDeploySetTarget pTarget
    local tPlatform
+
+	if pTarget is not empty then
    put sDeployTargetPlatforms[pTarget] into tPlatform
-   replace "chrome" with "google-chrome" in pTarget
    put pTarget into sTargetBrowser
    
+	# TODO: remove empty items from sDeployPlatforms
    delete item itemOffset(tPlatform, sDeployPlatforms) of sDeployPlatforms
    put tPlatform, sDeployPlatforms into sDeployPlatforms
    put pTarget into sDeployTargets[tPlatform]
    set the cDeployPlatforms of stack "revPreferences" to sDeployPlatforms
    set the cDeployTargets of stack "revPreferences" to sDeployTargets
+	end if
 end revIDEDeploySetTarget
 
 -- This method returns the current target of the 'Deploy' action.
@@ -164,35 +167,6 @@ function revIDEDeployGetTarget
    
    return empty
 end revIDEDeployGetTarget
-
--- This method returns true if deployment is possible with the given platform to the
--- current top stack
-function xrevIDEDeployIsPossible? pPlatform
---   if the mode of the topStack is not 1 then
---      return false
---   end if
-   
---   local tStack
---   put the mainStack of the topStack into tStack
---   if the cRevStandaloneSettings[pPlatform] of stack tStack then
---      return true
---   end if
-   
-   if there is a stack ("revDeployLibrary" & pPlatform) then
-      dispatch function "deployListTargets" to stack ("revDeployLibrary" & pPlatform) 
-      if it is "handled" and the result is not empty then
-         
-         local tTarget
-         repeat for each line tTarget in the result
-            if the cRevStandaloneSettings[tTarget] of stack tStack then
-               return true
-            end if
-         end repeat
-      end if
-   end if
-   
-   return false
-end xrevIDEDeployIsPossible?
 
 -- This method is called on startup to initialize the deployment library. This includes
 -- attempting to auto-configure any SDKs and such if necessary.
@@ -235,7 +209,7 @@ end revIDEDeployTargetsChanged
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Preferences require access to various specific aspects of deployment config, so these
+//  IOS Preferences require access to various specific aspects of deployment config, so these
 //  calls provide this in a sane manner.
 //
 
@@ -306,7 +280,7 @@ end revIDEDeployIOSGetLatestSDKInstalled
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Preferences require access to various specific aspects of deployment config, so these
+//  Android Preferences require access to various specific aspects of deployment config, so these
 //  calls provide this in a sane manner.
 //
 
@@ -341,7 +315,7 @@ function revIDEDeployAndroidGetVersionsList
    local tMap
    dispatch function "deployGetVersionsMap" to stack "revDeployLibraryAndroid"
    put the result into tMap
-   combine tMap with return
+   combine tMap with cr
    return tMap
 end revIDEDeployAndroidGetVersionsList
 
@@ -355,7 +329,7 @@ function revIDEDeployAndroidGetAPIsList
    dispatch function "deployGetVersionsMap" to stack "revDeployLibraryAndroid"
    put the result into tMap
    put the keys of tMap into tAPIs
-   replace return with comma in tAPIs
+   replace cr with comma in tAPIs
    sort items of tAPIs numeric ascending
    return tAPIs
 end revIDEDeployAndroidGetAPIsList

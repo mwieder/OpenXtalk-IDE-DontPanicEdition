@@ -65,21 +65,15 @@ on preOpenCard
    end if   
    if tShowTip is empty then put true into tShowTip
    
-   set the visible of group "generalCommercialTip" to tShowTip
    tipPreferenceSet tShowTip
    tipDisplayUpdate  
    
    pass preOpenCard
 end preOpenCard
 
-on tipDisplayUpdate
-   if the visible of group "generalCommercialTip" then
-      set the topLeft of group "generalContent" to 9,138
-      set the cSize of this card to 568,520
-   else 
-      set the topLeft of group "generalContent" to 9,78
-      set the cSize of this card to 568,460
-   end if
+private command tipDisplayUpdate
+   set the topLeft of group "generalContent" to 9,78
+   set the cSize of this card to 568,460
    updateCardSize
 end tipDisplayUpdate
 
