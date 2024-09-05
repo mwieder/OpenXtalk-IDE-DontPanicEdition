@@ -3,7 +3,7 @@ on preOpenCard
    lock messages
    
    local tEnabled, tPlatform
-   put canIncludeStackFiles() into tEnabled
+   put canIncludeStackFiles?() into tEnabled
    set the enabled of group "Basic Options" to tEnabled
    set the enabled of group "Advanced Options" to tEnabled
    
@@ -17,7 +17,7 @@ on preOpenCard
    put tStackFiles["relative"] into field "stackfiles"
    set the cStackPaths of field "stackfiles" to tStackFiles["full"]
    set the hilitedLines of field "stackfiles" to 1
-   send "mouseUp" to field "stackfiles"
+   dispatch "mouseUp" to field "stackfiles"
    unlock messages
    pass preOpenCard
 end preOpenCard
@@ -29,7 +29,7 @@ on revIncludeStackFiles pIncludeList
    put tStackFiles["relative"] into field "stackfiles"
    set the cStackPaths of field "stackfiles" to tStackFiles["full"]
    set the hilitedLines of field "stackfiles" to min(2,the number of lines of tStackFiles["relative"])
-   send "mouseUp" to field "stackfiles"
+   dispatch "mouseUp" to field "stackfiles"
    revSetEdit
 end revIncludeStackFiles
 
@@ -73,7 +73,7 @@ command updateCard
       set the textStyle of line 1 of field "stacks" to "bold"
       enable group "selectedStack"
       set the hilitedLines of field "stacks" to 1
-      send "mouseUp" to field "stacks"
+      dispatch "mouseUp" to field "stacks"
    end if
    set the hilite of button "moveSubstacks" to (tSettings["moveSubstacks"] = true)
    set the hilite of button "renameFiles" to (tSettings["renameGeneric"] = true)

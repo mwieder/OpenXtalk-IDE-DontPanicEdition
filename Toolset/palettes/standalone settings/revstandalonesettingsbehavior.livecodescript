@@ -77,11 +77,16 @@ private command updateTabButtons pSettings
    end repeat
    
    set the wholeMatches to true
-   set the enabled of button "OS X" of group "cards" of me to ("Mac OS X" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "Windows" of group "cards" of me to ("Windows" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "Unix" of group "cards" of me to ("Linux" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "iOS" of group "cards" of me to ("iOS" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "Android" of group "cards" of me to ("Android" is among the items of line 5 of the revLicenseInfo)
+   --   set the enabled of button "OS X" of group "cards" of me to ("Mac OS X" is among the items of line 5 of the revLicenseInfo)
+   --   set the enabled of button "Windows" of group "cards" of me to ("Windows" is among the items of line 5 of the revLicenseInfo)
+   --   set the enabled of button "Unix" of group "cards" of me to ("Linux" is among the items of line 5 of the revLicenseInfo)
+   --   set the enabled of button "iOS" of group "cards" of me to ("iOS" is among the items of line 5 of the revLicenseInfo)
+   --   set the enabled of button "Android" of group "cards" of me to ("Android" is among the items of line 5 of the revLicenseInfo)
+   set the enabled of button "OS X" of group "cards" of me to true
+   set the enabled of button "Windows" of group "cards" of me to true
+   set the enabled of button "Unix" of group "cards" of me to true
+   set the enabled of button "iOS" of group "cards" of me to true
+   set the enabled of button "Android" of group "cards" of me to true
    set the enabled of button "Emscripten" of group "cards" of me to true
 end updateTabButtons
 
@@ -467,9 +472,9 @@ end addProfilesToList
 function revGetPropertyProfilesList
    local tLine,tStackNames,tStack,tCard,tControl,tFinalList,tProfilesList
    
-    local tStackFiles
+   local tStackFiles
    revSBStackFilesList getTargetStackName(), tStackFiles
-  
+   
    repeat for each line tLine in tStackFiles
       put the mainStack of stack tLine into tStackNames
       put cr & the subStacks of stack tStackNames after tStackNames
@@ -531,13 +536,13 @@ function revRelativePath pPath
    return pPath
 end revRelativePath
 
-function canIncludeStackFiles
-   local tCan
-   put true into tCan
-   repeat for each item tPlatform in "ios,android,emscripten"
+private function canIncludeStackFiles?
+   local tCan?
+   put true into tCan?
+   repeat for each item tPlatform in "ios,android,emscripten,emscriptenHTML5,emscriptenWASM"
       if getSetting(tPlatform) then
-         put false into tCan
+         put false into tCan?
       end if
    end repeat
-   return tCan
-end canIncludeStackFiles
+   return tCan?
+end canIncludeStackFiles?
