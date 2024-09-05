@@ -6,10 +6,10 @@ on preOpenCard
    -- MW-2013-11-06: [[ LinuxX64 ]] For now, only show the x64 button if we have
    --    and engine to build for (this is only until we integrate 64-bit linux builds
    --    into production builds).
-   set the visible of button "Linux x64" to revEngineCheck("Linux x64")
+   set the visible of button "Linux x64" to revEngineCheck?("Linux x64")
    
    -- FG-2014-08-19: [[ RPi ]] Don't show the ARMv6 checkbox if the engine isn't present
-   set the visible of button "Linux ARMv6-HF" to revEngineCheck("Linux armv6-hf")
+   set the visible of button "Linux ARMv6-HF" to revEngineCheck?("Linux armv6-hf")
    
    set the enabled of group "UNIX" to false
    

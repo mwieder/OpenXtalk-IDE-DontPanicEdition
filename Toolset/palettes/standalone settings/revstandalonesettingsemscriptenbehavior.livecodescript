@@ -12,7 +12,7 @@ on initialize
    local tStandaloneSettingsA
    put getSettings() into tStandaloneSettingsA
    
-   set the visible of tEnableButton to revEngineCheck("Emscripten")
+   set the visible of tEnableButton to revEngineCheck?("Emscripten")
    set the hilite of tEnableButton to (tStandaloneSettingsA["Emscripten"] is true)
    
    -- Decide whether user is permitted to do HTML5 deployment
