@@ -452,6 +452,7 @@ private command revInternal__SetupPaths
       put true into gRevPopups
    else
       put empty into sRepositoryPath
+      --put tRepositoryPath into sRepositoryPath
    end if
    
    revInternal__Log "Message", "Tools Path = " & sToolsPath
@@ -2250,29 +2251,29 @@ end revEnvironmentCommercialRepositoryPath
 
 -- Deprecated Path Functions
 
-function revEnvironmentPreferencePath
-   return revEnvironmentUserPreferencesPath()
-end revEnvironmentPreferencePath
+--function revEnvironmentPreferencePath
+   --return revEnvironmentUserPreferencesPath()
+--end revEnvironmentPreferencePath
 
-function revEnvironmentPreferencesPath
-   return revEnvironmentUserPreferencesPath()
-end revEnvironmentPreferencesPath
+--function revEnvironmentPreferencesPath
+   --return revEnvironmentUserPreferencesPath()
+--end revEnvironmentPreferencesPath
 
-function revEnvironmentCachePath
-   throw "Component has attempted to use a non-existant environment path function: revEnvironmentCachePath"
-end revEnvironmentCachePath
+--function revEnvironmentCachePath
+   --throw "Component has attempted to use a non-existant environment path function: revEnvironmentCachePath"
+--end revEnvironmentCachePath
 
-function revEnvironmentSupportPath
-   throw "Component has attempted to use a non-existant environment path function: revEnvironmentSupportPath"
-end revEnvironmentSupportPath 
+--function revEnvironmentSupportPath
+   --throw "Component has attempted to use a non-existant environment path function: revEnvironmentSupportPath"
+--end revEnvironmentSupportPath 
 
-function revEnvironmentInstallationPath
-   throw "Component has attempted to use a non-existant environment path function: revEnvironmentInstallationPath"
-end revEnvironmentInstallationPath
+--function revEnvironmentInstallationPath
+   --throw "Component has attempted to use a non-existant environment path function: revEnvironmentInstallationPath"
+--end revEnvironmentInstallationPath
 
-function revEnvironmentDistributionPath
-   throw "Component has attempted to use a non-existant environment path function: revEnvironmentDistributionPath"
-end revEnvironmentDistributionPath
+--function revEnvironmentDistributionPath
+   --throw "Component has attempted to use a non-existant environment path function: revEnvironmentDistributionPath"
+--end revEnvironmentDistributionPath
 
 private function hookToolsPath pPath, pDefault
    dispatch function "revHookGetToolsPath" to me with pPath

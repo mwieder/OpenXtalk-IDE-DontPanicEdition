@@ -29,6 +29,7 @@ constant kSupportedPlatforms = "iOS Android Desktop Emscripten"
 
 -- The mapping from deploy target to platform
 local sDeployTargetPlatforms
+local sTargetBrowser
 
 -- The currently chosen deploy target for each platform
 local sDeployTargets
@@ -68,7 +69,8 @@ command revIDEDeployAction
    -- Invoke the action in the appropriate platform-specific library
    local tError
    if there is a stack ("revDeployLibrary" & tPlatform)  then
-      dispatch "deployDo" to stack ("revDeployLibrary" & tPlatform)  with tStack, tTarget
+      --dispatch "deployDo" to stack ("revDeployLibrary" & tPlatform)  with tStack, tTarget
+      dispatch "deployDo" to stack ("revDeployLibrary" & tPlatform) with tStack, sTargetBrowser
       put the result into tError
    else
       put "Unknown deployment platform - " & tPlatform into tError
@@ -115,11 +117,18 @@ function revIDEDeployListTargets
    return tTargets
 end revIDEDeployListTargets
 
+function targetBrowser
+   return sTargetBrowser
+end targetBrowser
+
 -- This method is invoked by the menu bar when the user selects a different deploy
--- target.
+-- target. (i.e., Test Target)
 command revIDEDeploySetTarget pTarget
    local tPlatform
    put sDeployTargetPlatforms[pTarget] into tPlatform
+   replace "chrome" with "google-chrome" in pTarget
+   put pTarget into sTargetBrowser
+   
    delete item itemOffset(tPlatform, sDeployPlatforms) of sDeployPlatforms
    put tPlatform, sDeployPlatforms into sDeployPlatforms
    put pTarget into sDeployTargets[tPlatform]
@@ -130,6 +139,7 @@ end revIDEDeploySetTarget
 -- This method returns the current target of the 'Deploy' action.
 function revIDEDeployGetTarget
    if the mode of the topStack is 1 then
+      
       local tStack
       put the mainStack of the topStack into tStack
       repeat for each item tPlatform in sDeployPlatforms
@@ -157,16 +167,16 @@ end revIDEDeployGetTarget
 
 -- This method returns true if deployment is possible with the given platform to the
 -- current top stack
-function revIDEDeployIsPossible pPlatform
-   if the mode of the topStack is not 1 then
-      return false
-   end if
+function xrevIDEDeployIsPossible? pPlatform
+--   if the mode of the topStack is not 1 then
+--      return false
+--   end if
    
-   local tStack
-   put the mainStack of the topStack into tStack
-   if the cRevStandaloneSettings[pPlatform] of stack tStack then
-      return true
-   end if
+--   local tStack
+--   put the mainStack of the topStack into tStack
+--   if the cRevStandaloneSettings[pPlatform] of stack tStack then
+--      return true
+--   end if
    
    if there is a stack ("revDeployLibrary" & pPlatform) then
       dispatch function "deployListTargets" to stack ("revDeployLibrary" & pPlatform) 
@@ -182,7 +192,7 @@ function revIDEDeployIsPossible pPlatform
    end if
    
    return false
-end revIDEDeployIsPossible
+end xrevIDEDeployIsPossible?
 
 -- This method is called on startup to initialize the deployment library. This includes
 -- attempting to auto-configure any SDKs and such if necessary.

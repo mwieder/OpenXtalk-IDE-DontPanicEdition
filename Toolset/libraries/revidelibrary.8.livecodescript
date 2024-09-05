@@ -8673,9 +8673,9 @@ function revIDETestTarget
    return revIDEDeployGetTarget()
 end revIDETestTarget
 
-function revIDETestCanDeployToTarget pTarget
-   return revIDEDeployIsPossible(pTarget)
-end revIDETestCanDeployToTarget
+--function revIDETestCanDeployToTarget? pTarget
+   --return revIDEDeployIsPossible?(pTarget)
+--end revIDETestCanDeployToTarget?
 
 on revIDESetTestTarget pTarget
    revIDEDeploySetTarget pTarget
@@ -12008,6 +12008,8 @@ function revIDEIsFilesetStale pInputs, pOutputs, pRecursive, @rError
          return false -- consider everything to be up-to-date
       end if
    
+return false # for speed don't make new docs
+
       -- Gather dates from each fileset
       local tInputTimes, tOutputTimes
       put __ScanFilesetMTimes(tOutputs, pRecursive, true) into tOutputTimes
@@ -12034,7 +12036,7 @@ end revIDEIsFilesetStale
 
 -- Converts pFileset to an array of at least one element and returns it.
 -- Return false if pFileset is an empty array or the empty string.
-function __CheckFileset pFileset
+private function __CheckFileset pFileset
    if pFileset is an array then
       if the number of elements in pFileset is 0 then
          return false
