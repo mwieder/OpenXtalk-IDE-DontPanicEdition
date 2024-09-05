@@ -8670,7 +8670,7 @@ function revIDETestTargets
 end revIDETestTargets
 
 function revIDETestTarget
-   return revIDEDeployGetTarget()
+   return deployGetTarget()
 end revIDETestTarget
 
 --function revIDETestCanDeployToTarget? pTarget

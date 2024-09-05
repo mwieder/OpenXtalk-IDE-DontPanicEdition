@@ -22,4 +22,3 @@ on initialize
    set the hilite of tEnableHTML5Button to (tStandaloneSettingsA["EmscriptenHTML5"] is true)
    set the hilite of tEnableWASMButton to (tStandaloneSettingsA["EmscriptenWASM"] is true)
 end initialize
-

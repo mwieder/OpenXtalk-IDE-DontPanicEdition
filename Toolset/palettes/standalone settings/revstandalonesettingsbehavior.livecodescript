@@ -522,8 +522,8 @@ command setStandaloneName pName
       put item 1 to -2 of pName into pName
    end if
    
-   if revFolderNameIsIllegal(pName) then
-      put revFolderNameMakeLegal(pName) into pName
+   if folderNameIsIllegal?(pName) then
+      put folderNameMakeLegal(pName) into pName
    end if
    
    setSetting "name", pName
@@ -540,7 +540,7 @@ function revRelativePath pPath
    return pPath
 end revRelativePath
 
-private function canIncludeStackFiles?
+function canIncludeStackFiles?
    local tCan?
    put true into tCan?
    repeat for each item tPlatform in "ios,android,emscripten,emscriptenHTML5,emscriptenWASM"

@@ -66,7 +66,7 @@ on updateSettings
    // IM-2012-03-05: initialize min version menu
    // SN-2015-05-13: [[ AndroidVersions ]] Make the Android versions changeable from
    //  a script-only stack
-   dispatch "updateSettings" to button "Minimum Android Version" with computeDefault(tSettings["android,minimum version"], item 1 of revIDEDeployAndroidGetAPIsList())
+   dispatch "updateSettings" to button "Minimum Android Version" with computeDefault(tSettings["android,minimum version"], item 1 of deploy.Android.GetApisList())
    
    local tSigning
    put computeDefault(tSettings["android,signing"], "Sign with my key") into tSigning
@@ -96,7 +96,7 @@ on updateSettings
    local tAllowHttpConnections
    put computeDefault(tSettings["android,allow http"], false) into tAllowHttpConnections
    set the hilited of button "Allow Http Connections" to tAllowHttpConnections
-
+   
    repeat with i = 1 to the number of groups of group "device capabilities"
       get tSettings["android,device capabilities"][the short name of group i of group "Device Capabilities"]
       if it is "true" then

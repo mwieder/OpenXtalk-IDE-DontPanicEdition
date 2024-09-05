@@ -13,7 +13,7 @@ on initialize
    
    // SN-2015-05-01: [[ Refactor iOS SDK versions ]] Use deploylibraryIos function
    local tMinimumVersions
-   repeat for each item tVersion in revIDEDeployIOSGetMinimumVersions()
+   repeat for each item tVersion in deploy.IOS.MinimumVersions()
       put tVersion && "or later" & LF after tMinimumVersions
    end repeat
    delete last char of tMinimumVersions
