@@ -1267,6 +1267,15 @@ command revInternal__InitialiseLibraries
    # AL-2015-09-02: [[ Bug 15841 ]] Temporarily add project browser library to prevent preference errors
    put cr & "revIDEProjectBrowserLibrary" after tBackList
    
+   local tLib
+   repeat for each line tLib in tLoadList	 
+      revInternal__Log "Message", "Loading library" && tLib	
+      revInternal__LoadLibrary tLib
+	  if the result is not empty then
+	     revInternal__Log "Error", the result 
+	  end if
+   end repeat
+   
       repeat for each line tLib in tBackList
 		try	
 			insert script of stack tLib into back 	 
