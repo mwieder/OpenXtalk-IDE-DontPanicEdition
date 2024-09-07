@@ -5,28 +5,14 @@ on preOpenCard
 end preOpenCard
 
 on initialize
-   local tEnableButton
-   put the long id of button "Emscripten" of group "platforms" into tEnableButton
-   
-   -- Check whether HTML5 deployment is requested for the target stack
-   local tStandaloneSettingsA
-   put getSettings() into tStandaloneSettingsA
-   
-   set the visible of tEnableButton to revEngineCheck?("Emscripten")
-   set the hilite of tEnableButton to (tStandaloneSettingsA["Emscripten"] is true)
+   local tSettings
+   put getSettings() into tSettings
+   local tEnabled = false
    
    -- Decide whether user is permitted to do HTML5 deployment
    local tHaveLicense
-   --if revLicenseType() is "community" then
-      put true into tHaveLicense
-   --else if ("HTML5" is among the items of line 5 of the revLicenseInfo) then
-      --put true into tHaveLicense
-   --else
-      --put false into tHaveLicense
-   --end if
+	put true into tHaveLicense
    
-   -- Disable the checkbox if no license is available
-   set the enabled of tEnableButton to tHaveLicense
    repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
       set the hilite of button ("Emscripten" && tItem) of group "platforms" of me to tSettings["Emscripten",tItem] is true
       set the visible of button ("Emscripten" && tItem) of group "platforms" of me to revEngineCheck("Emscripten" && tItem)
@@ -34,7 +20,8 @@ on initialize
          put true into tEnabled
       end if
       
-      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to true
+      -- Disable the checkbox if no license is available
+      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to tHaveLicense
    end repeat
    
    if not tEnabled and tSettings["Emscripten"] is true then
@@ -48,6 +35,35 @@ on initialize
    
    tipDisplayUpdate
 end initialize
+
+on updateEmscriptenChecked pChecked
+   set the visible of button "Emscriptenchecked" to pChecked
+   set the opaque of button "Emscriptenchecked" to false
+end updateEmscriptenChecked
+
+on updateEmscriptenArch pArch, pBuild
+   local tSettingsA
+   put getSettings() into tSettingsA
+   
+   put pBuild into tSettingsA["Emscripten",pArch]
+   
+   local tEnabled = false
+   repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
+      if tSettingsA["Emscripten",tItem] then
+         put true into tEnabled
+         exit repeat
+      end if
+   end repeat
+   put tEnabled into tSettingsA["Emscripten"]
+   setSettings tSettingsA
+   
+   if tEnabled then
+      buildForEnabled "emscripten"
+   end if
+   
+   revSetEdit
+   updateEmscriptenChecked tEnabled
+end updateEmscriptenArch
 
 on tipDisplayUpdate
    set the backColor of graphic "emscriptenNoLicenseBackground" to ideCoreEditionColour()
