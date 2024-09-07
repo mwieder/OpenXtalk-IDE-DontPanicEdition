@@ -23,11 +23,56 @@ on initialize
 	set the enabled of tEnableButton to tHaveLicense
    
 	-- Hide the license prompt if a license is available
-	set the visible of group "emscriptenLicenseTip" to not tHaveLicense
+	--set the visible of group "emscriptenLicenseTip" to not tHaveLicense
+   repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
+      set the hilite of button ("Emscripten" && tItem) of group "platforms" of me to tSettings["Emscripten",tItem] is true
+      set the visible of button ("Emscripten" && tItem) of group "platforms" of me to revEngineCheck("Emscripten" && tItem)
+      if tSettings["Emscripten",tItem] then
+         put true into tEnabled
+      end if
+      
+      -- Disable the checkbox if no license is available
+      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to tHaveLicense
+   end repeat
+   
+   if not tEnabled and tSettings["Emscripten"] is true then
+      set the hilite of button "Emscripten js" of group "platforms" of me to true
+      put true into tSettings["Emscripten,js"]
+      setSettings tSettings
+   end if
+   
    
 	tipDisplayUpdate
 end initialize
 
+on updateEmscriptenChecked pChecked
+   set the visible of button "Emscriptenchecked" to pChecked
+   set the opaque of button "Emscriptenchecked" to false
+end updateEmscriptenChecked
+
+on updateEmscriptenArch pArch, pBuild
+   local tSettingsA
+   put getSettings() into tSettingsA
+   
+   put pBuild into tSettingsA["Emscripten",pArch]
+   
+   local tEnabled = false
+   repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
+      if tSettingsA["Emscripten",tItem] then
+         put true into tEnabled
+         exit repeat
+      end if
+   end repeat
+   put tEnabled into tSettingsA["Emscripten"]
+   setSettings tSettingsA
+   
+   if tEnabled then
+      buildForEnabled "emscripten"
+   end if
+   
+   revSetEdit
+   updateEmscriptenChecked tEnabled
+end updateEmscriptenArch
 
 on tipDisplayUpdate
    --set the backColor of graphic "emscriptenNoLicenseBackground" to ideCoreEditionColour()
