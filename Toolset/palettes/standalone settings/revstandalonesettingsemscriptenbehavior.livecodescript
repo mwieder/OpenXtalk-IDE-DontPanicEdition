@@ -12,8 +12,15 @@ on initialize
 	local tStandaloneSettingsA
 	put getSettings() into tStandaloneSettingsA
    
-	set the visible of tEnableButton to revEngineCheck("Emscripten")
-	set the hilite of tEnableButton to (tStandaloneSettingsA["Emscripten"] is true)
+   -- Decide whether user is permitted to do HTML5 deployment
+   local tHaveLicense
+   --if revLicenseType() is "community" then
+      put true into tHaveLicense
+   --else if ("HTML5" is among the items of line 5 of the revLicenseInfo) then
+      --put true into tHaveLicense
+   --else
+      --put false into tHaveLicense
+   --end if
    
 	-- Decide whether user is permitted to do HTML5 deployment
 	local tHaveLicense
@@ -31,8 +38,7 @@ on initialize
          put true into tEnabled
       end if
       
-      -- Disable the checkbox if no license is available
-      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to tHaveLicense
+      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to true
    end repeat
    
    if not tEnabled and tSettings["Emscripten"] is true then
