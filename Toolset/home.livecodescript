@@ -282,7 +282,7 @@ on revInternal__openStack
          set the itemDel to comma
          open process tCommand for neither
          put tOldPath into $PATH
-      --end if
+#      end if
       
       close stack "revSplash"
       
@@ -340,8 +340,8 @@ constant kProductName = "LiveCode"
 -- Internal Setup Functions
 --
 
-private command revInternal__SetupLicense 
-   revInternal__Log "Enter", "License Setup"
+#private command revInternal__SetupLicense 
+#   revInternal__Log "Enter", "License Setup"
    
    --put line 1 of the revLicenseInfo into sLicenseName
    --put line 2 of the revLicenseInfo into sLicenseOrganization
@@ -352,12 +352,12 @@ private command revInternal__SetupLicense
       --put 1 into sLicenseMultiplicity
    --end if
    
-   put the version && "build" && the buildnumber into sLicenseVersion
+#   put the version && "build" && the buildnumber into sLicenseVersion
    
-   put revEnvironmentPlatform() into sLicensePlatform
+#   put revEnvironmentPlatform() into sLicensePlatform
    
-   revInternal__Log "Leave", "License Setup"
-end revInternal__SetupLicense
+#   revInternal__Log "Leave", "License Setup"
+#end revInternal__SetupLicense
 
 private command revInternal__SetupPaths
    revInternal__Log "Enter", "Path Setup"
@@ -433,9 +433,10 @@ private command revInternal__SetupPaths
    
    # The docs cache is per-version and edition
    local tEdition
-   --put tolower(sLicenseClass) into tEdition
-	put lower(kEdition) into tEdition
-   
+#   put tolower(sLicenseClass) into tEdition
+
+	put tolower("openxtalk") into tEdition
+
    local tVersion
    put the version into tVersion
    put replaceText(tVersion, "[-,\.]", "_") into tVersion
@@ -948,11 +949,12 @@ private command revInternal__EnsureFolder pFolder
 end revInternal__EnsureFolder
 
 function revInternal__CheckFileAssociations 
-   local tEnginePath
-   set the itemDelimiter to ":"
-   put item 2 to -1 of the address into tEnginePath
+	local tEnginePath
+	set the itemDelimiter to ":"
+	put item 2 to -1 of the address into tEnginePath
    
-   if the platform is "win32" then
+	switch the platform
+		case "win32"
       -- If .rev, .livecode or .livecodescript classes are not present, then we need new assocs
       # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
       if queryRegistry("HKEY_CURRENT_USER\Software\Classes\.rev\") is not "RevolutionStack" or \
@@ -976,20 +978,22 @@ function revInternal__CheckFileAssociations
       get queryRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\Shell\Open\Command\") 
       if word 1 of it is not quote & tEnginePath & quote then 
          return true 
-      end if 
-   else
-      -- Do Linux at some point!
-   end if
+      end if
+			break
+		default
+			-- Do Linux at some point!
+	end switch
    
    return false 
 end revInternal__CheckFileAssociations
 
 command revInternal__InstallFileAssociations 
-   local tEnginePath
-   set the itemDelimiter to ":"
-   put item 2 to -1 of the address into tEnginePath
+	local tEnginePath
+	set the itemDelimiter to ":"
+	put item 2 to -1 of the address into tEnginePath
    
-   if the platform is "win32" then
+	switch the platform
+		case "win32"
       replace slash with backslash in tEnginePath
       # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
       get setRegistry("HKEY_CURRENT_USER\Software\Classes\.rev\", "RevolutionStack") and \
@@ -1006,30 +1010,29 @@ command revInternal__InstallFileAssociations
       else
          _internal call "notify_association_changed"
       end if
-   else
-   end if
+   default
+   end switch
 end revInternal__InstallFileAssociations
 
 local sLogIndent, sLogPath, sLog
 private command revInternal__LogToFile pType, pMessage   
-   if sLogPath is empty then
-      exit revInternal__LogToFile
-   end if
+	if sLogPath is not empty then
    
-   open file sLogPath for text append
+		open file sLogPath for text append
    
-   if pType is not "Message" then
-      put pType && pMessage into pMessage
-   end if
+		if pType is not "Message" then
+			put pType && pMessage into pMessage
+		end if
    
-   repeat for each line tLine in pMessage
-      if sLogIndent > 0 then
-         write char 1 to sLogIndent of "                                " to file sLogPath
-      end if
-      write tLine & return to file sLogPath
-   end repeat
+		repeat for each line tLine in pMessage
+			if sLogIndent > 0 then
+				write char 1 to sLogIndent of "                                " to file sLogPath
+			end if
+			write tLine & return to file sLogPath
+		end repeat
    
-   close file sLogPath
+		close file sLogPath
+	end if
 end revInternal__LogToFile
 
 private command revInternal__LogToVariable pType, pMessage  
@@ -1122,7 +1125,8 @@ command revInternal__InitialiseSystem
    if it is empty then
       get "Small"
    end if
-   if sLicensePlatform is "Windows" and it is not "None" then
+#   if sLicensePlatform is "Windows" and it is not "None" then
+   if it is not "None" then
       local tCrashSettings, tVersion
       put the version into tVersion
       replace "." with "_" in tVersion
@@ -1170,7 +1174,7 @@ end revInternal__InitialiseGlobals
 private function revInternal__FilterHandlerList pList
    local tNewList
    repeat for each line tLine in pList
-      if tLine begins with "P" then
+      if tLine begins with "P" then # ignore private handlers
          next repeat
       end if
       put word 2 of tLine & return after tNewList
@@ -1192,43 +1196,43 @@ command revInternal__InitialiseLibraries
    
    local tLoadList
    put "revCommonLibrary" into tLoadList 
-   put return & "revDatabaseLibrary" after tLoadList 
-   put return & "revIDEDocumentationLibrary" after tLoadList
-   put return & "revMetadataLibrary" after tLoadList   
-   put return & "revSBLibrary" after tLoadList
-   put return & "revIDELibrary" after tLoadList
-   put return & "revidemessagehandlerlibrary" after tLoadList
-   put return & "revBackScriptLibrary" after tLoadList 
-   put return & "revDeployLibrary" after tLoadList
-   put return & "revDebuggerLibrary" after tLoadList 
-   put return & "revLibUrl" after tLoadList 
-   put return & "revPrintLibrary" after tLoadList 
-   put return & "revAnimationLibrary" after tLoadList 
-   put return & "revGeometryLibrary" after tLoadList 
-   put return & "revXMLRPCLibrary" after tLoadList 
-   put return & "revProfilesLibrary" after tLoadList 
-   put return & "revTableLibrary" after tLoadList 
-   put return & "revhtml5urllibrary" after tLoadList
+   put cr & "revDatabaseLibrary" after tLoadList 
+   put cr & "revIDEDocumentationLibrary" after tLoadList
+   put cr & "revMetadataLibrary" after tLoadList   
+   put cr & "revSBLibrary" after tLoadList
+   put cr & "revIDELibrary" after tLoadList
+   put cr & "revidemessagehandlerlibrary" after tLoadList
+   put cr & "revBackScriptLibrary" after tLoadList 
+   put cr & "revDeployLibrary" after tLoadList
+   put cr & "revDebuggerLibrary" after tLoadList 
+   put cr & "revLibUrl" after tLoadList 
+   put cr & "revPrintLibrary" after tLoadList 
+   put cr & "revAnimationLibrary" after tLoadList 
+   put cr & "revGeometryLibrary" after tLoadList 
+   put cr & "revXMLRPCLibrary" after tLoadList 
+   put cr & "revProfilesLibrary" after tLoadList 
+   put cr & "revTableLibrary" after tLoadList 
+   put cr & "revhtml5urllibrary" after tLoadList
 
    if revEnvironmentEditionProperty("autocomplete_pro") then
-      put return & "autocomplete-pro" after tLoadList
+      put cr & "autocomplete-pro" after tLoadList
    end if
    
    if revEnvironmentEditionProperty("autocomplete") then
-      put return & "autocomplete" after tLoadList
+      put cr & "autocomplete" after tLoadList
    end if
    
    local tBackList
    put "revidedeveloperextensionlibrary" into tBackList
-   put return & "revsaveasstandalone" after tBackList
-   put return & "revsaveasiosstandalone" after tBackList
-   put return & "revsaveasandroidstandalone" after tBackList
-   put return & "revsaveasemscriptenstandalone" after tBackList
-   put return & "revOnlineLibrary" after tBackList
-   put return & "revCore" after tBackList
+   put cr & "revsaveasstandalone" after tBackList
+   put cr & "revsaveasiosstandalone" after tBackList
+   put cr & "revsaveasandroidstandalone" after tBackList
+   put cr & "revsaveasemscriptenstandalone" after tBackList
+   put cr & "revOnlineLibrary" after tBackList
+   put cr & "revCore" after tBackList
    
    # AL-2015-09-02: [[ Bug 15841 ]] Temporarily add project browser library to prevent preference errors
-   put return & "revIDEProjectBrowserLibrary" after tBackList
+   put cr & "revIDEProjectBrowserLibrary" after tBackList
    
    local tLib
    repeat for each line tLib in tLoadList	 
@@ -1393,7 +1397,8 @@ command revInternal__InitialiseDefaults
       
    set the _ideoverride of stack "home" to true
 
-   switch sLicensePlatform
+#   switch sLicensePlatform
+	switch the platform
       case "MacOS X"
          set the stackFileType to "RevoRSTK"
          set the hidePalettes to true
@@ -1673,10 +1678,10 @@ command revInternal__InitialisePlugIns
    
    revIDEUpdatePlugins
    
-   local tPluginInfo
-   put revIDEPlugins() into tPluginInfo
-   repeat for each key tPlugin in revIDEPlugins()
-      if tPluginInfo[tPlugin]["startup"] is true then
+   local tPluginInfoArray
+   put revIDEPlugins() into tPluginInfoArray
+   repeat for each key tPlugin in tPluginInfoArray
+      if tPluginInfoArray[tPlugin]["startup"] is true then
          revIDEOpenPlugin tPlugin
       end if
    end repeat
@@ -1878,6 +1883,8 @@ function revEnvironmentEditionProperty pProp, pEdition
       return revEnvironmentToolsetPath() & "/resources/" & pEdition & "/ideSkin"
    end if
    
+	put "openxtalk" into pEdition
+
    switch pEdition
       case "community"
          switch pProp
@@ -1976,11 +1983,7 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "open_source_required"
                return false
             case "splash_strap"
-               --if revLicenseInfo["com.livecode.norevenuelimit"] is not empty then
                   return empty
-               --else
-                  --return "<p>This Indy license is only valid for organizations with annual revenues of $500,000 USD or less</p>"
-               --end if
             case "upgrade_mini_url"
                return empty
             case "upgrade_url"
@@ -1998,6 +2001,7 @@ function revEnvironmentEditionProperty pProp, pEdition
          break
       case "business"
       case "professional"
+		case "openxtalk"
          switch pProp
             case "name"
                return "Business"
