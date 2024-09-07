@@ -17,19 +17,34 @@ on initialize
    
    -- Decide whether user is permitted to do HTML5 deployment
    local tHaveLicense
-   if revLicenseType() is "community" then
+   --if revLicenseType() is "community" then
       put true into tHaveLicense
-   else if ("HTML5" is among the items of line 5 of the revLicenseInfo) then
-      put true into tHaveLicense
-   else
-      put false into tHaveLicense
-   end if
+   --else if ("HTML5" is among the items of line 5 of the revLicenseInfo) then
+      --put true into tHaveLicense
+   --else
+      --put false into tHaveLicense
+   --end if
    
    -- Disable the checkbox if no license is available
    set the enabled of tEnableButton to tHaveLicense
+   repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
+      set the hilite of button ("Emscripten" && tItem) of group "platforms" of me to tSettings["Emscripten",tItem] is true
+      set the visible of button ("Emscripten" && tItem) of group "platforms" of me to revEngineCheck("Emscripten" && tItem)
+      if tSettings["Emscripten",tItem] then
+         put true into tEnabled
+      end if
+      
+      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to true
+   end repeat
+   
+   if not tEnabled and tSettings["Emscripten"] is true then
+      set the hilite of button "Emscripten js" of group "platforms" of me to true
+      put true into tSettings["Emscripten,js"]
+      setSettings tSettings
+   end if
    
    -- Hide the license prompt if a license is available
-   set the visible of group "emscriptenLicenseTip" to not tHaveLicense
+   set the visible of group "emscriptenLicenseTip" to true
    
    tipDisplayUpdate
 end initialize
