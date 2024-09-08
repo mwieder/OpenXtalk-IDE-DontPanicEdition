@@ -4,8 +4,6 @@ constant kEdition = "commercial"
 #constant kEdition = "OpenXTalk"
 
 on startup
-   revSetTestEnvironment($TRAVIS is true)
-
    -- MW-2011-03-13: Make sure the externals are empty on startup
    set the externals of me to empty
    
@@ -340,25 +338,6 @@ constant kProductName = "LiveCode"
 -- Internal Setup Functions
 --
 
-#private command revInternal__SetupLicense 
-#   revInternal__Log "Enter", "License Setup"
-   
-   --put line 1 of the revLicenseInfo into sLicenseName
-   --put line 2 of the revLicenseInfo into sLicenseOrganization
-   --put line 3 of the revLicenseInfo into sLicenseClass
-   --put line 4 of the revLicenseInfo into sLicenseMultiplicity
-   
-   --if sLicenseMultiplicity is empty then
-      --put 1 into sLicenseMultiplicity
-   --end if
-   
-#   put the version && "build" && the buildnumber into sLicenseVersion
-   
-#   put revEnvironmentPlatform() into sLicensePlatform
-   
-#   revInternal__Log "Leave", "License Setup"
-#end revInternal__SetupLicense
-
 private command revInternal__SetupPaths
    revInternal__Log "Enter", "Path Setup"
    
@@ -378,7 +357,11 @@ private command revInternal__SetupPaths
       case "Linux"
          local tOldFolder
          put the folder into tOldFolder
-         set the folder to "~"
+         if revTestEnvironment() then
+           set the folder to "/tmp"
+         else
+            set the folder to "~"
+         end if
          put the folder & slash & ".runrev/revolution/enterprise/preferences" into sOldPreferencesPath
          if there is no folder sOldPreferencesPath then
             put the folder & slash & ".runrev/revolution/studio/preferences" into sOldPreferencesPath
@@ -440,7 +423,7 @@ private command revInternal__SetupPaths
    local tVersion
    put the version into tVersion
    put replaceText(tVersion, "[-,\.]", "_") into tVersion
-   put slash & tVersion & "_" & tEdition after sUserDocsPath
+   put slash & tVersion after sUserDocsPath
    
    -- MW-2013-06-13: [[ CloneAndRun ]] Set up the binaries path.
    local tRepositoryPath
@@ -464,6 +447,7 @@ private command revInternal__SetupPaths
    revInternal__Log "Message", "Cache Path = " & sCachePath
    revInternal__Log "Message", "Crash Log Path = " & sCrashLogPath
    revInternal__Log "Message", "Binaries Path = " & sBinariesPath
+   revInternal__Log "Message", "Repositories Path = " & sRepositoryPath
    
    revInternal__Log "Leave", "Path Setup"
 end revInternal__SetupPaths
@@ -501,50 +485,56 @@ command revInternal__SetupCustomizationPath
 end revInternal__SetupCustomizationPath
 
 function revInternal__StackFiles
-   local tPaletteFolder, tFolders
-   put revEnvironmentToolsetPath() & slash & "palettes" into tPaletteFolder
-   put tPaletteFolder into tFolders
-   
-   repeat for each line tFolder in folders(tPaletteFolder)
-      if char 1 of tFolder is "." then next repeat
-      put return & tPaletteFolder & slash & tFolder after tFolders
-   end repeat
-   
-   put return & revEnvironmentToolsetPath() & slash & "libraries" after tFolders
+   local tFolders
    if not revEnvironmentIsInstalled() then
+      put revEnvironmentIDEPrebuiltsPath("resource center") into tFolders
+
+      put return & revEnvironmentBinariesPath() & slash & "ide" after tFolders
+
       put return & revEnvironmentRepositoryPath() & slash & "ide-support" after tFolders
-      
-      -- legacy from commercial repo
-      put return & revEnvironmentCommercialRepositoryPath() & "/ide/Toolset/libraries" after tFolders
-      put revEnvironmentCommercialRepositoryPath() & "/ide/Toolset/palettes" into tPaletteFolder
-      repeat for each line tFolder in folders(tPaletteFolder)
-         if tFolder begins with "." then next repeat
-         put return & tPaletteFolder & slash & tFolder after tFolders
-      end repeat
       
       -- components
       local tComponentFolder
-      put revEnvironmentCommercialRepositoryPath() & "/components" into tComponentFolder
+      put revEnvironmentRepositoryPath() & "/components" into tComponentFolder
       repeat for each line tFolder in folders(tComponentFolder)
          if tFolder begins with "." then next repeat
          put return & tComponentFolder & slash & tFolder after tFolders
       end repeat
       
-      -- commercial extensions (ensure they are loaded from the repo)
-      local tExtensionFolder
-      put revEnvironmentCommercialRepositoryPath() & "/extensions/script-libraries" into tExtensionFolder
-      repeat for each line tFolder in folders(tExtensionFolder)
-         if tFolder begins with "." then next repeat
-         put return & tExtensionFolder & slash & tFolder after tFolders
-      end repeat
-      
       -- extensions (ensure they are loaded from the repo)
+      local tExtensionFolder
       put revEnvironmentRepositoryPath() & "/extensions/script-libraries" into tExtensionFolder
       repeat for each line tFolder in folders(tExtensionFolder)
          if tFolder begins with "." then next repeat
          put return & tExtensionFolder & slash & tFolder after tFolders
       end repeat
-   end if	
+   end if
+
+   local tPalettesFolder
+   put revEnvironmentToolsetPath() & slash & "palettes" into tPalettesFolder
+   if tFolders is empty then
+      put tPalettesFolder into tFolders
+   else
+      put return & tPalettesFolder after tFolders
+   end if
+
+   local tPaletteFolders
+   put folders(tPalettesFolder) into tPaletteFolders
+   repeat for each line tFolder in tPaletteFolders
+      if codeunit 1 of tFolder is "." then
+         next repeat
+      end if
+
+      local tPaletteFolder
+      put tPalettesFolder & slash & tFolder into tPaletteFolder
+      put return & tPaletteFolder after tFolders
+
+      if there is a folder (tPaletteFolder & slash & "behaviors") then
+         put return & tPaletteFolder & slash & "behaviors" after tFolders
+      end if
+   end repeat
+
+   put return & revEnvironmentToolsetPath() & slash & "libraries" after tFolders
    
    local tStackFiles, tStackName
    local tStackFilesA, tIDEVersion
@@ -572,10 +562,20 @@ function revInternal__StackFiles
          end if
          
          if tStackName is "revpreferences" then next repeat
-         
+
          // AL-2015-02-18: [[ Named Stack Versions ]] Choose a versioned stack file name over an unversioned one, and a later version over an earlier one. 
          local tExistingVersion
          put tStackFilesA[tStackName]["version"] into tExistingVersion
+
+         /* Unversioned stackfiles should not replace those with the same leaf
+          * name which have already been seen. */
+         if tStackName is among the keys of tStackFilesA and \
+                  tExistingVersion is empty and tVersion is empty then
+            next repeat
+         end if
+
+         /* Otherwise if the stackfile hasn't been seen before, or has a more
+          * recent version, it should replace the entry for it. */
          if tExistingVersion is empty or tVersion > tExistingVersion then
             put tPath & slash & tFile into tStackFilesA[tStackName]["file"]
             put tVersion into tStackFilesA[tStackName]["version"]
@@ -1070,7 +1070,13 @@ command revInternal__Log pType, pMessage
       put 0 into sLogIndent
       switch revEnvironmentPlatform()
          case "Linux"
-            put "~/.runrev/logs/" & toLower(kProductName) & "_tools_log.txt" into tLogPath
+            local tFolder
+            if revTestEnvironment() then
+              put "/tmp" into tFolder
+            else
+               put "~" into tFolder
+            end if
+            put tFolder & "/.runrev/logs/" & toLower(kProductName) & "_tools_log.txt" into tLogPath
             break
          case "MacOS X"
             put specialFolderPath("cusr") & "/Library/Logs/RunRev/" & kProductName & "ToolsLog.txt"  into tLogPath
@@ -1177,7 +1183,7 @@ private function revInternal__FilterHandlerList pList
       if tLine begins with "P" then # ignore private handlers
          next repeat
       end if
-      put word 2 of tLine & return after tNewList
+      put word 2 of tLine & cr after tNewList
    end repeat
    delete the last char of tNewList
    return tNewList
@@ -1189,7 +1195,7 @@ command revInternal__InitialiseLibraries
    try 	 	
       insert script of stack "revInitialisationLibrary" into back 	 
    catch tError 	 	
-      revInternal__Log "Error", "Error loading initialisation library" & return & tError 	 	
+      revInternal__Log "Error", "Error loading initialisation library" & cr & tError 	 	
    end try
    
    revInternal_SetJAVA_HOME
@@ -1243,13 +1249,13 @@ command revInternal__InitialiseLibraries
 	  end if
    end repeat
    
-   try	
       repeat for each line tLib in tBackList
-         insert script of stack tLib into back 	 
+		try	
+			insert script of stack tLib into back 	 
+		catch tError 	 	
+			revInternal__Log "Error", "Error loading backscript" && tLib & return & tError 	 	
+		end try
       end repeat
-   catch tError 	 	
-      revInternal__Log "Error", "Error loading library" && tLib & return & tError 	 	
-   end try
    
    # MW-2010-10-13: [[ Bug 8600 ]] Make sure the handler lists of the rev frontscript, backscript and shortcuts script
    #    are all up to date (used by revNoMessages script).
@@ -1274,7 +1280,7 @@ command revInternal__InitialiseLibraries
          
          local tFiles
          put the files into tFiles
-         filter tFiles with "*.livecode*"
+         filter tFiles with "*.livecodescript"
          
          repeat for each line tFile in tFiles
             if there is a stack tFile then
@@ -1284,7 +1290,37 @@ command revInternal__InitialiseLibraries
       end repeat
       
       set the folder to tOldFolder
-   end if
+   end if # there is a folder revEnvironmentExtPath()
+
+   /* When not installed, any integrated merg externals with libraries
+    * will be in the respository path, with their libraries matching
+    * `merg*.livecodescript. */
+   if not revEnvironmentIsInstalled() then
+      local tMergFolders
+      put folders(revEnvironmentRepositoryPath()) into tMergFolders
+      filter tMergFolders with "revmerg*"
+
+      repeat for each line tFolder in tMergFolders
+         local tMergSrcFolder
+         put (revEnvironmentRepositoryPath() & slash & tFolder & slash & "src") \
+            into tMergSrcFolder
+
+         local tMergFiles
+         put files(tMergSrcFolder) into tMergFiles
+         filter tMergFiles with "*.livecodescript"
+         
+         repeat for each line tFile in tMergFiles
+            local tMergLibraryFile
+            put tMergSrcFolder & slash & tFile into tMergLibraryFile
+
+            if there is a stack tMergLibraryFile then
+               /* Load the stack */
+               revInternal__LoadIfLibrary \
+                  the short name of stack tMergLibraryFile
+            end if
+         end repeat
+      end repeat
+   end if # not revEnvironmentIsInstalled()
    
    revInternal__Log "Leave", "Libraries Initialisation"
    
@@ -1324,7 +1360,7 @@ private command revInternal__SetupExternals
       put the folder & "/" & tExternal & return after tExternals
    end repeat
    
-   -- Load the Ext externals bundle
+	# Load the Ext externals bundle : the "Ext" folder
    if there is a folder revEnvironmentExtPath() then
       set the folder to revEnvironmentExtPath()
       repeat for each line tExternal in the folders
@@ -1336,15 +1372,19 @@ private command revInternal__SetupExternals
          -- The folder contains externals for multiple platforms, potentially
          -- Remember: .bundle "files" are really folders
          local tFiles
-         put the files & return & the folders into tFiles
+         put the files & cr & the folders into tFiles
          filter tFiles with ("*." & tExtension)
          
          repeat for each line tFile in tFiles
+# TODO: MDW 2023.12.06 can we load this?
+if "tsNet" is not in tExternal then
             put revEnvironmentExtPath() & "/" & tExternal & "/" & tFile & return after tExternals
+end if
          end repeat
       end repeat
-   end if
-   
+   end if # there is a folder revEnvironmentExtPath()
+
+	# Now gather the externals in the user area   
    if there is a folder revEnvironmentUserExternalsPath() then
       set the folder to revEnvironmentUserExternalsPath()
       repeat for each line tExternal in the folders & return & the files
@@ -1358,7 +1398,16 @@ private command revInternal__SetupExternals
    set the folder to tOldFolder
    
    filter tExternals with ("*." & tExtension)
-   
+
+			local tProcessor
+			put the processor into tProcessor
+			if tProcessor is "x86_64" then
+				filter tExternals without ("*86." & tExtension)
+			else
+				filter tExternals without ("*64." & tExtension)
+				filter tExternals with ("*86." & tExtension)
+			end if
+
    # OK-2007-09-24 : Support for legacy drivers. If the legacy drivers are in use, then the revdb
    # external should come from the user legacy externals folder rather than the main externals folder.
    if the cREVUseLegacyDrivers of stack "revPreferences" then
@@ -1367,7 +1416,7 @@ private command revInternal__SetupExternals
       if tOffset is not 0 then
          put revEnvironmentUserExternalsPath() & "/Legacy/revdb." & tExtension into line tOffset of tExternals
       end if
-   end if
+   end if # the cREVUseLegacyDrivers of stack "revPreferences"
    
    set the externals of stack "Home" to tExternals
    
@@ -1678,14 +1727,26 @@ command revInternal__InitialisePlugIns
    
    revIDEUpdatePlugins
    
-   local tPluginInfoArray
-   put revIDEPlugins() into tPluginInfoArray
-   repeat for each key tPlugin in tPluginInfoArray
-      if tPluginInfoArray[tPlugin]["startup"] is true then
+#	try
+#		libUrlSetSSLVerification false
+#	catch e
+#		dispatch "revUnloadLibrary" to stack "tsNetLibUrl"
+#	end try
+
+   local tPluginInfo
+   put revIDEPlugins() into tPluginInfo
+   repeat for each key tPlugin in revIDEPlugins()
+      if tPluginInfo[tPlugin]["startup"] is true then
+try
          revIDEOpenPlugin tPlugin
+catch e
+   revInternal__Log "plugin Error", tPlugin && e
+	dispatch "revUnloadLibrary" to stack "tsNetLibUrl"
+         revIDEOpenPlugin tPlugin
+end try
       end if
    end repeat
-   
+
    revInternal__Log "Leave", "Plug-Ins Initialisation"
    
    return true
@@ -2047,17 +2108,32 @@ function revEnvironmentPluginsPath
    return hookToolsPath("plugins", sToolsPath & "/Plugins")
 end revEnvironmentPluginsPath
 
-function revEnvironmentDevelopmentPluginsPath
-   if not revEnvironmentIsInstalled() then
-      -- check for private repo plugins
-      set the itemDelimiter to slash
-      local tPath
-      put item 1 to -3 of sToolsPath & "/ide/Plugins" into tPath
-      if there is a folder tPath then
-         return tPath
-      end if
+function revEnvironmentIDEPrebuiltsPath pWhich
+   if revEnvironmentIsInstalled() then
+      return empty
    end if
-   return empty
+
+   local tPath
+   put revEnvironmentRepositoryPath() & slash & "prebuilt" & slash & \
+         "unpacked" \
+      into tPath
+
+   switch pWhich
+   case "dictionary"
+      return tPath & slash & "ide_dictionary"
+   case "plugins"
+      return tPath & slash & "ide_plugins"
+   case "fonts"
+      return tPath & slash & "ide_fonts"
+   case "resource center"
+      return tPath & slash & "ide_resource_center"
+   default
+      throw "Unknown prebuilt" && pWhich
+   end switch
+end revEnvironmentIDEPrebuiltsPath
+
+function revEnvironmentDevelopmentPluginsPath
+   return revEnvironmentIDEPrebuiltsPath("plugins")
 end revEnvironmentDevelopmentPluginsPath
 
 function revEnvironmentExternalsPath
@@ -2085,7 +2161,11 @@ function revEnvironmentUserRuntimePath
 end revEnvironmentUserRuntimePath
 
 function revEnvironmentExtPath
-   return hookToolsPath("ext", sToolsPath & "/Ext")
+   if revEnvironmentIsInstalled() then
+      return hookToolsPath("ext", sToolsPath & "/Ext")
+   else
+      return sBinariesPath & slash & "ext"
+   end if
 end revEnvironmentExtPath
 
 //EJB for Testing System
@@ -2213,6 +2293,7 @@ function revEnvironmentNonNativeBinariesPath pPlatform, pSDK
       case "MacOSX x86-64"
       case "MacOSX x64"
       case "MacOSX x86_64"
+      case "MacOSX arm64"
          put slash & "mac-bin" after tNonNativeBinariesPath
          break
       case "Android"
@@ -2249,11 +2330,6 @@ end revEnvironmentNonNativeBinariesPath
 function revEnvironmentRepositoryPath
    return sRepositoryPath
 end revEnvironmentRepositoryPath
-
-function revEnvironmentCommercialRepositoryPath
-   set the itemDelimiter to slash
-   return item 1 to -2 of sRepositoryPath
-end revEnvironmentCommercialRepositoryPath
 
 -- Deprecated Path Functions
 

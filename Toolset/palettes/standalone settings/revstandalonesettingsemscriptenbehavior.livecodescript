@@ -5,14 +5,26 @@ on preOpenCard
 end preOpenCard
 
 on initialize
-   local tSettings
-   put getSettings() into tSettings
-   local tEnabled = false
+	local tEnableButton
+	put the long id of button "Emscripten" of group "platforms" into tEnableButton
+
+	-- Check whether HTML5 deployment is requested for the target stack
+	local tStandaloneSettingsA
+	put getSettings() into tStandaloneSettingsA
    
    -- Decide whether user is permitted to do HTML5 deployment
    local tHaveLicense
 	put true into tHaveLicense
    
+	-- Decide whether user is permitted to do HTML5 deployment
+	local tHaveLicense
+	put true into tHaveLicense
+   
+	-- Disable the checkbox if no license is available
+	set the enabled of tEnableButton to tHaveLicense
+   
+	-- Hide the license prompt if a license is available
+	--set the visible of group "emscriptenLicenseTip" to not tHaveLicense
    repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
       set the hilite of button ("Emscripten" && tItem) of group "platforms" of me to tSettings["Emscripten",tItem] is true
       set the visible of button ("Emscripten" && tItem) of group "platforms" of me to revEngineCheck("Emscripten" && tItem)
@@ -20,8 +32,7 @@ on initialize
          put true into tEnabled
       end if
       
-      -- Disable the checkbox if no license is available
-      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to tHaveLicense
+      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to true
    end repeat
    
    if not tEnabled and tSettings["Emscripten"] is true then
@@ -30,10 +41,8 @@ on initialize
       setSettings tSettings
    end if
    
-   -- Hide the license prompt if a license is available
-   set the visible of group "emscriptenLicenseTip" to true
    
-   tipDisplayUpdate
+	tipDisplayUpdate
 end initialize
 
 on updateEmscriptenChecked pChecked
@@ -66,15 +75,15 @@ on updateEmscriptenArch pArch, pBuild
 end updateEmscriptenArch
 
 on tipDisplayUpdate
-   set the backColor of graphic "emscriptenNoLicenseBackground" to ideCoreEditionColour()
+   --set the backColor of graphic "emscriptenNoLicenseBackground" to ideCoreEditionColour()
+   set the backColor of graphic "emscriptenNoLicenseBackground" to revIDEColor()
    
    if the visible of group "emscriptenLicenseTip" then
       set the topLeft of group "emscriptenSettings" to 12,136
-      set the cSize of this card to 567,371
    else 
       set the topLeft of group "emscriptenSettings" to -1,67
-      set the cSize of this card to 567,371
    end if
+   set the cSize of this card to 567,371
    
    updateCardSize
    
