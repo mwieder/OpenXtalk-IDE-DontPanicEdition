@@ -17,7 +17,7 @@ on startup
    revInternal__Log "Enter", "Startup"
    
    try
-      revInternal__SetupLicense
+      --revInternal__SetupLicense
       revInternal__SetupPaths
       revInternal__SetupFolders
       revInternal__SetupStackFiles
@@ -981,7 +981,7 @@ function revInternal__CheckFileAssociations
       end if
 			break
 		default
-			-- Do Linux at some point!
+			-- Do Linux file associations at some point!
 	end switch
    
    return false 
