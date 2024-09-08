@@ -5,8 +5,8 @@ on preOpenCard
 end preOpenCard
 
 on initialize
-   local tEnableButton
-   put the long id of button "Emscripten" of group "platforms" into tEnableButton
+   --local tEnableButton
+   --put the long id of button "Emscripten" of group "platforms" into tEnableButton
    
    -- Check whether HTML5 deployment is requested for the target stack
    local tStandaloneSettingsA
@@ -16,24 +16,16 @@ on initialize
    local tHaveLicense
    put true into tHaveLicense
    
-   -- Decide whether user is permitted to do HTML5 deployment
-   --local tHaveLicense
-   put true into tHaveLicense
-   
-   -- Disable the checkbox if no license is available
-   set the enabled of tEnableButton to tHaveLicense
-   
    -- Hide the license prompt if a license is available
-   --set the visible of group "emscriptenLicenseTip" to not tHaveLicense
    local tEnabled
    repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
-      set the hilite of button ("Emscripten" && tItem) of group "platforms" of me to (tStandaloneSettingsA["Emscripten",tItem] is true)
-      set the visible of button ("Emscripten" && tItem) of group "platforms" of me to revEngineCheck("Emscripten" && tItem)
+      set the hilite of button ("Emscripten"&tItem) of group "platforms" of me to (tStandaloneSettingsA["Emscripten",tItem] is true)
+      set the visible of button ("Emscripten"&tItem) of group "platforms" of me to revEngineCheck?("Emscripten" && tItem)
       if tStandaloneSettingsA["Emscripten",tItem] then
          put true into tEnabled
       end if
       
-      set the enabled of button ("Emscripten" && tItem) of group "platforms" of me to true
+      set the enabled of button ("Emscripten"&tItem) of group "platforms" of me to true
    end repeat
    
    if not tEnabled and tStandaloneSettingsA["Emscripten"] is true then

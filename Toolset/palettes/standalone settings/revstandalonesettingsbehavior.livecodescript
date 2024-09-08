@@ -41,7 +41,7 @@ private command updateTabButtons pSettings
    set the visible of button "AndroidChecked" of group "checks" of me to pSettings["android"] = true
    set the visible of button "BugsChecked" of group "checks" of me to pSettings["errorDialog"] = true
    set the visible of button "EmscriptenChecked" of group "checks" of me to \
-         pSettings["EmscriptenHTML5"] = true or pSettings["EmscriptenWASM"] = true
+         pSettings["EmscriptenJS"] = true or pSettings["EmscriptenWASM"] = true
    
    repeat for each item tItem in "SolIntel,SolSparc,Iris,Odt,rs6000,Linux,Bsd,Hp9k700,SPARC"
       if pSettings[tItem] then
