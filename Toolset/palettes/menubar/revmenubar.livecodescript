@@ -64,20 +64,20 @@ end setupDevelopmentMenu
 
 private on setupTextMenu
    local tText
-   put toggleMenuItem("Plain/;", false) & return after tText
-   put toggleMenuItem("&Bold/B", false) & return after tText
-   put toggleMenuItem("&Italic/I", false) & return after tText
-   put toggleMenuItem("&Underline/U", false) & return after tText
-   put toggleMenuItem("Strikeout", false) & return after tText
-   put toggleMenuItem("Box", false) & return after tText
-   put toggleMenuItem("3D Box", false) & return after tText
-   put "-" & return after tText
-   put toggleMenuItem("Link", false) & return after tText
-   put "-" & return after tText
-   put toggleMenuItem("Subscript", false) & return after tText
-   put toggleMenuItem("Superscript", false) & return after tText
-   put "-" & return after tText
-   put "Font" & return after tText
+   put toggleMenuItem("Plain/;", false) & cr after tText
+   put toggleMenuItem("&Bold/B", false) & cr after tText
+   put toggleMenuItem("&Italic/I", false) & cr after tText
+   put toggleMenuItem("&Underline/U", false) & cr after tText
+   put toggleMenuItem("Strikeout", false) & cr after tText
+   put toggleMenuItem("Box", false) & cr after tText
+   put toggleMenuItem("3D Box", false) & cr after tText
+   put "-" & cr after tText
+   put toggleMenuItem("Link", false) & cr after tText
+   put "-" & cr after tText
+   put toggleMenuItem("Subscript", false) & cr after tText
+   put toggleMenuItem("Superscript", false) & cr after tText
+   put "-" & cr after tText
+   put "Font" & cr after tText
    
    local tFontNames
    put the fontNames into tFontNames
@@ -93,18 +93,18 @@ private on setupTextMenu
       end if
    end repeat
    
-   put "Use Owner's Font" & return & "-" & return before tFontNames
+   put "Use Owner's Font" & cr & "-" & cr before tFontNames
    
    local fontnum
    put 1 into fontnum
    repeat for each line tFontName in tFontNames
       if tFontName is "-" then 
-         put tab & tFontName & return after tText
+         put tab & tFontName & cr after tText
       else
-         put "!u" & tab & tFontName & return after tText
+         put "!u" & tab & tFontName & cr after tText
       end if
    end repeat
-   put "Size" & return after tText
+   put "Size" & cr after tText
    
    local tFontSizes
    put format("Use Owner's Size\n-\n8\n9\n10\n12\n14\n18\n24\n36\n48\n-\nOther...") into tFontSizes
@@ -118,12 +118,12 @@ private on setupTextMenu
    put format("Use Owner's Color\n-\nBlack\nWhite\nRed\nGreen\nBlue\nYellow\n-\nPen Color") into tColors
    repeat for each line tColor in tColors
       if tColor is "-" then
-         put tab & tColor & return after tText
+         put tab & tColor & cr after tText
       else 
-         put "!u" & tab & tColor & return after tText
+         put "!u" & tab & tColor & cr after tText
       end if
    end repeat
-   put  "-" & return & "&Align" & return & "!u"  & tab & "Left" & return & "!u" & tab & "Center" & return & "!u" & tab & "Right" after tText
+   put  "-" & cr & "&Align" & cr & "!u"  & tab & "Left" & cr & "!u" & tab & "Center" & cr & "!u" & tab & "Right" after tText
    
    # Cache the text menu text in non-disabled state
    put tText into sTextMenuText
@@ -131,9 +131,9 @@ private on setupTextMenu
       if the platform is "MacOS" and tab is in tLine then
          replace tab with empty in tLine
          local tDisabledText
-         put tab & "(" & tLine & return after tDisabledText
+         put tab & "(" & tLine & cr after tDisabledText
       else
-         put "(" & tLine & return after tDisabledText
+         put "(" & tLine & cr after tDisabledText
       end if
    end repeat
    delete last char of tDisabledText
@@ -1247,7 +1247,7 @@ function revMenubarBuildMenu pMenu, pContext
       case "Text"
          return revMenubarTextMenu(pContext)
       case "Development"         
-         return revMenubarDevelopmentMenu(pContext)
+         return menubarDevelopmentMenu(pContext)
       case "View"
          return revMenubarViewMenu(pContext)
       case "Window"
@@ -1365,86 +1365,86 @@ private function revMenubarFileMenu pContext
    end if
    
    local tFile
-   put "&New Stack" & return after tFile
-   put tab & "Default Size" & return after tFile
-   put tab & "-" & return after tFile
-   put tab & "iPhone 4 (320x480)" & return after tFile
-   put tab & "iPhone 5 (320x568)" & return after tFile
-   put tab & "iPhone 6 (375x667)" & return after tFile
-   put tab & "iPhone 6 Plus (414x736)" & return after tFile
-   put tab & "iPad//Tablet Portrait (768x1024)" & return after tFile
-   put tab & "iPad//Tablet Landscape (1024x768)" & return after tFile
-   put tab & "-" & return after tFile
-   put tab & "Script only Stack" & return after tFile
+   put "&New Stack" & cr after tFile
+   put tab & "Default Size" & cr after tFile
+   put tab & "-" & cr after tFile
+   put tab & "iPhone 4 (320x480)" & cr after tFile
+   put tab & "iPhone 5 (320x568)" & cr after tFile
+   put tab & "iPhone 6 (375x667)" & cr after tFile
+   put tab & "iPhone 6 Plus (414x736)" & cr after tFile
+   put tab & "iPad//Tablet Portrait (768x1024)" & cr after tFile
+   put tab & "iPad//Tablet Landscape (1024x768)" & cr after tFile
+   put tab & "-" & cr after tFile
+   put tab & "Script only Stack" & cr after tFile
    
    if tIsUserTarget and not tIsScriptOnly then
-      put "&New Substack of" && char 1 to 20 of the mainStack of the topStack & "/|New Substack" & return after tFile
+      put "&New Substack of" && char 1 to 20 of the mainStack of the topStack & "/|New Substack" & cr after tFile
    else
-      put "(&New Substack" & return after tFile
+      put "(&New Substack" & cr after tFile
    end if
    
-   put "&Open Stack.../O" & return after tFile
+   put "&Open Stack.../O" & cr after tFile
    
    if revMenuBarRecentFiles() is not empty then
-      put "Open Recent File" & return after tFile
-      put revMenuBarRecentFiles() & return after tFile
+      put "Open Recent File" & cr after tFile
+      put revMenuBarRecentFiles() & cr after tFile
    else
-      put "(Open Recent File" & return after tFile
+      put "(Open Recent File" & cr after tFile
    end if
    
-   put enableMenuItem("&Close/W", the mode of the topStack <= 3 and the short name of the topstack is not "revMenubar") & return after tFile
-   put enableMenuItem("Close and Remove From Memor&y", tCanSaveStack) & return after tFile
-   put "-" & return after tFile
+   put enableMenuItem("&Close/W", the mode of the topStack <= 3 and the short name of the topstack is not "revMenubar") & cr after tFile
+   put enableMenuItem("Close and Remove From Memor&y", tCanSaveStack) & cr after tFile
+   put "-" & cr after tFile
    
-   put enableMenuItem("Import As Control", tIsUserTarget) & return after tFile
-   put tab & "Image File.../>|image" & return after tFile
-   put tab & "Audio File.../|audio" & return after tFile
-   put tab & "Video File.../|video" & return after tFile
-   put tab & "Text File.../|text" & return after tFile
-   put tab & "-" & return after tFile
-   put tab & "Graph from CSV File.../|graph" & return after tFile
-   put tab & "-" & return after tFile
-   put tab & "Snapshot of Screen" & return after tFile
-   put tab & enableMenuItem("Snapshot of Selected Object",  pContext["objectsSelected"]) & return after tFile
-   put tab & "-" & return after tFile
-   put tab & "All Images in Folder.../|image folder" & return after tFile
-   put tab & "All Audio Files in Folder.../|audio folder" & return after tFile
-   put tab & "All Video Files in Folder.../|video folder" & return after tFile
-   put tab & "All Text Files in Folder.../|text folder" & return after tFile
+   put enableMenuItem("Import As Control", tIsUserTarget) & cr after tFile
+   put tab & "Image File.../>|image" & cr after tFile
+   put tab & "Audio File.../|audio" & cr after tFile
+   put tab & "Video File.../|video" & cr after tFile
+   put tab & "Text File.../|text" & cr after tFile
+   put tab & "-" & cr after tFile
+   put tab & "Graph from CSV File.../|graph" & cr after tFile
+   put tab & "-" & cr after tFile
+   put tab & "Snapshot of Screen" & cr after tFile
+   put tab & enableMenuItem("Snapshot of Selected Object",  pContext["objectsSelected"]) & cr after tFile
+   put tab & "-" & cr after tFile
+   put tab & "All Images in Folder.../|image folder" & cr after tFile
+   put tab & "All Audio Files in Folder.../|audio folder" & cr after tFile
+   put tab & "All Video Files in Folder.../|video folder" & cr after tFile
+   put tab & "All Text Files in Folder.../|text folder" & cr after tFile
    
-   put enableMenuItem("New Referenced Control", tIsUserTarget) & return after tFile
-   put tab & "Image File.../|image" & return after tFile
-   put tab & enableMenuItem("Video File.../|video", the platform is not "Linux") & return after tFile
-   put tab & "-" & return after tFile
-   put tab & "All Images in Folder.../|image folder" & return after tFile
-   put tab & enableMenuItem("All Video Files in Folder.../|video folder", the platform is not "Linux") & return after tFile
-   put "-" & return after tFile
+   put enableMenuItem("New Referenced Control", tIsUserTarget) & cr after tFile
+   put tab & "Image File.../|image" & cr after tFile
+   put tab & enableMenuItem("Video File.../|video", the platform is not "Linux") & cr after tFile
+   put tab & "-" & cr after tFile
+   put tab & "All Images in Folder.../|image folder" & cr after tFile
+   put tab & enableMenuItem("All Video Files in Folder.../|video folder", the platform is not "Linux") & cr after tFile
+   put "-" & cr after tFile
    
-   put enableMenuItem("&Save/S", tCanSaveStack) & return after tFile
-   put enableMenuItem("Save &As...", tCanSaveStack) & return after tFile
-   put enableMenuItem("Move S&ubstack to File...", tIsUserTarget and the short name of the topStack is not the mainStack of the topStack) & return after tFile
-   put enableMenuItem("&Revert to Saved...", tIsUserTarget and the effective filename of the topStack is not empty) & return after tFile
-   put "-" & return after tFile
+   put enableMenuItem("&Save/S", tCanSaveStack) & cr after tFile
+   put enableMenuItem("Save &As...", tCanSaveStack) & cr after tFile
+   put enableMenuItem("Move S&ubstack to File...", tIsUserTarget and the short name of the topStack is not the mainStack of the topStack) & cr after tFile
+   put enableMenuItem("&Revert to Saved...", tIsUserTarget and the effective filename of the topStack is not empty) & cr after tFile
+   put "-" & cr after tFile
    
-   put enableMenuItem("&Share this stack...", tCanSaveStack) & return after tFile
-   put "-" & return after tFile
+   put enableMenuItem("&Share this stack...", tCanSaveStack) & cr after tFile
+   put "-" & cr after tFile
    
-   put enableMenuItem("Standalone Application Settings...", tIsUserTarget) & return after tFile
-   put enableMenuItem("Save as Standalone Application...", tIsUserTarget) & return after tFile
-   put "-" & return after tFile
+   put enableMenuItem("Standalone Application Settings...", tIsUserTarget) & cr after tFile
+   put enableMenuItem("Save as Standalone Application...", tIsUserTarget) & cr after tFile
+   put "-" & cr after tFile
    
-   put "P&age Setup..." & return after tFile
-   put enableMenuItem("&Print Card.../P", tIsUserTarget) & return after tFile
-   put enableMenuItem("Print Field...", word 1 of (the selObj) is "field") & return after tFile
+   put "P&age Setup..." & cr after tFile
+   put enableMenuItem("&Print Card.../P", tIsUserTarget) & cr after tFile
+   put enableMenuItem("Print Field...", word 1 of (the selObj) is "field") & cr after tFile
    
-   put "-" & return after tFile
+   put "-" & cr after tFile
    
    ## EJB 2014-08-26
    ## [[Bug 12880]]
    if the platform is "Linux" then
-      put "&Quit" & return after tFile
+      put "&Quit" & cr after tFile
    else
-      put "E&xit" & return after tFile
+      put "E&xit" & cr after tFile
    end if
    
    return modifyMenu("File", tFile)
@@ -1498,24 +1498,24 @@ private function revMenubarEditMenu pContext
          break
    end switch
    
-   put "&Undo/Z" & return after tEdit
-   put "-" & return after tEdit
-   put enableMenuItem("Cu&t" && tSelectionLabel & "/X|cut", tSelectionLabel is not empty) & return after tEdit
-   put enableMenuItem("&Copy" && tSelectionLabel & "/C|copy", tSelectionLabel is not empty) & return after tEdit
-   put enableMenuItem("&Paste"&& tClipboardLabel & "/V|paste", tClipboardLabel is not empty) & return after tEdit
-   put enableMenuItem("Paste &Unformatted/Cmd Shift Opt V", tClipboardLabel is "Text") & return after tEdit
-   put enableMenuItem("Clea&r" && tSelectionLabel, tSelectionLabel is not empty) & return after tEdit
-   put "-" & return after tEdit
-   put enableMenuItem("&Duplicate" && tObjectsLabel &"/D", tObjectsLabel is not empty) & return after tEdit
-   put "-" & return after tEdit
-   put "Select All/A" & return after tEdit
-   put "Deselect All" & return after tEdit
-   put enableMenuItem("In&vert Selection", tObjectsLabel is "Objects") & return after tEdit
-   put toggleMenuItem("Select Grouped Controls", the selectGroupedControls) & return after tEdit
-   put toggleMenuItem("Intersected Selections", the selectionMode is "intersect") & return after tEdit
-   put "-" & return after tEdit
-   put "Find and Replace.../F" & return after tEdit
-   put "-" & return after tEdit
+   put "&Undo/Z" & cr after tEdit
+   put "-" & cr after tEdit
+   put enableMenuItem("Cu&t" && tSelectionLabel & "/X|cut", tSelectionLabel is not empty) & cr after tEdit
+   put enableMenuItem("&Copy" && tSelectionLabel & "/C|copy", tSelectionLabel is not empty) & cr after tEdit
+   put enableMenuItem("&Paste"&& tClipboardLabel & "/V|paste", tClipboardLabel is not empty) & cr after tEdit
+   put enableMenuItem("Paste &Unformatted/Cmd Shift Opt V", tClipboardLabel is "Text") & cr after tEdit
+   put enableMenuItem("Clea&r" && tSelectionLabel, tSelectionLabel is not empty) & cr after tEdit
+   put "-" & cr after tEdit
+   put enableMenuItem("&Duplicate" && tObjectsLabel &"/D", tObjectsLabel is not empty) & cr after tEdit
+   put "-" & cr after tEdit
+   put "Select All/A" & cr after tEdit
+   put "Deselect All" & cr after tEdit
+   put enableMenuItem("In&vert Selection", tObjectsLabel is "Objects") & cr after tEdit
+   put toggleMenuItem("Select Grouped Controls", the selectGroupedControls) & cr after tEdit
+   put toggleMenuItem("Intersected Selections", the selectionMode is "intersect") & cr after tEdit
+   put "-" & cr after tEdit
+   put "Find and Replace.../F" & cr after tEdit
+   put "-" & cr after tEdit
    put "Pre&ferences" after tEdit
    
    return modifyMenu("Edit", tEdit)
@@ -1526,19 +1526,19 @@ end revMenubarEditMenu
 private function revMenubarToolsMenu pContext
    local tTools
    
-   put markMenuItem("&Browse Tool/9", the tool is "browse tool") & return after tTools
-   put markMenuItem("&Pointer Tool/0", the tool is "pointer tool") & return after tTools
-   put "-" & return after tTools
-   put toggleMenuItem("&Tools Palette/T", revIDEPaletteIsVisible("tools")) & return after tTools
-   put toggleMenuItem("&Paint and Draw Tools", "paint" is among the items of revIDEGetPreference("revTools_show")) & return after tTools
-   put "-" & return after tTools
+   put markMenuItem("&Browse Tool/9", the tool is "browse tool") & cr after tTools
+   put markMenuItem("&Pointer Tool/0", the tool is "pointer tool") & cr after tTools
+   put "-" & cr after tTools
+   put toggleMenuItem("&Tools Palette/T", revIDEPaletteIsVisible("tools")) & cr after tTools
+   put toggleMenuItem("&Paint and Draw Tools", "paint" is among the items of revIDEGetPreference("revTools_show")) & cr after tTools
+   put "-" & cr after tTools
    
-   put toggleMenuItem("Project Browser", revIDEPaletteIsVisible("project browser")) & return after tTools
-   put toggleMenuItem("&Message Box/M", revIDEPaletteIsVisible("message box")) & return after tTools
-   put toggleMenuItem("Extension Manager", revIDEPaletteIsVisible("extension manager")) & return after tTools
-   put toggleMenuItem("Extension Builder", revIDEPaletteIsVisible("extension builder")) & return after tTools
-   put "-" & return after tTools
-   put toggleMenuItem(enableMenuItem("Menu Builder", the mode of the topStack is 1), revIDEPaletteIsVisible("menu builder")) & return after tTools
+   put toggleMenuItem("Project Browser", revIDEPaletteIsVisible("project browser")) & cr after tTools
+   put toggleMenuItem("&Message Box/M", revIDEPaletteIsVisible("message box")) & cr after tTools
+   put toggleMenuItem("Extension Manager", revIDEPaletteIsVisible("extension manager")) & cr after tTools
+   put toggleMenuItem("Extension Builder", revIDEPaletteIsVisible("extension builder")) & cr after tTools
+   put "-" & cr after tTools
+   put toggleMenuItem(enableMenuItem("Menu Builder", the mode of the topStack is 1), revIDEPaletteIsVisible("menu builder")) & cr after tTools
    
    return modifyMenu("Tools", tTools)
 end revMenubarToolsMenu
@@ -1554,7 +1554,7 @@ private function revMenubarTextMenu pContext
       put sTextMenuText into tText   
       if pContext["textMenuSelection"] is "objects" then   
          --selected object   
-         put "(!nSubscript" & return & "(!nSuperscript" into line 11 to 12 of tText   
+         put "(!nSubscript" & cr & "(!nSuperscript" into line 11 to 12 of tText   
          try
             put the textFont of the selectedObject into tFont   
             put the textSize of the selectedObject into tSize   
@@ -1649,52 +1649,52 @@ private function revMenubarObjectMenu pContext
    put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
    
    ### Initial sections
-   put enableMenuItem("&Object Inspector", tIsObjectTarget) & return after tObject
-   put enableMenuItem("&Card Inspector", tIsUserTarget) & return after tObject
-   put enableMenuItem("&Stack Inspector/K", tIsUserTarget) & return after tObject
-   put "-" & return after tObject
-   put enableMenuItem("Object Script/E", tIsObjectTarget) & return after tObject
-   put enableMenuItem("Card Script", tIsUserTarget) & return after tObject
-   put enableMenuItem("Stack Script", tIsUserTarget) & return after tObject
-   put "-" & return after tObject
+   put enableMenuItem("&Object Inspector", tIsObjectTarget) & cr after tObject
+   put enableMenuItem("&Card Inspector", tIsUserTarget) & cr after tObject
+   put enableMenuItem("&Stack Inspector/K", tIsUserTarget) & cr after tObject
+   put "-" & cr after tObject
+   put enableMenuItem("Object Script/E", tIsObjectTarget) & cr after tObject
+   put enableMenuItem("Card Script", tIsUserTarget) & cr after tObject
+   put enableMenuItem("Stack Script", tIsUserTarget) & cr after tObject
+   put "-" & cr after tObject
    
    ### Lines 9 to 11: Group, Edit Group, Remove Group
    local tGroupLines
    if the selectedImage is empty and pContext["objectsSelected"] then
       if word 1 of (the selObj) is "group" and the number of lines in (the selObj) is 1 then   
-         put "&Ungroup Selected/G" & return & "&Edit Group/R" & return & "Remove Group"into tGroupLines   
+         put "&Ungroup Selected/G" & cr & "&Edit Group/R" & cr & "Remove Group"into tGroupLines   
       else if word 1 of (the selObj) is not among the items of "card,stack" then
-         put "&Group Selected/G" & return & "(&Edit Group/R" & return & "(Remove Group"into tGroupLines
+         put "&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group"into tGroupLines
       else
-         put "(&Group Selected/G" & return & "(&Edit Group/R" & return & "(Remove Group" into tGroupLines
+         put "(&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group" into tGroupLines
       end if
    else
-      put "(&Group Selected/G" & return & "(&Edit Group/R" & return & "(Remove Group" into tGroupLines   
+      put "(&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group" into tGroupLines   
    end if
    if the editBackground of the topStack and word 1 of (the selObj) is not "group" then
       put "&Stop Editing Group" into line 2 of tGroupLines
    end if
-   put tGroupLines & return after tObject
+   put tGroupLines & cr after tObject
    
    ### Line 12: Place group, with the list of groups
    local tGroupNames
    put buildGroupSubmenu(the short name of the topStack) into tGroupNames
    if the mode of the topStack is not 1 or tGroupNames is empty then 
-      put "(Place Group" & return after tObject   
+      put "(Place Group" & cr after tObject   
    else
-      put "Place Group" & return & tGroupNames & return after tObject 
+      put "Place Group" & cr & tGroupNames & cr after tObject 
    end if
-   put "-" & return after tObject
+   put "-" & cr after tObject
    
    ### New Card and Delete Card
-   put enableMenuItem("&New Card/N", tIsUserTarget) & return after tObject
-   put enableMenuItem("Delete Card", tIsUserTarget) & return after tObject
-   put enableMenuItem("New Control", the mode of the topStack is 1) & return after tObject
-   put revMenubarNewControlSubmenu() & return after tObject
-   put "-" & return after tObject
-   put enableMenuItem("New Widget", the mode of the topStack is 1) & return after tObject
-   put revMenubarNewWidgetSubmenu() & return after tObject
-   put "-" & return after tObject
+   put enableMenuItem("&New Card/N", tIsUserTarget) & cr after tObject
+   put enableMenuItem("Delete Card", tIsUserTarget) & cr after tObject
+   put enableMenuItem("New Control", the mode of the topStack is 1) & cr after tObject
+   put revMenubarNewControlSubmenu() & cr after tObject
+   put "-" & cr after tObject
+   put enableMenuItem("New Widget", the mode of the topStack is 1) & cr after tObject
+   put revMenubarNewWidgetSubmenu() & cr after tObject
+   put "-" & cr after tObject
    
    local tFlipText, tRotateText, tReshapeText
    if not pContext["enableFlipAndRotate"] or pContext["selectedObject"] is empty then
@@ -1722,21 +1722,21 @@ private function revMenubarObjectMenu pContext
    end if
    
    ### Flip, with a submenu. Rotate, with a submenu. And Reshape graphic
-   put tFlipText & return after tObject
-   put buildFlipSubmenu() & return after tObject
+   put tFlipText & cr after tObject
+   put buildFlipSubmenu() & cr after tObject
    
-   put tRotateText & return after tObject
-   put buildRotateSubmenu() & return after tObject
+   put tRotateText & cr after tObject
+   put buildRotateSubmenu() & cr after tObject
    
-   put tReshapeText & return after tObject
+   put tReshapeText & cr after tObject
    
-   put "-" & return after tObject
+   put "-" & cr after tObject
    
    ### Align selected controls, with a submenu
-   put enableMenuItem("Align Selected Controls", the number of lines in (the selObj) >= 2) & return after tObject
-   put buildAlignSubmenu() & return after tObject
+   put enableMenuItem("Align Selected Controls", the number of lines in (the selObj) >= 2) & cr after tObject
+   put buildAlignSubmenu() & cr after tObject
    
-   put "-" & return after tObject
+   put "-" & cr after tObject
    
    local tCanRelayer = true
    local tCanMoveBack = true
@@ -1772,10 +1772,10 @@ private function revMenubarObjectMenu pContext
    end if
    
    ### Send to back, Move Backward, Move Forward and Bring to Front
-   put enableMenuItem("&Send to Back", pContext["objectsSelected"] and tCanRelayer and tCanMoveBack) & return after tObject
-   put enableMenuItem("Move Backward/[", pContext["objectsSelected"] and tCanRelayer and tCanMoveBack) & return after tObject
-   put enableMenuItem("Move For&ward/]", pContext["objectsSelected"] and tCanRelayer and tCanMoveForward) & return after tObject
-   put enableMenuItem("Bring to &Front", pContext["objectsSelected"] and tCanRelayer and tCanMoveForward) & return after tObject
+   put enableMenuItem("&Send to Back", pContext["objectsSelected"] and tCanRelayer and tCanMoveBack) & cr after tObject
+   put enableMenuItem("Move Backward/[", pContext["objectsSelected"] and tCanRelayer and tCanMoveBack) & cr after tObject
+   put enableMenuItem("Move For&ward/]", pContext["objectsSelected"] and tCanRelayer and tCanMoveForward) & cr after tObject
+   put enableMenuItem("Bring to &Front", pContext["objectsSelected"] and tCanRelayer and tCanMoveForward) & cr after tObject
    
    return modifyMenu("Object", tObject)
 end revMenubarObjectMenu
@@ -1833,38 +1833,38 @@ end revMenubarNewWidgetSubmenu
 
 private function buildFlipSubmenu
    return \
-         tab & "Horizontal" & return & \
+         tab & "Horizontal" & cr & \
          tab & "Vertical" 
 end buildFlipSubmenu
 
 private function buildRotateSubmenu
    return \
-         tab & "By.../|By" & return & \
-         tab & "90° Right/|270" & return & \
-         tab & "90° Left/|90" & return & \
+         tab & "By.../|By" & cr & \
+         tab & "90° Right/|270" & cr & \
+         tab & "90° Left/|90" & cr & \
          tab & "180°/|180"
 end buildRotateSubmenu
 
 private function buildDistributeSubmenu
    return \
-   tab & tab & "First to last selected" & return & \
-   tab & tab & "Edge to edge" & return & \
+   tab & tab & "First to last selected" & cr & \
+   tab & tab & "Edge to edge" & cr & \
    tab & tab & "Across card"
 end buildDistributeSubmenu
 
 private function buildAlignSubmenu
    local tAlign
-   put tab & "Left" & return after tAlign
-   put tab & "Right" & return after tAlign
-   put tab & "Top" & return after tAlign
-   put tab & "Bottom" & return after tAlign
-   put tab & "-" & return after tAlign
-   put tab & "Make Widths E&qual/|Width" & return after tAlign
-   put tab & "Make &Heights Equal/|Height" & return after tAlign
-   put tab & "-" & return after tAlign
-   put tab & "Distribute Objects Horizontally..." & return after tAlign
-   put buildDistributeSubmenu() & return after tAlign
-   put tab & "Distribute Objects Vertically..." & return after tAlign
+   put tab & "Left" & cr after tAlign
+   put tab & "Right" & cr after tAlign
+   put tab & "Top" & cr after tAlign
+   put tab & "Bottom" & cr after tAlign
+   put tab & "-" & cr after tAlign
+   put tab & "Make Widths E&qual/|Width" & cr after tAlign
+   put tab & "Make &Heights Equal/|Height" & cr after tAlign
+   put tab & "-" & cr after tAlign
+   put tab & "Distribute Objects Horizontally..." & cr after tAlign
+   put buildDistributeSubmenu() & cr after tAlign
+   put tab & "Distribute Objects Vertically..." & cr after tAlign
    put buildDistributeSubmenu() after tAlign
    return tAlign
 end buildAlignSubmenu
@@ -1879,7 +1879,7 @@ private function buildGroupSubmenu pStack
    
    local tFinalGroups
    repeat for each line tGroup in tUnplacedIds   
-      put tab & the short name of control id tGroup of tStack & "/|" & tGroup & return after tFinalGroups
+      put tab & the short name of control id tGroup of tStack & "/|" & tGroup & cr after tFinalGroups
    end repeat   
    delete last char of tFinalGroups
    sort tFinalGroups   
@@ -1892,35 +1892,31 @@ end buildGroupSubmenu
 private function revMenubarHelpMenu pContext
    local tHelp
    # AL-2015-07-10: Temporarily remove welcome screen option from help menu
-   //put "Welcome Screen/|Welcome" & return after tHelp
-   put "Start Center/|Start Center" & return after tHelp
-   put "User Guide" & return after tHelp
-   put "Dictionary (API)/|Dictionary" & return after tHelp
+   put "Start Center/|Start Center" & cr after tHelp
+   put "User Guide" & cr after tHelp
+   put "Dictionary (API)/|Dictionary" & cr after tHelp
    
-   put "-" & return  after tHelp
+   put "-" & cr  after tHelp
    
-   put "Sample Stacks" & return after tHelp
-   put "Sample Scripts" & return after tHelp
-   put "-" & return after tHelp
-   put "Beginners Guide" & return after tHelp
-   put "All Guides" & return after tHelp
-   put "Tutorials" & return after tHelp
-   put "-" & return after tHelp
-   put "Forums" & return after tHelp
-   put "Technical Questions" & return after tHelp
-   put "Discussion List" & return after tHelp
-   put "Newsletters" & return after tHelp
-   put "-" & return after tHelp
-   put "Release Notes/|Release Notes" & return after tHelp
-   put "License Agreement/|License Agreement" & return after tHelp
-   put "-" & return after tHelp
-   put "&Buy a License.../|Buy" & return after tHelp
-   put "&Support.../|Support" & return after tHelp
-   put "-" & return after tHelp
-   put enableMenuItem("Re-license LiveCode/|Relicense", line 7 of the revLicenseInfo is not "Global") & return after tHelp
-   put "-" & return after tHelp
-   put "Check For Updates/|Update" & return after tHelp
-   put "-" & return after tHelp
+   put "Sample Stacks" & cr after tHelp
+   put "Sample Scripts" & cr after tHelp
+   put "-" & cr after tHelp
+   put "Beginners Guide" & cr after tHelp
+   put "All Guides" & cr after tHelp
+   put "Tutorials" & cr after tHelp
+   put "-" & cr after tHelp
+   put "Forums" & cr after tHelp
+   put "Technical Questions" & cr after tHelp
+   put "Discussion List" & cr after tHelp
+   put "Newsletters" & cr after tHelp
+   put "-" & cr after tHelp
+   put "Release Notes/|Release Notes" & cr after tHelp
+   put "License Agreement/|License Agreement" & cr after tHelp
+   put "-" & cr after tHelp
+   put "&Support.../|Support" & cr after tHelp
+   put "-" & cr after tHelp
+   put "Check For Updates/|Update" & cr after tHelp
+   put "-" & cr after tHelp
    put "About LiveCode/|About" after tHelp
    
    return modifyMenu("Help", tHelp)
@@ -1932,30 +1928,30 @@ private function revMenubarViewMenu pContext
    global gREVPalettes, gREVShowStacks
    
    local tView
-   put enableMenuItem("Go &First/1", the mode of the topStack is 1) & return after tView
-   put enableMenuItem("Go Pre&v/2", the mode of the topStack is 1) & return after tView
-   put enableMenuItem("Go Ne&xt/3", the mode of the topStack is 1) & return after tView
-   put enableMenuItem("Go &Last/4", the mode of the topStack is 1) & return after tView
-   put enableMenuItem("Go Recent/5", the mode of the topStack is 1) & return after tView
-   put "-" & return after tView
-   put toggleMenuItem("Toolbar Text", the cToolbarText of stack "revPreferences") & return after tView
-   put toggleMenuItem("Toolbar Icons", the cToolbarIcons of stack "revPreferences") & return after tView
-   put "-" & return after tView
-   put toggleMenuItem("Palettes", gREVPalettes is empty) & return after tView
-   put "-" & return after tView
-   put toggleMenuItem("Rulers", the mode of stack "revRulersH" is not 0) & return after tView
-   put toggleMenuItem("Grid", the grid) & return after tView
-   put toggleMenuItem("Backdrop", the backdrop is not "none") & return after tView
-   put toggleMenuItem("Show IDE Stacks In Lists", gREVShowStacks) & return after tView
-   put "-" & return after tView
-   put toggleMenuItem("Show &Invisible Objects" , the showInvisibles) & return after tView
+   put enableMenuItem("Go &First/1", the mode of the topStack is 1) & cr after tView
+   put enableMenuItem("Go Pre&v/2", the mode of the topStack is 1) & cr after tView
+   put enableMenuItem("Go Ne&xt/3", the mode of the topStack is 1) & cr after tView
+   put enableMenuItem("Go &Last/4", the mode of the topStack is 1) & cr after tView
+   put enableMenuItem("Go Recent/5", the mode of the topStack is 1) & cr after tView
+   put "-" & cr after tView
+   put toggleMenuItem("Toolbar Text", the cToolbarText of stack "revPreferences") & cr after tView
+   put toggleMenuItem("Toolbar Icons", the cToolbarIcons of stack "revPreferences") & cr after tView
+   put "-" & cr after tView
+   put toggleMenuItem("Palettes", gREVPalettes is empty) & cr after tView
+   put "-" & cr after tView
+   put toggleMenuItem("Rulers", the mode of stack "revRulersH" is not 0) & cr after tView
+   put toggleMenuItem("Grid", the grid) & cr after tView
+   put toggleMenuItem("Backdrop", the backdrop is not "none") & cr after tView
+   put toggleMenuItem("Show IDE Stacks In Lists", gREVShowStacks) & cr after tView
+   put "-" & cr after tView
+   put toggleMenuItem("Show &Invisible Objects" , the showInvisibles) & cr after tView
    
    return modifyMenu("View", tView)
 end revMenubarViewMenu
 
 ################################################################################
 
-private function revMenubarDevelopmentMenu pContext
+private function menubarDevelopmentMenu pContext
    global gREVSuppressErrors, gREVSuppressMessages
    
    local tIsUserTarget
@@ -1971,7 +1967,7 @@ private function revMenubarDevelopmentMenu pContext
    put tab & "-" & cr after tDevelopment
    put tab & "Plugin Settings" & cr after tDevelopment
    put "-" & cr after tDevelopment
-   put revMenubarSimulatorSubmenu() after tDevelopment
+   put menubarSimulatorSubmenu() after tDevelopment
    put "-" & cr after tDevelopment   
    
    if revEnvironmentEditionProperty("script_profiler") then
@@ -1995,10 +1991,11 @@ private function revMenubarDevelopmentMenu pContext
    put "Suspend Development Tools" & cr after tDevelopment
    
    return modifyMenu("Development", tDevelopment)
-end revMenubarDevelopmentMenu
+end menubarDevelopmentMenu
 
-private function revMenubarSimulatorSubmenu
+private function menubarSimulatorSubmenu
    local tSimulators
+   --put revIDEDeployTestTargets() into tSimulators
    put revIDETestTargets() into tSimulators
    
    if tSimulators is not an array then
@@ -2006,23 +2003,25 @@ private function revMenubarSimulatorSubmenu
    end if
    
    local tCurrentTarget
+   --put revIDEDeployTestTarget() into tCurrentTarget
    put revIDETestTarget() into tCurrentTarget
    
    local tMenu
    put enableMenuItem("Test/|Simulate", tCurrentTarget is not empty) & cr after tMenu
    put "Test Target/|Simulator Version" & cr after tMenu
    repeat for each key tPlatform in tSimulators
-      local tCanDeploy
-      put revIDETestCanDeployToTarget(tPlatform) into tCanDeploy
+      --local tCanDeploy?
+      --put IDETestCanDeployToTarget?(tPlatform) into tCanDeploy?
       repeat for each line tTarget in tSimulators[tPlatform]
-         put tab & enableMenuItem(toggleMenuItem(tTarget, tTarget is tCurrentTarget), tCanDeploy) & cr after tMenu
+         --         put tab & enableMenuItem(toggleMenuItem(tTarget, tTarget is tCurrentTarget), tCanDeploy?) & cr after tMenu
+         put tab & enableMenuItem(toggleMenuItem(tTarget, tTarget is tCurrentTarget), true) & cr after tMenu
       end repeat
       put tab & "-" & cr after tMenu
    end repeat
    delete char -3 to -1 of tMenu
    
    return tMenu
-end revMenubarSimulatorSubmenu
+end menubarSimulatorSubmenu
 
 ################################################################################
 
@@ -2035,7 +2034,7 @@ private function revMenubarWindowMenu pContext
    if sWindowMenuWindows is empty then
       put "(No Windows Open" into tWindow
    else
-      put sWindowMenuWindows & return & "-" & return & "Send Window to Back/`" into tWindow
+      put sWindowMenuWindows & cr & "-" & cr & "Send Window to Back/`" into tWindow
    end if
    
    return modifyMenu("Window", tWindow)
@@ -2080,48 +2079,48 @@ function revMenubarStackContextMenu pStack, pIndent
    end repeat
    
    local tText
-   put tIndent & "Edit Script" & return after tText
+   put tIndent & "Edit Script" & cr after tText
    put tIndent & enableMenuItem("Edit Behavior Script", \
-         exists(the behavior of stack pStack)) & return after tText
-   put tIndent & "Property Inspector" & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & "Stack Mode" & return after tText
+         exists(the behavior of stack pStack)) & cr after tText
+   put tIndent & "Property Inspector" & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & "Stack Mode" & cr after tText
    if gREVLanguageNames then
-      put tIndent & tab & markMenuItem("topLevel", the mode of stack pStack < 3) & return after tText
-      put tIndent & tab & markMenuItem("modeless", the mode of stack pStack is 3) & return after tText
-      put tIndent & tab & markMenuItem("palette", the mode of stack pStack is 4) & return after tText
-      put tIndent & tab & markMenuItem("modal", the mode of stack pStack is 5) & return after tText
+      put tIndent & tab & markMenuItem("topLevel", the mode of stack pStack < 3) & cr after tText
+      put tIndent & tab & markMenuItem("modeless", the mode of stack pStack is 3) & cr after tText
+      put tIndent & tab & markMenuItem("palette", the mode of stack pStack is 4) & cr after tText
+      put tIndent & tab & markMenuItem("modal", the mode of stack pStack is 5) & cr after tText
    else
-      put tIndent & tab & markMenuItem("TopLevel", the mode of stack pStack < 3) & return after tText
-      put tIndent & tab & markMenuItem("Modeless", the mode of stack pStack is 3) & return after tText
-      put tIndent & tab & markMenuItem("Palette", the mode of stack pStack is 4) & return after tText
-      put tIndent & tab & markMenuItem("Modal", the mode of stack pStack is 5) & return after tText
+      put tIndent & tab & markMenuItem("TopLevel", the mode of stack pStack < 3) & cr after tText
+      put tIndent & tab & markMenuItem("Modeless", the mode of stack pStack is 3) & cr after tText
+      put tIndent & tab & markMenuItem("Palette", the mode of stack pStack is 4) & cr after tText
+      put tIndent & tab & markMenuItem("Modal", the mode of stack pStack is 5) & cr after tText
    end if
-   put tIndent & "-" & return after tText
-   put tIndent & enableMenuItem("Paste Objects", the clipboard is "objects" and the mode of stack pStack is 1) & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & "New Card" & return after tText
-   put tIndent & "Delete Card" & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & "New Substack" & return after tText
-   put tIndent & enableMenuItem("Delete Substack", the mainstack of pStack is not the short name of pStack) & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & "Save" & return after tText
-   put tIndent & "Close and Remove From Memory" & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & "Standalone Application Settings..." & return after tText
-   put tIndent & "Save As Standalone Application..." & return after tText
-   put tIndent & "-" & return after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & enableMenuItem("Paste Objects", the clipboard is "objects" and the mode of stack pStack is 1) & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & "New Card" & cr after tText
+   put tIndent & "Delete Card" & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & "New Substack" & cr after tText
+   put tIndent & enableMenuItem("Delete Substack", the mainstack of pStack is not the short name of pStack) & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & "Save" & cr after tText
+   put tIndent & "Close and Remove From Memory" & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & "Standalone Application Settings..." & cr after tText
+   put tIndent & "Save As Standalone Application..." & cr after tText
+   put tIndent & "-" & cr after tText
    
    if there is a stack "com.livecode.library.scriptprofiler" then
       local tProfiler
       put the long id of stack "com.livecode.library.scriptprofiler" into tProfiler
       if tProfiler is among the lines of the backScripts then
-         put tIndent & "Start Profiling Scripts" & return after tText
+         put tIndent & "Start Profiling Scripts" & cr after tText
       else
-         put tIndent & "Stop Profiling Scripts..." & return after tText
+         put tIndent & "Stop Profiling Scripts..." & cr after tText
       end if
-      put tIndent & "-" & return after tText
+      put tIndent & "-" & cr after tText
    end if
    
    put revMenubarSendContextMenu(pStack, pIndent) after tText
@@ -2140,13 +2139,13 @@ function revMenuBarCardContextMenu pCard, pIndent
    put revIDEStackOfObject(pCard) into tTargetStack
    
    local tText
-   put revMenuBarStandardContextMenu(pCard, pIndent) & return into tText
-   put tIndent & "-" & return after tText
-   put tIndent & enableMenuItem("Paste Objects", the clipboard is "objects" and the mode of stack tTargetStack is 1) & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & "New Card" & return after tText
-   put tIndent & "Delete Card" & return after tText
-   put tIndent & "-" & return after tText
+   put revMenuBarStandardContextMenu(pCard, pIndent) & cr into tText
+   put tIndent & "-" & cr after tText
+   put tIndent & enableMenuItem("Paste Objects", the clipboard is "objects" and the mode of stack tTargetStack is 1) & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & "New Card" & cr after tText
+   put tIndent & "Delete Card" & cr after tText
+   put tIndent & "-" & cr after tText
    put revMenubarSendContextMenu(pCard, pIndent) after tText
    put revMenubarAdditionalContextMenu(pIndent) after tText
    return tText
@@ -2159,11 +2158,11 @@ function revMenuBarObjectContextMenu pExtraText, pObject, pIndent, pSelectable
    end repeat
    
    local tText
-   put revMenuBarStandardContextMenu(pObject, pIndent, pSelectable) & return into tText
+   put revMenuBarStandardContextMenu(pObject, pIndent, pSelectable) & cr into tText
    repeat for each line tLine in pExtraText
-      put tIndent & tLine & return after tText
+      put tIndent & tLine & cr after tText
    end repeat
-   put tIndent & "-" & return after tText
+   put tIndent & "-" & cr after tText
    put revMenubarSendContextMenu(pObject, pIndent) after tText
    put revMenubarAdditionalContextMenu(pIndent) after tText
    return tText
@@ -2176,12 +2175,12 @@ function revMenuBarStandardContextMenu pObject, pIndent, pSelectable
    end repeat
    
    local tText
-   put tIndent & "Edit Script" & return after tText
+   put tIndent & "Edit Script" & cr after tText
    put tIndent & enableMenuItem("Edit Behavior Script", \
-         exists(the behavior of pObject)) & return after tText
-   put tIndent & "Property Inspector" & return after tText
-   put tIndent & "-" & return after tText
-   put tIndent & enableMenuItem("Cut", pSelectable) & return after tText
+         exists(the behavior of pObject)) & cr after tText
+   put tIndent & "Property Inspector" & cr after tText
+   put tIndent & "-" & cr after tText
+   put tIndent & enableMenuItem("Cut", pSelectable) & cr after tText
    put tIndent & enableMenuItem("Copy", pSelectable) after tText
    return tText
 end revMenuBarStandardContextMenu
@@ -2223,56 +2222,56 @@ function revMenubarContextMenu pType, pTarget
    local tText
    switch pType
       case "group"
-         put enableMenuItem("Paste into Group", tSelectable and the clipboard is "objects") & return after tText
-         put "-" & return after tText
-         put enableMenuItem("Edit Group", tSelectable) & return after tText
-         put enableMenuItem("Ungroup", tSelectable) & return after tText
-         put "-" & return after tText
-         put toggleMenuItem("Lock Location", the lockLoc of pTarget) & return after tText
+         put enableMenuItem("Paste into Group", tSelectable and the clipboard is "objects") & cr after tText
+         put "-" & cr after tText
+         put enableMenuItem("Edit Group", tSelectable) & cr after tText
+         put enableMenuItem("Ungroup", tSelectable) & cr after tText
+         put "-" & cr after tText
+         put toggleMenuItem("Lock Location", the lockLoc of pTarget) & cr after tText
          break
       case "image"
-         put "-" & return after tText
-         put "Launch Editor" & return after tText
-         put toggleMenuItem("Magnify", the magnify of pTarget) & return after tText
-         put "-" & return after tText
-         put toggleMenuItem("Lock Location", the lockLoc of pTarget) & return after tText
+         put "-" & cr after tText
+         put "Launch Editor" & cr after tText
+         put toggleMenuItem("Magnify", the magnify of pTarget) & cr after tText
+         put "-" & cr after tText
+         put toggleMenuItem("Lock Location", the lockLoc of pTarget) & cr after tText
          put enableMenuItem("Make Original Size", the formattedWidth of pTarget is not the width of pTarget \
-               or the formattedHeight of pTarget is not the height of pTarget) & return after tText
+               or the formattedHeight of pTarget is not the height of pTarget) & cr after tText
          break
       case "polygon"
-         put "-" & return after tText
-         put toggleMenuItem( "Reshape Polygon", the editMode of pTarget is "polygon") & return after tText
+         put "-" & cr after tText
+         put toggleMenuItem( "Reshape Polygon", the editMode of pTarget is "polygon") & cr after tText
          break
       case "multiple"
-         put "-" & return after tText
-         put "Align" & return after tText
-         put tab & "Left" & return after tText
-         put tab & "Right" & return after tText
-         put tab & "Top" & return after tText
-         put tab & "Bottom" & return after tText
-         put tab & "-" & return after tText
-         put tab & "Make Widths Equal/|Width" & return after tText
-         put tab & "Make Heights Equal/|Height" & return after tText
-         put enableMenuItem("Group", tSelectable) & return after tText
+         put "-" & cr after tText
+         put "Align" & cr after tText
+         put tab & "Left" & cr after tText
+         put tab & "Right" & cr after tText
+         put tab & "Top" & cr after tText
+         put tab & "Bottom" & cr after tText
+         put tab & "-" & cr after tText
+         put tab & "Make Widths Equal/|Width" & cr after tText
+         put tab & "Make Heights Equal/|Height" & cr after tText
+         put enableMenuItem("Group", tSelectable) & cr after tText
          break
       case "field"
-         put enableMenuItem("Paste Text", tSelectable and the clipboard is "text") & return after tText
-         put "-" & return after tText
-         put toggleMenuItem("Lock Text", the lockText of pTarget) & return after tText
-         put toggleMenuItem("Can Receive Keyboard Focus", the traversalOn of pTarget) & return after tText
+         put enableMenuItem("Paste Text", tSelectable and the clipboard is "text") & cr after tText
+         put "-" & cr after tText
+         put toggleMenuItem("Lock Text", the lockText of pTarget) & cr after tText
+         put toggleMenuItem("Can Receive Keyboard Focus", the traversalOn of pTarget) & cr after tText
          break
       case "player"
-         put "-" & return after tText
-         put enableMenuItem("Play", word 1 of the tool is "browse") & return after tText
-         put enableMenuItem("Stop", word 1 of the tool is "browse") & return after tText
+         put "-" & cr after tText
+         put enableMenuItem("Play", word 1 of the tool is "browse") & cr after tText
+         put enableMenuItem("Stop", word 1 of the tool is "browse") & cr after tText
          if the paused of pTarget then
-            put enableMenuItem("Unpause", word 1 of the tool is "browse") & return after tText
+            put enableMenuItem("Unpause", word 1 of the tool is "browse") & cr after tText
          else
-            put enableMenuItem("Pause", word 1 of the tool is "browse") & return after tText
+            put enableMenuItem("Pause", word 1 of the tool is "browse") & cr after tText
          end if
          break
       case "menu"
-         put enableMenuItem("TopLevel Panel Stack", the menuName of pTarget is not empty) & return after tText
+         put enableMenuItem("TopLevel Panel Stack", the menuName of pTarget is not empty) & cr after tText
          break
    end switch
    
@@ -2400,8 +2399,8 @@ function revListMenuHandlers pObject, pSort, pIndentationLevel
          next repeat
       else
          # OK-2008-02-26 : Remove start and end line numbers from formattedHandlers, as these were added to the engine recently
-         #put tIndent & word 2 to -1 of tHandler & return after tFormattedHandlers
-         put tIndent & word 2 of tHandler & return after tFormattedHandlers
+         #put tIndent & word 2 to -1 of tHandler & cr after tFormattedHandlers
+         put tIndent & word 2 of tHandler & cr after tFormattedHandlers
       end if
       
    end repeat
@@ -2431,7 +2430,7 @@ function revListMenuHandlers pObject, pSort, pIndentationLevel
          end repeat
          
          if not tOverridden then
-            put tIndent & word 2 of tBehaviorHandler & return after tFormattedHandlers
+            put tIndent & word 2 of tBehaviorHandler & cr after tFormattedHandlers
          end if
       end repeat
    end if
@@ -3078,10 +3077,10 @@ on revMenubarDevelopmentMenuPick pWhich
          revIDESuspendDevelopmentTools
          break
       case "Simulate"
-         revIDEActionTest
+         revIDEDeployAction
          break
       case "Simulator Version"
-         revIDESetTestTarget item 2 of pWhich
+         revIDEDeploySetTarget item 2 of pWhich
          break
       case "Object Library"
          go cd 1 of stack "revImageLibrary" as modeless
@@ -3190,9 +3189,6 @@ on revMenubarHelpMenuPick pWhich
          break
       case "All Guides"
          revIDEOpenPalette "guide"
-         break
-      case "Relicense"
-         revIDEActionRelicense
          break
       case "Update"
          revIDECheckForUpdates

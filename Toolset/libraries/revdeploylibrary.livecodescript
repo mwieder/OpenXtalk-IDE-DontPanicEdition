@@ -117,8 +117,8 @@ end revIDEDeployListTargets
 
 -- This method is invoked by the menu bar when the user selects a different deploy
 -- target.
-command revIDEDeploySetTarget pTarget
-   local tPlatform
+command revIDEDeploySetTarget pTarget # = browser
+   local tPlatform # emscripten, android, ios
    put sDeployTargetPlatforms[pTarget] into tPlatform
    delete item itemOffset(tPlatform, sDeployPlatforms) of sDeployPlatforms
    put tPlatform, sDeployPlatforms into sDeployPlatforms
@@ -157,7 +157,7 @@ end revIDEDeployGetTarget
 
 -- This method returns true if deployment is possible with the given platform to the
 -- current top stack
-function revIDEDeployIsPossible pPlatform
+function IDEDeployIsPossible? pPlatform
    if the mode of the topStack is not 1 then
       return false
    end if
@@ -171,8 +171,6 @@ function revIDEDeployIsPossible pPlatform
    if there is a stack ("revDeployLibrary" & pPlatform) then
       dispatch function "deployListTargets" to stack ("revDeployLibrary" & pPlatform) 
       if it is "handled" and the result is not empty then
-         
-         local tTarget
          repeat for each line tTarget in the result
             if the cRevStandaloneSettings[tTarget] of stack tStack then
                return true
@@ -182,7 +180,7 @@ function revIDEDeployIsPossible pPlatform
    end if
    
    return false
-end revIDEDeployIsPossible
+end IDEDeployIsPossible?
 
 -- This method is called on startup to initialize the deployment library. This includes
 -- attempting to auto-configure any SDKs and such if necessary.

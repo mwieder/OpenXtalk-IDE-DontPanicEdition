@@ -77,7 +77,6 @@ private command updateTabButtons pSettings
       end if
    end repeat
    
-   --set the wholeMatches to true
    set the enabled of button "OS X" of group "cards" of me to true
    set the enabled of button "Windows" of group "cards" of me to true
    set the enabled of button "Unix" of group "cards" of me to true

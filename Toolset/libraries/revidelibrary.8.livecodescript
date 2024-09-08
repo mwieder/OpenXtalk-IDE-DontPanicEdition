@@ -8683,9 +8683,9 @@ function revIDETestTarget
    return revIDEDeployGetTarget()
 end revIDETestTarget
 
-function revIDETestCanDeployToTarget pTarget
-   return revIDEDeployIsPossible(pTarget)
-end revIDETestCanDeployToTarget
+function IDETestCanDeployToTarget? pTarget
+   return IDEDeployIsPossible?(pTarget)
+end IDETestCanDeployToTarget?
 
 on revIDESetTestTarget pTarget
    revIDEDeploySetTarget pTarget

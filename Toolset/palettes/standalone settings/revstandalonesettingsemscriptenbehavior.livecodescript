@@ -29,7 +29,7 @@ on initialize
    end repeat
    
    if not tEnabled and tStandaloneSettingsA["Emscripten"] is true then
-      set the hilite of button "Emscripten js" of group "platforms" of me to true
+      set the hilite of button "EmscriptenJS" of group "platforms" of me to true
       put true into tStandaloneSettingsA["Emscripten,js"]
       setSettings tStandaloneSettingsA
    end if
