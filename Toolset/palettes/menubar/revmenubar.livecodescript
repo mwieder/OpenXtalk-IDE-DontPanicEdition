@@ -1962,37 +1962,37 @@ private function revMenubarDevelopmentMenu pContext
    put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
    
    local tDevelopment
-   put "Object Library" & return after tDevelopment
-   put "Image Library" & return after tDevelopment
-   put "Plugins" & return after tDevelopment
+   put "Object Library" & cr after tDevelopment
+   put "Image Library" & cr after tDevelopment
+   put "Plugins" & cr after tDevelopment
    if sPluginMenuText is not empty then
-      put sPluginMenuText & return after tDevelopment
+      put sPluginMenuText & cr after tDevelopment
    end if
-   put tab & "-" & return after tDevelopment
-   put tab & "Plugin Settings" & return after tDevelopment
-   put "-" & return after tDevelopment
+   put tab & "-" & cr after tDevelopment
+   put tab & "Plugin Settings" & cr after tDevelopment
+   put "-" & cr after tDevelopment
    put revMenubarSimulatorSubmenu() after tDevelopment
-   put "-" & return after tDevelopment   
+   put "-" & cr after tDevelopment   
    
    if revEnvironmentEditionProperty("script_profiler") then
       local tProfiler
       put the long id of stack "com.livecode.library.scriptprofiler" into tProfiler
       if tProfiler is among the lines of the backScripts then
-         put enableMenuItem("Start Profiling Scripts", tIsUserTarget) & return after tDevelopment
+         put enableMenuItem("Start Profiling Scripts", tIsUserTarget) & cr after tDevelopment
       else
-         put enableMenuItem("Stop Profiling Scripts...", tIsUserTarget) & return after tDevelopment
+         put enableMenuItem("Stop Profiling Scripts...", tIsUserTarget) & cr after tDevelopment
       end if
-      put "-" & return after tDevelopment
+      put "-" & cr after tDevelopment
    end if
    
-   put toggleMenuItem("Script Debug Mode", revDebuggerEnabled()) & return after tDevelopment
-   put"Clear All Breakpoints" & return after tDevelopment
-   put "Message Watcher" & return after tDevelopment
-   put "-" & return after tDevelopment
-   put toggleMenuItem("Suppress Errors", gREVSuppressErrors) & return after tDevelopment
-   put toggleMenuItem("Suppress Messages", gREVSuppressMessages) & return after tDevelopment
-   put "-" & return after tDevelopment
-   put "Suspend Development Tools" & return after tDevelopment
+   put toggleMenuItem("Script Debug Mode", revDebuggerEnabled()) & cr after tDevelopment
+   put"Clear All Breakpoints" & cr after tDevelopment
+   put "Message Watcher" & cr after tDevelopment
+   put "-" & cr after tDevelopment
+   put toggleMenuItem("Suppress Errors", gREVSuppressErrors) & cr after tDevelopment
+   put toggleMenuItem("Suppress Messages", gREVSuppressMessages) & cr after tDevelopment
+   put "-" & cr after tDevelopment
+   put "Suspend Development Tools" & cr after tDevelopment
    
    return modifyMenu("Development", tDevelopment)
 end revMenubarDevelopmentMenu
@@ -2002,22 +2002,22 @@ private function revMenubarSimulatorSubmenu
    put revIDETestTargets() into tSimulators
    
    if tSimulators is not an array then
-      return "(Test/|Simulate" & return & "(Test Target" & return & tab & "(No targets configured" & return
+      return "(Test/|Simulate" & cr & "(Test Target" & cr & tab & "(No targets configured" & cr
    end if
    
    local tCurrentTarget
    put revIDETestTarget() into tCurrentTarget
    
    local tMenu
-   put enableMenuItem("Test/|Simulate", tCurrentTarget is not empty) & return after tMenu
-   put "Test Target/|Simulator Version" & return after tMenu
+   put enableMenuItem("Test/|Simulate", tCurrentTarget is not empty) & cr after tMenu
+   put "Test Target/|Simulator Version" & cr after tMenu
    repeat for each key tPlatform in tSimulators
       local tCanDeploy
       put revIDETestCanDeployToTarget(tPlatform) into tCanDeploy
       repeat for each line tTarget in tSimulators[tPlatform]
-         put tab & enableMenuItem(toggleMenuItem(tTarget, tTarget is tCurrentTarget), tCanDeploy) & return after tMenu
+         put tab & enableMenuItem(toggleMenuItem(tTarget, tTarget is tCurrentTarget), tCanDeploy) & cr after tMenu
       end repeat
-      put tab & "-" & return after tMenu
+      put tab & "-" & cr after tMenu
    end repeat
    delete char -3 to -1 of tMenu
    

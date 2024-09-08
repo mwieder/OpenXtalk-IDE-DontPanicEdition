@@ -1,7 +1,7 @@
 ﻿script "home"
 constant kImportantTextColor = "#569e54"
-constant kEdition = "commercial"
-#constant kEdition = "OpenXTalk"
+#constant kEdition = "commercial"
+constant kEdition = "OpenXTalk"
 
 on startup
    -- MW-2011-03-13: Make sure the externals are empty on startup
@@ -15,14 +15,13 @@ on startup
    revInternal__Log "Enter", "Startup"
    
    try
-      --revInternal__SetupLicense
-      revInternal__SetupPaths
-      revInternal__SetupFolders
-      revInternal__SetupStackFiles
-      revInternal__SetupSplash
-      revInternal__SetupPreferences
-      revInternal__SetupCustomizationPath
-      revInternal__SetupExternals
+      setupPaths
+      setupFolders
+      setupStackFiles
+      setupSplash
+      setupPreferences
+      setupCustomizationPath
+      setupExternals
    catch tError
       revInternal__Log "Error", tError
    end try
@@ -84,7 +83,7 @@ on preOpenStack
    
    revInternal__Log "Enter", "Pre-Open Stack"
    
-   revInternal__InitialiseDefaults
+   initialiseDefaults
    
    revInternal__Log "Leave", "Pre-Open Stack"
 end preOpenStack
@@ -95,14 +94,13 @@ on openStack
    end if
    revInternal__Log "Enter", "Open Stack"
    
-   //send "revInternal__openStack" to me in 0 millisecs
    revInternal__openStack
    
    revInternal__Log "Leave", "Open Stack"
 end openStack
 
 local sSplashStartTime
-on revInternal__openStack
+private command revInternal__openStack
    revInternal__Log "Enter", "revInternal__openStack"
    
    put the milliseconds into sSplashStartTime
@@ -114,43 +112,43 @@ on revInternal__openStack
    
    try
       if tSuccess then
-         revInternal__setSplashStatus "Checking System Parameters..."
-         revInternal__InitialiseSystem
+         setSplashStatusTo "Checking System Parameters..."
+         initialiseSystem
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Libraries..."
-         revInternal__InitialiseLibraries
+         setSplashStatusTo "Loading Libraries..."
+         initialiseLibraries
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Setting Globals..."
-         revInternal__InitialiseGlobals
+         setSplashStatusTo "Setting Globals..."
+         initialiseGlobals
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Setting Preferences..."
-         revInternal__InitialiseOptions
+         setSplashStatusTo "Setting Preferences..."
+         initialiseOptions
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Standard Icons..."
+         setSplashStatusTo "Loading Standard Icons..."
          set the visible of stack "revGeneralIcons" to false
          put true into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading theme data..."
-         revInternal__InitialiseIcons
+         setSplashStatusTo "Loading theme data..."
+         initialiseIcons
          put the result into tSuccess	
       end if	
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Patterns..."
+         setSplashStatusTo "Loading Patterns..."
          repeat for each item tPatternStack in "revGeneralPatterns,revCompatibilityPatterns1,revCompatibilityPatterns2"
             get there is a stack tPatternStack
          end repeat
@@ -158,71 +156,70 @@ on revInternal__openStack
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Script Editor..."
-         revInternal__InitialiseScriptEditor
+         setSplashStatusTo "Loading Script Editor..."
+         initialiseScriptEditor
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading User Icon Libraries..."
-         revInternal__InitialiseUserLibraries
+         setSplashStatusTo "Loading User Icon Libraries..."
+         initialiseUserLibraries
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Error Management..."
-         revInternal__InitialiseErrors
+         setSplashStatusTo "Loading Error Management..."
+         initialiseErrors
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Menu Bar..."
-         revInternal__InitialiseMenus
+         setSplashStatusTo "Loading Menu Bar..."
+         initialiseMenus
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Tools..."
-         revInternal__InitialiseTools
+         setSplashStatusTo "Loading Tools..."
+         initialiseTools
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Project Browser..."
-         revInternal__InitialiseProjectBrowser
+         setSplashStatusTo "Loading Project Browser..."
+         initialiseProjectBrowser
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Message Box..."
-         revInternal__InitialiseMessageBox
+         setSplashStatusTo "Loading Message Box..."
+         initialiseMessageBox
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Loading Plug-ins..."
-         revInternal__InitialisePlugIns
+         setSplashStatusTo "Loading Plug-ins..."
+         initialisePlugIns
          put the result into tSuccess
          set the defaultStack to "home" -- plug ins may take away default stack
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Cleaning Cache"
-         revInternal__CleanDocsCache
+         setSplashStatusTo "Cleaning Cache"
+         CleanDocsCache
          put the result into tSuccess
       end if
       
       if tSuccess and not revEnvironmentIsInstalled() then
-         revInternal__setSplashStatus "Building Dictionary"
-         revInternal__BuildDictionary
+         setSplashStatusTo "Building Dictionary"
+         buildDictionary
          put the result into tSuccess
       end if
       
       if tSuccess then
-         revInternal__setSplashStatus "Performing Final Steps..."
-         revInternal__setSplashStatus ""
-         revInternal__InitialiseFinalSteps
-         
+         setSplashStatusTo "Performing Final Steps..."
+         setSplashStatusTo ""
+         initialiseFinalSteps
          put the result into tSuccess
       end if
    catch tError
@@ -235,7 +232,9 @@ on revInternal__openStack
       quit
    end if
    
-   if $REV_TOOLS_PATH is empty and (revInternal__CheckFileAssociations() is true) and (the platform is "win32") then
+   if $REV_TOOLS_PATH is empty \
+         and (checkFileAssociations?() is true) \
+         and (the platform is "win32") then
       if revIDEGetPreference("cDontShowFileAssociationsDialog") is not true then
          modal stack "revFileAssociations"
       end if
@@ -245,56 +244,53 @@ on revInternal__openStack
    /*
    if revIDEGetPreference("welcomeScreenShown") is not "true" then
       revIDEOpenPalette "Welcome"
-   else if revIDEPrefGet("StartPageShow") is not "false" then
-      */
-      if revIDEGetPreference("cStartPageShow") is not "false" then
-         revIDEOpenPalette "Start Center"
-      end if
-
-      -- MM-2011-09-27: The new auto update process is handled entirely by the installer.
-      -- Luanch the installer in update mode to begin update process.
-      --
-      --if line 3 of revLicenseInfo is not "evaluation" then
-         local tCommand, tOldPath
-         put $PATH into tOldPath
-         set the itemdelimiter to "/"
-         switch the platform
-            case "MacOS"
-               put item 1 to -5 of the filename me & "/Contents/MacOS/autoupdater" into tCommand
-               put quote & tCommand & quote && "install -update" into tCommand
-               break
-            case "Win32"
-               put item 1 to -3 of the filename me & "/.setup.exe" into tCommand
-               put quote & tCommand & quote && "install -update" into tCommand
-               break
-            case "Linux"
-               -- MDW-2015-12-19 [[fix_installer]] LC8-style setup filename
-               if the processor is "x86_64" then
-               		put item 1 to -3 of the filename me & "/setup.x86_64" into tCommand
-               else
-               		put item 1 to -3 of the filename me & "/setup.x86" into tCommand
-               end if
-               put tCommand && "install -update" into tCommand
-               break
-         end switch
-         set the itemDel to comma
-         open process tCommand for neither
-         put tOldPath into $PATH
-#      end if
-      
-      close stack "revSplash"
-      
-      revInternal__Log "Leave", "revInternal__openStack"
-      revInternal__Log "End"
-      
-      -- Now the home stack has loaded, we can allow interrupts..
-      set the allowInterrupts to true
+   else if revIDEPrefGet("StartPageShow") is not "false" then */
+   if revIDEGetPreference("cStartPageShow") is not "false" then
+      revIDEOpenPalette "Start Center"
+   end if
+   
+   -- MM-2011-09-27: The new auto update process is handled entirely by the installer.
+   -- Launch the installer in update mode to begin update process.
+   --
+   local tCommand, tOldPath
+   put $PATH into tOldPath
+   set the itemdelimiter to "/"
+   switch the platform
+      case "MacOS"
+         put item 1 to -5 of the filename me & "/Contents/MacOS/autoupdater" into tCommand
+         put q(tCommand) && "install -update" into tCommand
+         break
+      case "Win32"
+         put item 1 to -3 of the filename me & "/.setup.exe" into tCommand
+         put q(tCommand) && "install -update" into tCommand
+         break
+      case "Linux"
+         -- MDW-2015-12-19 [[fix_installer]] LC8-style setup filename
+         if the processor is "x86_64" then
+            put item 1 to -3 of the filename me & "/setup.x86_64" into tCommand
+         else
+            put item 1 to -3 of the filename me & "/setup.x86" into tCommand
+         end if
+         put tCommand && "install -update" into tCommand
+         break
+   end switch
+   set the itemDel to comma
+   open process tCommand for neither
+   put tOldPath into $PATH
+   
+   close stack "revSplash"
+   
+   revInternal__Log "Leave", "revInternal__openStack"
+   revInternal__Log "End"
+   
+   -- Now the home stack has loaded, we can allow interrupts..
+   set the allowInterrupts to true
 end revInternal__openStack
 
-on revInternal__setSplashStatus pMessage
-	revInternal__Log "Message", pMessage
+private command setSplashStatusTo pMessage
+   revInternal__Log "Message", pMessage
    set the statusMessage of stack "revSplash" to pMessage
-end revInternal__setSplashStatus
+end setSplashStatusTo
 
 
 local sLicensePlatform
@@ -338,7 +334,7 @@ constant kProductName = "LiveCode"
 -- Internal Setup Functions
 --
 
-private command revInternal__SetupPaths
+private command setupPaths
    revInternal__Log "Enter", "Path Setup"
    
    local tHomePath
@@ -358,7 +354,7 @@ private command revInternal__SetupPaths
          local tOldFolder
          put the folder into tOldFolder
          if revTestEnvironment() then
-           set the folder to "/tmp"
+            set the folder to "/tmp"
          else
             set the folder to "~"
          end if
@@ -416,10 +412,10 @@ private command revInternal__SetupPaths
    
    # The docs cache is per-version and edition
    local tEdition
-#   put tolower(sLicenseClass) into tEdition
-
-	put tolower("openxtalk") into tEdition
-
+   #   put tolower(sLicenseClass) into tEdition
+   
+   put tolower("openxtalk") into tEdition
+   
    local tVersion
    put the version into tVersion
    put replaceText(tVersion, "[-,\.]", "_") into tVersion
@@ -427,7 +423,7 @@ private command revInternal__SetupPaths
    
    -- MW-2013-06-13: [[ CloneAndRun ]] Set up the binaries path.
    local tRepositoryPath
-   put revEnvironmentGuessRepositoryPath(tEnginePath) into tRepositoryPath
+   put guessEnvironmentRepositoryPath(tEnginePath) into tRepositoryPath
    if tRepositoryPath is not empty then
       put tRepositoryPath into sRepositoryPath
       put tEnginePath into sBinariesPath
@@ -450,55 +446,55 @@ private command revInternal__SetupPaths
    revInternal__Log "Message", "Repositories Path = " & sRepositoryPath
    
    revInternal__Log "Leave", "Path Setup"
-end revInternal__SetupPaths
+end setupPaths
 
-command revInternal__SetupCustomizationPath
-  revInternal__Log "Enter", "Customization Path Setup"
-  
-  # If there is a customization path set in the preferences, and it exists, then use it, otherwise
-  # revert to old behavior.
-  local tUserCustomizationPath
-  put the cCustomizationPath of stack "revPreferences" into tUserCustomizationPath
-  if tUserCustomizationPath is not empty then
-    put tUserCustomizationPath into sCustomizationPath
-  else
-    switch revEnvironmentPlatform()
-    case "Linux"
-      local tOldFolder
-      put the folder into tOldFolder
-      set the folder to "~"
-      put the folder & slash & "my_livecode" into sCustomizationPath
-      set the folder to tOldFolder
-      break
-    case "Windows"
-      put specialFolderPath(0x0005) & "/My LiveCode" into sCustomizationPath
-      break
-    case "MacOS X"
-      put specialFolderPath("docs") & "/My LiveCode" into sCustomizationPath
-      break
-    end switch
-    
-    revInternal__Log "Message", "Customization Path = " & sCustomizationPath
-  end if
-  
-  revInternal__Log "Leave", "Customization Path Setup"
-end revInternal__SetupCustomizationPath
+private command setupCustomizationPath
+   revInternal__Log "Enter", "Customization Path Setup"
+   
+   # If there is a customization path set in the preferences, and it exists, then use it, otherwise
+   # revert to old behavior.
+   local tUserCustomizationPath
+   put the cCustomizationPath of stack "revPreferences" into tUserCustomizationPath
+   if tUserCustomizationPath is not empty then
+      put tUserCustomizationPath into sCustomizationPath
+   else
+      switch revEnvironmentPlatform()
+         case "Linux"
+            local tOldFolder
+            put the folder into tOldFolder
+            set the folder to "~"
+            put the folder & slash & "my_livecode" into sCustomizationPath
+            set the folder to tOldFolder
+            break
+         case "Windows"
+            put specialFolderPath(0x0005) & "/My LiveCode" into sCustomizationPath
+            break
+         case "MacOS X"
+            put specialFolderPath("docs") & "/My LiveCode" into sCustomizationPath
+            break
+      end switch
+      
+      revInternal__Log "Message", "Customization Path = " & sCustomizationPath
+   end if
+   
+   revInternal__Log "Leave", "Customization Path Setup"
+end setupCustomizationPath
 
-function revInternal__StackFiles
+private function stackFileList
    local tFolders
    if not revEnvironmentIsInstalled() then
       put revEnvironmentIDEPrebuiltsPath("resource center") into tFolders
-
-      put return & revEnvironmentBinariesPath() & slash & "ide" after tFolders
-
-      put return & revEnvironmentRepositoryPath() & slash & "ide-support" after tFolders
+      
+      put cr & revEnvironmentBinariesPath() & slash & "ide" after tFolders
+      
+      put cr & revEnvironmentRepositoryPath() & slash & "ide-support" after tFolders
       
       -- components
       local tComponentFolder
       put revEnvironmentRepositoryPath() & "/components" into tComponentFolder
       repeat for each line tFolder in folders(tComponentFolder)
          if tFolder begins with "." then next repeat
-         put return & tComponentFolder & slash & tFolder after tFolders
+         put cr & tComponentFolder & slash & tFolder after tFolders
       end repeat
       
       -- extensions (ensure they are loaded from the repo)
@@ -506,35 +502,35 @@ function revInternal__StackFiles
       put revEnvironmentRepositoryPath() & "/extensions/script-libraries" into tExtensionFolder
       repeat for each line tFolder in folders(tExtensionFolder)
          if tFolder begins with "." then next repeat
-         put return & tExtensionFolder & slash & tFolder after tFolders
+         put cr & tExtensionFolder & slash & tFolder after tFolders
       end repeat
    end if
-
+   
    local tPalettesFolder
    put revEnvironmentToolsetPath() & slash & "palettes" into tPalettesFolder
    if tFolders is empty then
       put tPalettesFolder into tFolders
    else
-      put return & tPalettesFolder after tFolders
+      put cr & tPalettesFolder after tFolders
    end if
-
+   
    local tPaletteFolders
    put folders(tPalettesFolder) into tPaletteFolders
    repeat for each line tFolder in tPaletteFolders
       if codeunit 1 of tFolder is "." then
          next repeat
       end if
-
+      
       local tPaletteFolder
       put tPalettesFolder & slash & tFolder into tPaletteFolder
-      put return & tPaletteFolder after tFolders
-
+      put cr & tPaletteFolder after tFolders
+      
       if there is a folder (tPaletteFolder & slash & "behaviors") then
-         put return & tPaletteFolder & slash & "behaviors" after tFolders
+         put cr & tPaletteFolder & slash & "behaviors" after tFolders
       end if
    end repeat
-
-   put return & revEnvironmentToolsetPath() & slash & "libraries" after tFolders
+   
+   put cr & revEnvironmentToolsetPath() & slash & "libraries" after tFolders
    
    local tStackFiles, tStackName
    local tStackFilesA, tIDEVersion
@@ -562,20 +558,20 @@ function revInternal__StackFiles
          end if
          
          if tStackName is "revpreferences" then next repeat
-
+         
          // AL-2015-02-18: [[ Named Stack Versions ]] Choose a versioned stack file name over an unversioned one, and a later version over an earlier one. 
          local tExistingVersion
          put tStackFilesA[tStackName]["version"] into tExistingVersion
-
+         
          /* Unversioned stackfiles should not replace those with the same leaf
-          * name which have already been seen. */
+         * name which have already been seen. */
          if tStackName is among the keys of tStackFilesA and \
-                  tExistingVersion is empty and tVersion is empty then
+               tExistingVersion is empty and tVersion is empty then
             next repeat
          end if
-
+         
          /* Otherwise if the stackfile hasn't been seen before, or has a more
-          * recent version, it should replace the entry for it. */
+         * recent version, it should replace the entry for it. */
          if tExistingVersion is empty or tVersion > tExistingVersion then
             put tPath & slash & tFile into tStackFilesA[tStackName]["file"]
             put tVersion into tStackFilesA[tStackName]["version"]
@@ -596,9 +592,9 @@ function revInternal__StackFiles
    unlock messages
    delete the last char of tStackFiles
    return tStackFiles
-end revInternal__StackFiles
+end stackFileList
 
-private command revInternal__SetupPreferences
+private command setupPreferences
    revInternal__Log "Enter", "Preferences Setup"
    
    local tOldPreferencesStackFile, tOldNewPreferencesStackFile
@@ -657,7 +653,7 @@ private command revInternal__SetupPreferences
          create invisible stack "revpreferences"
       end if
       set the filename of stack "revpreferences" to tPreferencesStackFile7
-      revInternal__ResetPreferences
+      resetPreferences
       unlock messages
       
    end if
@@ -673,34 +669,34 @@ private command revInternal__SetupPreferences
    revInternal__Log "Message", "Mapping Stack 'revpreferences.rev' to stackfile '" & tPreferencesStackFile7 & "'"
    
    revInternal__Log "Leave", "Preferences Setup"
-end revInternal__SetupPreferences
+end setupPreferences
 
-private command revInternal__SetupFolders
+private command setupFolders
    revInternal__Log "Enter", "Folders Setup"
    
    local tPath, tComponent
    set the itemDelimiter to "/"
    
    revInternal__Log "Message", "Setting up Preferences Path"
-   revInternal__EnsureFolder sPreferencesPath
+   ensureExistenceOfFolder sPreferencesPath
    
    revInternal__Log "Message", "Setting up Cache Path"
-   revInternal__EnsureFolder sCachePath
+   ensureExistenceOfFolder sCachePath
    
    revInternal__Log "Message", "Setting up Crash Log Path"
-   revInternal__EnsureFolder sCrashLogPath
+   ensureExistenceOfFolder sCrashLogPath
    
    revInternal__Log "Message", "Setting up Docs Path"
-   revInternal__EnsureFolder sUserDocsPath
+   ensureExistenceOfFolder sUserDocsPath
    
    revInternal__Log "Leave", "Folders Setup"
-end revInternal__SetupFolders
+end setupFolders
 
-private command revInternal__SetupSplash
-	palette stack "revSplash"
-end revInternal__SetupSplash
+private command setupSplash
+   --palette stack "revSplash"
+end setupSplash
 
-command revInternal__ResetPreferences
+private command resetPreferences
    -- clear the preferences stack
    set the customKeys of stack "revPreferences" to empty
    set the customPropertySets of stack "revPreferences" to empty
@@ -901,7 +897,7 @@ command revInternal__ResetPreferences
    delete variable tPropsArray
    
    revInternal__SavePreferences
-end revInternal__ResetPreferences
+end resetPreferences
 
 --------------------------------------------------------------------------------
 -- Internal Utility Functions
@@ -925,92 +921,94 @@ command __revInternal_SavePreferences
    unlock messages
 end __revInternal_SavePreferences
 
-private command revInternal__EnsureFolder pFolder
-  revInternal__Log "Enter", "Ensuring Folder '" & pFolder & "'"
-  
-  local tPath
-  local tComponent
-  
-  set the itemDelimiter to "/"
-  put item 1 of pFolder & "/" into tPath
-  repeat for each item tComponent in item 2 to -1 of pFolder
-    put tComponent & "/" after tPath
-    if there is no folder (char 1 to -2 of tPath) then
-      create folder char 1 to -2 of tPath
-      if the result is empty then
-        revInternal__Log "Message", "Creation of folder '" & char 1 to -2 of tPath & "' succeeded"
-      else
-        revInternal__Log "Message", "Creation of folder '" & char 1 to -2 of tPath & "' failed"
-      end if
-    end if
-  end repeat
-  
-  revInternal__Log "Leave", "Ensuring Folder '" & pFolder & "'"
-end revInternal__EnsureFolder
-
-function revInternal__CheckFileAssociations 
-	local tEnginePath
-	set the itemDelimiter to ":"
-	put item 2 to -1 of the address into tEnginePath
+private command ensureExistenceOfFolder pFolder
+   revInternal__Log "Enter", "Ensuring Folder '" & pFolder & "'"
    
-	switch the platform
-		case "win32"
-      -- If .rev, .livecode or .livecodescript classes are not present, then we need new assocs
-      # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
-      if queryRegistry("HKEY_CURRENT_USER\Software\Classes\.rev\") is not "RevolutionStack" or \
-            queryRegistry("HKEY_CURRENT_USER\Software\Classes\.livecode\") is not "LiveCodeStack" or \ 
-            queryRegistry("HKEY_CURRENT_USER\Software\Classes\.livecodescript\") is not "LiveCodeScriptOnlyStack"
-      then 
-         return true 
-      end if 
-      
-      -- If .rev, .livecode or .livecodescript classes are not present, then we need new assocs
-      # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
-      replace slash with backslash in tEnginePath
-      get queryRegistry("HKEY_CURRENT_USER\Software\Classes\RevolutionStack\Shell\Open\Command\") 
-      if word 1 of it is not quote & tEnginePath & quote then 
-         return true 
-      end if 
-      get queryRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeStack\Shell\Open\Command\") 
-      if word 1 of it is not quote & tEnginePath & quote then 
-         return true 
-      end if 
-      get queryRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\Shell\Open\Command\") 
-      if word 1 of it is not quote & tEnginePath & quote then 
-         return true 
+   local tPath
+   local tComponent
+   
+   set the itemDelimiter to "/"
+   put item 1 of pFolder & "/" into tPath
+   repeat for each item tComponent in item 2 to -1 of pFolder
+      put tComponent & "/" after tPath
+      if there is no folder (char 1 to -2 of tPath) then
+         create folder char 1 to -2 of tPath
+         if the result is empty then
+            revInternal__Log "Message", "Creation of folder '" & char 1 to -2 of tPath & "' succeeded"
+         else
+            revInternal__Log "Message", "Creation of folder '" & char 1 to -2 of tPath & "' failed"
+         end if
       end if
-			break
-		default
-			-- Do Linux file associations at some point!
-	end switch
+   end repeat
+   
+   revInternal__Log "Leave", "Ensuring Folder '" & pFolder & "'"
+end ensureExistenceOfFolder
+
+private function checkFileAssociations?
+   local tEnginePath
+   set the itemDelimiter to ":"
+   put item 2 to -1 of the address into tEnginePath
+   
+   switch the platform
+      case "win32"
+         -- If .rev, .livecode or .livecodescript classes are not present, then we need new assocs
+         # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
+         if queryRegistry("HKEY_CURRENT_USER\Software\Classes\.rev\") is not "RevolutionStack" or \
+               queryRegistry("HKEY_CURRENT_USER\Software\Classes\.livecode\") is not "LiveCodeStack" or \ 
+               queryRegistry("HKEY_CURRENT_USER\Software\Classes\.livecodescript\") is not "LiveCodeScriptOnlyStack"
+         then 
+            return true 
+         end if 
+         
+         -- If .rev, .livecode or .livecodescript classes are not present, then we need new assocs
+         # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
+         replace slash with backslash in tEnginePath
+         get queryRegistry("HKEY_CURRENT_USER\Software\Classes\RevolutionStack\Shell\Open\Command\") 
+         if word 1 of it is not q(tEnginePath) then 
+            return true 
+         end if 
+         get queryRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeStack\Shell\Open\Command\") 
+         if word 1 of it is not q(tEnginePath) then 
+            return true 
+         end if 
+         get queryRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\Shell\Open\Command\") 
+         if word 1 of it is not q(tEnginePath) then 
+            return true 
+         end if
+         break
+      default
+         -- Do Linux file associations at some point!
+   end switch
    
    return false 
-end revInternal__CheckFileAssociations
+end checkFileAssociations?
 
-command revInternal__InstallFileAssociations 
-	local tEnginePath
-	set the itemDelimiter to ":"
-	put item 2 to -1 of the address into tEnginePath
+# NOTE: not used?
+command revInternal__InstallFileAssociations
+   local tEnginePath
+   set the itemDelimiter to ":"
+   put item 2 to -1 of the address into tEnginePath
    
-	switch the platform
-		case "win32"
-      replace slash with backslash in tEnginePath
-      # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
-      get setRegistry("HKEY_CURRENT_USER\Software\Classes\.rev\", "RevolutionStack") and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\RevolutionStack\Shell\Open\Command\", quote & tEnginePath & quote && quote & "%1" & quote) and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\RevolutionStack\DefaultIcon\", tEnginePath & comma & "1") and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\.livecode\", "LiveCodeStack") and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeStack\Shell\Open\Command\", quote & tEnginePath & quote && quote & "%1" & quote) and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeStack\DefaultIcon\", tEnginePath & comma & "1") and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\.livecodescript\", "LiveCodeScriptOnlyStack") and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\Shell\Open\Command\", quote & tEnginePath & quote && quote & "%1" & quote) and \
-            setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\DefaultIcon\", tEnginePath & comma & "1")
-      if it is false then
-         answer error "Failed to set file associations."
-      else
-         _internal call "notify_association_changed"
-      end if
-   default
+   switch the platform
+      case "win32"
+         replace slash with backslash in tEnginePath
+         # AL-2015-03-13: [[ Bug 14910 ]] Add .livecodescript to valid stack file extensions on windows 
+         get setRegistry("HKEY_CURRENT_USER\Software\Classes\.rev\", "RevolutionStack") and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\RevolutionStack\Shell\Open\Command\", q(tEnginePath) && q("%1")) and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\RevolutionStack\DefaultIcon\", tEnginePath & comma & "1") and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\.livecode\", "LiveCodeStack") and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeStack\Shell\Open\Command\", q(tEnginePath) && q("%1")) and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeStack\DefaultIcon\", tEnginePath & comma & "1") and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\.livecodescript\", "LiveCodeScriptOnlyStack") and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\Shell\Open\Command\", q(tEnginePath) && q("%1")) and \
+               setRegistry("HKEY_CURRENT_USER\Software\Classes\LiveCodeScriptOnlyStack\DefaultIcon\", tEnginePath & comma & "1")
+         if it is false then
+            answer error "Failed to set file associations."
+         else
+            _internal call "notify_association_changed"
+         end if
+      case "linux"
+      default
    end switch
 end revInternal__InstallFileAssociations
 
@@ -1072,7 +1070,7 @@ command revInternal__Log pType, pMessage
          case "Linux"
             local tFolder
             if revTestEnvironment() then
-              put "/tmp" into tFolder
+               put "/tmp" into tFolder
             else
                put "~" into tFolder
             end if
@@ -1087,7 +1085,7 @@ command revInternal__Log pType, pMessage
             break
       end switch
       set the itemDelimiter to "/"
-      revInternal__EnsureFolder item 1 to -2 of tLogPath
+      ensureExistenceOfFolder item 1 to -2 of tLogPath
       if there is no folder item 1 to -2 of tLogPath then
          put empty into tLogPath
       end if
@@ -1120,7 +1118,7 @@ end revInternal__Log
 -- Internal Initialisation Functions
 --
 
-command revInternal__InitialiseSystem
+private command initialiseSystem
    local tSuccess
    
    revInternal__Log "Enter", "System Initialisation"
@@ -1131,7 +1129,6 @@ command revInternal__InitialiseSystem
    if it is empty then
       get "Small"
    end if
-#   if sLicensePlatform is "Windows" and it is not "None" then
    if it is not "None" then
       local tCrashSettings, tVersion
       put the version into tVersion
@@ -1142,19 +1139,19 @@ command revInternal__InitialiseSystem
       
       convert the seconds to dateItems
       put format("%s/%s-%s-%04d_%02d_%02d-%02d_%02d_%02d.dmp", \
-             sCrashLogPath, kProductName, tVersion, item 1 of it, item 2 of it, item 3 of it, \
-             item 4 of it, item 5 of it, item 6 of it) into tCrashSettings["filename"]
+            sCrashLogPath, kProductName, tVersion, item 1 of it, item 2 of it, item 3 of it, \
+            item 4 of it, item 5 of it, item 6 of it) into tCrashSettings["filename"]
       
       revInternal__Log "Message", "Configuring crash log output to" && tCrashSettings["filename"]
-      do "set the revCrashReportSettings to tCrashSettings"
+      set the revCrashReportSettings to tCrashSettings ## "do" this
    end if
-
+   
    revInternal__Log "Leave", "System Initialisation"
    
    return tSuccess
-end revInternal__InitialiseSystem
+end initialiseSystem
 
-command revInternal__InitialiseGlobals
+private command initialiseGlobals
    revInternal__Log "Enter", "Globals Initialisation"
    
    global gREVDevelopment
@@ -1175,9 +1172,9 @@ command revInternal__InitialiseGlobals
    revInternal__Log "Leave", "Globals Initialisation"
    
    return true
-end revInternal__InitialiseGlobals
+end initialiseGlobals
 
-private function revInternal__FilterHandlerList pList
+private function internal__FilterHandlerList pList
    local tNewList
    repeat for each line tLine in pList
       if tLine begins with "P" then # ignore private handlers
@@ -1187,19 +1184,9 @@ private function revInternal__FilterHandlerList pList
    end repeat
    delete the last char of tNewList
    return tNewList
-end revInternal__FilterHandlerList
+end internal__FilterHandlerList
 
-command revInternal__InitialiseLibraries
-   revInternal__Log "Enter", "Libraries Initialisation"
-   	    	 	
-   try 	 	
-      insert script of stack "revInitialisationLibrary" into back 	 
-   catch tError 	 	
-      revInternal__Log "Error", "Error loading initialisation library" & cr & tError 	 	
-   end try
-   
-   revInternal_SetJAVA_HOME
-   
+private function librariesToUse
    local tLoadList
    put "revCommonLibrary" into tLoadList 
    put cr & "revDatabaseLibrary" after tLoadList 
@@ -1219,7 +1206,6 @@ command revInternal__InitialiseLibraries
    put cr & "revProfilesLibrary" after tLoadList 
    put cr & "revTableLibrary" after tLoadList 
    put cr & "revhtml5urllibrary" after tLoadList
-
    if revEnvironmentEditionProperty("autocomplete_pro") then
       put cr & "autocomplete-pro" after tLoadList
    end if
@@ -1227,7 +1213,10 @@ command revInternal__InitialiseLibraries
    if revEnvironmentEditionProperty("autocomplete") then
       put cr & "autocomplete" after tLoadList
    end if
-   
+   return tLoadList
+end librariesToUse
+
+private function backScriptLibraries
    local tBackList
    put "revidedeveloperextensionlibrary" into tBackList
    put cr & "revsaveasstandalone" after tBackList
@@ -1236,6 +1225,59 @@ command revInternal__InitialiseLibraries
    put cr & "revsaveasemscriptenstandalone" after tBackList
    put cr & "revOnlineLibrary" after tBackList
    put cr & "revCore" after tBackList
+   return tBackList
+end backScriptLibraries
+
+private command initialiseLibraries
+   revInternal__Log "Enter", "Libraries Initialisation"
+   	    	 	
+   try 	 	
+      insert script of stack "revInitialisationLibrary" into back 	 
+   catch tError 	 	
+      revInternal__Log "Error", "Error loading initialisation library" & cr & tError 	 	
+   end try
+   
+   revInternal_SetJAVA_HOME
+   
+   local tLoadList
+   put librariesToUse() into tLoadList
+   #   put "revCommonLibrary" into tLoadList 
+   #   put cr & "revDatabaseLibrary" after tLoadList 
+   #   put cr & "revIDEDocumentationLibrary" after tLoadList
+   #   put cr & "revMetadataLibrary" after tLoadList   
+   #   put cr & "revSBLibrary" after tLoadList
+   #   put cr & "revIDELibrary" after tLoadList
+   #   put cr & "revidemessagehandlerlibrary" after tLoadList
+   #   put cr & "revBackScriptLibrary" after tLoadList 
+   #   put cr & "revDeployLibrary" after tLoadList
+   #   put cr & "revDebuggerLibrary" after tLoadList 
+   #   put cr & "revLibUrl" after tLoadList 
+   #   put cr & "revPrintLibrary" after tLoadList 
+   #   put cr & "revAnimationLibrary" after tLoadList 
+   #   put cr & "revGeometryLibrary" after tLoadList 
+   #   put cr & "revXMLRPCLibrary" after tLoadList 
+   #   put cr & "revProfilesLibrary" after tLoadList 
+   #   put cr & "revTableLibrary" after tLoadList 
+   #   put cr & "revhtml5urllibrary" after tLoadList
+   
+   #   if revEnvironmentEditionProperty("autocomplete_pro") then
+   #      put cr & "autocomplete-pro" after tLoadList
+   #   end if
+   
+   #   if revEnvironmentEditionProperty("autocomplete") then
+   #      put cr & "autocomplete" after tLoadList
+   #   end if
+   
+   # set up the backscript libraries
+   local tBackList
+   put backScriptLibraries() into tBackList
+   #   put "revidedeveloperextensionlibrary" into tBackList
+   #   put cr & "revsaveasstandalone" after tBackList
+   #   put cr & "revsaveasiosstandalone" after tBackList
+   #   put cr & "revsaveasandroidstandalone" after tBackList
+   #   put cr & "revsaveasemscriptenstandalone" after tBackList
+   #   put cr & "revOnlineLibrary" after tBackList
+   #   put cr & "revCore" after tBackList
    
    # AL-2015-09-02: [[ Bug 15841 ]] Temporarily add project browser library to prevent preference errors
    put cr & "revIDEProjectBrowserLibrary" after tBackList
@@ -1244,22 +1286,22 @@ command revInternal__InitialiseLibraries
    repeat for each line tLib in tLoadList	 
       revInternal__Log "Message", "Loading library" && tLib	
       revInternal__LoadLibrary tLib
-	  if the result is not empty then
-	     revInternal__Log "Error", the result 
-	  end if
+      if the result is not empty then
+         revInternal__Log "Error", the result 
+      end if
    end repeat
    
-      repeat for each line tLib in tBackList
-		try	
-			insert script of stack tLib into back 	 
-		catch tError 	 	
-			revInternal__Log "Error", "Error loading backscript" && tLib & return & tError 	 	
-		end try
-      end repeat
+   repeat for each line tLib in tBackList
+      try	
+         insert script of stack tLib into back 	 
+      catch tError 	 	
+         revInternal__Log "Error", "Error loading backscript" && tLib & return & tError 	 	
+      end try
+   end repeat
    
    # MW-2010-10-13: [[ Bug 8600 ]] Make sure the handler lists of the rev frontscript, backscript and shortcuts script
    #    are all up to date (used by revNoMessages script).
-   set the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" to revInternal__FilterHandlerList(the revAvailableHandlers of stack "revBackScriptLibrary")
+   set the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" to internal__FilterHandlerList(the revAvailableHandlers of stack "revBackScriptLibrary")
    
    # Now we have the IDE scripts in place, initiaize the deployment platforms
    try
@@ -1291,20 +1333,20 @@ command revInternal__InitialiseLibraries
       
       set the folder to tOldFolder
    end if # there is a folder revEnvironmentExtPath()
-
+   
    /* When not installed, any integrated merg externals with libraries
-    * will be in the respository path, with their libraries matching
-    * `merg*.livecodescript. */
+   * will be in the respository path, with their libraries matching
+   * `merg*.livecodescript. */
    if not revEnvironmentIsInstalled() then
       local tMergFolders
       put folders(revEnvironmentRepositoryPath()) into tMergFolders
       filter tMergFolders with "revmerg*"
-
+      
       repeat for each line tFolder in tMergFolders
          local tMergSrcFolder
          put (revEnvironmentRepositoryPath() & slash & tFolder & slash & "src") \
-            into tMergSrcFolder
-
+               into tMergSrcFolder
+         
          local tMergFiles
          put files(tMergSrcFolder) into tMergFiles
          filter tMergFiles with "*.livecodescript"
@@ -1312,11 +1354,11 @@ command revInternal__InitialiseLibraries
          repeat for each line tFile in tMergFiles
             local tMergLibraryFile
             put tMergSrcFolder & slash & tFile into tMergLibraryFile
-
+            
             if there is a stack tMergLibraryFile then
                /* Load the stack */
                revInternal__LoadIfLibrary \
-                  the short name of stack tMergLibraryFile
+                     the short name of stack tMergLibraryFile
             end if
          end repeat
       end repeat
@@ -1325,9 +1367,9 @@ command revInternal__InitialiseLibraries
    revInternal__Log "Leave", "Libraries Initialisation"
    
    return true
-end revInternal__InitialiseLibraries
+end initialiseLibraries
 
-private command revInternal__SetupExternals
+private command setupExternals
    revInternal__Log "Enter", "Externals Setup"
    
    local tExtension
@@ -1360,7 +1402,7 @@ private command revInternal__SetupExternals
       put the folder & "/" & tExternal & return after tExternals
    end repeat
    
-	# Load the Ext externals bundle : the "Ext" folder
+   # Load the Ext externals bundle : the "Ext" folder
    if there is a folder revEnvironmentExtPath() then
       set the folder to revEnvironmentExtPath()
       repeat for each line tExternal in the folders
@@ -1376,15 +1418,15 @@ private command revInternal__SetupExternals
          filter tFiles with ("*." & tExtension)
          
          repeat for each line tFile in tFiles
-# TODO: MDW 2023.12.06 can we load this?
-if "tsNet" is not in tExternal then
-            put revEnvironmentExtPath() & "/" & tExternal & "/" & tFile & return after tExternals
-end if
+            # TODO: MDW 2023.12.06 can we load this?
+            if "tsNet" is not in tExternal then
+               put revEnvironmentExtPath() & "/" & tExternal & "/" & tFile & return after tExternals
+            end if
          end repeat
       end repeat
    end if # there is a folder revEnvironmentExtPath()
-
-	# Now gather the externals in the user area   
+   
+   # Now gather the externals in the user area   
    if there is a folder revEnvironmentUserExternalsPath() then
       set the folder to revEnvironmentUserExternalsPath()
       repeat for each line tExternal in the folders & return & the files
@@ -1398,16 +1440,16 @@ end if
    set the folder to tOldFolder
    
    filter tExternals with ("*." & tExtension)
-
-			local tProcessor
-			put the processor into tProcessor
-			if tProcessor is "x86_64" then
-				filter tExternals without ("*86." & tExtension)
-			else
-				filter tExternals without ("*64." & tExtension)
-				filter tExternals with ("*86." & tExtension)
-			end if
-
+   
+   local tProcessor
+   put the processor into tProcessor
+   if tProcessor is "x86_64" then
+      filter tExternals without ("*86." & tExtension)
+   else
+      filter tExternals without ("*64." & tExtension)
+      filter tExternals with ("*86." & tExtension)
+   end if
+   
    # OK-2007-09-24 : Support for legacy drivers. If the legacy drivers are in use, then the revdb
    # external should come from the user legacy externals folder rather than the main externals folder.
    if the cREVUseLegacyDrivers of stack "revPreferences" then
@@ -1425,12 +1467,12 @@ end if
    end repeat
    
    revInternal__Log "Leave", "Externals Setup"
-end revInternal__SetupExternals
+end setupExternals
 
-private command revInternal__SetupStackFiles
+private command setupStackFiles
    revInternal__Log "Enter", "Stack Files Setup"
    
-   set the stackFiles of stack "Home" to revInternal__StackFiles()
+   set the stackFiles of stack "Home" to stackFileList()
    
    local tStackFile
    set the itemDelimiter to comma
@@ -1439,22 +1481,22 @@ private command revInternal__SetupStackFiles
    end repeat
    
    revInternal__Log "Leave", "Stack Files Setup"
-end revInternal__SetupStackFiles
+end setupStackFiles
 
-command revInternal__InitialiseDefaults
+private command initialiseDefaults
    revInternal__Log "Enter", "Defaults Initialisation"
-      
+   
    set the _ideoverride of stack "home" to true
-
-#   switch sLicensePlatform
-	switch the platform
+   
+   #   switch sLicensePlatform
+   switch the platform
       case "MacOS X"
          set the stackFileType to "RevoRSTK"
          set the hidePalettes to true
          set the dontUseNS to false
          set the itemdelimiter to "."
          revInternal__Log "message", "Trying to set the default text of stack home"
-
+         
          hide stack "revMacCursors"    
          break
       case "Windows"
@@ -1480,9 +1522,9 @@ command revInternal__InitialiseDefaults
    revInternal__Log "Leave", "Defaults Initialisation"
    
    return true
-end revInternal__InitialiseDefaults
+end initialiseDefaults
 
-command revInternal__InitialiseOptions
+private command initialiseOptions
    revInternal__Log "Enter", "Options Initialisation"
    
    set the selectGroupedControls to the cSelectGrouped of stack "revPreferences"
@@ -1550,36 +1592,36 @@ command revInternal__InitialiseOptions
    revInternal__Log "Leave", "Options Initialisation"
    
    return true
-end revInternal__InitialiseOptions
+end initialiseOptions
 
-command revInternal__InitialiseUserLibraries
-  local tEnvironmentIcons, tUserIcons, tList
-  
-  revInternal__Log "Enter", "User Libraries Initialisation"
-  put revAbsoluteFolderListing(revEnvironmentResourcesPath("Icon Libraries")) into tEnvironmentIcons
-  put revAbsoluteFolderListing(revEnvironmentUserResourcesPath("Icon Libraries")) into tUserIcons
-  put revCombineFilePaths(tUserIcons,tEnvironmentIcons) into tList
-  
-  lock messages
-  
-  repeat for each line l in tList 
-    if there is a stack l then
-      hide stack l
-    end if
-  end repeat
-  
-  unlock messages
-  
-  revInternal__Log "Leave", "User Libraries Initialisation"
-  
-  return true
-end revInternal__InitialiseUserLibraries
+private command initialiseUserLibraries
+   local tEnvironmentIcons, tUserIcons, tList
+   
+   revInternal__Log "Enter", "User Libraries Initialisation"
+   put revAbsoluteFolderListing(revEnvironmentResourcesPath("Icon Libraries")) into tEnvironmentIcons
+   put revAbsoluteFolderListing(revEnvironmentUserResourcesPath("Icon Libraries")) into tUserIcons
+   put revCombineFilePaths(tUserIcons,tEnvironmentIcons) into tList
+   
+   lock messages
+   
+   repeat for each line l in tList 
+      if there is a stack l then
+         hide stack l
+      end if
+   end repeat
+   
+   unlock messages
+   
+   revInternal__Log "Leave", "User Libraries Initialisation"
+   
+   return true
+end initialiseUserLibraries
 
-command revInternal__InitialiseScriptEditor
+private command initialiseScriptEditor
    revInternal__Log "Enter", "Script Editor Initialisation"
    
    set the behavior of stack revScriptEditorMain() to the long id of stack revIDEScriptEditorBehavior("utilities")
-
+   
    # IM-2016-03-01: [[ Bug 16244 ]] IDE stacks should always hide invisible objects
    set the showInvisibles of stack revScriptEditorMain() to false
    set the _ideoverride of stack revScriptEditorMain() to true
@@ -1587,21 +1629,21 @@ command revInternal__InitialiseScriptEditor
    revInternal__Log "Leave", "Script Editor Initialisation"
    
    return true
-end revInternal__InitialiseScriptEditor
+end initialiseScriptEditor
 
-command revInternal__InitialiseErrors
-  revInternal__Log "Enter", "Errors Initialisation"
-  
-  # IM-2016-03-01: [[ Bug 16244 ]] IDE stacks should always hide invisible objects
-  set the showInvisibles of stack "revErrorDisplay" to false
-  set the _ideoverride of stack "revErrorDisplay" to true
+private command initialiseErrors
+   revInternal__Log "Enter", "Errors Initialisation"
    
-  revInternal__Log "Leave", "Errors Initialisation"
-  
-  return true
-end revInternal__InitialiseErrors
+   # IM-2016-03-01: [[ Bug 16244 ]] IDE stacks should always hide invisible objects
+   set the showInvisibles of stack "revErrorDisplay" to false
+   set the _ideoverride of stack "revErrorDisplay" to true
+   
+   revInternal__Log "Leave", "Errors Initialisation"
+   
+   return true
+end initialiseErrors
 
-command revInternal__InitialiseTools
+private command initialiseTools
    revInternal__Log "Enter", "Tools Initialisation"
    
    local tToolsStackName
@@ -1624,9 +1666,9 @@ command revInternal__InitialiseTools
    revInternal__Log "Leave", "Tools Initialisation"
    
    return true
-end revInternal__InitialiseTools
+end initialiseTools
 
-command revInternal__InitialiseIcons
+private command initialiseIcons
    revInternal__Log "Enter", "Icons Initialisation"
    
    lock screen
@@ -1641,9 +1683,9 @@ command revInternal__InitialiseIcons
    revInternal__Log "Leave", "Icons Initialisation"
    
    return true
-end revInternal__InitialiseIcons
+end initialiseIcons
 
-command revInternal__InitialiseMenus
+private command initialiseMenus
    revInternal__Log "Enter", "Menus Initialisation"
    
    revInternal__Log "message", "Trying to get the platform"
@@ -1669,9 +1711,9 @@ command revInternal__InitialiseMenus
    local tWindowRect
    put line (the screen of stack tMenuBar) of the working screenRects into tWindowRect
    if tWindowRect is not empty then
-	   if tToolsRight < 100 then put tToolsRight + 5 into item 1 of tWindowRect
-	   put the bottom of stack tMenuBar + 5 into item 2 of tWindowRect
-	   set the windowBoundingRect to tWindowRect
+      if tToolsRight < 100 then put tToolsRight + 5 into item 1 of tWindowRect
+      put the bottom of stack tMenuBar + 5 into item 2 of tWindowRect
+      set the windowBoundingRect to tWindowRect
    end if
    
    # IM-2016-03-01: [[ Bug 16244 ]] IDE stacks should always hide invisible objects
@@ -1685,16 +1727,16 @@ command revInternal__InitialiseMenus
    end if
    
    return true
-end revInternal__InitialiseMenus
+end initialiseMenus
 
-command revInternal__InitialiseProjectBrowser
+private command initialiseProjectBrowser
    revInternal__Log "Enter", "Project Browser Initialisation"
-
+   
    if the cAppOverview of stack "revPreferences" and there is a stack "revApplicationOverview" then
       set the _ideoverride of stack "revApplicationOverview" to true
       toplevel "revApplicationOverview"
    end if
-
+   
    // EJB
    if there is a stack "revProjectBrowser" then
       if the cIDEProjectBrowserOpen of stack "revPreferences" is not false then
@@ -1705,9 +1747,9 @@ command revInternal__InitialiseProjectBrowser
    revInternal__Log "Leave", "Project Browser Initialisation"
    
    return true
-end revInternal__InitialiseProjectBrowser
+end initialiseProjectBrowser
 
-command revInternal__InitialiseMessageBox
+private command initialiseMessageBox
    revInternal__Log "Enter", "Message Box Initialisation"
    
    if the platform is among the items of "MacOS,Win32" then
@@ -1720,57 +1762,57 @@ command revInternal__InitialiseMessageBox
    revInternal__Log "Leave", "Message Box Initialisation"
    
    return true
-end revInternal__InitialiseMessageBox
+end initialiseMessageBox
 
-command revInternal__InitialisePlugIns
+private command initialisePlugIns
    revInternal__Log "Enter", "Plug-Ins Initialisation"
    
    revIDEUpdatePlugins
    
-#	try
-#		libUrlSetSSLVerification false
-#	catch e
-#		dispatch "revUnloadLibrary" to stack "tsNetLibUrl"
-#	end try
-
+   #	try
+   #		libUrlSetSSLVerification false
+   #	catch e
+   #		dispatch "revUnloadLibrary" to stack "tsNetLibUrl"
+   #	end try
+   
    local tPluginInfo
    put revIDEPlugins() into tPluginInfo
    repeat for each key tPlugin in revIDEPlugins()
       if tPluginInfo[tPlugin]["startup"] is true then
-try
-         revIDEOpenPlugin tPlugin
-catch e
-   revInternal__Log "plugin Error", tPlugin && e
-	dispatch "revUnloadLibrary" to stack "tsNetLibUrl"
-         revIDEOpenPlugin tPlugin
-end try
+         try
+            revIDEOpenPlugin tPlugin
+         catch e
+            revInternal__Log "plugin Error", tPlugin && e
+            dispatch "revUnloadLibrary" to stack "tsNetLibUrl"
+            revIDEOpenPlugin tPlugin
+         end try
       end if
    end repeat
-
+   
    revInternal__Log "Leave", "Plug-Ins Initialisation"
    
    return true
-end revInternal__InitialisePlugIns
+end initialisePlugIns
 
-command revInternal__InitialiseFinalSteps
+private command initialiseFinalSteps
    revInternal__Log "Enter", "Final Initialisation"
    
    --the following *MUST* be the last item to avoid excess sending to overview as environment loads
    revInternal__Log "Message", "Installing Remaining Libraries"
-
+   
    revInternal__LoadLibrary "revFrontScriptLibrary"
    if the result is not empty then
       revInternal__Log "Error", the result  
    end if
-      
-   set the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" to revInternal__FilterHandlerList(the revAvailableHandlers of stack "revFrontScriptLibrary")
+   
+   set the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" to internal__FilterHandlerList(the revAvailableHandlers of stack "revFrontScriptLibrary")
    
    revInternal__LoadLibrary "revShortCutsLibrary"
    if the result is not empty then
       revInternal__Log "Error", the result  
    end if
    
-   set the cREVGeneral["handlerlist"] of stack "revShortCutsLibrary" to revInternal__FilterHandlerList(the revAvailableHandlers of stack "revShortCutsLibrary")
+   set the cREVGeneral["handlerlist"] of stack "revShortCutsLibrary" to internal__FilterHandlerList(the revAvailableHandlers of stack "revShortCutsLibrary")
    
    revInternal__Log "Message", "Setting up verbose debugging"
    send "revVerboseDebug" && the cVerboseDebug of stack "revPreferences" to stack "revFrontScriptLibrary"
@@ -1799,16 +1841,16 @@ command revInternal__InitialiseFinalSteps
    revInternal__Log "Leave", "Final Initialisation"
    
    return true
-end revInternal__InitialiseFinalSteps
+end initialiseFinalSteps
 
-command revInternal__BuildDictionary
+private command buildDictionary
    revInternal__Log "Enter", "Building Dictionary"
    revIDEGenerateDistributedDocs
    revInternal__Log "Leave", "Building Dictionary"
    return true
-end revInternal__BuildDictionary
+end buildDictionary
 
-command revInternal__CleanDocsCache
+private command CleanDocsCache
    revInternal__Log "Enter", "Cleaning Docs Cache"
    # Clean up old non-versioned docs
    local tOldDocsFolder
@@ -1828,7 +1870,7 @@ command revInternal__CleanDocsCache
    end if
    revInternal__Log "Leave", "Cleaning Docs Cache"
    return true
-end revInternal__CleanDocsCache
+end CleanDocsCache
 
 command revInternal__ConstrainStack pStack
   local tStackTitleBarRect
@@ -2192,22 +2234,22 @@ function revEnvironmentCustomizationPath
 end revEnvironmentCustomizationPath
 
 function revEnvironmentUserResourcesPath pType, pCreate
-  local tFolder
-  
-  put sCustomizationPath & "/Resources" into tFolder
-  if pType is not empty then
-    put "/" & pType after tFolder
-  end if
-  
-  if pCreate then
-    revInternal__EnsureFolder tFolder
-  end if
-  
-  if there is no folder tFolder then
-    return empty
-  end if
-  
-  return tFolder
+   local tFolder
+   
+   put sCustomizationPath & "/Resources" into tFolder
+   if pType is not empty then
+      put "/" & pType after tFolder
+   end if
+   
+   if pCreate then
+      ensureExistenceOfFolder tFolder
+   end if
+   
+   if there is no folder tFolder then
+      return empty
+   end if
+   
+   return tFolder
 end revEnvironmentUserResourcesPath
 
 function revEnvironmentUserToolsetPath
@@ -2313,7 +2355,7 @@ function revEnvironmentNonNativeBinariesPath pPlatform, pSDK
          put slash & "android-x86_64-bin" after tNonNativeBinariesPath
          break
       case "Emscripten"
-      case "HTML5"
+      //case "HTML5"
          put slash & "emscripten-bin" after tNonNativeBinariesPath
          break
       case "iOS"
@@ -2367,7 +2409,7 @@ end hookToolsPath
 
 
 -- Works out the source repository path for the engine (if any)
-private function revEnvironmentGuessRepositoryPath pEnginePath
+private function guessEnvironmentRepositoryPath pEnginePath
    -- Build and package directories
    local tPlatform
    local tProcessor
@@ -2413,7 +2455,7 @@ private function revEnvironmentGuessRepositoryPath pEnginePath
    end if
    
    return tRepositoryPath
-end revEnvironmentGuessRepositoryPath
+end guessEnvironmentRepositoryPath
 
 --------------------------------------------------------------------------------
 -- Global Environment Functions - General Support
@@ -2439,3 +2481,7 @@ function revEnvironmentPlatform
    
    return tPlatform
 end revEnvironmentPlatform
+
+function q pText
+   return quote & pText & quote
+end q
