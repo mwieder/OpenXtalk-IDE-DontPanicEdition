@@ -60,7 +60,7 @@ on preOpenCard
       --if  revLicenseType() is "community" then
          --if the seconds > (tTipLastShown + 2419200) then
             --put true into tShowTip
-         end if
+         --end if
       --end if
    end if   
    if tShowTip is empty then put true into tShowTip

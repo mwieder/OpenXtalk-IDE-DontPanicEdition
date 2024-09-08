@@ -40,7 +40,8 @@ private command updateTabButtons pSettings
    set the visible of button "IosChecked" of group "checks" of me to pSettings["ios"] = true
    set the visible of button "AndroidChecked" of group "checks" of me to pSettings["android"] = true
    set the visible of button "BugsChecked" of group "checks" of me to pSettings["errorDialog"] = true
-   set the visible of button "EmscriptenChecked" of group "checks" of me to pSettings["Emscripten"] = true
+   set the visible of button "EmscriptenChecked" of group "checks" of me to \
+         pSettings["EmscriptenHTML5"] = true or pSettings["EmscriptenWASM"] = true
    
    repeat for each item tItem in "SolIntel,SolSparc,Iris,Odt,rs6000,Linux,Bsd,Hp9k700,SPARC"
       if pSettings[tItem] then
@@ -76,12 +77,12 @@ private command updateTabButtons pSettings
       end if
    end repeat
    
-   set the wholeMatches to true
-   set the enabled of button "OS X" of group "cards" of me to ("Mac OS X" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "Windows" of group "cards" of me to ("Windows" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "Unix" of group "cards" of me to ("Linux" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "iOS" of group "cards" of me to ("iOS" is among the items of line 5 of the revLicenseInfo)
-   set the enabled of button "Android" of group "cards" of me to ("Android" is among the items of line 5 of the revLicenseInfo)
+   --set the wholeMatches to true
+   set the enabled of button "OS X" of group "cards" of me to true
+   set the enabled of button "Windows" of group "cards" of me to true
+   set the enabled of button "Unix" of group "cards" of me to true
+   set the enabled of button "iOS" of group "cards" of me to true
+   set the enabled of button "Android" of group "cards" of me to true
    set the enabled of button "Emscripten" of group "cards" of me to true
 end updateTabButtons
 
