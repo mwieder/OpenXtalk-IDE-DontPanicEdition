@@ -8832,13 +8832,17 @@ end revIDEToggle
 
 on revIDEToggleToolbar pWhich
    local tCurrentPref
-   if pWhich is "Toolbar Text" then
-      put revIDEGetPreference("cToolbarText") is true into tCurrentPref
-      revIDESetPreference "cToolbarText", not tCurrentPref
-   else if pWhich is "Toolbar Icons" then
-      put revIDEGetPreference("cToolbarIcons") is true into tCurrentPref
-      revIDESetPreference "cToolbarIcons", not tCurrentPref
-   end if
+   local tWhich
+   switch pWhich
+      case "Toolbar Text"
+         put "cToolbarText" into tWhich
+         break
+      case "Toolbar Icons"
+         put "cToolbarIcons" into tWhich
+         break
+   end switch
+   put revIDEGetPreference(tWhich) is true into tCurrentPref
+   revIDESetPreference tWhich, not tCurrentPref
 end revIDEToggleToolbar
 
 on revIDEToggleShowIDEStacksInLists
