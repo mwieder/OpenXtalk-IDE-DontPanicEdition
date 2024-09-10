@@ -94,7 +94,7 @@ command revIDEDeployBuild pPlatform, pTargetStack, pOutputFolder
    put the mainStack of stack pTargetStack into pTargetStack
    
    -- Dispatch the action to the platform-specific library
-   dispatch "deployBuild" to stack ("revDeployLibrary" & pPlatform) with pTargetStack, pOutputFolder
+   dispatch "deployBuild" to stack ("revDeployLibrary"&pPlatform) with pTargetStack, pOutputFolder
 end revIDEDeployBuild
 
 -- This method is invoked by the menu bar to construct the current list of targets.
@@ -102,32 +102,39 @@ end revIDEDeployBuild
 -- of possible targets.
 function revIDEDeployListTargets
    local tTargets
-   repeat for each word tPlatform in kSupportedPlatforms
-      if there is not a stack ("revDeployLibrary" & tPlatform) then
-         next repeat
-      end if
-      
-      dispatch function "deployListTargets" to stack ("revDeployLibrary" & tPlatform) 
-      if it is "handled" and the result is not empty then
-         put the result into tTargets[tPlatform]
-      end if
-   end repeat
+   if the mode of the topstack is 1 then
+      repeat for each word tPlatform in kSupportedPlatforms
+         if there is not a stack ("revDeployLibrary"&tPlatform) then
+            next repeat
+         end if
+         
+         dispatch function "deployListTargets" to stack ("revDeployLibrary"&tPlatform) 
+         if it is "handled" and the result is not empty then
+            put the result into tTargets[tPlatform]
+         end if
+      end repeat
+   end if
    return tTargets
 end revIDEDeployListTargets
 
--- This method is invoked by the menu bar when the user selects a different deploy
--- target.
+/*
+* This method is invoked by the menu bar when the user selects a different deploy target.
+*/
 command revIDEDeploySetTarget pTarget # = browser
    local tPlatform # emscripten, android, ios
+   
    put sDeployTargetPlatforms[pTarget] into tPlatform
    delete item itemOffset(tPlatform, sDeployPlatforms) of sDeployPlatforms
    put tPlatform, sDeployPlatforms into sDeployPlatforms
-   put pTarget into sDeployTargets[tPlatform]
    set the cDeployPlatforms of stack "revPreferences" to sDeployPlatforms
+   
+   put pTarget into sDeployTargets[tPlatform]
    set the cDeployTargets of stack "revPreferences" to sDeployTargets
 end revIDEDeploySetTarget
 
--- This method returns the current target of the 'Deploy' action.
+/*
+* This method returns the current target of the 'Deploy' action.
+*/
 function revIDEDeployGetTarget
    if the mode of the topStack is 1 then
       local tStack
@@ -194,8 +201,11 @@ command revIDEDeployInitialize
    end repeat
    
    local tDeployPlatforms, tDeployTargets
-   put the cDeployPlatforms of stack "revPreferences" into tDeployPlatforms
-   put the cDeployTargets of stack "revPreferences" into tDeployTargets
+   set the cDeployPlatforms of stack "revPreferences" to empty
+   set the cDeployTargets of stack "revPreferences" to empty
+   
+   put revIDEGetPreference("cDeployPlatforms") into tDeployPlatforms
+   put revIDEGetPreference("cDeployTargets") into tDeployTargets
    if tDeployPlatforms is not empty then
       put tDeployPlatforms into sDeployPlatforms
       put tDeployTargets into sDeployTargets

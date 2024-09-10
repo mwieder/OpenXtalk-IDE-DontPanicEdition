@@ -19,9 +19,9 @@ on initialize
    -- Hide the license prompt if a license is available
    local tEnabled
    repeat for each item tItem in revSBPlatformArchitectures("Emscripten")
-      set the hilite of button ("Emscripten"&tItem) of group "platforms" of me to (tStandaloneSettingsA["Emscripten",tItem] is true)
-      set the visible of button ("Emscripten"&tItem) of group "platforms" of me to revEngineCheck?("Emscripten" && tItem)
-      if tStandaloneSettingsA["Emscripten",tItem] then
+      set the hilite of button ("Emscripten"&tItem) of group "platforms" of me to (tStandaloneSettingsA["Emscripten"&tItem] is true)
+      set the visible of button ("Emscripten"&tItem) of group "platforms" of me to revEngineCheck?("Emscripten"&tItem)
+      if tStandaloneSettingsA["Emscripten"&tItem] then
          put true into tEnabled
       end if
       
@@ -30,7 +30,7 @@ on initialize
    
    if not tEnabled and tStandaloneSettingsA["Emscripten"] is true then
       set the hilite of button "EmscriptenJS" of group "platforms" of me to true
-      put true into tStandaloneSettingsA["Emscripten,js"]
+      put true into tStandaloneSettingsA["EmscriptenJS"]
       setSettings tStandaloneSettingsA
    end if
    
