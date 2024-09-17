@@ -45,45 +45,5 @@ on preOpenCard
    set the hilite of button "Automatically Build here" of me to (tStandaloneSettingsA["automaticallyBuildInDefaultFolder"] is true)
    
    enable group "profiles"
-   
-   local tTipLastShown, tShowTip
-   
-   put the cIDE_SAGeneralTipShow of stack "revPreferences" into tShowTip
-   put the cIDE_SAGeneralTipLastShown of stack "revPreferences" into tTipLastShown
-   
-   --if revLicenseType() is "commercial" or revLicenseType() is "professional" then
-      put false into tShowTip
-      set the cIDE_SAGeneralTipShow of stack "revPreferences" to false
-   --end if
-   
-   if tShowTip is false then
-      --if  revLicenseType() is "community" then
-         --if the seconds > (tTipLastShown + 2419200) then
-            --put true into tShowTip
-         --end if
-      --end if
-   end if   
-   if tShowTip is empty then put true into tShowTip
-   
-   set the visible of group "generalCommercialTip" to tShowTip
-   tipPreferenceSet tShowTip
-   tipDisplayUpdate  
-   
    pass preOpenCard
 end preOpenCard
-
-on tipDisplayUpdate
-   if the visible of group "generalCommercialTip" then
-      set the topLeft of group "generalContent" to 9,138
-      set the cSize of this card to 568,520
-   else 
-      set the topLeft of group "generalContent" to 9,78
-      set the cSize of this card to 568,460
-   end if
-   updateCardSize
-end tipDisplayUpdate
-
-on tipPreferenceSet pValue
-   set the cIDE_SAGeneralTipShow of stack "revPreferences" to pValue
-   set the cIDE_SAGeneralTipLastShown of stack "revPreferences" to the seconds
-end tipPreferenceSet

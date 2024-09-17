@@ -32,7 +32,7 @@ end __revIDEDeveloperCompilationError
 
 private function __revIDEDeveloperExtensionShouldRecompile pFolder, pFile, pType
    # To avoid excessive recompilation, test to see if the compiled module exists and is up to date.
-   local tCompileInputs, tCompileOutputs, tNeedUpdate, tError
+   local tCompileInputs, tCompileOutputs, tNeedUpdate?, tError
    
    put pFolder & slash & pFile into tCompileInputs[1]
    
@@ -41,13 +41,13 @@ private function __revIDEDeveloperExtensionShouldRecompile pFolder, pFile, pType
       put pFolder & slash & revIDEExtensionBytecodeFilename(true) into tCompileOutputs[2]
    end if
    put revIDEIsFilesetStale(tCompileInputs, tCompileOutputs, false, tError) \
-         into tNeedUpdate
+         into tNeedUpdate?
    
-   if pType is "lcb" and tNeedUpdate is false then
-      put not extensionCheckModuleVersion("", tCompileInputs[1]) into tNeedUpdate
+   if pType is "lcb" and tNeedUpdate? is false then
+      put not extensionCheckModuleVersion("", tCompileInputs[1]) into tNeedUpdate?
    end if
    
-   return tNeedUpdate is not false
+   return tNeedUpdate? is not false
 end __revIDEDeveloperExtensionShouldRecompile
 
 private command __revIDEDeveloperExtensionRemoveFolder pFolder

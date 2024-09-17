@@ -853,7 +853,7 @@ on revTutorialPositionStack pStack, pObject, pWidthOverride, pForceVertical, pTo
    put the long id of image "Image" of stack "revTutorial" into tImageID
    
    local tHasUrl, tUrlControlID
-   if revIDEBrowserWidgetUnavailable() then
+   if revIDEBrowserWidgetUnavailable?() then
       put the long id of field "Url" of stack "revTutorial" into tUrlControlID
       put the text of tUrlControlID is not empty into tHasUrl
    else
@@ -1674,7 +1674,7 @@ on revInitialiseTutorial
    set the opaque of it to true
    set the backcolor of it to "white"
    
-   if revIDEBrowserWidgetUnavailable() then
+   if revIDEBrowserWidgetUnavailable?() then
       create field "Url"
       set the dontWrap of it to true
    else
@@ -2184,7 +2184,7 @@ on revTutorialConfigureMessage pData, pTopLeft
    end if
    
    
-   if revIDEBrowserWidgetUnavailable() then
+   if revIDEBrowserWidgetUnavailable?() then
       if pData["url"] is not empty then
          set the text of field "Url" of stack "revTutorial" to pData["url"]
       else

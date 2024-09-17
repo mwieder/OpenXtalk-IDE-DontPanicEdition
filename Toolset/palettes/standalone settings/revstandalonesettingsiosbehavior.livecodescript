@@ -34,26 +34,26 @@ on initialize
    
    local tTipLastShown, tShowTip
    
-   put the cIDE_SAIOSTipShow of stack "revPreferences" into tShowTip
-   put the cIDE_SAIOSTipLastShown of stack "revPreferences" into tTipLastShown
+   --put the cIDE_SAIOSTipShow of stack "revPreferences" into tShowTip
+   --put the cIDE_SAIOSTipLastShown of stack "revPreferences" into tTipLastShown
    
    if revLicenseType() is not "community" then
-      put false into tShowTip
+      --put false into tShowTip
       set the cIDE_SAGeneralTipShow of stack "revPreferences" to false
    end if
    
-   if tShowTip is false then
-      if  revLicenseType() is "community" then
-         if the seconds > (tTipLastShown + 2419200) then
-            put true into tShowTip
-         end if
-      end if
-   end if   
-   if tShowTip is empty then put true into tShowTip
+   --   if tShowTip is false then
+   --      if  revLicenseType() is "community" then
+   --         if the seconds > (tTipLastShown + 2419200) then
+   --            put true into tShowTip
+   --         end if
+   --      end if
+   --   end if   
+   --   if tShowTip is empty then put true into tShowTip
    
-   set the visible of group "iOSCommercialTip" to tShowTip
-   tipPreferenceSet tShowTip
-   tipDisplayUpdate
+   --set the visible of group "iOSCommercialTip" to tShowTip
+   --tipPreferenceSet tShowTip
+   --tipDisplayUpdate
 end initialize
 
 on updateProfiles
@@ -482,39 +482,20 @@ on chooseImageFileWithDimension pType, pDimensions
    end if
 end chooseImageFileWithDimension
 
-on tipDisplayUpdate
-   if the visible of group "iOSCommercialTip" then
-      set the topLeft of group "buildbutton" to 50,127
-      set the topLeft of group "iOS Settings" to 5,127
-      repeat for each line tLine in the text of button "iOSTabMenu"
-         local tName
-         put tLine into tName
-         if tName is "Requirements" then
-            put "Requirement" into tName
-         end if
-         set the topLeft of group tName to 12,178
-      end repeat 
-      set the cSize of this card to 754,670
-   else 
-      set the topLeft of group "buildbutton" to 50,60
-      set the topLeft of group "iOS Settings" to 5,57
-      repeat for each line tLine in the text of button "iOSTabMenu"
-         local tName2
-         put tLine into tName2
-         if tName2 is "Requirements" then
-            put "Requirement" into tName2
-         end if
-         set the topLeft of group tName2 to 12,108
-      end repeat 
-      set the cSize of this card to 754,600
-   end if
+command tipDisplayUpdate
+   set the topLeft of group "buildbutton" to 50,60
+   set the topLeft of group "iOS Settings" to 5,57
+   repeat for each line tLine in the text of button "iOSTabMenu"
+      local tName2
+      put tLine into tName2
+      if tName2 is "Requirements" then
+         put "Requirement" into tName2
+      end if
+      set the topLeft of group tName2 to 12,108
+   end repeat 
+   set the cSize of this card to 754,600
    updateCardSize
 end tipDisplayUpdate
-
-on tipPreferenceSet pValue
-   set the cIDE_SAIOSTipShow of stack "revPreferences" to pValue
-   set the cIDE_SAIOSTipLastShown of stack "revPreferences" to the seconds
-end tipPreferenceSet
 
 function getIosProvisioningProfiles
    local tOldFolder

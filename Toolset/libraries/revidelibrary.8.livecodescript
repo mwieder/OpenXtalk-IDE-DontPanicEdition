@@ -2242,7 +2242,7 @@ function revIDEStacksInUse
    put 1 into tCount
    repeat for each line tStack in tStacksInUse
       dispatch function "__readPropertiesOfControl" to stack tStack with tProperties, tData[tCount]
-      put "stack" && quote & tStack & quote into tData[tCount]["long id"]
+      put "stack" && q(tStack) into tData[tCount]["long id"]
       add 1 to tCount
    end repeat
    
@@ -2695,7 +2695,7 @@ command revIDESetPBSortPreferences pPref, pSortType, pSortOrder
 end revIDESetPBSortPreferences
 
 function revIDEStackProperties pStackID, pLevel
-   if not exists(pStackID) then return __revIDEError("You must specify an object to read from." &&  quote & pStackID & quote && "is not an object")
+   if not exists(pStackID) then return __revIDEError("You must specify an object to read from." &&  q(pStackID) && "is not an object")
    
    local tStackArray
    
@@ -3059,8 +3059,8 @@ end revIDESelectedObjects
 #############
 local sDownloadData, sDownloadStatus, sDownloadQueue
 on revIDEDownloadFile pURL, pTargetDirectory, pCallbackTarget, pProgressMessageName, pCompleteMessageName
-   if char 1 to 3 of pURL is not among the items of "htt,ftp" then return __revIDEError("Cannot download file" && quote & pURL & quote & ". It is not a valid URL.")
-   if there is not a folder pTargetDirectory then return __revIDEError("Cannot download file. Target directory" && quote & pTargetDirectory & quote && "does not exist")
+   if char 1 to 3 of pURL is not among the items of "htt,ftp" then return __revIDEError("Cannot download file" && q(pURL) & ". It is not a valid URL.")
+   if there is not a folder pTargetDirectory then return __revIDEError("Cannot download file. Target directory" && q(pTargetDirectory) && "does not exist")
    if pURL is among the lines of sDownloadQueue then return "File already in download queue"
 
    # Store data in download queue
@@ -4126,7 +4126,7 @@ on revIDEEnsurePath pPath
       end if
 
       if tPath is empty then next repeat
-      if there is a folder (quote & tPath & quote) then next repeat
+      if there is a folder (q(tPath)) then next repeat
 
       create folder tPath
    end repeat
@@ -4597,9 +4597,9 @@ private function revIDEPaletteBarHeight pStackID
    return the effective height of pStackID - the height of pStackID
 end revIDEPaletteBarHeight
 
-function revIDEBrowserWidgetUnavailable
+function revIDEBrowserWidgetUnavailable?
    return (the platform is "Linux") and ($LIVECODE_USE_CEF is 0)
-end revIDEBrowserWidgetUnavailable
+end revIDEBrowserWidgetUnavailable?
 
 /*
 Opens an IDE stack as a palette. In the future this should be changed so that
@@ -4656,7 +4656,7 @@ command revIDEOpenPalette pPaletteName
          break
       case "dictionary"
       case "guide"
-         if revIDEBrowserWidgetUnavailable() then
+         if revIDEBrowserWidgetUnavailable?() then
             local tWhich
             if pPaletteName is "dictionary" then
                put "api" into tWhich
@@ -4888,7 +4888,7 @@ private function __escapeStringAndConvertLineEndings pString
    replace CRLF with "\n" in pString
    replace numToCodepoint(13) with "\n" in pString
    replace LF with "\n" in pString
-   return (quote & pString & quote)
+   return (q(pString))
 end __escapeStringAndConvertLineEndings
 
 /*
@@ -4907,8 +4907,8 @@ on revIDEInstallUserGuide pGuideFolder, pExtensionName, pAuthor
    
    local tGuideJSON
    put "{" & CR after tGuideJSON
-   put tab & quote & "guide" & quote & ":" && quote & pExtensionName & quote & comma & CR after tGuideJSON
-   put quote & "data" & quote & ":" & __escapeStringAndConvertLineEndings(tGuide) & CR after tGuideJSON
+   put tab & q("guide") & ":" && q(pExtensionName) & comma & CR after tGuideJSON
+   put q("data") & ":" & __escapeStringAndConvertLineEndings(tGuide) & CR after tGuideJSON
    put "}" after tGuideJSON
    
    revIDESetUTF8FileContents pGuideFolder & slash & "guide.js", tGuideJSON
@@ -4944,7 +4944,7 @@ on revIDEGoToLCSDictionaryEntry pTag, pType
 end revIDEGoToLCSDictionaryEntry
 
 on revIDEGoToDictionaryEntry pLibrary, pTag, pType
-   if revIDEBrowserWidgetUnavailable() then
+   if revIDEBrowserWidgetUnavailable?() then
       revIDEGenerateDictionaryHTML "api", pLibrary, pTag, pType
       launch url ("file:" & revIDEGetDictionaryUrl("api"))
    else
@@ -5842,7 +5842,7 @@ function revIDEGetDataGridProperty pObject, pProperty, @rEffective
          local tTemplate
          put the dgProps["row template"] of pObject into tTemplate
          set the itemdel to "card"
-         return "button" && quote & "Behavior Script" & quote && "card" && item 2 to -1 of tTemplate
+         return "button" && q("Behavior Script") && "card" && item 2 to -1 of tTemplate
          break
       case "text"
          if sFirstRowHeaders[pObject] then
@@ -6377,7 +6377,7 @@ end revIDESetImageFilename
 #############
 
 on revIDEStandaloneSettingsForStack pStackID
-   send "revStandaloneSettings" && quote & the short name of pStackID & quote to stack "revStandaloneSettings"
+   send "revStandaloneSettings" && q(the short name of pStackID) to stack "revStandaloneSettings"
 end revIDEStandaloneSettingsForStack
 
 private function __standaloneSettingsInfoFilename
@@ -6450,6 +6450,7 @@ private function __revIDEStandaloneSettingsOfStackForExtension pStack, pInfoA, p
    return tPropsA
 end __revIDEStandaloneSettingsOfStackForExtension
 
+# only called from revStandaloneSettingsNew stack
 function revIDEStandaloneSettingsInfo
    local tStandaloneDefinitionsPath
    put revIDESpecialFolderPath("Standalone Settings Definitions") into tStandaloneDefinitionsPath
@@ -6464,11 +6465,12 @@ on revIDEStandaloneSettingsSet pStack, pProperty, pValue
    set the cRevStandaloneSettings[pProperty] of pStack to pValue
 end revIDEStandaloneSettingsSet
 
-function revIDEStandaloneSections
+private function revIDEStandaloneSections
 	// AL-2015-03-03: [[ Bug 14769 ]] Add 'Table' section to the property inspector
    return "General,Stacks,Copy Files,Mac,Windows,Linux,iOS,Android,Bug Reports"
 end revIDEStandaloneSections
 
+# only called from revStandaloneSettingsNew stack
 function revIDEStandaloneSectionNameToIconName pName
    switch pName
       default
@@ -6636,7 +6638,7 @@ on revIDEOpenPlugin pName
    if tMode is "invisible" then
       go invisible stack tStackPath
    else 
-      do "go stack" && quote &  tStackPath & quote && "as" && tMode
+      do "go stack" && q(tStackPath) && "as" && tMode
    end if
 end revIDEOpenPlugin
 
@@ -7446,16 +7448,16 @@ on revIDEAnswerFile pType, pInstructions, pBasePath, pTypesA, pSingleFile
    local tTutorial
    put revIDETutorialInProgress() into tTutorial
    if tTutorial is not empty then
-      put " with" && quote & revIDETutorialResourcePath(tTutorial) & quote after tAnswerString
+      put " with" && q(revIDETutorialResourcePath(tTutorial)) after tAnswerString
    end if
    
    # Add any types defined in the type array
    local tTypeString
    repeat with x  = 1 to the number of elements of tTypesA
       if tTypeString is empty then
-         put " with type" && quote & tTypesA[x] & quote into tTypeString
+         put " with type" && q(tTypesA[x]) into tTypeString
       else
-         put " or type" && quote & tTypesA[x] & quote after tTypeString
+         put " or type" && q(tTypesA[x]) after tTypeString
       end if
    end repeat
    put tTypeString after tAnswerString
@@ -8683,9 +8685,9 @@ function revIDETestTarget
    return revIDEDeployGetTarget()
 end revIDETestTarget
 
-function IDETestCanDeployToTarget? pTarget
-   return IDEDeployIsPossible?(pTarget)
-end IDETestCanDeployToTarget?
+--function IDETestCanDeployToTarget? pTarget
+--   return IDEDeployIsPossible?(pTarget)
+--end IDETestCanDeployToTarget?
 
 on revIDESetTestTarget pTarget
    revIDEDeploySetTarget pTarget
@@ -8982,7 +8984,7 @@ on revIDELaunchResource pName
 end revIDELaunchResource
 
 on revIDEActionRelicense
-   answer question "Are you sure you want to re-license? Clicking " & quote & "Ok" & quote & " will restart LiveCode and you will be asked re-activate." with "Cancel" or "OK"
+   answer question "Are you sure you want to re-license? Clicking " & q("Ok") & " will restart LiveCode and you will be asked re-activate." with "Cancel" or "OK"
    if it is "OK" then
       revIDERelicense
    end if
@@ -9347,7 +9349,7 @@ on revIDEPlaceGroupOnCard pGroupID
    if pGroupID is not empty then
       place background id pGroupID onto this card
       if the tool is "pointer tool" then
-         do ("select background id" & quote & pGroupID & quote)
+         do ("select background id" & q(pGroupID))
       end if
    end if
 end revIDEPlaceGroupOnCard
@@ -9831,18 +9833,18 @@ command revIDECheckForUpdates
       switch the platform
          case "MacOS"
             put item 1 to -5 of the filename of stack "home" & "/Contents/MacOS/autoupdater" into tCommand
-            put quote & tCommand & quote && "install -foregroundupdate" into tCommand
+            put q(tCommand) && "install -foregroundupdate" into tCommand
             break
          case "Win32"
             put item 1 to -3 of the filename of stack "home" & "/.setup.exe" into tCommand
-            put quote & tCommand & quote && "install -foregroundupdate" into tCommand
+            put q(tCommand) && "install -foregroundupdate" into tCommand
             break
          case "Linux"
             -- MDW-2015-12-19 [[fix_installer]] LC8-style setup filename
             if the processor is "x86_64" then
-               	put item 1 to -4 of the filename of me & "/setup.x86_64" into tCommand
+               put item 1 to -4 of the filename of me & "/setup.x86_64" into tCommand
             else
-               	put item 1 to -4 of the filename of me & "/setup.x86" into tCommand
+               put item 1 to -4 of the filename of me & "/setup.x86" into tCommand
             end if
             put tCommand && "install -foregroundupdate" into tCommand
             break
@@ -10729,7 +10731,7 @@ private function escape pString, pConvertLineEndings
    //replace "<" with "&lt;" in pString
    //replace ">" with "&gt;" in pString
    replace tab with "\t" in pString
-   return (quote & pString & quote)
+   return (q(pString))
 end escape
 
 private function __getLCBSourceFile pFolder
@@ -10794,31 +10796,31 @@ private function revIDEGetExtensionDocsData pAPI
                tInputs[the number of elements in tInputs + 1]
       end if
       
-      local tNeedUpdate, tError, tAPIDoc
+      local tNeedUpdate?, tError, tAPIDoc
       put tCachedDataFolder & slash & "api.lcdoc" into tAPIDoc
       put revIDEIsFilesetStale(tInputs, tAPIDoc, false, tError) \
-            into tNeedUpdate
+            into tNeedUpdate?
       
       # If there is an up-to-date api.lcdoc in the source folder, just copy that across
       local tSourceAPI
       put tFolder & slash & "api.lcdoc" into tSourceAPI
       if there is a file tSourceAPI then
          if tSource is empty then
-            put false into tNeedUpdate
+            put false into tNeedUpdate?
             if there is no file tAPIDoc then
                revIDESetUTF8FileContents tAPIDoc, revIDEUTF8FileContents(tSourceAPI)
             end if
-         else if tNeedUpdate then
+         else if tNeedUpdate? then
             if revIDEIsFilesetStale(tInputs, tSourceAPI, false, tError) \
                   is false then 
                
                revIDESetUTF8FileContents tAPIDoc, revIDEUTF8FileContents(tSourceAPI)
-               put false into tNeedUpdate
+               put false into tNeedUpdate?
             end if 
          end if
       end if
       # Regenerate the lcdoc file if required
-      if tNeedUpdate is true then
+      if tNeedUpdate? is true then
          # Generate the docs text in lcdoc format 
          local tDoc
          if tExtensionData["source_type"] is "lcb" then
@@ -10847,15 +10849,15 @@ private function revIDEGetExtensionDocsData pAPI
       local tAPIJS
       put tCachedDataFolder & "/api.js" into tAPIJS
       # Check if the .js is out of date
-      if tNeedUpdate is not true then
+      if tNeedUpdate? is not true then
          put tAPIDoc into tInputs[1]
          put revIDEIsFilesetStale(tInputs, tAPIJS , false, tError) \
-               into tNeedUpdate
+               into tNeedUpdate?
       end if
       
-      if tNeedUpdate is false then
+      if tNeedUpdate? is false then
          put revIDEUTF8FileContents(tAPIJS) into tExtensionAPI
-      else if tNeedUpdate is true then
+      else if tNeedUpdate? is true then
          local tLibraryArray, Lcdoc
          dispatch function "revDocsParseDocFileToLibraryArray" to stack "revDocsParser" \ 
                with tAPIDoc, tExtensionData["title"], \ 
@@ -10921,24 +10923,24 @@ private function revIDEGetDocsGuideData
       revIDEEnsurePath tCachedDataFolder
       
       # Check if the .js is out of date
-      local tNeedUpdate, tError, tGuideJS
+      local tNeedUpdate?, tError, tGuideJS
       put tCachedDataFolder & "/guide.js" into tGuideJS
       put revIDEIsFilesetStale(tGuideFile, tGuideJS, false, tError) \
-            into tNeedUpdate
+            into tNeedUpdate?
       
-      if tNeedUpdate is false then
+      if tNeedUpdate? is false then
          put revIDEUTF8FileContents(tGuideJS) into tExtensionGuide
-      else if tNeedUpdate is true then
+      else if tNeedUpdate? is true then
          local tGuide
          put revIDEUTF8FileContents(tGuideFile) into tGuide
          
          if tGuide is not empty then
             put "{" & CR after tExtensionGuide
-            put tab & quote & "name" & quote & ":" && quote & tExtensionData["name"] & quote & comma & CR after tExtensionGuide
-            put tab & quote & "display name" & quote & ":" && quote & tExtensionData["title"] & quote & comma & CR after tExtensionGuide
-            put tab & quote & "group" & quote & ":" && quote & "Extensions" & quote & comma & CR after tExtensionGuide
-            put tab & quote & "location" & quote & ":" && quote & tFolder & quote & comma & CR after tExtensionGuide
-            put quote & "data" & quote & ":" & escape(tGuide, true) & CR after tExtensionGuide
+            put tab & q("name") & ":" && q(tExtensionData["name"]) & comma & CR after tExtensionGuide
+            put tab & q("display name") & ":" && q(tExtensionData["title"]) & comma & CR after tExtensionGuide
+            put tab & q("group") & ":" && q("Extensions") & comma & CR after tExtensionGuide
+            put tab & q("location") & ":" && q(tFolder) & comma & CR after tExtensionGuide
+            put q("data") & ":" & escape(tGuide, true) & CR after tExtensionGuide
             put "}" after tExtensionGuide
             
             revIDESetUTF8FileContents tGuideJS, tExtensionGuide
@@ -10963,7 +10965,7 @@ on revIDERegenerateBuiltGuides
    local tGuidePath
    put revIDESpecialFolderPath("guide") into tGuidePath
    
-   put "var tUserGuideData =" & CR & "{" & CR & tab & quote & "guides" & quote & ":[" into tData
+   put "var tUserGuideData =" & CR & "{" & CR & tab & q("guides") & ":[" into tData
    
    put revIDEGetDocsGuideData() after tData
    
@@ -10995,9 +10997,9 @@ on revIDERegenerateBuiltAPIs
    end repeat
    
    local tDictionaryData
-   put "var dictionary_data =" & return & "{" & return & \
-         tab & quote & "docs" & quote & ":[" & \
-         tData & return & tab & "]" & return & "}" \
+   put "var dictionary_data =" & cr & "{" & cr & \
+         tab & q("docs") & ":[" & \
+         tData & cr & tab & "]" & cr & "}" \
          into tDictionaryData
    
    local tDocsCache
@@ -11017,7 +11019,7 @@ on revIDEGenerateDistributedDocs
    revIDERegenerateBuiltDictionaryData
 end revIDEGenerateDistributedDocs
 
-private on revIDEGenerateDistributedGuide
+private command revIDEGenerateDistributedGuide
    # Set the default folder to where the guide markdown files are stored in the IDE
    local tGuideFoldersWithLocationA
    put revIDESpecialFolderPath("ide guides") into tGuideFoldersWithLocationA[1]["folder"]
@@ -11033,15 +11035,15 @@ private on revIDEGenerateDistributedGuide
          into tGuideJSONFile
 
    # Check if the distributed guide is out of date
-   local tKey, tInputFiles, tNeedUpdate, tError
+   local tKey, tInputFiles, tNeedUpdate?, tError
    repeat for each key tKey in tGuideFoldersWithLocationA
       put tGuideFoldersWithLocationA[tKey]["folder"] into tInputFiles[tKey]
    end repeat
    put revIDEIsFilesetStale(tInputFiles, tGuideJSONFile, true, tError) \
-         into tNeedUpdate
+         into tNeedUpdate?
 
    # If we don't need to regenerate, exit
-   if tNeedUpdate is not true then
+   if tNeedUpdate? is not true then
       exit revIDEGenerateDistributedGuide
    end if
    
@@ -11061,43 +11063,50 @@ private on revIDEGenerateDistributedGuide
    revIDESetUTF8FileContents tGuideJSONFile, tGuideData
 end revIDEGenerateDistributedGuide
 
+private function ideGeneratedOutputFolder pType
+   local tFolder
+   put revIDESpecialFolderPath("api", "livecode") & pType & slash & pType & ".js" into tFolder
+   return tFolder
+end ideGeneratedOutputFolder
+
 private command revIDEGenerateDistributedAPI
+   
    local tRepoPath
    put revEnvironmentRepositoryPath() into tRepoPath
    
-   local tDocsFolder
-   put tRepoPath & slash & "docs" into tDocsFolder
-   if there is not a folder tDocsFolder then
-      answer "No dictionary data found at" && tDocsFolder
-   end if
+   ideDocs.UpdateScriptDictionary.IfNecessary tRepoPath
    
-   # Check to see if we need to regenerate the script dictionary
-   local tNeedUpdate, tInputs, tError, tOutput
-   put the effective filename of stack "revDocsParser" into tInputs[0]
-   put tDocsFolder & slash & "dictionary" into tInputs[1]
-   put tDocsFolder & slash & "glossary" into tInputs[2]
-   put revIDESpecialFolderPath("api", "livecode_script") & slash & "script.js" into tOutput
+   --   local tDocsFolder
+   --   put tRepoPath & slash & "docs" into tDocsFolder
+   --   if there is not a folder tDocsFolder then
+   --      answer "No dictionary data found at" && tDocsFolder
+   --   end if
    
-   put revIDEIsFilesetStale(tInputs, tOutput, true, tError) into tNeedUpdate
+   --   # Check to see if we need to regenerate the script dictionary
+   local tNeedUpdate?, tInputs, tError, tOutput
+   --   put the effective filename of stack "revDocsParser" into tInputs[0]
+   --   put tDocsFolder & slash & "dictionary" into tInputs[1]
+   --   put tDocsFolder & slash & "glossary" into tInputs[2]
+   --   put ideGeneratedOutputFolder("script") into tOutput
    
-   # Regenerate dictionary if necessary
-   if tNeedUpdate then
-      local tScriptA
-      put "LiveCode Script" into tScriptA["display name"]
-      put revDocsModifyForUrl(tScriptA["display name"]) into tScriptA["name"]
-      put "LiveCode" into tScriptA["author"]
-      put "dictionary" into tScriptA["type"]
-      # Parse the dictionary files into a structured array
-      put revDocsParseDictionaryToLibraryArray(tDocsFolder) into tScriptA["doc"]
-      
-      # Update the database
-      ideDocsUpdateDatabase "livecode_script", tScriptA, true
-      
-      local tJSON
-      put revDocsFormatLibraryDocArrayAsJSON(tScriptA) into tJSON
-      revIDESetUTF8FileContents revIDESpecialFolderPath("api", "livecode_script") & slash & "script.js", \
-            tJSON
-   end if
+   --   put revIDEIsFilesetStale(tInputs, tOutput, true, tError) into tNeedUpdate?
+   
+   --   --put false into tNeedUpdate? # TODO: just a kludge
+   --   # Regenerate dictionary if necessary
+   --   if tNeedUpdate? then
+   --      local tScriptA
+   --      put "LiveCode Script" into tScriptA["display name"]
+   --      put revDocsModifyForUrl(tScriptA["display name"]) into tScriptA["name"]
+   --      put "LiveCode" into tScriptA["author"]
+   --      put "dictionary" into tScriptA["type"]
+   --      # Parse the dictionary files into a structured array
+   --      put revDocsParseDictionaryToLibraryArray(tDocsFolder) into tScriptA["doc"]
+   
+   --      # Update the database
+   --      ideDocsUpdateDatabase "livecode_script", tScriptA, true
+   
+   --      ideSetFileContentsFromArray tScriptA, tOutput
+   --   end if # tNeedUpdate
    
    # Check to see if we need to regenerate the builder dictionary
    local tModuleList
@@ -11105,7 +11114,7 @@ private command revIDEGenerateDistributedAPI
    
    set the itemdelimiter to slash
    put empty into tInputs
-   put revIDESpecialFolderPath("api", "livecode_builder") & slash & "builder.js" into tOutput
+   put ideGeneratedOutputFolder("builder") into tOutput
    put the effective filename of stack "revDocsParser" into tInputs[0]
    local tCount
    put 1 into tCount
@@ -11114,10 +11123,11 @@ private command revIDEGenerateDistributedAPI
       add 1 to tCount
    end repeat
    
-   put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate
+   put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate?
    
+   --put false into tNeedUpdate? # TODO: just a kludge
    # Regenerate dictionary if necessary
-   if tNeedUpdate then
+   if tNeedUpdate? then
       local tModularA, tModularCount, tBlocksA, tParsedA
       put 1 into tModularCount
       set the itemdelimiter to "."
@@ -11151,30 +11161,30 @@ private command revIDEGenerateDistributedAPI
       # Update the database
       ideDocsUpdateDatabase "livecode_builder", tBuilderA, true
       
-      put revDocsFormatLibraryDocArrayAsJSON(tBuilderA) into tJSON
-      revIDESetUTF8FileContents revIDESpecialFolderPath("api", "livecode_builder") & slash & "builder.js", \
-            tJSON
-   end if
+      ideSetFileContentsFromArray tBuilderA, tOutput
+   end if # tNeedUpdate
    
    # Check to see if we need to regenerate the datagrid docs
-   put empty into tInputs
-   put revIDESpecialFolderPath("api", "livecode_script") & slash & "dg.js" into tOutput
-   put the effective filename of stack "revDocsParser" into tInputs[0]
-   local tDatagridDoc, tFolder
-   put revIDESpecialFolderPath("Documentation") &"/dictionary" into tFolder
-   put tFolder & slash & "datagrid.lcdoc" into tInputs[1]
-   put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate
-   # Regenerate if necessary   
-   if tNeedUpdate then
-      local tLibA
-      put revDocsParseDocFileToLibraryArray(tFolder & slash & "datagrid.lcdoc", "DataGrid", "LiveCode") into tLibA
-
-      # Update the database
-      ideDocsUpdateDatabase "livecode_script", tLibA, true
-      put revDocsFormatLibraryDocArrayAsJSON(tLibA) into tJSON
-      revIDESetUTF8FileContents revIDESpecialFolderPath("api", "livecode_script") & slash & "dg.js", \
-            tJSON
-   end if
+   ideDocs.UpdateDatagridDocs.IfNecessary
+   
+   --   put empty into tInputs
+   --   put revIDESpecialFolderPath("api", "livecode_script") & slash & "dg.js" into tOutput
+   --   put the effective filename of stack "revDocsParser" into tInputs[0]
+   --   local tDatagridDoc, tFolder
+   --   put revIDESpecialFolderPath("Documentation") &"/dictionary" into tFolder
+   --   put tFolder & slash & "datagrid.lcdoc" into tInputs[1]
+   --   put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate?
+   
+   --   --put false into tNeedUpdate? # TODO: just a kludge
+   --   # Regenerate if necessary   
+   --   if tNeedUpdate? then
+   --      local tLibA
+   --      put revDocsParseDocFileToLibraryArray(tFolder & slash & "datagrid.lcdoc", "DataGrid", "LiveCode") into tLibA
+   
+   --      # Update the database
+   --      ideDocsUpdateDatabase "livecode_script", tLibA, true
+   --      ideSetFileContentsFromArray tLibA, tOutput
+   --   end if # tNeedUpdate
    
    local tIDELibsFolder, tIdeSupportFolder
    put tRepoPath & "/ide-support" into tIdeSupportFolder
@@ -11185,15 +11195,17 @@ private command revIDEGenerateDistributedAPI
    put the effective filename of stack "revDocsParser" into tInputs[0]
    put tIdeSupportFolder into tInputs[1]
    put tIDELibsFolder into tInputs[2]
-   put revIDESpecialFolderPath("api", "livecode_ide") & slash & "ide.js" into tOutput
+   put ideGeneratedOutputFolder("ide") into tOutput
    
-   put revIDEIsFilesetStale(tInputs, tOutput, true, tError) into tNeedUpdate
+   put revIDEIsFilesetStale(tInputs, tOutput, true, tError) into tNeedUpdate?
+   
+   --put false into tNeedUpdate? # TODO: just a kludge
    # Regenerate dictionary if necessary
-   if tNeedUpdate then
+   if tNeedUpdate? then
       local tIDELibs, tIDEA, tIDECount, tIDEParsedA
       put 1 into tIDECount
       put the stackfiles of stack "home" into tIDELibs
-      split tIDELibs by return and comma
+      split tIDELibs by cr and comma
       repeat for each key tStackName in tIDELibs
          local tStack, tPassword, tDoc
          try
@@ -11202,7 +11214,7 @@ private command revIDEGenerateDistributedAPI
          end try
          if tStack is not empty and tPassword is empty then
             put revDocsGenerateDocsFileFromText(the script of tStack, \ 
-               tStack) into tDoc
+                  tStack) into tDoc
          end if
          if tDoc is not empty then
             put tDoc into tIDEA[tIDECount]
@@ -11228,10 +11240,8 @@ private command revIDEGenerateDistributedAPI
       # Update the database
       ideDocsUpdateDatabase "livecode_ide", tIDELibraryA, true
       
-      put revDocsFormatLibraryDocArrayAsJSON(tIDELibraryA) into tJSON
-      revIDESetUTF8FileContents revIDESpecialFolderPath("api", "livecode_ide") & slash & "ide.js", \
-            tJSON
-   end if
+      ideSetFileContentsFromArray tIDELibraryA, tOutput
+   end if # tNeedUpdate
    
    local tExtractedDocsFolder
    put revEnvironmentBinariesPath() & slash & "extracted_docs" into tExtractedDocsFolder
@@ -11240,36 +11250,111 @@ private command revIDEGenerateDistributedAPI
    put files(tExtractedDocsFolder) into tFiles
    filter tFiles with "*.lcdoc"
    
-   set the itemDelimiter to "."
-   local tFile
    repeat for each line tFile in tFiles
-      # Check to see if we need to regenerate the docs
-      put empty into tInputs
-      put revIDESpecialFolderPath("api", "livecode_script") & slash & toLower(item 1 to -2 of tFile) & ".js" into tOutput
-      put the effective filename of stack "revDocsParser" into tInputs[0]
-      put tExtractedDocsFolder & slash & tFile into tInputs[1]
-      put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate
-      # Regenerate if necessary
-      if tNeedUpdate then
-         put revDocsParseDocFileToLibraryArray(tExtractedDocsFolder & slash & tFile, item -2 of tFile, "LiveCode") into tLibA
-         # Update the database
-         ideDocsUpdateDatabase "livecode_script", tLibA, true
-         put revDocsFormatLibraryDocArrayAsJSON(tLibA) into tJSON
-         revIDESetUTF8FileContents tOutput, tJSON
-      end if
+      ideGenerateDocsFromFile tFile, tExtractedDocsFolder
    end repeat
 end revIDEGenerateDistributedAPI
+
+private command ideDocs.UpdateScriptDictionary.IfNecessary pRepoPath
+   local tInputs, tOutput
+   local tDocsFolder
+
+   put pRepoPath & slash & "docs" into tDocsFolder
+   if there is not a folder tDocsFolder then
+      answer "No dictionary data found at" && tDocsFolder
+   end if
+   put the effective filename of stack "revDocsParser" into tInputs[0]
+   put tDocsFolder & slash & "dictionary" into tInputs[1]
+   put tDocsFolder & slash & "glossary" into tInputs[2]
+   put ideGeneratedOutputFolder("script") into tOutput
+   
+   local tNeedUpdate?, tError
+   put revIDEIsFilesetStale(tInputs, tOutput, true, tError) into tNeedUpdate?
+   
+   --put false into tNeedUpdate? # TODO: just a kludge
+   # Regenerate dictionary if necessary
+   if tNeedUpdate? then
+      local tScriptA
+      put "LiveCode Script" into tScriptA["display name"]
+      put revDocsModifyForUrl(tScriptA["display name"]) into tScriptA["name"]
+      put "LiveCode" into tScriptA["author"]
+      put "dictionary" into tScriptA["type"]
+      # Parse the dictionary files into a structured array
+      put revDocsParseDictionaryToLibraryArray(tDocsFolder) into tScriptA["doc"]
+      
+      # Update the database
+      ideDocsUpdateDatabase "livecode_script", tScriptA, true
+      
+      ideSetFileContentsFromArray tScriptA, tOutput
+   end if # tNeedUpdate
+end ideDocs.UpdateScriptDictionary.IfNecessary
+
+
+private command ideDocs.UpdateDatagridDocs.IfNecessary
+   local tInputs, tOutput, tError
+   
+   put empty into tInputs
+   put revIDESpecialFolderPath("api", "livecode_script") & slash & "dg.js" into tOutput
+   put the effective filename of stack "revDocsParser" into tInputs[0]
+   local tDatagridDoc, tFolder
+   put revIDESpecialFolderPath("Documentation") &"/dictionary" into tFolder
+   put tFolder & slash & "datagrid.lcdoc" into tInputs[1]
+   local tNeedUpdate?
+   put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate?
+   
+   --put false into tNeedUpdate? # TODO: just a kludge
+   # Regenerate if necessary   
+   if tNeedUpdate? then
+      local tLibA
+      put revDocsParseDocFileToLibraryArray(tFolder & slash & "datagrid.lcdoc", "DataGrid", "LiveCode") into tLibA
+      
+      # Update the database
+      ideDocsUpdateDatabase "livecode_script", tLibA, true
+      ideSetFileContentsFromArray tLibA, tOutput
+   end if # tNeedUpdate
+end ideDocs.UpdateDatagridDocs.IfNecessary
+
+private command ideSetFileContentsFromArray pArray, pOutputPath
+   local tJSON
+   
+   put revDocsFormatLibraryDocArrayAsJSON(pArray) into tJSON
+   revIDESetUTF8FileContents pOutputPath, tJSON
+end ideSetFileContentsFromArray
+
+private command ideGenerateDocsFromFile pFile, pFolder
+   local tInputs, tOutput
+   local tNeedUpdate?
+   local tError
+   
+   # Check to see if we need to regenerate the docs
+   set the itemDelimiter to "."
+   put empty into tInputs
+   put revIDESpecialFolderPath("api", "livecode_script") & slash & toLower(item 1 to -2 of pFile) & ".js" into tOutput
+   put the effective filename of stack "revDocsParser" into tInputs[0]
+   put pFolder & slash & pFile into tInputs[1]
+   put revIDEIsFilesetStale(tInputs, tOutput, false, tError) into tNeedUpdate?
+   
+   --put false into tNeedUpdate? # TODO: just a kludge
+   # Regenerate if necessary
+   local tLibA, tJSON
+   if tNeedUpdate? then
+      put revDocsParseDocFileToLibraryArray(pFolder & slash & pFile, item -2 of pFile, "LiveCode") into tLibA
+      # Update the database
+      ideDocsUpdateDatabase "livecode_script", tLibA, true
+      ideSetFileContentsFromArray tLibA, tOutput
+   end if
+end ideGenerateDocsFromFile
 
 on revIDEEnsureDictionaryUrl pWhich
    local tInput, tOutput
    put revIDEGetDictionaryHTMLTemplate(pWhich) into tInput
    put revIDEGetDictionaryUrl(pWhich) into tOutput
 
-   local tNeedUpdate, tError
+   local tNeedUpdate?, tError
    put revIDEIsFilesetStale(revIDEGetDictionaryHTMLTemplate(pWhich), \
-         revIDEGetDictionaryUrl(pWhich), false, tError) into tNeedUpdate
+         revIDEGetDictionaryUrl(pWhich), false, tError) into tNeedUpdate?
 
-   if tNeedUpdate is true then
+   if tNeedUpdate? is true then
       revIDEGenerateDictionaryHTML pWhich
    end if
 end revIDEEnsureDictionaryUrl
@@ -12042,13 +12127,14 @@ function revIDEIsFilesetStale pInputs, pOutputs, pRecursive, @rError
       return tInputTimes["max"] > tOutputTimes["min"]
    catch tError
       put tError into rError
-      return empty
+      throw terror
+      return true
    end try
 end revIDEIsFilesetStale
 
 -- Converts pFileset to an array of at least one element and returns it.
 -- Return false if pFileset is an empty array or the empty string.
-function __CheckFileset pFileset
+private function __CheckFileset pFileset
    if pFileset is an array then
       if the number of elements in pFileset is 0 then
          return false
@@ -12076,7 +12162,7 @@ end __CheckFileset
 -- If pAllowMissing is true, return false on encountering a missing
 -- file; otherwise, it is an error for pFileset to contain a
 -- missing file.
-private function __ScanFilesetMTimes pFileset, pRecursive, pAllowMissing
+private function __ScanFilesetMTimes pFileset, pRecursive?, pAllowMissing?
    local tResult
    put empty into tResult["min"]
    put 0 into tResult["max"]
@@ -12087,7 +12173,7 @@ private function __ScanFilesetMTimes pFileset, pRecursive, pAllowMissing
 
    local tFilename
    repeat for each element tFilename in pFileset
-      if not __ScanFileMTime(tFilename, pRecursive, pAllowMissing, \
+      if not __ScanFileMTime(tFilename, pRecursive?, pAllowMissing?, \
             tResult["min"], tResult["max"]) then
          return false
       end if
@@ -12096,7 +12182,7 @@ private function __ScanFilesetMTimes pFileset, pRecursive, pAllowMissing
    return tResult
 end __ScanFilesetMTimes
 
-private function __ScanFileMTime pFilename, pRecursive, pAllowMissing, \
+private function __ScanFileMTime pFilename, pRecursive?, pAllowMissing?, \
       @xMin, @xMax
    
    local tDirname, tBasename
@@ -12131,7 +12217,7 @@ private function __ScanFileMTime pFilename, pRecursive, pAllowMissing, \
    -- Directory
    local tContents, tInnerFilename
    if there is a folder pFilename then
-      if pRecursive then
+      if pRecursive? then
          
          -- List directory contents
          revIDEPushDefaultFolder pFilename
@@ -12155,7 +12241,7 @@ private function __ScanFileMTime pFilename, pRecursive, pAllowMissing, \
          -- Recursively scan files & folders
          repeat for each line tInnerFilename in tContents
             put pFilename & slash before tInnerFilename
-            if not __ScanFileMTime(tInnerFilename, pRecursive, pAllowMissing, xMin, xMax) then
+            if not __ScanFileMTime(tInnerFilename, pRecursive?, pAllowMissing?, xMin, xMax) then
                return false
             end if
          end repeat
@@ -12163,11 +12249,11 @@ private function __ScanFileMTime pFilename, pRecursive, pAllowMissing, \
          return true
       else
          throw "Failed to check modification time: unexpected folder" && pFilename
-      end if
+      end if # pRecursive? 
    end if
    
    -- Missing
-   if pAllowMissing then
+   if pAllowMissing? then
       return false
    else
       throw "Failed to check modification time: missing file" && pFilename
@@ -12262,36 +12348,36 @@ on revIDEFindMoreWidgets
    unlock screen
 end revIDEFindMoreWidgets
 
-command ideShowUpgradeOptions
-   if ideCanShowUpgradeOptions() then
-      lock screen
-      if the mode of stack revIDEPaletteToStackName("start center") is 0 then
-         revIDEOpenPalette "start center"
-      end if
-      dispatch "ideAction" to stack revIDEPaletteToStackName("start center") with "launchAdWithUrl"
-      unlock screen
-   else if ideShouldShowUpgradeOptions() then
-      local tUpgradeEdition
-      put revEnvironmentEditionProperty("upgrade_edition") into tUpgradeEdition
-      launch url revEnvironmentEditionProperty("edition_external_url", tUpgradeEdition)
-   end if
-end ideShowUpgradeOptions
+--command ideShowUpgradeOptions
+--   if ideCanShowUpgradeOptions?() then
+--      lock screen
+--      if the mode of stack revIDEPaletteToStackName("start center") is 0 then
+--         revIDEOpenPalette "start center"
+--      end if
+--      dispatch "ideAction" to stack revIDEPaletteToStackName("start center") with "launchAdWithUrl"
+--      unlock screen
+--   else if ideShouldShowUpgradeOptions?() then
+--      local tUpgradeEdition
+--      put revEnvironmentEditionProperty("upgrade_edition") into tUpgradeEdition
+--      launch url revEnvironmentEditionProperty("edition_external_url", tUpgradeEdition)
+--   end if
+--end ideShowUpgradeOptions
 
-function ideCanShowUpgradeOptions
-   return ideShouldShowUpgradeOptions() \
-         and hasConnection() \
-         and not revIDEBrowserWidgetUnavailable()
-end ideCanShowUpgradeOptions
+function ideCanShowUpgradeOptions?
+   return ideShouldShowUpgradeOptions?() \
+         and hasConnection?() \
+         and not revIDEBrowserWidgetUnavailable?()
+end ideCanShowUpgradeOptions?
 
-function ideShouldShowUpgradeOptions
+function ideShouldShowUpgradeOptions?
    return \
          revEnvironmentEditionProperty("upgrade_mini_url") is not empty \
          and revEnvironmentEditionProperty("upgrade_edition") is not empty
-end ideShouldShowUpgradeOptions
+end ideShouldShowUpgradeOptions?
 
-private function hasConnection
+private function hasConnection?
    return url("http://google.com/") is not empty
-end hasConnection
+end hasConnection?
 
 on ideDesktopChanged
    ideSetWindowBoundingRect
@@ -12331,3 +12417,7 @@ command ideSetWindowBoundingRect
       set the windowBoundingRect to tWindowRect
    end if
 end ideSetWindowBoundingRect
+
+private function q pText
+   return quote & pText & quote
+end q

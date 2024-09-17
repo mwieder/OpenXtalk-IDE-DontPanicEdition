@@ -1986,8 +1986,8 @@ function revEnvironmentEditionProperty pProp, pEdition
       return revEnvironmentToolsetPath() & "/resources/" & pEdition & "/ideSkin"
    end if
    
-	put "openxtalk" into pEdition
-
+   put "openxtalk" into pEdition
+   
    switch pEdition
       case "community"
          switch pProp
@@ -2020,8 +2020,10 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "edition_external_url"
                return "https://livecode.com/products/community-edition/"
             case "autocomplete"
+               return there is a stack "autocomplete"
             case "autocomplete_pro"
-               return false
+               return there is a stack "autocomplete-pro"
+               --return false
             case "script_profiler"
                return false
          end switch
@@ -2086,7 +2088,7 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "open_source_required"
                return false
             case "splash_strap"
-                  return empty
+               return empty
             case "upgrade_mini_url"
                return empty
             case "upgrade_url"
@@ -2104,7 +2106,7 @@ function revEnvironmentEditionProperty pProp, pEdition
          break
       case "business"
       case "professional"
-		case "openxtalk"
+      case "openxtalk"
          switch pProp
             case "name"
                return "Business"

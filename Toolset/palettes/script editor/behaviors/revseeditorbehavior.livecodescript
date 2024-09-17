@@ -1,4 +1,4 @@
-﻿script "revSEEditorBehavior"
+﻿script "revSEEditorBehavior" with behavior "com.livecode.scripteditor.behavior.editorcommon"
 # Stores the following mapping
 #  <handler name>,type   => string representing the handler type eg PF for private function
 # <handler name>,start  => line offset to start of handler
@@ -1050,7 +1050,7 @@ private command prepareContextMenu
    put tGoToDefinition & return into tText
    put "Find in" & return after tText
    
-   if not revIDEBrowserWidgetUnavailable() then
+   if not revIDEBrowserWidgetUnavailable?() then
       put tab & "Docs" & return after tText
    end if
    

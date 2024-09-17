@@ -43,7 +43,7 @@ private command subscribeMessages
 end subscribeMessages
 
 local sTextMenuDisabledText, sTextMenuText, sPluginMenuText
-on setDefaultText
+command setDefaultText
    setupTextMenu
 end setDefaultText
 
@@ -307,21 +307,20 @@ on ideToggleChanged pToggle
       default
          break
    end switch
-   
 end ideToggleChanged
 
 on idePluginsChanged
    setupDevelopmentMenu
 end idePluginsChanged
 
-on generateMenu
+command generateMenu
    generateMenubarUI
    generateMenuGroup
    generateContextMenu
 end generateMenu
 
 constant kTutorialActionSize = 10
-on generateMenubarUI
+private command generateMenubarUI
    if there is a group "icons" of me then
       delete group "icons" of me
    end if
@@ -488,7 +487,7 @@ private command generateUpgradeGroup
    hide group "upgrade" of me
 end generateUpgradeGroup
 
-on generateMenuGroup
+private command generateMenuGroup
    lock messages
    if there is a group "revMenuBar" of me then
       delete group "revMenuBar" of me
@@ -550,7 +549,7 @@ on generateMenuGroup
    unlock messages
 end generateMenuGroup
 
-on generateContextMenu
+command generateContextMenu
    if there is a button "context" of me then
       delete button "context" of me
    end if
@@ -642,7 +641,7 @@ on layoutMenu
       set the left of group "tutorial" of me to tLeft
       
       add the width of group "tutorial" of me + kPadding to tLeft
-   else if ideShouldShowUpgradeOptions() then
+   else if ideShouldShowUpgradeOptions?() then
       hide group "tutorial" of me
       
       add kPadding/2 to tLeft
@@ -1023,7 +1022,7 @@ on mouseUp
       else if tTarget is "skip" then
          revIDETutorialSkipToNextSkipPoint
       end if
-   else if the short name of the owner of the target is "upgrade" then
+      else if the short name of the owner of the target is "upgrade" then
       local tStartCenterClassic
       put revIDEGetPreference("StartCenterClassic") into tStartCenterClassic
       revIDESetPreference "StartCenterClassic", true
@@ -2381,8 +2380,8 @@ function toggleMenuItem pItem, pHilited?
    return tMenuItem
 end toggleMenuItem
 
-function markMenuItem pItem, pMarked
-   if pMarked then
+function markMenuItem pItem, pMarked?
+   if pMarked? then
       return "!r" & pItem
    end if
    return "!u" & pItem

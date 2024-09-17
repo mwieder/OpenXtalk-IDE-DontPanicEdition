@@ -754,7 +754,7 @@ on ideAction pAction, pUrl
 end ideAction
 
 private command showUpgradeMini
-   if ideCanShowUpgradeOptions() and \ 
+   if ideCanShowUpgradeOptions?() and \ 
          the cTutorialOverride of me is not true then
       showBrowser "UpgradeMini", \
             revEnvironmentEditionProperty("upgrade_mini_url")

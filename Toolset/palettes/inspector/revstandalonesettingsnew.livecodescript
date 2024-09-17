@@ -20,7 +20,8 @@ on preOpenStack
    dispatch "setAsBehavior" to revIDEInspectorBehavior() with the long id of me
 end preOpenStack
 
-on openStack   
+on openStack
+   answer "I'm opening stack revStandaloneSettingsNew"
    lock screen
    # Register of IDE messages
    revIDESubscribe "ideSelectedObjectChanged"
