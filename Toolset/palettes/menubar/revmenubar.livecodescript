@@ -156,7 +156,7 @@ private function menubar.EscapeStackNameForMenu pName
 end menubar.EscapeStackNameForMenu
 
 local sWindowMenuWindows
-private on setupWindowMenu
+private command setupWindowMenu
    #   Set sWindowMenuText to a list of open Windows in suitable format for putting into a menu button.
    #   This will be any script editors or the dictionary or resource center if they are open, and any user stacks.
    local tWindows
@@ -173,7 +173,7 @@ private on setupWindowMenu
    repeat for each line tStack in tWindows
       if there is not a stack tStack then next repeat
       put the short name of tStack into tStackName
-      if revIDEStackIsIDEWindow(tStackName) then
+      if ide.StackIsIDEWindow?(tStackName) then
          put the title of tStack into tStackName
       end if
       
