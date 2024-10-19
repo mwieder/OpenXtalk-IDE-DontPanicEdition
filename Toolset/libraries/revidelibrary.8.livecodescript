@@ -9464,169 +9464,169 @@ function revIDEStackFileIsScriptOnly pStackFile
          revIDEFlipGraphics the selobj, pOrientation
       end revIDEActionFlipGraphic
       
-      on revIDEFlipGraphics pGraphics, pOrientation
-         # Make sure targets are all graphics
-         if not revIDEEnsureControlsOfType(pGraphics, "graphic") then
-            exit revIDEFlipGraphics
-         end if
+on revIDEFlipGraphics pGraphics, pOrientation
+   # Make sure targets are all graphics
+   if not revIDEEnsureControlsOfType(pGraphics, "graphic") then
+      exit revIDEFlipGraphics
+   end if
+   
+   repeat for each line tGraphic in pGraphics
+      local tPoints, tNewPoints
+      put the points of tGraphic into tPoints
+      
+      if pOrientation is "Horizontal" then
+         ## 2014-08-20 EJB [[Bug 13191]]
+         --flip graphic horizontally
+         local tLeft, tRight
+         put the left of tGraphic into tLeft
+         put the right of tGraphic into tRight
          
-         repeat for each line tGraphic in pGraphics
-            local tPoints, tNewPoints
-            put the points of tGraphic into tPoints
+         repeat for each line tPoint in tPoints
+            -- added BN in case a line is empty
+            if tPoint is empty then
+               put cr after tNewPoints
+               next repeat
+            end if
             
-            if pOrientation is "Horizontal" then
-               ## 2014-08-20 EJB [[Bug 13191]]
-               --flip graphic horizontally
-               local tLeft, tRight
-               put the left of tGraphic into tLeft
-               put the right of tGraphic into tRight
-               
-               repeat for each line tPoint in tPoints
-                  -- added BN in case a line is empty
-                  if tPoint is empty then
-                     put cr after tNewPoints
-                     next repeat
-                  end if
-                  
-                  put tLeft + tRight - item 1 of tPoint, item 2 of tPoint & cr after tNewPoints
-               end repeat
-            else
-               --flip graphic vertically
-               local tTop, tBottom
-               put the top of tGraphic into tTop
-               put the bottom of tGraphic into tBottom
-               repeat for each line tPoint in tPoints
-                  -- added BN in case a line is empty
-                  if tPoint is empty then
-                     put cr after tNewPoints
-                     next repeat
-                  end if
-                  
-                  put item 1 of tPoint, tTop + tBottom - item 2 of tPoint & cr after tNewPoints
-               end repeat
-            end if
-            set the points of tGraphic to tNewPoints
+            put tLeft + tRight - item 1 of tPoint, item 2 of tPoint & cr after tNewPoints
          end repeat
-      end revIDEFlipGraphics
-      
-      on revIDEFlipImages pImages, pOrientation
-         # Make sure targets are all images
-         if not revIDEEnsureControlsOfType(pImages, "image") then
-            exit revIDEFlipImages
-         end if
-         
-         lock screen
-         repeat for each line tImage in pImages
-            # Flip command can parse arbitrary image chunk expressions as of 6.7.8
-            local tImageLongID
-            put the long id of tImage into tImageLongID
-            if pOrientation is "Horizontal" then
-               flip tImageLongID horizontal
-            else
-               flip tImageLongID vertical
+      else
+         --flip graphic vertically
+         local tTop, tBottom
+         put the top of tGraphic into tTop
+         put the bottom of tGraphic into tBottom
+         repeat for each line tPoint in tPoints
+            -- added BN in case a line is empty
+            if tPoint is empty then
+               put cr after tNewPoints
+               next repeat
             end if
+            
+            put item 1 of tPoint, tTop + tBottom - item 2 of tPoint & cr after tNewPoints
          end repeat
-         unlock screen
-      end revIDEFlipImages
+      end if
+      set the points of tGraphic to tNewPoints
+   end repeat
+end revIDEFlipGraphics
       
-      on revIDEActionRotateImageBy
-         modal "revRotate"
-         if the cRotateImage of stack "revRotate" is empty then exit revIDEActionRotateImageBy
-         
-         local tRotateImage
-         put the cRotateImage of stack "revRotate" into tRotateImage
-         
-         revIDEActionRotateImage tRotateImage
-      end revIDEActionRotateImageBy
+on revIDEFlipImages pImages, pOrientation
+   # Make sure targets are all images
+   if not revIDEEnsureControlsOfType(pImages, "image") then
+      exit revIDEFlipImages
+   end if
+   
+   lock screen
+   repeat for each line tImage in pImages
+      # Flip command can parse arbitrary image chunk expressions as of 6.7.8
+      local tImageLongID
+      put the long id of tImage into tImageLongID
+      if pOrientation is "Horizontal" then
+         flip tImageLongID horizontal
+      else
+         flip tImageLongID vertical
+      end if
+   end repeat
+   unlock screen
+end revIDEFlipImages
+      
+on revIDEActionRotateImageBy
+   modal "revRotate"
+   if the cRotateImage of stack "revRotate" is empty then exit revIDEActionRotateImageBy
+   
+   local tRotateImage
+   put the cRotateImage of stack "revRotate" into tRotateImage
+   
+   revIDEActionRotateImage tRotateImage
+end revIDEActionRotateImageBy
       
       on revIDEActionRotateImage pAngle
          revIDERotateImages the selobj, pAngle
       end revIDEActionRotateImage
       
-      private command rotateImageByLongID pLongID, pAngle
-         # Force the image reference to begin with the explicit token 'image'
-         local tStack
-         put revIDEStackOfObject(pLongID) into tStack
-         
-         local tImageID
-         put the id of pLongID into tImageID
-         rotate image id tImageID of stack tStack by pAngle
-      end rotateImageByLongID
+private command rotateImageByLongID pLongID, pAngle
+   # Force the image reference to begin with the explicit token 'image'
+   local tStack
+   put revIDEStackOfObject(pLongID) into tStack
+   
+   local tImageID
+   put the id of pLongID into tImageID
+   rotate image id tImageID of stack tStack by pAngle
+end rotateImageByLongID
       
-      on revIDERotateImages pImages, pAngle
-         # Make sure targets are all images
-         if not revIDEEnsureControlsOfType(pImages, "image") then
-            exit revIDERotateImages
-         end if
-         
-         lock screen
-         local tPreviousImageQualitySetting
-         repeat for each line tImage in pImages
-            local tImageLongID
-            put the long id of tImage into tImageLongID
-            put the resizeQuality of tImageLongID into tPreviousImageQualitySetting
-            set the resizeQuality of tImageLongID to "best"
-            # Arbitrary chunk expressions do not work with rotate command
-            rotateImageByLongID tImageLongID, pAngle
-            set the resizeQuality of tImageLongID to tPreviousImageQualitySetting
-         end repeat
-         revIDESetTool "pointer"
-         unlock screen
-      end revIDERotateImages
+on revIDERotateImages pImages, pAngle
+   # Make sure targets are all images
+   if not revIDEEnsureControlsOfType(pImages, "image") then
+      exit revIDERotateImages
+   end if
+   
+   lock screen
+   local tPreviousImageQualitySetting
+   repeat for each line tImage in pImages
+      local tImageLongID
+      put the long id of tImage into tImageLongID
+      put the resizeQuality of tImageLongID into tPreviousImageQualitySetting
+      set the resizeQuality of tImageLongID to "best"
+      # Arbitrary chunk expressions do not work with rotate command
+      rotateImageByLongID tImageLongID, pAngle
+      set the resizeQuality of tImageLongID to tPreviousImageQualitySetting
+   end repeat
+   revIDESetTool "pointer"
+   unlock screen
+end revIDERotateImages
       
-      on revIDEActionRotateGraphicBy
-         modal "revRotate"
-         if the cRotateGraphic of stack "revRotate" is empty then exit revIDEActionRotateGraphicBy
-         
-         local tRotateGraphic
-         put the cRotateGraphic of stack "revRotate" into tRotateGraphic
-         
-         revIDEActionRotateGraphic tRotateGraphic
-      end revIDEActionRotateGraphicBy
+on revIDEActionRotateGraphicBy
+   modal "revRotate"
+   if the cRotateGraphic of stack "revRotate" is empty then exit revIDEActionRotateGraphicBy
+   
+   local tRotateGraphic
+   put the cRotateGraphic of stack "revRotate" into tRotateGraphic
+   
+   revIDEActionRotateGraphic tRotateGraphic
+end revIDEActionRotateGraphicBy
       
-      on revIDEActionRotateGraphic pAngle
-         revIDERotateGraphics the selobj, pAngle
-      end revIDEActionRotateGraphic
+on revIDEActionRotateGraphic pAngle
+   revIDERotateGraphics the selobj, pAngle
+end revIDEActionRotateGraphic
+
+on revIDERotateGraphics pGraphics, pAngle
+   # Make sure targets are all graphics
+   if not revIDEEnsureControlsOfType(pGraphics, "graphic") then
+      exit revIDERotateGraphics
+   end if
+   
+   lock screen
+   repeat for each line tLine in pGraphics
+      revRotatePoly tLine, pAngle
+   end repeat
+   revIDESetTool "pointer"
+   unlock screen
+end revIDERotateGraphics
       
-      on revIDERotateGraphics pGraphics, pAngle
-         # Make sure targets are all graphics
-         if not revIDEEnsureControlsOfType(pGraphics, "graphic") then
-            exit revIDERotateGraphics
-         end if
-         
-         lock screen
-         repeat for each line tLine in pGraphics
-            revRotatePoly tLine, pAngle
-         end repeat
-         revIDESetTool "pointer"
-         unlock screen
-      end revIDERotateGraphics
+function revIDEEnsureControlsOfType pControls, pType
+   repeat for each line tControl in pControls
+      if word 1 of tControl is not pType then
+         return false
+      end if
+   end repeat
+   return true
+end revIDEEnsureControlsOfType
       
-      function revIDEEnsureControlsOfType pControls, pType
-         repeat for each line tControl in pControls
-            if word 1 of tControl is not pType then
-               return false
-            end if
-         end repeat
-         return true
-      end revIDEEnsureControlsOfType
-      
-      on revIDESetModeOfStack pStack, pMode
-         switch pMode
-            case "modeless"
-               modeless pStack
-               break
-            case "palette"
-               palette pStack
-               break
-            case "toplevel"
-               toplevel pStack
-               break
-            case "modal"
-               modal pStack
-               break
-         end switch
-      end revIDESetModeOfStack
+on revIDESetModeOfStack pStack, pMode
+   switch pMode
+      case "modeless"
+         modeless pStack
+         break
+      case "palette"
+         palette pStack
+         break
+      case "toplevel"
+         toplevel pStack
+         break
+      case "modal"
+         modal pStack
+         break
+   end switch
+end revIDESetModeOfStack
       
       ////////////////////////////////////////////////////////////////////////////////
       
@@ -9634,23 +9634,23 @@ function revIDEStackFileIsScriptOnly pStackFile
       #   pModeNumber : the value of the "mode" property of an open stack
       # Returns
       #   What style that mode corresponds to.
-      private function stackModeName pModeNumber
-         switch pModeNumber
-            case 1
-            case 2
-               return "toplevel"
-               break
-            case 3
-               return "modeless"
-               break
-            case 4
-               return "palette"
-               break
-            case 5
-               return "modal"
-               break
-         end switch
-      end stackModeName
+private function stackModeName pModeNumber
+   switch pModeNumber
+      case 1
+      case 2
+         return "toplevel"
+         break
+      case 3
+         return "modeless"
+         break
+      case 4
+         return "palette"
+         break
+      case 5
+         return "modal"
+         break
+   end switch
+end stackModeName
       
       -- Suspend Development Tools
       --   Removes all IDE related backscripts and stacks so that an application can
@@ -9666,100 +9666,100 @@ function revIDEStackFileIsScriptOnly pStackFile
       --  Note at present, holding down shift will cause *all* back and front
       --  scripts to be removed including library scripts such as Table, PrintBack etc.
       --
-      command revIDESuspendDevelopmentTools
-         global gREVRestore
-         
-         -- Store the old setting of scriptdebugmode and disable it
-         put revIDEGetPreference("cREVScriptDebugMode") into gREVRestore["scriptdebugmode"]
-         
-         revIDESetPreference "cREVScriptDebugMode",false
-         
-         # OK-2008-05-23 : Suspend any script editors.
-         send "revSESuspendEditors" to revScriptEditorMain()
-         
-         -- Remove front and back scripts that pertain to the IDE
-         -- If the shift-key is down, we remove *all* 'rev' front and back scripts, including
-         -- the library scripts.
-         local tScriptsList, tRemoveFrontList, tRemoveBackList, tLine
-         select empty
-         if the shiftKey is down then
-            put the frontScripts into tScriptsList
-            repeat for each line tLine in tScriptsList
-               if revIDEObjectIsOnIDEStack(tLine) then
-                  put tLine & cr after tRemoveFrontList
-                  remove script of tLine from front
-               end if
-            end repeat
-            put the backScripts into tScriptsList
-            repeat for each line tLine in tScriptsList
-               if revIDEObjectIsOnIDEStack(tLine) then
-                  put tLine & cr after tRemoveBackList
-                  remove script of tLine from back
-               end if
-            end repeat
-         else
-            put the frontScripts into tScriptsList
-            repeat for each line tLine in tScriptsList
-               if the short name of tLine is among the items of "revFrontScriptLibrary,revDebuggerLibrary,revShortCutsLibrary" then
-                  put tLine & cr after tRemoveFrontList
-                  remove script of tLine from front
-               end if
-            end repeat
-            put the backScripts into tScriptsList
-            repeat for each line tLine in tScriptsList
-               if the short name of tLine is "revBackScriptLibrary,revShortCutsLibrary" then
-                  put tLine & cr after tRemoveBackList
-                  remove script of tLine from back
-               end if
-            end repeat
+command revIDESuspendDevelopmentTools
+   global gREVRestore
+   
+   -- Store the old setting of scriptdebugmode and disable it
+   put revIDEGetPreference("cREVScriptDebugMode") into gREVRestore["scriptdebugmode"]
+   
+   revIDESetPreference "cREVScriptDebugMode",false
+   
+   # OK-2008-05-23 : Suspend any script editors.
+   send "revSESuspendEditors" to revScriptEditorMain()
+   
+   -- Remove front and back scripts that pertain to the IDE
+   -- If the shift-key is down, we remove *all* 'rev' front and back scripts, including
+   -- the library scripts.
+   local tScriptsList, tRemoveFrontList, tRemoveBackList, tLine
+   select empty
+   if the shiftKey is down then
+      put the frontScripts into tScriptsList
+      repeat for each line tLine in tScriptsList
+         if revIDEObjectIsOnIDEStack(tLine) then
+            put tLine & cr after tRemoveFrontList
+            remove script of tLine from front
          end if
-         delete last char of tRemoveBackList
-         delete last char of tRemoveFrontList
-         
-         -- Close all Revolution IDE stacks
-         local tList, tMode, tClosedStacksList
-         put the openStacks into tList
-         lock messages
-         repeat for each line tStack in tList
-            if revIDEStackNameIsIDEStack(tStack) then
-               # OK-2008-05-23 : Compare the stack's mode to its style. If they are equal then we don't need to store the mode, as opening the 
-               # stack will result in the default mode being that which matches its style.
-               local tModeName
-               put stackModeName(the mode of stack tStack) into tModeName
-               if tModeName is the style of stack tStack then
-                  put empty into tMode
-               else
-                  put tModeName into tMode
-               end if
-               close stack tStack
-               put tStack,tMode & return after tClosedStacksList
-            end if
-         end repeat
-         delete last char of tClosedStacksList
-         
-         -- Switch to browser tool
-         put the tool into gREVRestore["tool"]
-         choose browse tool
-         
-         put tRemoveBackList into gREVRestore["backscripts"]
-         put tRemoveFrontList into gREVRestore["frontScripts"]
-         put tClosedStacksList into gREVRestore["stacks"]
-         
-         -- Reset the windowBoundingRect
-         local tWindowRect
-         put revIDEStackScreenRect(the short name of the topStack, true) into tWindowRect
-         set the windowBoundingRect to tWindowRect
-         
-         -- Show the restore dialog
-         lock recent
-         palette "revRestore"
-         unlock recent
-         
-         -- Setup the default menubar to one specific to this mode
-         set the defaultMenuBar to the long id of group "Restore Development Tools" of stack "revRestore"
-         
-         unlock messages
-      end revIDESuspendDevelopmentTools
+      end repeat
+      put the backScripts into tScriptsList
+      repeat for each line tLine in tScriptsList
+         if revIDEObjectIsOnIDEStack(tLine) then
+            put tLine & cr after tRemoveBackList
+            remove script of tLine from back
+         end if
+      end repeat
+   else
+      put the frontScripts into tScriptsList
+      repeat for each line tLine in tScriptsList
+         if the short name of tLine is among the items of "revFrontScriptLibrary,revDebuggerLibrary,revShortCutsLibrary" then
+            put tLine & cr after tRemoveFrontList
+            remove script of tLine from front
+         end if
+      end repeat
+      put the backScripts into tScriptsList
+      repeat for each line tLine in tScriptsList
+         if the short name of tLine is "revBackScriptLibrary,revShortCutsLibrary" then
+            put tLine & cr after tRemoveBackList
+            remove script of tLine from back
+         end if
+      end repeat
+   end if
+   delete last char of tRemoveBackList
+   delete last char of tRemoveFrontList
+   
+   -- Close all Revolution IDE stacks
+   local tList, tMode, tClosedStacksList
+   put the openStacks into tList
+   lock messages
+   repeat for each line tStack in tList
+      if revIDEStackNameIsIDEStack(tStack) then
+         # OK-2008-05-23 : Compare the stack's mode to its style. If they are equal then we don't need to store the mode, as opening the 
+         # stack will result in the default mode being that which matches its style.
+         local tModeName
+         put stackModeName(the mode of stack tStack) into tModeName
+         if tModeName is the style of stack tStack then
+            put empty into tMode
+         else
+            put tModeName into tMode
+         end if
+         close stack tStack
+         put tStack,tMode & return after tClosedStacksList
+      end if
+   end repeat
+   delete last char of tClosedStacksList
+   
+   -- Switch to browser tool
+   put the tool into gREVRestore["tool"]
+   choose browse tool
+   
+   put tRemoveBackList into gREVRestore["backscripts"]
+   put tRemoveFrontList into gREVRestore["frontScripts"]
+   put tClosedStacksList into gREVRestore["stacks"]
+   
+   -- Reset the windowBoundingRect
+   local tWindowRect
+   put revIDEStackScreenRect(the short name of the topStack, true) into tWindowRect
+   set the windowBoundingRect to tWindowRect
+   
+   -- Show the restore dialog
+   lock recent
+   palette "revRestore"
+   unlock recent
+   
+   -- Setup the default menubar to one specific to this mode
+   set the defaultMenuBar to the long id of group "Restore Development Tools" of stack "revRestore"
+   
+   unlock messages
+end revIDESuspendDevelopmentTools
       
       -- Restore Development Tools
       --
@@ -10719,356 +10719,356 @@ function revIDEStackFileIsScriptOnly pStackFile
       #
       ##################################################
       
-      private function escape pString, pConvertLineEndings
-         replace "\" with "\\" in pString
-         replace quote with ("\" & quote) in pString
-         
-         if pConvertLineEndings is true then
-            replace CRLF with "\n" in pString
-            replace numToCodepoint(13) with "\n" in pString
+private function escape pString, pConvertLineEndings
+   replace "\" with "\\" in pString
+   replace quote with ("\" & quote) in pString
+   
+   if pConvertLineEndings is true then
+      replace CRLF with "\n" in pString
+      replace numToCodepoint(13) with "\n" in pString
+   end if
+   replace LF with "\n" in pString
+   replace numToCodepoint(13) with "\r" in pString
+   //replace "<" with "&lt;" in pString
+   //replace ">" with "&gt;" in pString
+   replace tab with "\t" in pString
+   return (q(pString))
+end escape
+      
+private function __getLCBSourceFile pFolder
+   revIDEPushDefaultFolder pFolder
+   # Isolate the source file
+   local tSource
+   put the files into tSource
+   filter tSource with "*.lcb"
+   revIDEPopDefaultFolder
+   return tSource
+end __getLCBSourceFile
+      
+private function revIDEGetBaseDocsData pWhich
+   local tData
+   
+   local tAPIPath, tLibs
+   put revIDESpecialFolderPath("api", pWhich) into tAPIPath
+   put files(tAPIPath) into tLibs
+   filter tLibs with "*.js"
+   local tDoc
+   repeat for each line tLibraryJS in tLibs
+      put revIDEUTF8FileContents(tAPIPath & slash & tLibraryJS) into tDoc
+      if tData is empty then
+         put tDoc into tData
+      else
+         put comma & tDoc after tData
+      end if
+   end repeat
+   
+   return tData
+end revIDEGetBaseDocsData 
+      
+private function revIDEGetExtensionDocsData pAPI
+   local tExtensionDocsDataA
+   put revIDEExtensionDocsData(pAPI) into tExtensionDocsDataA
+   
+   local tFolder, tCachedDataFolder
+   set the itemdelimiter to slash
+   
+   local tData
+   repeat for each element tExtensionData in tExtensionDocsDataA
+      local tExtensionAPI
+      put tExtensionData["folder"] into tFolder
+      
+      local tSource
+      put tExtensionData["source_file"] into tSource
+      
+      # Check if the lcdoc file is out of date
+      put revEnvironmentUserDocsPath() & slash & tExtensionData["name"] into tCachedDataFolder
+      revIDEEnsurePath tCachedDataFolder
+      
+      local tInputs
+      put empty into tInputs
+      if tSource is not empty then
+         put tFolder & slash & tSource into tInputs[1]
+      end if
+      
+      # If we are running from source, also add the docs parser as an input 
+      # dependency of the docs files
+      if not revEnvironmentIsInstalled() then
+         put the effective filename of stack "revDocsParser" into \
+               tInputs[the number of elements in tInputs + 1]
+      end if
+      
+      local tNeedUpdate?, tError, tAPIDoc
+      put tCachedDataFolder & slash & "api.lcdoc" into tAPIDoc
+      put revIDEIsFilesetStale(tInputs, tAPIDoc, false, tError) \
+            into tNeedUpdate?
+      
+      # If there is an up-to-date api.lcdoc in the source folder, just copy that across
+      local tSourceAPI
+      put tFolder & slash & "api.lcdoc" into tSourceAPI
+      if there is a file tSourceAPI then
+         if tSource is empty then
+            put false into tNeedUpdate?
+            if there is no file tAPIDoc then
+               revIDESetUTF8FileContents tAPIDoc, revIDEUTF8FileContents(tSourceAPI)
+            end if
+         else if tNeedUpdate? then
+            if revIDEIsFilesetStale(tInputs, tSourceAPI, false, tError) \
+                  is false then 
+               
+               revIDESetUTF8FileContents tAPIDoc, revIDEUTF8FileContents(tSourceAPI)
+               put false into tNeedUpdate?
+            end if 
          end if
-         replace LF with "\n" in pString
-         replace numToCodepoint(13) with "\r" in pString
-         //replace "<" with "&lt;" in pString
-         //replace ">" with "&gt;" in pString
-         replace tab with "\t" in pString
-         return (q(pString))
-      end escape
-      
-      private function __getLCBSourceFile pFolder
-         revIDEPushDefaultFolder pFolder
-         # Isolate the source file
-         local tSource
-         put the files into tSource
-         filter tSource with "*.lcb"
-         revIDEPopDefaultFolder
-         return tSource
-      end __getLCBSourceFile
-      
-      private function revIDEGetBaseDocsData pWhich
-         local tData
-         
-         local tAPIPath, tLibs
-         put revIDESpecialFolderPath("api", pWhich) into tAPIPath
-         put files(tAPIPath) into tLibs
-         filter tLibs with "*.js"
+      end if
+      # Regenerate the lcdoc file if required
+      if tNeedUpdate? is true then
+         # Generate the docs text in lcdoc format 
          local tDoc
-         repeat for each line tLibraryJS in tLibs
-            put revIDEUTF8FileContents(tAPIPath & slash & tLibraryJS) into tDoc
-            if tData is empty then
-               put tDoc into tData
-            else
-               put comma & tDoc after tData
+         if tExtensionData["source_type"] is "lcb" then
+            dispatch function "revDocsGenerateDocsFileFromModularFile" to stack "revDocsParser" with \
+                  tFolder & slash & tSource
+            put the result into tDoc
+         else if tExtensionData["source_type"] is "lcs" then
+            local tStack, tPassword
+            try
+               put the long id of stack (tFolder & slash & tSource) into tStack
+               put the password of tStack into tPassword
+            end try
+            if tStack is not empty and tPassword is empty then
+               dispatch function "revDocsGenerateDocsFileFromText" \
+                     to stack "revDocsParser" with \
+                     the script of tStack, tStack
+               put the result into tDoc
             end if
-         end repeat
-         
-         return tData
-      end revIDEGetBaseDocsData 
-      
-      private function revIDEGetExtensionDocsData pAPI
-         local tExtensionDocsDataA
-         put revIDEExtensionDocsData(pAPI) into tExtensionDocsDataA
-         
-         local tFolder, tCachedDataFolder
-         set the itemdelimiter to slash
-         
-         local tData
-         repeat for each element tExtensionData in tExtensionDocsDataA
-            local tExtensionAPI
-            put tExtensionData["folder"] into tFolder
-            
-            local tSource
-            put tExtensionData["source_file"] into tSource
-            
-            # Check if the lcdoc file is out of date
-            put revEnvironmentUserDocsPath() & slash & tExtensionData["name"] into tCachedDataFolder
-            revIDEEnsurePath tCachedDataFolder
-            
-            local tInputs
-            put empty into tInputs
-            if tSource is not empty then
-               put tFolder & slash & tSource into tInputs[1]
-            end if
-            
-            # If we are running from source, also add the docs parser as an input 
-            # dependency of the docs files
-            if not revEnvironmentIsInstalled() then
-               put the effective filename of stack "revDocsParser" into \
-                     tInputs[the number of elements in tInputs + 1]
-            end if
-            
-            local tNeedUpdate?, tError, tAPIDoc
-            put tCachedDataFolder & slash & "api.lcdoc" into tAPIDoc
-            put revIDEIsFilesetStale(tInputs, tAPIDoc, false, tError) \
-                  into tNeedUpdate?
-            
-            # If there is an up-to-date api.lcdoc in the source folder, just copy that across
-            local tSourceAPI
-            put tFolder & slash & "api.lcdoc" into tSourceAPI
-            if there is a file tSourceAPI then
-               if tSource is empty then
-                  put false into tNeedUpdate?
-                  if there is no file tAPIDoc then
-                     revIDESetUTF8FileContents tAPIDoc, revIDEUTF8FileContents(tSourceAPI)
-                  end if
-               else if tNeedUpdate? then
-                  if revIDEIsFilesetStale(tInputs, tSourceAPI, false, tError) \
-                        is false then 
-                     
-                     revIDESetUTF8FileContents tAPIDoc, revIDEUTF8FileContents(tSourceAPI)
-                     put false into tNeedUpdate?
-                  end if 
-               end if
-            end if
-            # Regenerate the lcdoc file if required
-            if tNeedUpdate? is true then
-               # Generate the docs text in lcdoc format 
-               local tDoc
-               if tExtensionData["source_type"] is "lcb" then
-                  dispatch function "revDocsGenerateDocsFileFromModularFile" to stack "revDocsParser" with \
-                        tFolder & slash & tSource
-                  put the result into tDoc
-               else if tExtensionData["source_type"] is "lcs" then
-                  local tStack, tPassword
-                  try
-                     put the long id of stack (tFolder & slash & tSource) into tStack
-                     put the password of tStack into tPassword
-                  end try
-                  if tStack is not empty and tPassword is empty then
-                     dispatch function "revDocsGenerateDocsFileFromText" \
-                           to stack "revDocsParser" with \
-                           the script of tStack, tStack
-                     put the result into tDoc
-                  end if
-               end if
-               if tDoc is not empty then
-                  # Output the lcdoc file
-                  revIDESetUTF8FileContents tAPIDoc, tDoc
-               end if
-            end if
-            
-            local tAPIJS
-            put tCachedDataFolder & "/api.js" into tAPIJS
-            # Check if the .js is out of date
-            if tNeedUpdate? is not true then
-               put tAPIDoc into tInputs[1]
-               put revIDEIsFilesetStale(tInputs, tAPIJS , false, tError) \
-                     into tNeedUpdate?
-            end if
-            
-            if tNeedUpdate? is false then
-               put revIDEUTF8FileContents(tAPIJS) into tExtensionAPI
-            else if tNeedUpdate? is true then
-               local tLibraryArray, Lcdoc
-               dispatch function "revDocsParseDocFileToLibraryArray" to stack "revDocsParser" \ 
-                     with tAPIDoc, tExtensionData["title"], \ 
-                     tExtensionData["author"]
-               put the result into tLibraryArray
-               
-               dispatch function "revDocsFormatLibraryDocArrayAsJSON" to stack "revDocsParser" \
-                     with tLibraryArray
-               put the result into tExtensionAPI
-               
-               # Update the dictionary database
-               ideDocsUpdateDatabase pAPI, tLibraryArray, false
-               
-               revIDESetUTF8FileContents tAPIJS, tExtensionAPI
-            end if
-            
-            if tExtensionAPI is not empty then
-               if tData is not empty then
-                  put comma & tExtensionAPI after tData
-               else
-                  put tExtensionAPI into tData
-               end if
-            end if
-         end repeat
-         return tData
-      end revIDEGetExtensionDocsData
-      
-      private function revIDEGetDocsAPIData pWhich
-         local tData, tExtensions
-         put revIDEGetBaseDocsData(pWhich) into tData
-         put revIDEGetExtensionDocsData(pWhich) into tExtensions
-         if tExtensions is not empty then
-            put comma & tExtensions after tData
          end if
-         return tData
-      end revIDEGetDocsAPIData 
-      
-      private function revIDEGetDocsGuideData
-         local tData
-         
-         local tGuidePath
-         put revIDESpecialFolderPath("guide") into tGuidePath
-         put revIDEUTF8FileContents(tGuidePath & slash & "distributed_guide.js") into tData
-         
-         local tExtensionDocsDataA
-         put revIDEExtensionDocsData() into tExtensionDocsDataA
-         
-         local tFolder, tCachedDataFolder
-         set the itemdelimiter to slash
-         repeat for each element tExtensionData in tExtensionDocsDataA
-            local tExtensionGuide, tGuideFile
-            put empty into tExtensionGuide
-            put tExtensionData["folder"] into tFolder
-            put revEnvironmentUserDocsPath() & slash & \ 
-                  tExtensionData["name"] into tCachedDataFolder
-            put tFolder & slash & "guide.md" into tGuideFile
-            if there is not a file tGuideFile then
-               -- User widgets have the guide.md in docs/guide/
-               put "/docs/guide" after tFolder
-               put tFolder & slash & "guide.md" into tGuideFile
-            end if
-            if there is not a file tGuideFile then next repeat
-            revIDEEnsurePath tCachedDataFolder
-            
-            # Check if the .js is out of date
-            local tNeedUpdate?, tError, tGuideJS
-            put tCachedDataFolder & "/guide.js" into tGuideJS
-            put revIDEIsFilesetStale(tGuideFile, tGuideJS, false, tError) \
-                  into tNeedUpdate?
-            
-            if tNeedUpdate? is false then
-               put revIDEUTF8FileContents(tGuideJS) into tExtensionGuide
-            else if tNeedUpdate? is true then
-               local tGuide
-               put revIDEUTF8FileContents(tGuideFile) into tGuide
-               
-               if tGuide is not empty then
-                  put "{" & CR after tExtensionGuide
-                  put tab & q("name") & ":" && q(tExtensionData["name"]) & comma & CR after tExtensionGuide
-                  put tab & q("display name") & ":" && q(tExtensionData["title"]) & comma & CR after tExtensionGuide
-                  put tab & q("group") & ":" && q("Extensions") & comma & CR after tExtensionGuide
-                  put tab & q("location") & ":" && q(tFolder) & comma & CR after tExtensionGuide
-                  put q("data") & ":" & escape(tGuide, true) & CR after tExtensionGuide
-                  put "}" after tExtensionGuide
-                  
-                  revIDESetUTF8FileContents tGuideJS, tExtensionGuide
-               end if
-            else
-               -- FIXME There is some inconsistency in the guide's files that we
-               -- can't cope with
-            end if
-            
-            if tExtensionGuide is not empty then
-               put comma & tExtensionGuide after tData
-            end if
-         end repeat
-         
-         return tData
-      end revIDEGetDocsGuideData
-      
-      on revIDERegenerateBuiltGuides
-         local tData
-         
-         # Get the location of the distributed guide
-         local tGuidePath
-         put revIDESpecialFolderPath("guide") into tGuidePath
-         
-         put "var tUserGuideData =" & CR & "{" & CR & tab & q("guides") & ":[" into tData
-         
-         put revIDEGetDocsGuideData() after tData
-         
-         put CR & tab & "]" & CR & "}" after tData
-         
-         local tDocsCache
-         put revIDESpecialFolderPath("documentation cache") into tDocsCache
-         revIDESetUTF8FileContents tDocsCache & slash & "built_guide.js", tData
-      end revIDERegenerateBuiltGuides
-      
-      constant kAPIs = "LiveCode Script,livecode_script|LiveCode Builder,livecode_builder|LiveCode IDE,livecode_ide"
-      on revIDERegenerateBuiltAPIs
-         local tData, tAPIData
-         set the lineDelimiter to "|"
-         repeat for each line tAPI in kAPIs
-            -- For now, the IDE API is BFS only
-            if item 2 of tAPI is "livecode_ide" and revEnvironmentIsInstalled() then
-               next repeat
-            end if
-            
-            put revIDEGetDocsAPIData(item 2 of tAPI) into tAPIData
-            dispatch function "revDocsCreateAPIJSON" to stack "revDocsParser" \
-                  with item 1 of tAPI, item 2 of tAPI, "", tAPIData
-            if tData is empty then
-               put the result into tData
-            else
-               put comma & the result after tData
-            end if
-         end repeat
-         
-         local tDictionaryData
-         put "var dictionary_data =" & cr & "{" & cr & \
-               tab & q("docs") & ":[" & \
-               tData & cr & tab & "]" & cr & "}" \
-               into tDictionaryData
-         
-         local tDocsCache
-         put revIDESpecialFolderPath("documentation cache") into tDocsCache
-         revIDESetUTF8FileContents tDocsCache & slash & "built_api.js", tDictionaryData
-      end revIDERegenerateBuiltAPIs
-      
-      on revIDERegenerateBuiltDictionaryData
-         revIDERegenerateBuiltAPIs
-         revIDERegenerateBuiltGuides
-      end revIDERegenerateBuiltDictionaryData
-      
-      on revIDEGenerateDistributedDocs
-         start using stack (revEnvironmentRepositoryPath() & slash & "ide-support" & slash & "revdocsparser.livecodescript")
-         ideGenerateDistributedGuide
-         ideGenerateDistributedAPI
-         revIDERegenerateBuiltDictionaryData
-      end revIDEGenerateDistributedDocs
-      
-      private command ideGenerateDistributedGuide
-         # Set the default folder to where the guide markdown files are stored in the IDE
-         local tGuideFoldersWithLocationA
-         put revIDESpecialFolderPath("ide guides") into tGuideFoldersWithLocationA[1]["folder"]
-         put "ide" into tGuideFoldersWithLocationA[1]["location"]
-         
-         if not revEnvironmentIsInstalled() then
-            put revIDESpecialFolderPath("repo guides") into tGuideFoldersWithLocationA[2]["folder"]
-            put "repo" into tGuideFoldersWithLocationA[2]["location"]
+         if tDoc is not empty then
+            # Output the lcdoc file
+            revIDESetUTF8FileContents tAPIDoc, tDoc
          end if
-         
-         local tGuideJSONFile
-         put revIDESpecialFolderPath("guide") & slash & "distributed_guide.js" \
-               into tGuideJSONFile
-         
-         # Check if the distributed guide is out of date
-         local tKey, tInputFiles, tNeedUpdate?, tError
-         repeat for each key tKey in tGuideFoldersWithLocationA
-            put tGuideFoldersWithLocationA[tKey]["folder"] into tInputFiles[tKey]
-         end repeat
-         put revIDEIsFilesetStale(tInputFiles, tGuideJSONFile, true, tError) \
+      end if
+      
+      local tAPIJS
+      put tCachedDataFolder & "/api.js" into tAPIJS
+      # Check if the .js is out of date
+      if tNeedUpdate? is not true then
+         put tAPIDoc into tInputs[1]
+         put revIDEIsFilesetStale(tInputs, tAPIJS , false, tError) \
                into tNeedUpdate?
-         
-         # If we don't need to regenerate, exit
-         if tNeedUpdate? is not true then
-            exit ideGenerateDistributedGuide
-         end if
-         
-         local tOrderedGuidesA, tOrderFolder
-         put revIDESpecialFolderPath("ide guides") into tOrderFolder
-         put revDocsOrderedGuideData(tGuideFoldersWithLocationA, tOrderFolder) into tOrderedGuidesA
-         
-         local tGuideData
-         repeat for each element tGuideA in tOrderedGuidesA
-            put tab & "{" after tGuideData
-            put return & revDocsFormatGuideDataAsJSON(tGuideA) after tGuideData
-            put return & tab & "}," after tGuideData
-         end repeat
-         delete the last char of tGuideData
-         
-         # Write out to apropriate location
-         revIDESetUTF8FileContents tGuideJSONFile, tGuideData
-      end ideGenerateDistributedGuide
+      end if
       
-      private function ideGeneratedOutputFolder pType
-         local tFolder
-         put revIDESpecialFolderPath("api", "livecode_") & pType & slash & pType & ".js" into tFolder
-         return tFolder
-      end ideGeneratedOutputFolder
+      if tNeedUpdate? is false then
+         put revIDEUTF8FileContents(tAPIJS) into tExtensionAPI
+      else if tNeedUpdate? is true then
+         local tLibraryArray, Lcdoc
+         dispatch function "revDocsParseDocFileToLibraryArray" to stack "revDocsParser" \ 
+               with tAPIDoc, tExtensionData["title"], \ 
+               tExtensionData["author"]
+         put the result into tLibraryArray
+         
+         dispatch function "revDocsFormatLibraryDocArrayAsJSON" to stack "revDocsParser" \
+               with tLibraryArray
+         put the result into tExtensionAPI
+         
+         # Update the dictionary database
+         ideDocsUpdateDatabase pAPI, tLibraryArray, false
+         
+         revIDESetUTF8FileContents tAPIJS, tExtensionAPI
+      end if
+      
+      if tExtensionAPI is not empty then
+         if tData is not empty then
+            put comma & tExtensionAPI after tData
+         else
+            put tExtensionAPI into tData
+         end if
+      end if
+   end repeat
+   return tData
+end revIDEGetExtensionDocsData
+      
+private function revIDEGetDocsAPIData pWhich
+   local tData, tExtensions
+   put revIDEGetBaseDocsData(pWhich) into tData
+   put revIDEGetExtensionDocsData(pWhich) into tExtensions
+   if tExtensions is not empty then
+      put comma & tExtensions after tData
+   end if
+   return tData
+end revIDEGetDocsAPIData 
+      
+private function revIDEGetDocsGuideData
+   local tData
+   
+   local tGuidePath
+   put revIDESpecialFolderPath("guide") into tGuidePath
+   put revIDEUTF8FileContents(tGuidePath & slash & "distributed_guide.js") into tData
+   
+   local tExtensionDocsDataA
+   put revIDEExtensionDocsData() into tExtensionDocsDataA
+   
+   local tFolder, tCachedDataFolder
+   set the itemdelimiter to slash
+   repeat for each element tExtensionData in tExtensionDocsDataA
+      local tExtensionGuide, tGuideFile
+      put empty into tExtensionGuide
+      put tExtensionData["folder"] into tFolder
+      put revEnvironmentUserDocsPath() & slash & \ 
+            tExtensionData["name"] into tCachedDataFolder
+      put tFolder & slash & "guide.md" into tGuideFile
+      if there is not a file tGuideFile then
+         -- User widgets have the guide.md in docs/guide/
+         put "/docs/guide" after tFolder
+         put tFolder & slash & "guide.md" into tGuideFile
+      end if
+      if there is not a file tGuideFile then next repeat
+      revIDEEnsurePath tCachedDataFolder
+      
+      # Check if the .js is out of date
+      local tNeedUpdate?, tError, tGuideJS
+      put tCachedDataFolder & "/guide.js" into tGuideJS
+      put revIDEIsFilesetStale(tGuideFile, tGuideJS, false, tError) \
+            into tNeedUpdate?
+      
+      if tNeedUpdate? is false then
+         put revIDEUTF8FileContents(tGuideJS) into tExtensionGuide
+      else if tNeedUpdate? is true then
+         local tGuide
+         put revIDEUTF8FileContents(tGuideFile) into tGuide
+         
+         if tGuide is not empty then
+            put "{" & CR after tExtensionGuide
+            put tab & q("name") & ":" && q(tExtensionData["name"]) & comma & CR after tExtensionGuide
+            put tab & q("display name") & ":" && q(tExtensionData["title"]) & comma & CR after tExtensionGuide
+            put tab & q("group") & ":" && q("Extensions") & comma & CR after tExtensionGuide
+            put tab & q("location") & ":" && q(tFolder) & comma & CR after tExtensionGuide
+            put q("data") & ":" & escape(tGuide, true) & CR after tExtensionGuide
+            put "}" after tExtensionGuide
+            
+            revIDESetUTF8FileContents tGuideJS, tExtensionGuide
+         end if
+      else
+         -- FIXME There is some inconsistency in the guide's files that we
+         -- can't cope with
+      end if
+      
+      if tExtensionGuide is not empty then
+         put comma & tExtensionGuide after tData
+      end if
+   end repeat
+   
+   return tData
+end revIDEGetDocsGuideData
+      
+on revIDERegenerateBuiltGuides
+   local tData
+   
+   # Get the location of the distributed guide
+   local tGuidePath
+   put revIDESpecialFolderPath("guide") into tGuidePath
+   
+   put "var tUserGuideData =" & CR & "{" & CR & tab & q("guides") & ":[" into tData
+   
+   put revIDEGetDocsGuideData() after tData
+   
+   put CR & tab & "]" & CR & "}" after tData
+   
+   local tDocsCache
+   put revIDESpecialFolderPath("documentation cache") into tDocsCache
+   revIDESetUTF8FileContents tDocsCache & slash & "built_guide.js", tData
+end revIDERegenerateBuiltGuides
+      
+constant kAPIs = "LiveCode Script,livecode_script|LiveCode Builder,livecode_builder|LiveCode IDE,livecode_ide"
+on revIDERegenerateBuiltAPIs
+   local tData, tAPIData
+   set the lineDelimiter to "|"
+   repeat for each line tAPI in kAPIs
+      -- For now, the IDE API is BFS only
+      if item 2 of tAPI is "livecode_ide" and revEnvironmentIsInstalled() then
+         next repeat
+      end if
+      
+      put revIDEGetDocsAPIData(item 2 of tAPI) into tAPIData
+      dispatch function "revDocsCreateAPIJSON" to stack "revDocsParser" \
+            with item 1 of tAPI, item 2 of tAPI, "", tAPIData
+      if tData is empty then
+         put the result into tData
+      else
+         put comma & the result after tData
+      end if
+   end repeat
+   
+   local tDictionaryData
+   put "var dictionary_data =" & cr & "{" & cr & \
+         tab & q("docs") & ":[" & \
+         tData & cr & tab & "]" & cr & "}" \
+         into tDictionaryData
+   
+   local tDocsCache
+   put revIDESpecialFolderPath("documentation cache") into tDocsCache
+   revIDESetUTF8FileContents tDocsCache & slash & "built_api.js", tDictionaryData
+end revIDERegenerateBuiltAPIs
+      
+on revIDERegenerateBuiltDictionaryData
+   revIDERegenerateBuiltAPIs
+   revIDERegenerateBuiltGuides
+end revIDERegenerateBuiltDictionaryData
+      
+on revIDEGenerateDistributedDocs
+   start using stack (revEnvironmentRepositoryPath() & slash & "ide-support" & slash & "revdocsparser.livecodescript")
+   ideGenerateDistributedGuide
+   ideGenerateDistributedAPI
+   revIDERegenerateBuiltDictionaryData
+end revIDEGenerateDistributedDocs
+      
+private command ideGenerateDistributedGuide
+   # Set the default folder to where the guide markdown files are stored in the IDE
+   local tGuideFoldersWithLocationA
+   put revIDESpecialFolderPath("ide guides") into tGuideFoldersWithLocationA[1]["folder"]
+   put "ide" into tGuideFoldersWithLocationA[1]["location"]
+   
+   if not revEnvironmentIsInstalled() then
+      put revIDESpecialFolderPath("repo guides") into tGuideFoldersWithLocationA[2]["folder"]
+      put "repo" into tGuideFoldersWithLocationA[2]["location"]
+   end if
+   
+   local tGuideJSONFile
+   put revIDESpecialFolderPath("guide") & slash & "distributed_guide.js" \
+         into tGuideJSONFile
+   
+   # Check if the distributed guide is out of date
+   local tKey, tInputFiles, tNeedUpdate?, tError
+   repeat for each key tKey in tGuideFoldersWithLocationA
+      put tGuideFoldersWithLocationA[tKey]["folder"] into tInputFiles[tKey]
+   end repeat
+   put revIDEIsFilesetStale(tInputFiles, tGuideJSONFile, true, tError) \
+         into tNeedUpdate?
+   
+   # If we don't need to regenerate, exit
+   if tNeedUpdate? is not true then
+      exit ideGenerateDistributedGuide
+   end if
+   
+   local tOrderedGuidesA, tOrderFolder
+   put revIDESpecialFolderPath("ide guides") into tOrderFolder
+   put revDocsOrderedGuideData(tGuideFoldersWithLocationA, tOrderFolder) into tOrderedGuidesA
+   
+   local tGuideData
+   repeat for each element tGuideA in tOrderedGuidesA
+      put tab & "{" after tGuideData
+      put return & revDocsFormatGuideDataAsJSON(tGuideA) after tGuideData
+      put return & tab & "}," after tGuideData
+   end repeat
+   delete the last char of tGuideData
+   
+   # Write out to apropriate location
+   revIDESetUTF8FileContents tGuideJSONFile, tGuideData
+end ideGenerateDistributedGuide
+      
+private function ideGeneratedOutputFolder pType
+   local tFolder
+   put revIDESpecialFolderPath("api", "livecode_") & pType & slash & pType & ".js" into tFolder
+   return tFolder
+end ideGeneratedOutputFolder
       
 command ideGenerateDistributedAPI
    local tRepoPath

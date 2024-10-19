@@ -1,18 +1,18 @@
 ﻿script "revStandaloneSettingsBehavior"
 on preOpenStack
-   local tLicenseType
+   --local tLicenseType
    
    start using stack "revSaveAsStandalone"
-  
+   
    if getTargetStackName() is not among the lines of the mainStacks then
       revStandaloneSettings the mainStack of the topStack
    end if
-
+   
    repeat with X=1 to the number of buttons of group "flavors" of card "Unix"
       set the enabled of button X of group "flavors" of card "Unix" to true
    end repeat
    
-   updateCardSize
+   --updateCardSize
    
    navigateToCard "General"
    repeat with X=1 to the number of btns of group "cards"
@@ -20,6 +20,20 @@ on preOpenStack
       set the showBorder of button X of group "cards" to false
    end repeat
    helpButtons
+   
+   if not isMacEngineFat?() then
+      hide button "MacOSX arm64" of card "OS X"
+   else
+      show button "MacOSX arm64" of card "OS X"
+      
+      /* Building for arm64 is not supported on macOS < 10.13 as codesign does
+      * not have the required support for the arm64 slice. */
+      set the itemDelimiter to "."
+      if item 1 to 2 of the systemVersion < 10.13 then
+         set the disabled of button "MacOSX arm64" of card "OS X" to true
+      end if
+      set the itemDelimiter to comma
+   end if
 end preOpenStack
 
 constant kButtonList = "General,Stacks,Copy Files,Inclusions,OS X,Windows,Unix,iOS,Android,Emscripten,Bug Reports"
@@ -46,6 +60,7 @@ private command updateTabButtons pSettings
    repeat for each item tItem in "SolIntel,SolSparc,Iris,Odt,rs6000,Linux,Bsd,Hp9k700,SPARC"
       if pSettings[tItem] then
          set the visible of button "Unixchecked" of group "checks" of me to true
+         exit repeat
       end if 
    end repeat
    
@@ -139,7 +154,7 @@ on revStandaloneSettings pStack
    revSBDefaultStandaloneSettings pStack, tSettings
    setSettings tSettings
    modeless "revStandaloneSettings"
-   send "preOpenCard" to this card of stack "revStandaloneSettings"
+   dispatch "preOpenCard" to this card of stack "revStandaloneSettings"
    updateTabButtons tSettings
    unlock screen
 end revStandaloneSettings
@@ -153,27 +168,27 @@ end revSetEdit
 
 constant kButtonWidth = 66
 constant kMargin = 4
-function minCardWidth
-   return the number of buttons of group "Cards" of me * kButtonWidth + kMargin + 24
-end minCardWidth
+--function minCardWidth
+--   return the number of buttons of group "Cards" of me * kButtonWidth + kMargin + 24
+--end minCardWidth
 
 on preOpenCard
    lock screen
-   updateCardSize
+   --updateCardSize
    updateLabel the short name of this card of me
    unlock screen
 end preOpenCard
 
-command updateCardSize
-   if the cSize of this card of me is not empty then
-      local tWidth,tHeight
-      put max(item 1 of the cSize of this card of me, minCardWidth()) into tWidth
-      put item 2 of the cSize of this card of me into tHeight
-      
-      revChangeWindowSize tWidth, tHeight, "snap", ,250
-   end if
-   dispatch "resizeStack" to this card of me
-end updateCardSize
+--command updateCardSize
+--   if the cSize of this card of me is not empty then
+--      local tWidth,tHeight
+--      put max(item 1 of the cSize of this card of me, minCardWidth()) into tWidth
+--      put item 2 of the cSize of this card of me into tHeight
+
+--      revChangeWindowSize tWidth, tHeight, "snap", ,250
+--   end if
+--   dispatch "resizeStack" to this card of me
+--end updateCardSize
 
 on resumeStack
    if the short name of this stack is "revStandaloneSettings" then
@@ -262,6 +277,18 @@ function selectImageFile pDimensions
    
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectImageFile
+
+# NOTE: Where is this called from? 10.0.0-dp8
+function selectAdaptiveIconsResFolder
+   local tResourcesFolder
+   answer folder "Please choose the 'res' folder that includes the adaptive icons"
+   put it into tResourcesFolder
+   if tResourcesFolder is empty then
+      return empty
+   end if
+   
+   return utilityMakePathRelative(tResourcesFolder, utilityTargetStackPath())
+end selectAdaptiveIconsResFolder
 
 function selectFontMapFile
    local tFile
@@ -455,7 +482,7 @@ end androidIdentifierValid
 
 private command addToListIfNotEmpty pValue, @xList
    if pValue is not empty then
-      put pValue & return after xList
+      put pValue & cr after xList
    end if
 end addToListIfNotEmpty
 
@@ -541,3 +568,37 @@ function canIncludeStackFiles
    end repeat
    return tCan
 end canIncludeStackFiles
+
+local sIsMacEngineFat
+private function isMacEngineFat?
+   if sIsMacEngineFat is not empty then
+      return sIsMacEngineFat
+   end if
+   
+   /* Get the path to the engine used to build for macOS */
+   local tPath
+   put revSBEnginePath("MacOSX") into tPath
+   
+   /* Read the first four bytes of the engine file */
+   local tHeader
+   open file tPath for binary read
+   if the result is empty then
+      read from file tPath for 4 bytes
+      put it into tHeader
+      close file tPath
+   end if
+   
+   local tHeaderHex
+   get binaryDecode("H8", tHeader, tHeaderHex)
+   switch tHeaderHex
+      case "bebafeca"
+      case "cafebabe"
+         put true into sIsMacEngineFat
+         break
+      default
+         put false into sIsMacEngineFat
+         break
+   end switch
+   
+   return sIsMacEngineFat
+end isMacEngineFat?

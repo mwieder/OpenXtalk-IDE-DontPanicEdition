@@ -10,6 +10,7 @@ on preOpenCard
    
    -- FG-2014-08-19: [[ RPi ]] Don't show the ARMv6 checkbox if the engine isn't present
    set the visible of button "Linux ARMv6-HF" to revEngineCheck?("Linux armv6-hf")
+   set the visible of button "Linux ARM64" to revEngineCheck?("Linux arm64")
    
    set the enabled of group "UNIX" to false
    
@@ -26,7 +27,7 @@ on preOpenCard
    # OK-2007-08-14 : Temporary disable the Solaris buttons until we support it, also ensure that unix dialog
    # stacks are only included if the linux button is checked, this block of code should be removed when unix
    # support is completed.
-   set the enabled of button "Solaris Intel" of group "Flavors" of me to false
+   --set the enabled of button "Solaris Intel" of group "Flavors" of me to false
    set the enabled of button "Solaris SPARC" of group "Flavors" of me to false
    
    // SN-2015-01-13: [[ Bug 14373 ]] Do not undo what the previous does: not only looking at the Linux checkbox
