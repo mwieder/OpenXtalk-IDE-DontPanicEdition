@@ -20,12 +20,12 @@ on preOpenStack
    # Load the saved cache data
    revOnlineCacheLoad
    login  
-   send "initialize" to group "search filter" of me
-   send "initialize" to group "search order" of me
-   send "initialize" to group "paging" of me
-   send "initialize" to group "progressbar" of me
-   send "initialize" to group "search list" of me
-   send "initialize" to group "viewing pane" of me
+   dispatch "initialize" to group "search filter" of me
+   dispatch "initialize" to group "search order" of me
+   dispatch "initialize" to group "paging" of me
+   dispatch "initialize" to group "progressbar" of me
+   dispatch "initialize" to group "search list" of me
+   dispatch "initialize" to group "viewing pane" of me
    updateBannerImage
    updateView
    rvoResize
@@ -40,7 +40,7 @@ end closeStack
 # Wrapper needed to perform login attempt upon startup
 private command login
    if revOnlineSession() is not empty then
-      send "loggedInDisplay" to group "menubar" of me
+      dispatch "loggedInDisplay" to group "menubar" of me
    else
       if revOnlinePrefGet("rememberEmail") is true then
          local tEmail, tPassword
@@ -49,19 +49,19 @@ private command login
             put revOnlinePrefGet("passwordhash") into tPassword         
             revOnlineLogin tEmail, tPassword, "loginCallback", (the long id of me)
          else
-            send "loggedOutDisplay" to group "menubar" of me
+            dispatch "loggedOutDisplay" to group "menubar" of me
          end if
       else
-         send "loggedOutDisplay" to group "menubar" of me
+         dispatch "loggedOutDisplay" to group "menubar" of me
       end if
    end if   
 end login
 
 command loginCallback pSuccess
    if pSuccess then
-      send "loggedInDisplay" to group "menubar" of me
+      dispatch "loggedInDisplay" to group "menubar" of me
    else
-      send "loggedOutDisplay" to group "menubar" of me
+      dispatch "loggedOutDisplay" to group "menubar" of me
    end if
 end loginCallback
 
@@ -80,55 +80,55 @@ end rvoConnectionErrorDisplay
 command rvoResize pUpdate
    # menubar
    set the rect of group "menubar" of me to \
-          (the left of this card of me, the top of this card of me, the right of this card of me,52)
-   send "resize" to group "Menubar" of me
+         (the left of this card of me, the top of this card of me, the right of this card of me,52)
+   dispatch "resize" to group "Menubar" of me
    
    # progressbar
    set the rect of group "progressbar" of me to \
-          (the left of this card of me, the bottom of this card of me - 25, the right of this card of me, the bottom of this card of me)   
+         (the left of this card of me, the bottom of this card of me - 25, the right of this card of me, the bottom of this card of me)   
    local tDivider1, tDivider2
    put the left of button "resize bar" of me - 1 into tDivider1
    put the left of button "resize bar" of me + 300 into tDivider2
-   send "resize tDivider1, tDivider2" to group "progressbar" of me
+   dispatch "resize" to group "progressbar" of me with tDivider1, tDivider2
    
    # search filter
    set the rect of group "search filter" of me to \
-          (the left of this card of me, the bottom of group "menubar" of me, the left of button "resize bar" of me, the bottom of this card of me - 25)
-   send "resize" to group "Search Filter" of me
+         (the left of this card of me, the bottom of group "menubar" of me, the left of button "resize bar" of me, the bottom of this card of me - 25)
+   dispatch "resize" to group "Search Filter" of me
    
    # search order
    set the rect of group "search order" of me to \
-          (the right of group "search filter" of me, the bottom of group "menubar" of me, the right of group "search filter" of me + 284,the bottom of group "menubar" of me + 30)
-   send "resize" to group "search order" of me
+         (the right of group "search filter" of me, the bottom of group "menubar" of me, the right of group "search filter" of me + 284,the bottom of group "menubar" of me + 30)
+   dispatch "resize" to group "search order" of me
    
    # pages
    set the rect of group "paging" of me to \
-          (the right of group "search filter" of me + 3, the bottom of group "search order" of me, the right of group "search filter" of me + 284, the bottom of group "search order" of me + 21)
-   send "resize" to group "paging" of me    
+         (the right of group "search filter" of me + 3, the bottom of group "search order" of me, the right of group "search filter" of me + 284, the bottom of group "search order" of me + 21)
+   dispatch "resize" to group "paging" of me    
    
    # resize bar
    --set the rect of button "resize bar" of me to \
-          --(the left of button "resize bar" of me, the bottom of group "paging" of me, the left of button "resize bar" of me + 2, the top of group "progressbar" of me)
+   --(the left of button "resize bar" of me, the bottom of group "paging" of me, the left of button "resize bar" of me + 2, the top of group "progressbar" of me)
    
    # editing controls
    set the rect of group "edit controls" of me to \
-          (the right of group "paging" of me, the bottom of group "search order" of me, the right of this card, the bottom of group "search order" of me + 21)
-   send "resize" to group "edit controls" of me
+         (the right of group "paging" of me, the bottom of group "search order" of me, the right of this card, the bottom of group "search order" of me + 21)
+   dispatch "resize" to group "edit controls" of me
    
    # search list
    if the cMode of group "search list" of me is "grid" then      
       set the rect of group "search list" of me to \
-             (the right of button "resize bar" of me - 1, the bottom of group "paging" of me, the right of this card, the top of group "progressbar" of me)
+            (the right of button "resize bar" of me - 1, the bottom of group "paging" of me, the right of this card, the top of group "progressbar" of me)
    else      
       set the rect of group "search list" of me to \
-             (the right of button "resize bar" of me - 1, the bottom of group "paging" of me, the right of group "search filter" of me + 302, the top of group "progressbar" of me)
+            (the right of button "resize bar" of me - 1, the bottom of group "paging" of me, the right of group "search filter" of me + 302, the top of group "progressbar" of me)
    end if
-   send "resize pUpdate" to group "Search List" of me
+   dispatch "resize" to group "Search List" of me with pUpdate
    
    # Viewing Pane
    set the rect of group "viewing pane" of me to \
-          (the right of group "search list" of me, the bottom of group "paging" of me, the right of this card of me, the bottom of this card of me - 25)   
-   send "resize" to group "Viewing pane" of me
+         (the right of group "search list" of me, the bottom of group "paging" of me, the right of this card of me, the bottom of this card of me - 25)   
+   dispatch "resize" to group "Viewing pane" of me
    
    # resize bar
    --set the height of button "resize bar" of me to (the top of group "progressbar" of me - the bottom of group "paging" of me)
@@ -136,11 +136,11 @@ command rvoResize pUpdate
    
    # Border
    set the rect of graphic "border" of me to \
-          (the right of button "resize bar" of me - 1, the top of group "paging" of me - 1, the right of this card + 40, the bottom of this card)  
+         (the right of button "resize bar" of me - 1, the top of group "paging" of me - 1, the right of this card + 40, the bottom of this card)  
 end rvoResize
 
 command rvoUpdateSearchFilter
-   send "intialize" to group "search filter" of me
+   dispatch "intialize" to group "search filter" of me
 end rvoUpdateSearchFilter
 
 command rvoDeleteStack pStackId pCallback
@@ -428,7 +428,7 @@ end rvoEditTags
 local sCallbackLastHandle, sCallBacks, sLastCallback
 
 command log pMessage
-   put pMessage & return after msg
+   put pMessage & cr after msg
 end log
 
 command logArray pArray
@@ -576,7 +576,7 @@ command updateView pMode, pView, pId
    end if   
    
    # Clear editing controls
-   send "hideAll" to group "edit controls" of me
+   dispatch "hideAll" to group "edit controls" of me
    
    if the cMode of group "search list" of me is "list" then
       set the cSelectedView of group "search order" of me to "list"
@@ -613,17 +613,17 @@ end updateView
 # Updates the tooltip field with a message, if pWithClear is true then the tooltip
 # will be cleared after a set period of time.  With wait ensures the message will
 # display for a minimum time period
-command rvoUpdateTooltip pMessage, pWithClear, pWithWait
+command rvoUpdateTooltip pMessage, pWithClear?, pWithWait
    if pMessage is "bad_login" or pMessage is "cgierror,not_logged_in" then
       set the cTooltip of group "progressbar" of me to "You are not logged in"
-      send "loggedOutDisplay" to group "menubar" of me
+      dispatch "loggedOutDisplay" to group "menubar" of me
    else
       set the cTooltip of group "progressbar" of me to pMessage
    end if
    if pWithWait then
       set the cWait of group "progressbar" of me to "true"
    end if
-   if pWithClear then
+   if pWithClear? then
       send "rvoClearTooltip pMessage" to me in 3 seconds
    end if
 end rvoUpdateTooltip
@@ -706,7 +706,7 @@ command rvoShareThisStack pStackPath
    updateView "list", "stack", "new"   
    send "newStackFile pStackPath" to group "stack" of group "viewing pane" of me
    unlock screen
-   --put "finished Shre" & return after msg
+   --put "finished Share" & return after msg
 end rvoShareThisStack
 
 on updateBannerImage
@@ -721,8 +721,3 @@ on updateBannerImage
    set the width of image "topBanner" of group "menubar" to the formattedWidth of image "topBanner"
    set the topLeft of image "topBanner" of group "menubar" to 0,0
 end updateBannerImage
-
-
-
-
-
