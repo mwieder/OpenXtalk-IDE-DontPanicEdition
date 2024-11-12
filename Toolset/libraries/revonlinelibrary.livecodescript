@@ -9,13 +9,13 @@ end revGoOnline
 
 # Returns
 #   The url of the revOnline CGI server
-function revOnlineCGIUrl
+private function revOnlineCGIUrl
    return "https://developer.runrev.com/revonline.irev"
 end revOnlineCGIUrl
 
 # Returns
 #   The url of the revOnline secure CGI server
-function revOnlineSecureCGIUrl
+private function revOnlineSecureCGIUrl
    return "https://developer.runrev.com/revonline_secure.irev"
 end revOnlineSecureCGIUrl
 
@@ -175,55 +175,10 @@ command revOnlineChangePassword pSessionId, pOld, pNew, pCallback, pCallbackTarg
    revOnlineQueryServer tRequest, true, "get", tCallback
 end revOnlineChangePassword
 
-# OK-2009-09-16
-#   pSessionId : Obtained from revOnlineSession() after logging in
-#   pCallback : name of command.  Passed 2 parameters. pSuccess, whether or not the signup succeeded. pId, the affiliate id,
-#  (or error string if pSuccess was false).
-#  pCallbackTarget : long id of object to send callback to.
---command revOnlineAffiliateSignup pSessionId, pCallback, pCallbackTarget
---   local tRequest
---   put "affiliateSignup" into tRequest["action"]
---   put pSessionId into tRequest["parameters"]["sessionId"]
-
---   # Create a callback to this library first so we can wrap the cgi return value nicely
---   local tInternalCallback
---   put revCallbackCreate(the long id of me, "revOnlineAffiliatesSignupCallback") into tInternalCallback
-
---   # Create a callback to send back to the original caller. This is passed as a parameter to the internal callback,
---   # so it knows where to send the stuff to.
---   local tExternalCallback
---   put revCallbackCreate(pCallbackTarget, pCallback) into tExternalCallback
---   revCallbackAddParameter tInternalCallback, tExternalCallback
-
---   # Send the query and return a request id, which allows us to cancel it.
---   revOnlineQueryServer tRequest, false, "get",  tInternalCallback
---   return the result
---end revOnlineAffiliateSignup
-
-# Internal callback, don't call this from outside the library
---command revOnlineAffiliatesSignupCallback pCallback, pResult
---   if pResult["success"] then
---      revOnlinePrefSet "affiliateId", pResult["id"]
---   end if
---   revCallbackAddParameter pCallback, pResult["success"]
---   revCallbackAddParameter pCallback, pResult["id"]
---   revCallbackApplyLast pCallback
---end revOnlineAffiliatesSignupCallback
-
---command revOnlineShowAffiliatesSignupDialog
---   # OK-2009-09-16: Due to bug 8274, this won't work. The dialog ends up at the location of the current topStack instead.
---   # I worked around it by setting the loc of the stack in its preOpenStack event.
---   --set the loc of stack "revOnlineAffiliateSignupDialog" to the screenLoc
---   modal stack "revOnlineAffiliateSignupDialog"
---   return the cResult of stack "revOnlineAffiliateSignupDialog"
---end revOnlineShowAffiliatesSignupDialog
-
 local sAccountFailureCallbackTarget
 local sAccountFailureCallback
 
 command revOnlineRequestAccount pEmail, pCallback, pCallbackTarget
-   # Temporary measure
-   --if line 3 of the revLicenseInfo is not "evaluation" then
    local tExternalCallback
    put revCallbackCreate(pCallbackTarget, pCallback) into tExternalCallback
    
@@ -240,12 +195,7 @@ command revOnlineRequestAccount pEmail, pCallback, pCallbackTarget
       revCallbackAddParameter tInternalCallback, "Empty email address"
       revCallbackApplyLast tInternalCallback
    end if
-   --else
-   # Temporary
-   --dispatch sAccountFailureCallback to sAccountFailureCallbackTarget
-   --end if
 end revOnlineRequestAccount
-
 
 # Temporary measure
 command revOnlineSetAccountFailureCallback pCallback, pTarget
@@ -277,6 +227,7 @@ command revOnlineDeleteAccount pSessionId, pPassword, pCallback, pCallbackTarget
 end revOnlineDeleteAccount
 
 command revOnlineResetPassword pEmail, pCallback, pCallbackTarget
+   lock screen
    local tInternalCallback
    put revCallbackCreate(the long id of me, "revOnlineResetPasswordCallback") into tInternalCallback
    
@@ -288,6 +239,7 @@ command revOnlineResetPassword pEmail, pCallback, pCallbackTarget
    put "resetPassword" into tRequest["action"]
    put the text of field "email" into tRequest["parameters"]["email"]
    revOnlineQueryServer tRequest, true, "get", tInternalCallback
+   unlock screen
 end revOnlineResetPassword
 
 command revOnlineResetPasswordCallback pCallback, pResult
@@ -359,13 +311,13 @@ local sPendingRequests
 #   This creates a unique identifier for each server request that is queued. This id may then
 #   be returned to the caller and can be used to cancel the request and remove it from the queue.
 private function queueGenerateRequestId
-   --return uuid() & the milliseconds
-   local tId
-   repeat 32 times
-      put any char of "abcdefghijklnmopqrstuvwxyz0123456789_ " after tId
-   end repeat
-   put the milliseconds after tId
-   return tId
+   return uuid() & the milliseconds
+   --   local tId
+   --   repeat 32 times
+   --      put any char of "abcdefghijklnmopqrstuvwxyz0123456789_ " after tId
+   --   end repeat
+   --   put the milliseconds after tId
+   --   return tId
 end queueGenerateRequestId
 
 # Parameters
@@ -639,7 +591,7 @@ private command rvoQueryServerDoLocking pRequest, pSecure?, pMethod, pCache
             put revOnlineDecodeArray(tServerResponse) into tArray
          catch tError
             # Server didnt return a valid array, a bug in the cgi script...
-			log "server didn't return a valid array"
+            log "server didn't return a valid array"
          end try
       end if
       
@@ -661,7 +613,7 @@ end revOnlineResetRequestIsRunning
 # OK-2009-02-03 : Bug 7606 - This variable will contain true if a connection error was encountered by the last query executed.
 local sConnectionError? = false
 
-function revOnlineGetConnectionError?
+private function revOnlineGetConnectionError?
    return sConnectionError?
 end revOnlineGetConnectionError?
 
@@ -673,13 +625,13 @@ command revOnlineSetConnectionErrorCallback pCallback, pTarget
    put pCallback into sConnectionErrorCallback
 end revOnlineSetConnectionErrorCallback
 
-command revOnlineSetConnectionError pValue?
+private command revOnlineSetConnectionError pValue?
    --log "Setting connection error :" & pValue
    if pValue? is true and pValue? is not sConnectionError? then
       if sConnectionErrorCallback is not empty then
          try
-         send sConnectionErrorCallback to sConnectionErrorCallbackTarget
-         	end try
+            send sConnectionErrorCallback to sConnectionErrorCallbackTarget
+         end try
       end if
    end if
    put pValue? into sConnectionError?
@@ -747,8 +699,6 @@ command revOnlineQueryServerCallback pUrl, pStatus
 end revOnlineQueryServerCallback
 
 local sRequestCount
---local sTotalRequestSize
---local sUncompressedRequestSize
 
 --constant kUseCompression = false
 constant kUseCompression = true
@@ -756,22 +706,16 @@ constant kUseCompression = true
 # Description
 #   This function takes a Revolution array and serializes it into a urlEncoded binary string
 private function revOnlineEncodeArray pArray
-   # OK-2009-01-31 : Temporarily we calculate both the compressed and normal
-   # data, so that we can compare their sizes and work out if compression is actually
-   # helping. Unfortunately it seems that it makes a much smaller difference than hoped.
    local tCompressed, tNormal
    // AL-2014-08-18: [[ Bug 12547 ]] Encode array for revOnline in 6.x format
-   put urlEncode(base64Encode(compress(arrayEncode(pArray, "6.0")))) into tCompressed
-   --put urlEncode(base64Encode(compress(arrayEncode(pArray)))) into tCompressed
-   put urlEncode(base64Encode(arrayEncode(pArray, "6.0"))) into tNormal
    
-   --add the length of tCompressed to sTotalRequestSize
-   --add the length of tNormal to sUncompressedRequestSize
    add 1 to sRequestCount
    
    if kUseCompression then
+      put urlEncode(base64Encode(compress(arrayEncode(pArray, "6.0")))) into tCompressed
       return tCompressed
    else
+      put urlEncode(base64Encode(arrayEncode(pArray, "6.0"))) into tNormal
       return tNormal
    end if
 end revOnlineEncodeArray
@@ -785,25 +729,9 @@ private function revOnlineDecodeArray pEncodedArray
    else
       put arrayDecode(base64Decode(urlDecode(pEncodedArray))) into tArray
    end if
-   
-   # For simplicity, just rebuild the original string the array and find out what its size would have been
-   # in both cases.
-   --local tCompressed, tNormal
-   // AL-2014-08-18: [[ Bug 12547 ]] Encode array for revOnline in 6.x format
-   --put urlEncode(base64Encode(compress(arrayEncode(tArray, "6.0")))) into tCompressed
-   --put urlEncode(base64Encode(arrayEncode(tArray, "6.0"))) into tNormal
-   
-   --add the length of tCompressed to sTotalRequestSize
-   --add the length of tNormal to sUncompressedRequestSize
    add 1 to sRequestCount
-   
    return tArray
 end revOnlineDecodeArray
-
---function revOnlineAverageDataSize
---   return "With compression: " & sTotalRequestSize / sRequestCount & return & \
---          "Without compression: " & sUncompressedRequestSize / sRequestCount
---end revOnlineAverageDataSize
 
 command revOnlinePickRandomStack pCallback
    local tQuery
@@ -846,27 +774,24 @@ end errorString
 
 # Description
 #   Initialises the callback library
-command revCallbackInitialise
-   if sgCallbackInitialised is true then
-      exit revCallbackInitialise
-   end if
-   
-   put empty into sgCallbacks
-   put 0 into sgCallbackLastHandle
-   
-   put true into sgCallbackInitialised
-end revCallbackInitialise
+--command revCallbackInitialise
+--   if sgCallbackInitialised is true then
+--      exit revCallbackInitialise
+--   end if
+
+--   put empty into sgCallbacks
+--   put 0 into sgCallbackLastHandle
+
+--   put true into sgCallbackInitialised
+--end revCallbackInitialise
 
 # Description
 #   Should be called when the library is unloaded, although it currently does nothing.
-command revCallbackFinalise
-   if sgCallbackInitialised is true then
-      --exit revCallbackFinalise
-      --end if
-      
-      put false into sgCallbackInitialised --as not init anylonger
-   end if
-end revCallbackFinalise
+--command revCallbackFinalise
+--   if sgCallbackInitialised is true then
+--      put false into sgCallbackInitialised --as not init anylonger
+--   end if
+--end revCallbackFinalise
 
 # Parameters
 #   pObject : the target of the callback to be created, i.e which object it will be sent to
@@ -900,7 +825,7 @@ end revCallbackCreate
 #   pHandle : a callback handle as returned by revCallbackCreate
 # Description
 #   Destroys the callback by simply removing it from the sgCallbacks array.
-command revCallbackDestroy pHandle
+private command revCallbackDestroy pHandle
    delete variable sgCallbacks[pHandle]
 end revCallbackDestroy
 
@@ -910,15 +835,15 @@ end revCallbackDestroy
 #   Cancels the specified callback. This does not delete it, it simply means that the callback
 #   will not be sent again. The callback may be deleted at some later point, when no references to it
 #   linger anywhere.
-command revCallbackCancel pHandle
-   put true into sgCancelledCallbacks[pHandle]
-end revCallbackCancel
+--command revCallbackCancel pHandle
+--   put true into sgCancelledCallbacks[pHandle]
+--end revCallbackCancel
 
 # Parameters
 #   pHandle : a callback handle as returned by revCallbackCreate
 # Description
 #   Sends the specified callback to its target, with whatever parameters are currently associated with it (and any new ones added)
-on revCallbackApply pHandle
+command revCallbackApply pHandle
    if sgCancelledCallbacks[pHandle] then
       exit revCallbackApply
    end if
@@ -958,7 +883,7 @@ end revCallbackApply
 #   Sends the specified callback to its target, with whatever parameters are currently associated with it, then destroys the callback.
 #   Note that any additional parameters are ignored here, rather than passed to the callback target, its probably possible to fix this,
 #   but a little awkward. The problem can easily be worked round by simply calling revCallbackApply then revCallbackDestroy directly.
-on revCallbackApplyLast pHandle
+command revCallbackApplyLast pHandle
    revCallbackApply pHandle
    revCallbackDestroy pHandle
 end revCallbackApplyLast
@@ -971,7 +896,7 @@ end revCallbackApplyLast
 #   pNumber : the parameter number, if empty, the default is to add the new parameter after any existing ones.
 # Description
 #   Adds the specified parameter to a callback
-on revCallbackAddParameter pHandle, pValue, pNumber
+command revCallbackAddParameter pHandle, pValue, pNumber
    if not revCallbackExists?(pHandle) then
       return errorString("callback_not_found")
    end if
@@ -1008,7 +933,7 @@ end revCallbackAddParameter
 #   pValue : the new parameter value
 # Description
 #   Sets the value of the specified existing parameter to pValue
-on revCallbackSetParameter pHandle, pNumber, pValue
+command revCallbackSetParameter pHandle, pNumber, pValue
    if not revCallbackExists?(pHandle) then
       return errorString("callback_not_found")
    end if
@@ -1028,22 +953,22 @@ end revCallbackSetParameter
 #   pNumber : the number of the parameter to retrieve
 # Returns
 #   The current value of the specified parameter, or an error string if not found.
-function revCallbackGetParameter pHandle, pNumber
-   local tCallback, tValue
-   
-   if not revCallbackExists?(pHandle) then
-      return errorString("callback_not_found")
-   end if
-   
-   local tArgumentCount
-   put item 2 of line 1 of the extents of sgCallbacks[pHandle]["arguments"] into tArgumentCount
-   
-   if (pNumber is empty) or (pNumber > tArgumentCount) or (pNumber < 0) then
-      return errorString("invalid_parameter_index")
-   end if
-   
-   return sgCallbacks[pHandle]["arguments"][pNumber]
-end revCallbackGetParameter
+--function revCallbackGetParameter pHandle, pNumber
+--   local tCallback, tValue
+
+--   if not revCallbackExists?(pHandle) then
+--      return errorString("callback_not_found")
+--   end if
+
+--   local tArgumentCount
+--   put item 2 of line 1 of the extents of sgCallbacks[pHandle]["arguments"] into tArgumentCount
+
+--   if (pNumber is empty) or (pNumber > tArgumentCount) or (pNumber < 0) then
+--      return errorString("invalid_parameter_index")
+--   end if
+
+--   return sgCallbacks[pHandle]["arguments"][pNumber]
+--end revCallbackGetParameter
 
 # Parameters
 #   pHandle : a callback handle as returned by revCallbackCreate
@@ -1056,34 +981,19 @@ end revCallbackExists?
 # Parameters
 #   pHandle : a callback handle as returned by revCallbackCreate
 # Returns
-#   Returns true or false depending on whether the callback is valid, according to:
-#   1) The target is not empty
-#   2) The message is not empty (no point sending an empty message!)
-#   3) The target exists (we are not pointing at something that doesnt exist).
-#   4) The message points to a handler that exists (this is checked in a little bit of a crude way).
---function revCallbackValid pHandle
---   local tMessage, tTarget
---   put line 1 of sgCallbacks[pHandle] into tTarget
---   put line 2 of sgCallbacks[pHandle] into tMessage
---   return tTarget is not empty and tMessage is not empty and exists(tTarget) and ((("on" && tMessage) is among the lines of the script of tTarget ) or ("command " & tMessage is among the lines of the script of tTarget))
---end revCallbackValid
-
-# Parameters
-#   pHandle : a callback handle as returned by revCallbackCreate
-# Returns
 #   All the details stored for the specified callback. This function is for debugging purposes only.
 #   The return value will be an array.
-function revCallbackDetails pHandle
-   return sgCallbacks[pHandle]
-end revCallbackDetails
+--function revCallbackDetails pHandle
+--   return sgCallbacks[pHandle]
+--end revCallbackDetails
 
 # Parameters
 #   pHandle : a callback handle as returned by revCallbackCreate
 # Description
 #   Outputs all information about the specified callback to the message box.
-command revCallbackLog pHandle
-   logArray sgCallbacks[pHandle]
-end revCallbackLog
+--command revCallbackLog pHandle
+--   logArray sgCallbacks[pHandle]
+--end revCallbackLog
 
 
 #########################################################################
@@ -1176,9 +1086,6 @@ command revOnlinePrefLoad
 end revOnlinePrefLoad
 
 
-
-
-
 #########################################################################
 # Cache library
 #########################################################################
@@ -1216,13 +1123,13 @@ end revOnlineCacheAdd
 #   pKey : the identifer for the cache item to remove. 
 #  Description
 #   Removes the specified item from the cache. If this item doesn't exist in the cache, will have no effect.
-command revOnlineCacheRemove pKey, pDontClearActions
+command revOnlineCacheRemove pKey, pDontClearActions?
    local tLength
    put the length of sCache[pKey] into tLength
    delete variable sCache[pKey]
    delete variable sCacheTimestamps[pKey]
    
-   if not pDontClearActions then
+   if not pDontClearActions? then
       repeat for each key tAction in sCacheActions
          delete variable sCacheActions[tAction][pKey]
       end repeat

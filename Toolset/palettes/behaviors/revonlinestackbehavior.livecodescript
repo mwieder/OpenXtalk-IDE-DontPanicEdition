@@ -56,20 +56,20 @@ end login
 
 command loginCallback pSuccess
    if pSuccess then
-      send "loggedInDisplay" to group "menubar" of me
+      dispatch "loggedInDisplay" to group "menubar" of me
    else
-      send "loggedOutDisplay" to group "menubar" of me
+      dispatch "loggedOutDisplay" to group "menubar" of me
    end if
 end loginCallback
 
 # If no connection then need to reflect this in the gui
 command rvoConnectionErrorDisplay
-   --revOnlineQueueClear
+   lock screen
    set the cTooltip of group "progressbar" of me to "Connection failure"
    
    rvoDrawProgressBar 0
    rvoHideProgressBar
-   --hide group "viewing pane" of me
+   unlock screen
 end rvoConnectionErrorDisplay
 
 # The parameter is to distinguish an actual resize stack message from a scripted one
@@ -86,7 +86,8 @@ command rvoResize pUpdate
    local tDivider1, tDivider2
    put the left of button "resize bar" of me - 1 into tDivider1
    put the left of button "resize bar" of me + 300 into tDivider2
-   send "resize" to group "progressbar" of me with tDivider1, tDivider2
+   --dispatch "resize" to group "progressbar" of me with tDivider1, tDivider2
+   send "resize tDivider1, tDivider2" to group "progressbar" of me
    
    # search filter
    set the rect of group "search filter" of me to \
@@ -140,7 +141,7 @@ command rvoUpdateSearchFilter
    send "intialize" to group "search filter" of me
 end rvoUpdateSearchFilter
 
-command rvoDeleteStack pStackId pCallback
+command rvoDeleteStack pStackId, pCallback
    local tArray
    put "deleteStack" into tArray["action"]
    put pStackId into tArray["parameters"]["id"]
@@ -266,7 +267,7 @@ end rvoUpdateProgress
 
 # Draws the progressbar and puts text into the tooltip field
 command rvoDrawProgressBar pPercent, pMessage
-   
+   lock screen
    if pPercent < 100 then
       send "update pPercent, rvoHiliteColor(), false" to group "loading progress" of group "progressBar" of me
       if pMessage is not empty then
@@ -281,16 +282,21 @@ command rvoDrawProgressBar pPercent, pMessage
       send "rvoHideProgressBar" to me in 500 milliseconds
    end if
    show group "loading progress" of group "progressBar" of me
+   unlock screen
 end rvoDrawProgressBar
 
-command rvoHideProgressBar   
+command rvoHideProgressBar
+   lock screen   
    hide group "loading progress" of group "progressBar" of me
+   unlock screen
 end rvoHideProgressBar
 
 
 # Hide progressbar
 command hideProgress
+   lock screen
    hide group "loading progress" of group "progressBar" of me
+   unlock screen
 end hideProgress
 
 # Returns the standard hilite color for revonline
