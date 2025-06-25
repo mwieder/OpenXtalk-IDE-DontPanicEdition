@@ -30,5 +30,4 @@ function ideProjectBrowserShowGroupThumbnailsGet
 end ideProjectBrowserShowGroupThumbnailsGet
 
 on ideProjectBrowserShowGroupThumbnailsSet
-
 end ideProjectBrowserShowGroupThumbnailsSet

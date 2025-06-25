@@ -3,14 +3,14 @@
 on extensionInitialize
 	if the target is not me then
 		pass "extensionInitialize"
-	end if	
+	end if
    insert the script of me into front
 end extensionInitialize
 
 on extensionFinalize
 	if the target is not me then
 		pass "extensionFinalize"
-	end if	
+	end if
    remove the script of me from front
 end extensionFinalize
 
@@ -19,12 +19,12 @@ end extensionFinalize
 /*
  * Version history :
  * -----------------
- * 
+ *
  * Date      Who  Version  Comments
  * --------  ---  -------  ------------------------------------------------------------------
  * 20040203  js   2.2a1    improved table field interaction with databases
  * 20040715  js   2.3b1    fixed bug #67 ; fixed bug #1487
- * 
+ *
  */
 
 
@@ -42,21 +42,21 @@ local lObject, lxmovevalue
 end preOpenCard
 
 on focusOut
-  if lObject is empty or there is not a lObject then 
+  if lObject is empty or there is not a lObject then
     revDeleteCellFields
     pass focusOut
   end if
   revDeleteUnwantedFields
-  pass focusOut    
+  pass focusOut
 end focusOut
 
 on focusIn
-  if lObject is empty or there is not a lObject then 
+  if lObject is empty or there is not a lObject then
     revDeleteCellFields
     pass focusIn
   end if
   revDeleteUnwantedFields
-  pass focusIn    
+  pass focusIn
 end focusIn
 
 --js::20040715::start
@@ -82,19 +82,19 @@ end revDoFocusIn
 on exitField
    local tTarget
    put the long id of the target into tTarget
-   
+
    # OK-2009-01-29 : If we're cell editing then obtain a reference to the original table field before deleting the cell
    local tOwner
    if there is a tTarget and the cREVTable["acell"] of tTarget then
       put the cREVTable["owner"] of tTarget into tOwner
    end if
-   
-   if lObject is empty or there is not a lObject then 
+
+   if lObject is empty or there is not a lObject then
       revDeleteCellFields
       pass exitField
    end if
    revDeleteUnwantedFields
-   
+
    # OK-2009-01-29 : If tOwner is not empty then it is assumed that were we editing a cell and have now finished.
    # Closefield should be sent directly to the table to simulate the standard field behavior. It should be fine to pass
    # the message after this, as the target would not have been the table field anyway, so it shouldnt get it twice.
@@ -103,12 +103,12 @@ on exitField
          send "exitField" to tOwner
       end try
    end if
-   
-   pass exitField    
+
+   pass exitField
 end exitField
 
 on scrollBarDrag pValue
-  if (lObject is empty) or (there is not a lObject) or (the long id of the target is lObject) or (the cREVTable["acell"] of the long id of the target is true) then 
+  if (lObject is empty) or (there is not a lObject) or (the long id of the target is lObject) or (the cREVTable["acell"] of the long id of the target is true) then
     if (the long id of the target is lObject) then
       revDeleteCellFields
     end if
@@ -169,10 +169,10 @@ end revDeleteUnwantedFields
 on revDeleteCellFields
    if the cREVTable["acell"] of this card is not true then exit revDeleteCellFields  -- performance
    set the lockMessages to true  -- performance
-   
+
    local tDefault
    put the defaultStack into tDefault
-   
+
    local tDeleteList
    put empty into tDeleteList
    if lObject is not empty then
@@ -217,7 +217,7 @@ on revMoveCellRight
   if exists(lObject) then
     put "right" into tDirection
     put the cREVTable["currentxcell"] of lObject into txcell
-    put the cREVTable["currentycell"] of lObject into tycell 
+    put the cREVTable["currentycell"] of lObject into tycell
     send "revMoveCellDirection lObject,txcell,tycell,tDirection" to lObject
   end if
   unlock screen
@@ -234,7 +234,7 @@ on revMoveCellDown
   if exists(lObject) then
     put "down" into tDirection
     put the cREVTable["currentxcell"] of lObject into txcell
-    put the cREVTable["currentycell"] of lObject into tycell 
+    put the cREVTable["currentycell"] of lObject into tycell
     send "revMoveCellDirection lObject,txcell,tycell,tDirection" to lObject
   end if
   unlock screen
@@ -251,7 +251,7 @@ on revMoveCellUp
   if exists(lObject) then
     put "up" into tDirection
     put the cREVTable["currentxcell"] of lObject into txcell
-    put the cREVTable["currentycell"] of lObject into tycell 
+    put the cREVTable["currentycell"] of lObject into tycell
     send "revMoveCellDirection lObject,txcell,tycell,tDirection" to lObject
   end if
   unlock screen
@@ -268,7 +268,7 @@ on revMoveCellLeft
   if exists(lObject) then
     put "left" into tDirection
     put the cREVTable["currentxcell"] of lObject into txcell
-    put the cREVTable["currentycell"] of lObject into tycell 
+    put the cREVTable["currentycell"] of lObject into tycell
     send "revMoveCellDirection lObject,txcell,tycell,tDirection" to lObject
   end if
   unlock screen
@@ -302,13 +302,13 @@ end arrowKey
 --    fixed bug #1487
 on closeField
    put the long id of the target into tTarget
-   
+
    # OK-2009-01-29 : If we're cell editing then obtain a reference to the original table field before deleting the cell
    local tOwner
    if there is a tTarget and the cREVTable["acell"] of tTarget then
       put the cREVTable["owner"] of tTarget into tOwner
    end if
-   
+
    if (word 1 of the tool is "browse") and (the cREVTable["acell"] of tTarget) then
       lock screen
       revWriteCellField lObject
@@ -320,7 +320,7 @@ on closeField
          revUpdateTable tTarget
       end if
    end if
-   
+
    # OK-2009-01-29 : If tOwner is not empty then it is assumed that were we editing a cell and have now finished.
    # Closefield should be sent directly to the table to simulate the standard field behavior. It should be fine to pass
    # the message after this, as the target would not have been the table field anyway, so it shouldnt get it twice.
@@ -329,7 +329,7 @@ on closeField
          send "closeField" to tOwner
       end try
    end if
-   
+
    pass closeField
 end closeField
 
@@ -354,15 +354,15 @@ end revUpdateTable
 --on revWriteCellField pObject
 --  --revSetScrollInfo pObject
 --  put the cREVTable["currentxcell"] of pObject into txcell
---  put the cREVTable["currentycell"] of pObject into tycell 
+--  put the cREVTable["currentycell"] of pObject into tycell
 --  put the cREVTable["currentview"] of pObject into tNewField
---  put revGetCellName(pObject) into tFieldName 
---  
+--  put revGetCellName(pObject) into tFieldName
+--
 --  if there is not a field tFieldName then exit revWriteCellField
 --  set the itemDelimiter to tab
 --  put the text of field tFieldName into tNewText
 --  put item txcell of line tycell of tNewField into tcurrentcell
---  
+--
 --  if not (tNewText = tcurrentcell) then
 --    put 0 into tMaxColumns
 --    put the number of lines of the cREVTable["currentview"] of pObject into tMaxRows
@@ -377,13 +377,13 @@ end revUpdateTable
 --    end if
 --    if tycell > tMaxRows then
 --      if the last char of tNewField is not cr then
---        put cr after tNewfield  
+--        put cr after tNewfield
 --      end if
 --      repeat with i = 1 to (tycell - tMaxRows)
 --        repeat with j = 1 to (tMaxColumns)
 --          put tab after tNewfield
---        end repeat   
---        put cr after tNewfield  
+--        end repeat
+--        put cr after tNewfield
 --      end repeat
 --      if the last char of tNewField is cr then
 --        delete last char of tNewField
@@ -400,10 +400,10 @@ end revUpdateTable
 --        put tab after tNewline
 --      end repeat
 --      put tNewline into line tycell of tNewField
---    end if   
---     
+--    end if
+--
 --    put tNewText into item txcell of line tycell tNewField
---    set the cREVTable["currentview"] of pObject to tNewField 
+--    set the cREVTable["currentview"] of pObject to tNewField
 --    put empty into tColumnValues
 --    repeat with i = 1 to tMaxColumns
 --      put item i of line tycell of tNewField & cr after tColumnValues
@@ -421,15 +421,15 @@ end revUpdateTable
 --on revWriteCellField pObject
 --  --revSetScrollInfo pObject
 --  put the cREVTable["currentxcell"] of pObject into txcell
---  put the cREVTable["currentycell"] of pObject into tycell 
+--  put the cREVTable["currentycell"] of pObject into tycell
 --  put the cREVTable["currentview"] of pObject into tNewField
---  put revGetCellName(pObject) into tFieldName 
---  
+--  put revGetCellName(pObject) into tFieldName
+--
 --  if there is not a field tFieldName then exit revWriteCellField
 --  set the itemDelimiter to tab
 --  put the text of field tFieldName into tNewText
 --  put item txcell of line tycell of tNewField into tcurrentcell
---  
+--
 --  if not (tNewText = tcurrentcell) then
 --    put 0 into tMaxColumns
 --    put the number of lines of the cREVTable["currentview"] of pObject into tMaxRows
@@ -444,13 +444,13 @@ end revUpdateTable
 --    end if
 --    if tycell > tMaxRows then
 --      if the last char of tNewField is not cr then
---        put cr after tNewfield  
+--        put cr after tNewfield
 --      end if
 --      repeat with i = 1 to (tycell - tMaxRows)
 --        repeat with j = 1 to (tMaxColumns)
 --          put tab after tNewfield
---        end repeat   
---        put cr after tNewfield  
+--        end repeat
+--        put cr after tNewfield
 --      end repeat
 --      if the last char of tNewField is cr then
 --        delete last char of tNewField
@@ -467,10 +467,10 @@ end revUpdateTable
 --        put tab after tNewline
 --      end repeat
 --      put tNewline into line tycell of tNewField
---    end if   
---     
+--    end if
+--
 --    put tNewText into item txcell of line tycell tNewField
---    set the cREVTable["currentview"] of pObject to tNewField 
+--    set the cREVTable["currentview"] of pObject to tNewField
 --    put empty into tColumnValues
 --    repeat with i = 1 to tMaxColumns
 --      put item i of line tycell of tNewField & cr after tColumnValues
@@ -488,10 +488,10 @@ end revUpdateTable
 on revWriteCellField pObject
   --revSetScrollInfo pObject
   put the cREVTable["currentxcell"] of pObject into txcell
-  put the cREVTable["currentycell"] of pObject into tycell 
+  put the cREVTable["currentycell"] of pObject into tycell
   put the cREVTable["currentview"] of pObject into tCurrentView
-  put revGetCellName(pObject) into tFieldName 
-  
+  put revGetCellName(pObject) into tFieldName
+
   if there is not a field tFieldName then exit revWriteCellField
   put the long ID of field tFieldName into tFieldRef
   put the text of field tFieldName into tNewText
@@ -644,13 +644,13 @@ function revScientificDisplay pPrefixList, pNumber, pGroup
   put format(tFormat,pNumber) into tFormattedNumber
   return tFormattedNumber
 end revScientificDisplay
-  
+
 function revDateDisplay pPrefixList, pNumber, pGroup
   set the itemDelimiter to comma
   --  put the cREVTable["datetypes"] of pObject into tDateType
   put pPrefixList into tDateType
   if pGroup >= (the number of items in tDateType) then
-    put item (the number of items in tDateType) of tDateType into tDate 
+    put item (the number of items in tDateType) of tDateType into tDate
   else
     put item pGroup of tDateType into tDate
   end if
@@ -670,11 +670,11 @@ function revDateDisplay pPrefixList, pNumber, pGroup
   default
     convert pNumber to system date
   end switch
-  
+
   put pNumber into tFormattedNumber
   return tFormattedNumber
 end revDateDisplay
-    
+
 on revDoFormatting pObject
   put the cREVTable["formatlist"] of pObject into tFormatList
   if tFormatList is not empty then
@@ -721,7 +721,7 @@ on revDoFormatting pObject
 end revDoFormatting
 
 on revDecimalFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["decimalformat"] of pObject is not empty then 
+  --  if the cREVTable["decimalformat"] of pObject is not empty then
   --    put the cREVTable["decimalformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -744,7 +744,7 @@ on revDecimalFormat pObject,pCellList,pPrefixList
 end revDecimalFormat
 
 on revScientificFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["scientificformat"] of pObject is not empty then 
+  --  if the cREVTable["scientificformat"] of pObject is not empty then
   --    put the cREVTable["scientificformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -767,7 +767,7 @@ on revScientificFormat pObject,pCellList,pPrefixList
 end revScientificFormat
 
 on revDateFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["dateformat"] of pObject is not empty then 
+  --  if the cREVTable["dateformat"] of pObject is not empty then
   --    put the cREVTable["dateformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -788,9 +788,9 @@ on revDateFormat pObject,pCellList,pPrefixList
     end repeat
   end if
 end revDateFormat
-    
+
 on revPercentageFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["percentageformat"] of pObject is not empty then 
+  --  if the cREVTable["percentageformat"] of pObject is not empty then
   --    put the cREVTable["percentageformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -813,7 +813,7 @@ on revPercentageFormat pObject,pCellList,pPrefixList
 end revPercentageFormat
 
 on revGenericFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["genericformat"] of pObject is not empty then 
+  --  if the cREVTable["genericformat"] of pObject is not empty then
   --    put the cREVTable["genericformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -836,7 +836,7 @@ on revGenericFormat pObject,pCellList,pPrefixList
 end revGenericFormat
 
 on revPrefixFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["genericformat"] of pObject is not empty then 
+  --  if the cREVTable["genericformat"] of pObject is not empty then
   --    put the cREVTable["genericformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -859,7 +859,7 @@ on revPrefixFormat pObject,pCellList,pPrefixList
 end revPrefixFormat
 
 on revSuffixFormat pObject,pCellList,pPrefixList
-  --  if the cREVTable["genericformat"] of pObject is not empty then 
+  --  if the cREVTable["genericformat"] of pObject is not empty then
   --    put the cREVTable["genericformat"] of pObject into tRawList
   if pCellList is not empty then
     put pCellList into tRawList
@@ -906,7 +906,7 @@ function revUnParseCellList pRawList
     set the itemDelimiter to space
   end repeat
   if the last char of tCellList is space then
-    delete the last char of tCellList  
+    delete the last char of tCellList
   end if
   return tCellList
 end revUnParseCellList
@@ -928,7 +928,7 @@ function revParseCellList pObject, pColumnList
     set the itemDelimiter to comma
   end repeat
   if the last char of tParseList is space then
-    delete last char of tParseList  
+    delete last char of tParseList
   end if
   return tParseList
 end revParseCellList
@@ -959,9 +959,9 @@ end mouseUp
 --  set the cREVTable["currentxmouseloc"] of pObject to item 1 of the clickloc
 --  set the cREVTable["currentymouseloc"] of pObject to item 2 of the clickloc
 --  set the cREVTable["leftfieldloc"] of pObject to item 1 of the rect of pObject
---  set the cREVTable["topfieldloc"] of pObject to item 2 of the rect of pObject 
+--  set the cREVTable["topfieldloc"] of pObject to item 2 of the rect of pObject
 --  set the cREVTable["rightfieldloc"] of pObject to item 3 of the rect of pObject
---  set the cREVTable["bottomfieldloc"] of pObject to item 4 of the rect of pObject 
+--  set the cREVTable["bottomfieldloc"] of pObject to item 4 of the rect of pObject
 --  set the cREVTable["currenthscroll"] of pObject to the hscroll of pObject
 --  set the cREVTable["currentvscroll"] of pObject to the vscroll of pObject
 --  if the number of items in the tabStops of pObject is empty then
@@ -980,40 +980,40 @@ on revGetTableSettings pObject
    set the cREVTable["currentxmouseloc"] of pObject to item 1 of the clickloc
    set the cREVTable["currentymouseloc"] of pObject to item 2 of the clickloc
    set the cREVTable["leftfieldloc"] of pObject to item 1 of the rect of pObject
-   set the cREVTable["topfieldloc"] of pObject to item 2 of the rect of pObject 
-   set the cREVTable["rightfieldloc"] of pObject to item 3 of the rect of pObject 
-   set the cREVTable["bottomfieldloc"] of pObject to item 4 of the rect of pObject 
+   set the cREVTable["topfieldloc"] of pObject to item 2 of the rect of pObject
+   set the cREVTable["rightfieldloc"] of pObject to item 3 of the rect of pObject
+   set the cREVTable["bottomfieldloc"] of pObject to item 4 of the rect of pObject
    set the cREVTable["currenthscroll"] of pObject to the hscroll of pObject
    set the cREVTable["currentvscroll"] of pObject to the vscroll of pObject
-      
+
    -- fix 3231
    if the number of items in the tabStops of pObject is empty or the number of items in the tabStops of pObject is 0 then
       set the tabStops of pObject to 75
    end if
-   
+
    set the cREVTable["numbertabstops"] of pObject to the number of items in the tabStops of pObject
    set the cREVTable["scrollbarwidth"] of pObject to the scrollBarWidth of pObject
-   
+
    -- MD5 digest check after "or" added KM Oct 02 to fix 4079 - data updated by user
    if the cREVTable["currentview"] of pObject is empty or md5Digest(the cREVTable["currentview"] of pObject) is not md5Digest(the htmlText of pObject) then
       set the cREVTable["currentview"] of pObject to the htmltext of pObject
    end if
-   
+
    revCalculateCellSpacing pObject
-   
-   revCalculateViewableArea pObject   
+
+   revCalculateViewableArea pObject
 end revGetTableSettings
 --js::20040715::end
 
 on revMoveNextRow pObject
-  put the cREVTable["currentycell"] of pObject into tycell  
+  put the cREVTable["currentycell"] of pObject into tycell
   if tycell >= 1 then
     set the cREVTable["currentycell"] of pObject to (tycell + 1)
   end if
 end revMoveNextRow
 
 on revMovePrevRow pObject
-  put the cREVTable["currentycell"] of pObject into tycell  
+  put the cREVTable["currentycell"] of pObject into tycell
   if tycell > 1 then
     set the cREVTable["currentycell"] of pObject to (tycell - 1)
   end if
@@ -1050,7 +1050,7 @@ end revCalculateCellSpacing
 --js::20040715::old_code
 --on revCreateNextColumn pObject, pNumberofColumns
 --  put the cREVTable["currentxcell"] of pObject into txcell
---  put the cREVTable["currentycell"] of pObject into tycell 
+--  put the cREVTable["currentycell"] of pObject into tycell
 --  put the cREVTable["currentview"] of pObject into tNewField
 --  put line tycell of tNewField into tNewline
 --  if the last char of tNewline is cr then
@@ -1061,7 +1061,7 @@ end revCalculateCellSpacing
 --    put tab after tNewLine
 --  end repeat
 --  put tNewline into line tycell of tNewField
---  set the cREVTable["currentview"] of pObject to tNewField 
+--  set the cREVTable["currentview"] of pObject to tNewField
 --  revDisplayFormattedData pObject
 --end revCreateNextColumn
 --js::20040715::new_code
@@ -1081,18 +1081,18 @@ on revCreateNextColumn pObject, pNumberofColumns
   then set the htmlText of the last field to tCurrentView
   else set the text of the last field to tCurrentView
   /* put empty into item (txcell + pNumberOfColumns) of line tycell of the last field */
-  
+
   # OK-2008-01-25 : Unneeded iterator removed and loop optimized
   --   repeat with i = 1 to pNumberofColumns
   --     put tab after line tycell of the last field
   --   end repeat
-  
+
   local tIndent
   repeat pNumberOfColumns times
     put tab after tIndent
   end repeat
   put tIndent after line tycell of the last field
-  
+
   put the htmlText of tFieldRef into tCurrentView
   delete the last field
   unlock messages
@@ -1108,9 +1108,9 @@ end revCreateNextColumn
 --js::20040715::old_code
 --on revCheckNextColumn pObject
 --  put the cREVTable["currentxcell"] of pObject into txcell
---  put the cREVTable["currentycell"] of pObject into tycell 
+--  put the cREVTable["currentycell"] of pObject into tycell
 --  set the itemDelimiter to tab
---  put the number of items in line tycell of the cREVTable["currentview"] of pObject into tColumns 
+--  put the number of items in line tycell of the cREVTable["currentview"] of pObject into tColumns
 --  set the itemDelimiter to comma
 --  put the cREVTable["currentview"] of pObject into tNewField
 --  if txcell >= tColumns then
@@ -1121,14 +1121,14 @@ end revCreateNextColumn
 --    put tab & tab after tNewline
 --    put tNewline into line tycell of tNewField
 --  end if
---  set the cREVTable["currentview"] of pObject to tNewField 
+--  set the cREVTable["currentview"] of pObject to tNewField
 --  revDisplayFormattedData pObject
 --end revCheckNextColumn
 --js::20040715::new_code
 on revCheckNextColumn pObject
   put the cREVTable["currentxcell"] of pObject into txcell
-  put the cREVTable["currentycell"] of pObject into tycell 
-  put the cREVTable["currentview"] of pObject into tCurrentView 
+  put the cREVTable["currentycell"] of pObject into tycell
+  put the cREVTable["currentview"] of pObject into tCurrentView
   set the itemDelimiter to tab
   -- just a rerun of the dirty trick
   lock screen
@@ -1137,7 +1137,7 @@ on revCheckNextColumn pObject
   if isHTML(tCurrentView)
   then set the htmlText of the last field to tCurrentView
   else set the text of the last field to tCurrentView
-  put the number of items in line tycell of the last field into tColumns 
+  put the number of items in line tycell of the last field into tColumns
   if txcell >= tColumns then put empty into item tColumns + 2 of line tycell of the last field
   put the htmltext of the last field into tCurrentView
   delete the last field
@@ -1153,8 +1153,8 @@ end revCheckNextColumn
 --js::20040715::old_code
 --on revCheckNextRow pObject
 --  put the cREVTable["currentxcell"] of pObject into txcell
---  put the cREVTable["currentycell"] of pObject into tycell 
---  put the number of lines of the cREVTable["currentview"] of pObject into tMaxRows 
+--  put the cREVTable["currentycell"] of pObject into tycell
+--  put the number of lines of the cREVTable["currentview"] of pObject into tMaxRows
 --  put the cREVTable["currentview"] of pObject into tNewField
 --  set the itemDelimiter to tab
 --  put 0 into tMaxColumns
@@ -1171,24 +1171,24 @@ end revCheckNextColumn
 --    if the last char of tNewField is not cr then
 --      put cr after tNewfield
 --    end if
---    repeat with i = 1 to 2  
+--    repeat with i = 1 to 2
 --      repeat with j = 1 to (tMaxColumns)
 --        put tab after tNewfield
 --      end repeat
 --      put cr after tNewField
 --    end repeat
 --    if the last char of tNewField is cr then
---      delete last char of tNewField   
+--      delete last char of tNewField
 --    end if
 --  end if
---  set the cREVTable["currentview"] of pObject to tNewField 
+--  set the cREVTable["currentview"] of pObject to tNewField
 --  revDisplayFormattedData pObject
 --end revCheckNextRow
 --js::20040715::new_code
 on revCheckNextRow pObject
   put the cREVTable["currentxcell"] of pObject into txcell
-  put the cREVTable["currentycell"] of pObject into tycell 
-  put the cREVTable["currentview"] of pObject into tCurrentView 
+  put the cREVTable["currentycell"] of pObject into tycell
+  put the cREVTable["currentview"] of pObject into tCurrentView
   set the itemDelimiter to tab
   -- just a rerun of the dirty trick
   lock screen
@@ -1200,7 +1200,7 @@ on revCheckNextRow pObject
   else set the text of the last field to tCurrentView
   put the number of lines of tCurrentView into tMaxRows
   put 1 into tMaxColumns
-  
+
   # OK-2007-01-25 : Optmization of loop
   --  repeat with i = 1 to tMaxRows
   --    if the number of items in line i of the last field > tMaxColumns then
@@ -1208,7 +1208,7 @@ on revCheckNextRow pObject
   --    end if
   --  end repeat
   put calculateMaxColumns(the long id of the last field, tMaxRows, tab) into tMaxColumns
-  
+
   if txcell > tMaxColumns then
     put txcell into tMaxColumns
   end if
@@ -1244,9 +1244,9 @@ end revCheckNextRow
 private function calculateMaxColumns pField, pMaxRows, pDelimiter
   local tRowNumber
   put 0 into tRowNumber
-  
+
   set the itemDelimiter to pDelimiter
-  
+
   local tMaxColumns
   repeat for each line tLine in the text of pField
     local tItemCount
@@ -1259,7 +1259,7 @@ private function calculateMaxColumns pField, pMaxRows, pDelimiter
       exit repeat
     end if
   end repeat
-  
+
   return tMaxColumns
 end calculateMaxColumns
 
@@ -1270,26 +1270,26 @@ on revCalculateCellLoc pObject
   put the cREVTable["currentxmouseloc"] of pObject into txmouseloc
   put the cREVTable["currentymouseloc"] of pObject into tymouseloc
   put the cREVTable["leftfieldloc"] of pObject into txfieldloc
-  put the cREVTable["topfieldloc"] of pObject into tyfieldloc 
+  put the cREVTable["topfieldloc"] of pObject into tyfieldloc
   put the cREVTable["currenthscroll"] of pObject into thscroll
   put the cREVTable["currentvscroll"] of pObject into tvscroll
   put the cREVTable["cellxspacing"] of pObject into txspacing
   put the cREVTable["cellyspacing"] of pObject into tyspacing
   put the cREVTable["numbertabstops"] of pObject into tnumbertabs
-  
+
   // SN-2015-06-23: [[ Bug 15522 ]] Apply fix proposed by Bernd Niggemann
   put txmouseloc + thscroll - txfieldloc - the leftMargin of pObject - the borderWidth  of pObject + 2  into tcolumnpixel   -- BN subracted leftMargin and borderWidth
   put tymouseloc + tvscroll - tyfieldloc - the topMargin of pObject - the borderWidth of pObject + 2 into trowpixel   -- BN subtracted topMargin and borderWidth
-  
+
   put 0 into txpixel
   put 0 into typixel
   put 0 into txcount
   put 0 into tycount
-  
+
   repeat until txpixel > tcolumnpixel
     put txcount + 1 into txcount
     if txcount <= tnumbertabs then
-      put item txcount of the tabStops of pObject into txpixel 
+      put item txcount of the tabStops of pObject into txpixel
       --put txpixel + txfieldloc into trightrect
       --      if txcount = 1 then
       --        put txfieldloc into tleftrect
@@ -1302,8 +1302,8 @@ on revCalculateCellLoc pObject
       --put txpixel + txfieldloc - txspacing into tleftrect
     end if
   end repeat
-  
-  
+
+
   put word 2 of the clickLine into tycount
   if tycount is empty then
     -- recursive search for line number
@@ -1314,13 +1314,13 @@ on revCalculateCellLoc pObject
       --put typixel + tyfieldloc - tyspacing into ttoprect
     end repeat
   end if
-   
+
   if the cREVTable["maxColumnCount"] of pObject is a number then
     put min(the cREVTable["maxColumnCount"] of pObject,txcount) into txcount
   end if
-   
+
   set the cREVTable["currentxcell"] of pObject to txcount
-  set the cREVTable["currentycell"] of pObject to tycount  
+  set the cREVTable["currentycell"] of pObject to tycount
 end revCalculateCellLoc
 
 --js::20040715::start
@@ -1331,7 +1331,7 @@ end revCalculateCellLoc
 --  put the cREVTable["rightfieldloc"] of pObject into txmouseloc
 --  put the cREVTable["bottomfieldloc"] of pObject into tymouseloc
 --  put the cREVTable["leftfieldloc"] of pObject into txfieldloc
---  put the cREVTable["topfieldloc"] of pObject into tyfieldloc 
+--  put the cREVTable["topfieldloc"] of pObject into tyfieldloc
 --  put the cREVTable["currenthscroll"] of pObject into thscroll
 --  put the cREVTable["currentvscroll"] of pObject into tvscroll
 --  put the cREVTable["cellxspacing"] of pObject into txspacing
@@ -1344,11 +1344,11 @@ end revCalculateCellLoc
 --  put 0 into typixel
 --  put 0 into txcount
 --  put 0 into tycount
---  
+--
 --  repeat until txpixel > tcolumnpixel
 --    put txcount + 1 into txcount
 --    if txcount <= tnumbertabs then
---      put item txcount of the tabStops of pObject into txpixel 
+--      put item txcount of the tabStops of pObject into txpixel
 --      --put txpixel + txfieldloc into trightrect
 --      --      if txcount = 1 then
 --      --        put txfieldloc into tleftrect
@@ -1361,14 +1361,14 @@ end revCalculateCellLoc
 --      --put txpixel + txfieldloc - txspacing into tleftrect
 --    end if
 --  end repeat
---  
+--
 --  repeat until typixel > trowpixel
 --    put tycount + 1 into tycount
 --    put typixel + tyspacing into typixel
 --    --put typixel + tyfieldloc into tbottomrect
 --    --put typixel + tyfieldloc - tyspacing into ttoprect
 --  end repeat
---   
+--
 --  put 0 into tMaxColumns
 --  repeat with i = 1 to tMaxRows
 --    if the number of items in line i of the cREVTable["currentview"] of pObject > tMaxColumns
@@ -1382,9 +1382,9 @@ end revCalculateCellLoc
 --  if (tMaxColumns is not empty) and (tMaxColumns > txcount) then
 --    put tMaxColumns into txcount
 --  end if
---  
+--
 --  set the cREVTable["viewablecolumns"] of pObject to txcount
---  set the cREVTable["viewablerows"] of pObject to tycount  
+--  set the cREVTable["viewablerows"] of pObject to tycount
 --end revCalculateViewableArea
 --js::20040715::new_code
 on revCalculateViewableArea pObject
@@ -1392,7 +1392,7 @@ on revCalculateViewableArea pObject
    put the cREVTable["rightfieldloc"] of pObject into txmouseloc
    put the cREVTable["bottomfieldloc"] of pObject into tymouseloc
    put the cREVTable["leftfieldloc"] of pObject into txfieldloc
-   put the cREVTable["topfieldloc"] of pObject into tyfieldloc 
+   put the cREVTable["topfieldloc"] of pObject into tyfieldloc
    put the cREVTable["currenthscroll"] of pObject into thscroll
    put the cREVTable["currentvscroll"] of pObject into tvscroll
    put the cREVTable["cellxspacing"] of pObject into txspacing
@@ -1406,18 +1406,18 @@ on revCalculateViewableArea pObject
    put 0 into typixel
    put 0 into txcount
    put 0 into tycount
-   
+
    ## Bug 11189
    ## When last 2 values of tab stops were the same this was causing an infinte loop
    if txspacing < 1 then put 1 into txspacing
    repeat until txpixel > tcolumnpixel
       put txcount + 1 into txcount
-      if txcount <= tnumbertabs then 
+      if txcount <= tnumbertabs then
          if item  txcount of the tabStops of pObject > txpixel then
-            put item txcount of the tabStops of pObject into txpixel 
+            put item txcount of the tabStops of pObject into txpixel
          else
             put txpixel + txspacing into txpixel
-         end if 
+         end if
       else
          put txpixel + txspacing into txpixel
       end if
@@ -1455,7 +1455,7 @@ on revCalculateViewableArea pObject
    end if
 
    set the cREVTable["viewablecolumns"] of pObject to txcount
-   set the cREVTable["viewablerows"] of pObject to tycount  
+   set the cREVTable["viewablerows"] of pObject to tycount
 
 end revCalculateViewableArea
 --js::20040715::end
@@ -1466,11 +1466,11 @@ private function lineHeight pObject, pLineNumber, pLineSpacing
    local tLineHeight
    put pLineSpacing + 2 * the padding of line pLineNumber of pObject \
          + the spaceAbove of line pLineNumber of pObject into tLineHeight
-   
+
    if pLineNumber > 1 then
       add the spaceBelow of line pLineNumber - 1 of pObject to tLineHeight
    end if
-   
+
    return tLineHeight
 end lineHeight
 
@@ -1481,9 +1481,9 @@ private function paragraphTagRegex
 end paragraphTagRegex
 
 //  If the text is not seen as HTML text when it is, then the text of the
-//  table field will be set to its HTMLtext (see bug 15545) 
+//  table field will be set to its HTMLtext (see bug 15545)
 private function isHTML pText
-   put paragraphTagRegex() into tA   
+   put paragraphTagRegex() into tA
    put matchText(ptext, tA) and char -4 to -1 of pText is "</p>" into tResult
    return tresult
 end isHTML
@@ -1491,7 +1491,7 @@ end isHTML
 on revCalculateCellRect pObject
   revUpdateScrollInfo pObject
   put the cREVTable["leftfieldloc"] of pObject into txfieldloc
-  put the cREVTable["topfieldloc"] of pObject into tyfieldloc 
+  put the cREVTable["topfieldloc"] of pObject into tyfieldloc
   put the cREVTable["rightfieldloc"] of pObject into trightfieldloc
   put the cREVTable["scrollbarwidth"] of pObject into tscrollbarwidth
   put the cREVTable["currenthscroll"] of pObject into thscroll
@@ -1500,25 +1500,25 @@ on revCalculateCellRect pObject
   put the cREVTable["cellyspacing"] of pObject into tyspacing
   put the cREVTable["currentxcell"] of pObject into txcell
   put the cREVTable["currentycell"] of pObject into tycell
-  put the cREVTable["numbertabstops"] of pObject into tnumbertabs  
+  put the cREVTable["numbertabstops"] of pObject into tnumbertabs
   --  put revReadCellValue(pObject,txcell,tycell) into tcellvalue
   put revReadCellValue(pObject,txcell,tycell,"html") into tcellvalue
   set the cREVTable["currentcellvalue"] of pObject to tcellvalue
   set the itemDelimiter to comma
-  
+
  -- SN-2015-06-23: [[ ImprovedTableNav ]] the margins can be a list of 4 items, if not all equal
   local t_left_fudge, t_top_fudge, t_right_fudge, t_bottom_fudge
   put the leftMargin of pObject + the borderWidth of pObject into t_left_fudge
   put the topMargin of pObject + the borderWidth of pObject into t_top_fudge
   put the rightMargin of pObject + the borderWidth of pObject into t_right_fudge
   put the bottomMargin pObject + the borderWidth of pObject into t_bottom_fudge
-  
+
   put 0 into txpixel
   put 0 into typixel
   repeat with i = 1 to txcell
      if i <= tnumbertabs then
         // We want to take into account the left fudge
-      put item i of the tabStops of pObject + txfieldloc + t_left_fudge into txpixel 
+      put item i of the tabStops of pObject + txfieldloc + t_left_fudge into txpixel
       put txpixel into trightrect
       if i = 1 then
         put t_left_fudge + txfieldloc into tleftrect
@@ -1532,20 +1532,20 @@ on revCalculateCellRect pObject
       put trightrect - txspacing into tleftrect
     end if
   end repeat
-  
+
   // SN-2015-06-24: [[ ImprovedTableNav ]] Refactored line height calculation
   put t_top_fudge + tyfieldloc into ttoprect
   put ttoprect into tBottomrect
-  repeat with i = 1 to tycell     
+  repeat with i = 1 to tycell
      put tBottomRect into tTopRect
      add lineHeight(pObject, i, tyspacing) to tBottomRect
   end repeat
-  
+
   put tleftrect - thscroll into tleftrect
   put trightrect - thscroll into trightrect
   put ttoprect - tvscroll into ttoprect
   put tbottomrect - tvscroll into tbottomrect
-  
+
   // SN-2015-06-24: [[ ImprovedTableNav ]] Use the bottom fudge
   if tbottomrect > (the cREVTable["bottomfieldloc"] of pObject - the cREVTable["scrollbarwidth"] of pObject - t_bottom_fudge) then
     revCheckNextRow pObject
@@ -1627,14 +1627,14 @@ on revCalculateCellRect pObject
     set the cREVTable["currenthscroll"] of pObject to tnewhscroll
     revUpdateScrollInfo pObject
   end if
-  
+
   // SN-2015-06-23: [[ ImprovedTableNav ]] Aesthetical fudge, to have
   //  the edition cell covering exactly the selected cell
   subtract 3 from tleftrect
   subtract 3 from trightrect
   subtract 6 from ttoprect
   subtract 5 from tbottomrect
-  
+
   set the cREVTable["leftcellloc"] of pObject to tleftrect
   set the cREVTable["topcellloc"] of pObject to ttoprect
   set the cREVTable["rightcellloc"] of pObject to trightrect
@@ -1658,11 +1658,11 @@ end revCalculateCellRect
 function revGetCellRect pObject
   put the cREVTable["leftcellloc"] of pObject into tResult
   put "," after tResult
-  put the cREVTable["topcellloc"] of pObject after tResult 
+  put the cREVTable["topcellloc"] of pObject after tResult
   put "," after tResult
   put the cREVTable["rightcellloc"] of pObject after tResult
   put "," after tResult
-  put the cREVTable["bottomcellloc"] of pObject after tResult 
+  put the cREVTable["bottomcellloc"] of pObject after tResult
   return tResult
 end revGetCellRect
 
@@ -1670,7 +1670,7 @@ function revGetCellName pObject
   put "revCell-" into tResult
   put the cREVTable["currentxcell"] of pObject after tResult
   put "," after tResult
-  put the cREVTable["currentycell"] of pObject after tResult 
+  put the cREVTable["currentycell"] of pObject after tResult
   return tResult
 end revGetCellName
 
@@ -1782,14 +1782,14 @@ on revResizeTemplates pObject
   set the borderWidth of the templatefield to 1
   set the htmltext of the templatefield to the cREVTable["currentcellvalue"] of pObject
   set the name of the templatefield to lFieldName
-  
+
   # OK-2009-01-29 : Set metadata on the cell fields so that we know which object they are attached to.
   # These means that when we get a closeField / exitField message targeted to the cell, we can delete it,
   # and then redirect the message to the actual table field.
   set the cREVTable["owner"] of the templateField to pObject
-  
+
   set the focus of the templatefield to true
-  
+
   set the cREVTable["acell"] of the templatefield to true
   set the cREVTable["acell"] of this card to true -- needed to avoid cycling through controls unnecessarily
 end revResizeTemplates
@@ -1807,7 +1807,7 @@ on revCreateCellField pObject
     set the dontWrap of field tFieldName to true
     unlock messages
     reset templatefield
-    --reset templategraphic
+    reset templategraphic
   end if
 end revCreateCellField
 
@@ -1818,10 +1818,10 @@ function revIsColumnLocked pObject
     put revParseRangeList(tLockList) into tLock
     if tColumn is among the items of tLock then
       return true
-    else 
+    else
       return false
     end if
-  else 
+  else
     return false
   end if
 end revIsColumnLocked
@@ -1847,7 +1847,7 @@ function revParseRangeList pRawList
   if the last char of tRangeList is comma then
     delete the last char of tRangeList
   end if
-  
+
   return tRangeList
 end revParseRangeList
 
