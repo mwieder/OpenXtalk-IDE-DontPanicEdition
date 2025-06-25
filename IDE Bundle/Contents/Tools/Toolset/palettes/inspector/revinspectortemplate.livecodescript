@@ -1,4 +1,4 @@
-﻿script "revInspectorTemplate"
+﻿script "revInspectorTemplate" with behavior "revInspectorBehavior"
 local sSelectedObjects, sObjectTypes
 local sInspectorLock
 on preOpenStack
@@ -16,26 +16,68 @@ end preOpenStack
 
 on openStack
    lock screen
-
    # Register of IDE messages
    revIDESubscribe "idePreferenceChanged:idePropertyInspector_labels"
-
    # Get a list of the properties and groups we'll be displaying
    set the inspectorData of me to revIDEPropertiesInfo(sSelectedObjects)
    unlock screen
-
    set the visible of me to true
 end openStack
 
 on closeStack
    ## Unsubscribe from all messages
    revIDEUnsubscribe "idePreferenceChanged:idePropertyInspector_labels"
-
+   closeAllPopUps
    set the cSelectedObjects of me to empty
-
    # Unlock
    put false into sInspectorLock
 end closeStack
+
+on closeAllPopUps  -- popupDismiss
+   lock screen
+   if there is a stack "revPropertyPopup strokeGradient" then
+      stop using stack "revPropertyPopup strokeGradient"
+      close stack "revPropertyPopup strokeGradient"
+      delete stack "revPropertyPopup strokeGradient"
+      send ("delete stack "& quote & "revPropertyPopup strokeGradient" & quote ) to stack "Home"
+      -- put "stack strokeGradient removed from memory:" & not(there is a stack "revPropertyPopup strokeGradient")
+   end if
+   if there is a stack "revPropertyPopup fillGradient" then
+      stop using stack "revPropertyPopup fillGradient"
+      close stack "revPropertyPopup fillGradient"
+      delete stack "revPropertyPopup fillGradient"
+      send ("delete stack "& quote & "revPropertyPopup fillGradient" & quote ) to stack "Home"
+      -- put "stack fillGradient removed from memory:" & not(there is a stack "revPropertyPopup fillGradient")
+   end if
+   if there is a stack "revPropertyPopup dropShadow" then
+      stop using stack "revPropertyPopup dropShadow"
+      close stack "revPropertyPopup dropShadow"
+      delete stack "revPropertyPopup dropShadow"
+      send ("delete stack "& quote & "revPropertyPopup dropShadow" & quote ) to stack "Home"
+      -- put "stack strokeGradient removed from memory:" & not(there is a stack "revPropertyPopup strokeGradient")
+   end if
+   if there is a stack "revPropertyPopup innerShadow" then
+      stop using stack "revPropertyPopup innerShadow"
+      close stack "revPropertyPopup innerShadow"
+      delete stack "revPropertyPopup innerShadow"
+      send ("delete stack "& quote & "revPropertyPopup innerShadow" & quote ) to stack "Home"
+      -- put "stack fillGradient removed from memory:" & not(there is a stack "revPropertyPopup fillGradient")
+   end if
+   if there is a stack "revPropertyPopup outerGlow" then
+      stop using stack "revPropertyPopup outerGlow"
+      close stack "revPropertyPopup outerGlow"
+      delete stack "revPropertyPopup outerGlow"
+      send ("delete stack "& quote & "revPropertyPopup outerGlow" & quote ) to stack "Home"
+      -- put "stack fillGradient removed from memory:" & not(there is a stack "revPropertyPopup fillGradient")
+   end if
+   if there is a stack "revPropertyPopup innerGlow" then
+      stop using stack "revPropertyPopup innerGlow"
+      close stack "revPropertyPopup innerGlow"
+      delete stack "revPropertyPopup innerGlow"
+      send ("delete stack "& quote & "revPropertyPopup innerGlow" & quote ) to stack "Home"
+      -- put "stack fillGradient removed from memory:" & not(there is a stack "revPropertyPopup fillGradient")
+   end if
+end closeAllPopUps
 
 on resizeStack
    resizeInspector
@@ -52,36 +94,28 @@ setProp cSelectedObjects pSelectedObjects
    if the cLocked of me then
       exit cSelectedObjects
    end if
-
    # Unsubscribe the the objects previously
    revIDEUnsubscribe "idePropertyChanged","",sSelectedObjects
-
    lock screen
-
    inspectorClear
-
    put pSelectedObjects into sSelectedObjects
 
    # Keep track of the object 'types' in case they are changed via PI
    put ideObjectTypesFromObjectList(pSelectedObjects) into sObjectTypes
-
    if pSelectedObjects is empty then
       inspectorTitleUpdate
       set the inspectorData of me to empty
+      closeAllPopUps
       exit cSelectedObjects
    end if
-
    revIDESubscribe "idePropertyChanged", pSelectedObjects
 
    # Get a list of the properties and groups we'll be displaying
    set the inspectorData of me to revIDEPropertiesInfo(pSelectedObjects)
-
    inspectorTitleUpdate
-
    get pSelectedObjects is not revIDESelectedObjects()
    put it into sInspectorLock
    toggleFrameItem "inspectorLock", it
-
    unlock screen
 
    set the visible of me to true
@@ -149,7 +183,6 @@ on inspectorTreeMenuDisplay
    local tObjects, tStack, tDefaultStack
    local tHandlers, tSendMessageList, tLockInspector, tFocusedObject
    put sSelectedObjects into tObjects
-
    put the defaultStack into tDefaultStack
 
    # Create the button that we're going to popup on this stack
@@ -277,11 +310,11 @@ getProp displayData
 end displayData
 
 getProp viewColumns [pSection]
-   return 1
+   return 2
 end viewColumns
 
 getProp showSubSections [pSection]
-   return false
+   return false -- true ?
 end showSubSections
 
 function inspectorSectionIcon pSection

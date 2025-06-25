@@ -1,8 +1,9 @@
-﻿script "com.livecode.pi.graphiceffect.behavior"
+﻿script "com.livecode.pi.graphiceffect.behavior" with behavior "revInspectorEditorBehavior"
 local sPopupDefaults
 
 on editorInitialize
-   set the editorMinWidth of me to 25
+   set the editorMinWidth of me to 30
+   set the editorMinHeight of me to 200
    set the editorMaxWidth of me to 0
    
    local tPopupData, tDefaultStore

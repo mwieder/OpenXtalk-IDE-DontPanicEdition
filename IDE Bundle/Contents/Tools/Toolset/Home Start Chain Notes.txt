@@ -39,6 +39,20 @@ HOME Start chain:
     Checks license info for "evaluation" and then runs auto updater per platform -- Commented this whole section out to disable it
 end
 
+relaunch -- seems to only apply to Windows:
+    local tParameters
+    repeat with x = 1 to the paramCount
+       put param(x) into tParameters[x]
+    end repeat
+    dispatch command "revHookLaunchInstance" to me with tParameters
+    if it is "handled" then
+       if the result is empty then
+          pass relaunch
+       else if the result is "background" then
+          return "background"
+       end if
+       return empty
+    end if
 
 IDE Home script interesting functions:
 

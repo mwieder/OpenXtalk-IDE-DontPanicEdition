@@ -500,13 +500,13 @@ command connectorResize pControl
          put 13 into tWidgetSize
          break
       case tTextSize >= 14 and tTextSize < 18
-         put 16 into tWidgetSize
+         put 15 into tWidgetSize
          break
       case tTextSize >= 18
-         put 18 into tWidgetSize
+         put 17 into tWidgetSize
          break
       default
-         put 12 into tWidgetSize
+         put 13 into tWidgetSize
    end switch
 
    set the width of widget "icon" of group pControl of me to tWidgetSize
