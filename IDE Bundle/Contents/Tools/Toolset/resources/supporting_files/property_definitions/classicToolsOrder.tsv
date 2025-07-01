@@ -1,5 +1,6 @@
 com.livecode.interface.classic.Button
 com.livecode.interface.classic.RectangleButton
+com.livecode.interface.classic.OvalButton
 com.livecode.interface.classic.FilledButton
 com.livecode.interface.classic.DefaultButton
 com.livecode.interface.classic.Checkbox

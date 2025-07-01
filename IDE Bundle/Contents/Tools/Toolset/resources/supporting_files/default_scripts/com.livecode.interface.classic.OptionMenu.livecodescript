@@ -1,7 +1,7 @@
 ﻿script "com.livecode.interface.classic.OptionMenu"
 -- Sent when a menu item is picked from the option menu
-on menuPick pItemName
-   switch pItemName
+on menuPick pChosenItem
+   switch pChosenItem
    case empty
       break
    default
