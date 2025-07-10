@@ -375,6 +375,7 @@ private command revInternal__openStack
 end revInternal__openStack
 
 private command applyTheme
+return
    -- apply a theme
    -- (only one of these conditions can be true)
    set the cREVLaunching of stack "Home" to false
@@ -2756,7 +2757,7 @@ on tApplyTheme_nullify
    if the cREVLaunching of stack "Home" is false then
          if the platform contains "win" then send "IDEtoDefaultWin" to this stack -- remove theme for windows
          if the platform contains "mac" then send "IDEtoDefaultMac" to this stack -- remove theme for mac
-         if the platform contains "linux" then dispatch "IDEtoDefaultLin" to this stack -- remove any theming for Linux
+         if the platform contains "linux" then send "IDEtoDefaultLin" to this stack -- remove any theming for Linux
    end if
 end tApplyTheme_nullify
 
@@ -2827,7 +2828,7 @@ on IDEtoDefaultLin
                      -- set btn colour
                      repeat the number of btns of card tCardCount of stack (line tcount of tStacks)
                         add 1 to tBtnCount
-
+/*
                         switch the style of btn tBtnCount of card tCardCount of stack (line tcount of tStacks)
                            case "checkbox"
                            case "radiobutton"
@@ -2841,7 +2842,20 @@ on IDEtoDefaultLin
                               end if
                               break
                         end switch
-
+*/
+                        if the style of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) is "checkbox" then
+                           set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to false
+                        else
+                           if the style of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) is "radiobutton" then
+                              set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to false
+                           else
+                              if the long name of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) contains ("group " & q("toolbar")) then
+                                 set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to false -- don't make toolbar btns opaque
+                              else
+                                 set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to true
+                              end if
+                           end if
+                        end if
                         set the ink of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to "srcCopy"
                         set the foregroundColor of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to empty
                         set the backgroundColor of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to empty
@@ -3161,9 +3175,6 @@ end IDEtoDarkWin
 
 constant kWhiteBkgnd = "255,255,255" # bright white
 constant kDarkText = "0,0,0" # black text
-#constant kLightGrey = "225,225,255" # very light grey
-#constant kDarkGrey = "50,50,50" # very dark grey
-
 on IDEtoLightWin
    local tIgnoreInsidePlugins, tIgnoreInsideDocs, tIgnoreInsideHome
    lock screen
@@ -3314,7 +3325,7 @@ on IDEtoDefaultMac
                      -- set btn colour
                      repeat the number of btns of card tCardCount of stack (line tcount of tStacks)
                         add 1 to tBtnCount
-
+/*
                         switch the style of btn tBtnCount of card tCardCount of stack (line tcount of tStacks)
                            case "checkbox"
                            case "radiobutton"
@@ -3324,7 +3335,16 @@ on IDEtoDefaultMac
                               set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to true
                               break
                         end switch
-
+*/
+                        if the style of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) is "checkbox" then
+                           set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to false
+                        else
+                           if the style of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) is "radiobutton" then
+                              set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to false
+                           else
+                              set the opaque of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to true
+                           end if
+                        end if
                         set the ink of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to "srcCopy"
                         set the foregroundColor of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to empty
                         set the backgroundColor of btn tBtnCount of card tCardCount of stack (line tcount of tStacks) to empty

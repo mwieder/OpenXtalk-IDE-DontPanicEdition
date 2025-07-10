@@ -6,9 +6,9 @@ on preOpenStack
       put false into gREVDontLoadMenus
       exit preOpenStack
    end if
-   
+
    subscribeMessages
-   
+
    setDefaultText
    setMenuProperties
    generateMenu
@@ -30,14 +30,14 @@ private command subscribeMessages
    revIDESubscribe "idePreferenceChanged:cToolbarIcons"
    revIDESubscribe "idePreferenceChanged:cToolbarText"
    revIDESubscribe "ideToolChanged"
-   
+
    revIDESubscribe "ideToggleChanged:suppressMessages"
    revIDESubscribe "ideToggleChanged:suppressErrors"
    revIDESubscribe "ideToggleChanged:selectGrouped"
-   
+
    revIDESubscribe "idePluginsChanged"
    revIDESubscribe "ideWindowsChanged"
-   
+
    revIDESubscribe "ideTutorialProgressChanged"
    revIDESubscribe "ideActiveStacksChanged"
 end subscribeMessages
@@ -78,34 +78,34 @@ private on setupTextMenu
    put toggleMenuItem("Superscript", false) & cr after tText
    put "-" & cr after tText
    put "Font" & cr after tText
-   
+
    local tFontNames
    put the fontNames into tFontNames
    replace "/" with "\" in tFontNames
    sort lines of tFontNames
-   
-   /* Fake fonts begin with "(", but the menu code interprets a "(" at 
-   the beginning of the item to mean the item is disabled. 
+
+   /* Fake fonts begin with "(", but the menu code interprets a "(" at
+   the beginning of the item to mean the item is disabled.
    So, to show a "(" instead of disabling, we need to double it */
    repeat with tLine = 1 to the number of lines of tFontNames
       if line tLine of tFontNames begins with "(" then
          put "(" before line tLine of tFontNames
       end if
    end repeat
-   
+
    put "Use Owner's Font" & cr & "-" & cr before tFontNames
-   
+
    local fontnum
    put 1 into fontnum
    repeat for each line tFontName in tFontNames
-      if tFontName is "-" then 
+      if tFontName is "-" then
          put tab & tFontName & cr after tText
       else
          put "!u" & tab & tFontName & cr after tText
       end if
    end repeat
    put "Size" & cr after tText
-   
+
    local tFontSizes
    put format("Use Owner's Size\n-\n8\n9\n10\n12\n14\n18\n24\n36\n48\n-\nOther...") into tFontSizes
    repeat for each line l in tFontSizes
@@ -113,18 +113,18 @@ private on setupTextMenu
       else put "!u" & tab & l & cr after tText
    end repeat
    put "Color" & cr after tText
-   
+
    local tColors
    put format("Use Owner's Color\n-\nBlack\nWhite\nRed\nGreen\nBlue\nYellow\n-\nPen Color") into tColors
    repeat for each line tColor in tColors
       if tColor is "-" then
          put tab & tColor & cr after tText
-      else 
+      else
          put "!u" & tab & tColor & cr after tText
       end if
    end repeat
    put  "-" & cr & "&Align" & cr & "!u"  & tab & "Left" & cr & "!u" & tab & "Center" & cr & "!u" & tab & "Right" after tText
-   
+
    # Cache the text menu text in non-disabled state
    put tText into sTextMenuText
    repeat for each line tLine in tText
@@ -141,12 +141,12 @@ private on setupTextMenu
    put tDisabledText into sTextMenuDisabledText
 end setupTextMenu
 
-# OK-2010-02-19: Bug 8157 - Escape special characters from stack names in menus, more may 
+# OK-2010-02-19: Bug 8157 - Escape special characters from stack names in menus, more may
 # need to be added here.
 private function menubar.EscapeStackNameForMenu pName
    replace "!" with "\!" in pName
    replace "&" with "\&" in pName
-   if the platform is "MacOS" then 
+   if the platform is "MacOS" then
       replace "/" with "\/" in pName
       replace "(" with "\(" in pName
    else
@@ -161,12 +161,12 @@ private command setupWindowMenu
    #   This will be any script editors or the dictionary or resource center if they are open, and any user stacks.
    local tWindows
    put revIDEWindowList() into tWindows
-   
-   if tWindows is empty then      
+
+   if tWindows is empty then
       put empty into sWindowMenuWindows
       exit setupWindowMenu
    end if
-   
+
    // PM-2016-05-14: [[ Bug 17638 ]] Show stacks by name, unless they are instances of the script editor,
    // the Dictionary or the Resource Center. In this case show the stack title, as in LC 6.7.x
    local tMenu, tMenuLine, tStackName
@@ -176,7 +176,7 @@ private command setupWindowMenu
       if ide.StackIsIDEWindow?(tStackName) then
          put the title of tStack into tStackName
       end if
-      
+
       put "!n" & menubar.EscapeStackNameForMenu(tStackName) & "/|" & tStack into tMenuLine
       if tMenu is empty then
          put tMenuLine into tMenu
@@ -184,7 +184,7 @@ private command setupWindowMenu
          put cr & tMenuLine after tMenu
       end if
    end repeat
-   
+
    # Put a checkmark against the 'topmost' stack
    put "!c" into char 1 to 2 of line 1 of tMenu
    put tMenu into sWindowMenuWindows
@@ -198,7 +198,7 @@ private function menuBar.RecentFiles
    # Get the recent file data
    local tRecentFiles
    put revIDERecentStacks() into tRecentFiles
-   
+
    # Generate the menu
    local tMenu
    repeat with x = 1 to the number of elements of tRecentFiles
@@ -208,12 +208,12 @@ private function menuBar.RecentFiles
          put cr & tab & menubar.EscapeStackNameForMenu(tRecentFiles[x]["label"]) & "/|" & tRecentFiles[x]["filename"] after tMenu
       end if
    end repeat
-   
+
    if tMenu is not empty then
       put cr & tab & "-" after tMenu
       put cr & tab & "Clear Recent Files" & "/|" & kClearRecentFiles after tMenu
    end if
-   
+
    return tMenu
 end menuBar.RecentFiles
 
@@ -225,14 +225,14 @@ on moveStack
    end if
    revIDESetPaletteRectPreference the short name of me
    ideSetWindowBoundingRect
-   
+
    pass moveStack
 end moveStack
 
 on setMenuProperties
    set the height of me to 47
    set the resizable of me to false
-   
+
    local tTitle
    set the itemDelimiter to "-"
    put "LiveCode" && revEnvironmentEditionProperty("name") into tTitle
@@ -246,21 +246,21 @@ on setMenuProperties
    end if
    set the itemDelimiter to comma
    set the title of me to tTitle
-   
+
    local tScreenRect
    put revIDEStackScreenRect(the short name of this stack, true) into tScreenRect
-   
+
    if the platform is not "MacOS" then
       if item 3 of the screenRect is 800 then
          set the topLeft of me to item 1 to 2 of tScreenRect
-      else 
+      else
          --screen rect > 800 by 600
          if revIDEGetPreference("cREVMenuBarTopLeft") is empty
          then set the loc of me to item 1 of revIDEStackScreenLoc(the short name of this stack), 54
          else set the topLeft of me to revIDEGetPreference("cREVMenuBarTopLeft")
       end if
    end if
-   
+
    if the platform is "MacOS" then
       set the decorations of me to empty
       set the topLeft of me to item 1 to 2 of tScreenRect
@@ -324,16 +324,16 @@ private command generateMenubarUI
    if there is a group "icons" of me then
       delete group "icons" of me
    end if
-   
+
    if there is a group "toolbar" of me then
       delete group "toolbar" of me
    end if
-   
+
    reset the templatebutton
-   
+
    create group "icons"
    create group "toolbar"
-   
+
    lock messages
    # Setup the default button
    set the showname of the templatebutton to true
@@ -344,10 +344,10 @@ private command generateMenubarUI
    set the margins of the templatebutton to "4,0,4,1"
    set the traversalOn of the templatebutton to false
    set the autoHilite of the templatebutton to false
-   
+
    # Setup the default image
    set the resizequality of the templateimage to "best"
-   
+
    # Setup the default field
    set the traversalon of the templatefield to false
    set the threed of the templatefield to false
@@ -356,7 +356,7 @@ private command generateMenubarUI
    set the opaque of the templatefield to false
    set the height of the templatefield to 21
    set the locktext of the templatefield to true
-   
+
    local tDividerCount
    put 1 into tDividerCount
    repeat for each item tItem in menubar.Items()
@@ -372,13 +372,13 @@ private command generateMenubarUI
          set the id of it to revIDENewIconID()
          set the filename of image tItem of me to menubar.ButtonNameToIconPath(tItem)
          local tFilename
-         repeat for each item tStyle in "hilited,disabled,depressed,hilited-depressed" 
+         repeat for each item tStyle in "hilited,disabled,depressed,hilited-depressed"
             put menubar.ButtonNameToIconPath(tItem, tStyle) into tFilename
             if there is a file tFilename then
                create invisible image (tItem & "-" & tStyle) in group "icons" of me
                set the id of it to revIDENewIconID()
                set the filename of image (tItem & "-" & tStyle) of me to tFilename
-               if tStyle is "hilited" then 
+               if tStyle is "hilited" then
                   set the cHighlightedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
                else if tStyle is "depressed" then
                   set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
@@ -388,7 +388,7 @@ private command generateMenubarUI
                   set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
                end if
             else
-               if tStyle is "hilited" then 
+               if tStyle is "hilited" then
                   set the cHighlightedIcon of the templatebutton to the cIcon of the templatebutton
                else if tStyle is "disabled" then
                   set the disabledIcon of the templatebutton to the cIcon of the templatebutton
@@ -399,25 +399,25 @@ private command generateMenubarUI
                end if
             end if
          end repeat
-         
+
          create button tItem in group "toolbar" of me
          set the cIcon of it to the id of image tItem of group "icons" of me
          set the icon of it to the cIcon of it
          set the label of it to localizeMenuItem(tItem)
       end if
    end repeat
-   
+
    set the hilitedIcon of the templatebutton to 0
    set the disabledIcon of the templatebutton to 0
-   
+
    generateTutorialGroup
    generateUpgradeGroup
-   
+
    reset the templategraphic
    reset the templatebutton
    reset the templateimage
    reset the templatefield
-   
+
    unlock messages
 end generateMenubarUI
 
@@ -425,7 +425,7 @@ private command generateTutorialGroup
    if there is a group "tutorial" of me then
       delete group "tutorial" of me
    end if
-   
+
    create group "tutorial"
    set the margins of it to 0
    create group "progress" in group "tutorial" of me
@@ -436,12 +436,12 @@ private command generateTutorialGroup
    create graphic "Trough" in group "Progress" of group "tutorial" of me
    create graphic "Bar" in group "Progress" of group "tutorial" of me
    set the backcolor of it to "white"
-   
+
    create field "label" in group "tutorial" of me
    set the margins of it to 4
    set the textSize of it to 10
    set the traversalOn of it to false
-   
+
    create group "actions" in group "tutorial" of me
    set the margins of it to 0
    create widget "stop" as "com.livecode.widget.svgpath" in group "actions" of group "tutorial" of me
@@ -449,13 +449,13 @@ private command generateTutorialGroup
    set the height of it to kTutorialActionSize
    set the iconPresetName of it to "stop"
    set the traversalOn of it to false
-   
+
    create widget "skip" as "com.livecode.widget.svgpath" in group "actions" of group "tutorial" of me
    set the width of it to kTutorialActionSize
    set the height of it to kTutorialActionSize
    set the iconPresetName of it to "forward"
    set the traversalOn of it to false
-   
+
    hide group "tutorial" of me
 end generateTutorialGroup
 
@@ -463,27 +463,27 @@ private command generateUpgradeGroup
    if there is a group "upgrade" of me then
       delete group "upgrade" of me
    end if
-   
+
    create group "upgrade"
    set the margins of it to 0
-   
+
    create graphic "bg" in group "upgrade" of me
    set the opaque of it to true
    set the style of it to "roundRect"
    set the lineSize of it to 0
-   
+
    local tUpgradeEdition
    put revEnvironmentEditionProperty("upgrade_edition") into tUpgradeEdition
    set the backcolor of it to revEnvironmentEditionProperty("color", tUpgradeEdition)
    set the roundRadius of it to 8
-   
+
    create field "label" in group "upgrade" of me
    set the margins of it to 4
    set the traversalOn of it to false
    set the text of it to "Upgrade Options"
    set the textStyle["bold"] of it to true
    set the textColor of it to "white"
-   
+
    hide group "upgrade" of me
 end generateUpgradeGroup
 
@@ -492,7 +492,7 @@ private command generateMenuGroup
    if there is a group "revMenuBar" of me then
       delete group "revMenuBar" of me
    end if
-   
+
    set the traversalOn of the templatebutton to false
    set the style of the templatebutton to "menu"
    set the menumode of the templatebutton to "pulldown"
@@ -502,15 +502,15 @@ private command generateMenuGroup
    local tButtonScript
    put "on menuPick pWhich; revMenubarMenuPick pWhich; end menuPick" into tButtonScript
    set the script of the templatebutton to tButtonScript
-   
+
    local tGroupScript
    put  "on mouseDown; revMenubarBuildMenus; end mouseDown" into tGroupScript
    create invisible group "revMenuBar"
    set the script of it to tGroupScript
-   
+
    set the topleft of group "revMenuBar" of me to 0,0
    set the lockloc of group "revMenuBar" of me to true
-   
+
    local tLeft
    put 1 into tLeft
    repeat for each item tItem in menubar.Menus()
@@ -526,12 +526,12 @@ private command generateMenuGroup
          set the mnemonic of it to 1
       end if
    end repeat
-   
+
    if the platform is not "macos" then
       show group "revMenuBar" of me
    end if
    set the menubar of me to "revMenuBar"
-   
+
    reset the templatebutton
    set the style of the templatebutton to "rectangle"
    set the height of the templatebutton to 2
@@ -539,8 +539,8 @@ private command generateMenuGroup
    set the showborder of the templatebutton to true
    set the borderwidth of the templatebutton to 2
    set the showname of the templatebutton to false
-   
-   if the platform is "Linux" then 
+
+   if the platform is "Linux" then
       create button "Divider" in group "revMenuBar"
    else
       create invisible button "Divider" in group "revMenuBar"
@@ -553,11 +553,11 @@ command generateContextMenu
    if there is a button "context" of me then
       delete button "context" of me
    end if
-   
+
    set the style of the templatebutton to "menu"
    set the menumode of the templatebutton to "popup"
    set the visible of the templatebutton to false
-   
+
    create button "context"
 end generateContextMenu
 
@@ -571,21 +571,21 @@ constant kUpgradeButtonMarginHorizontal = 15
 on layoutMenu
    lock screen
    lock messages
-   
+
    local tDividerCount
    put 1 into tDividerCount
-   
+
    local tLeft, tTop
    put kPadding into tLeft
-   
-   if the platform is "macos" then 
+
+   if the platform is "macos" then
       put kMenuBarTop into tTop
    else
       put kMenuBarTop + kMenuBarHeight into tTop
    end if
    local tTopLeft
    put the topleft of me into tTopLeft
-   
+
    local tLastDivide
    repeat for each item tItem in menubar.Items()
       if tItem is "Divide" then
@@ -605,23 +605,23 @@ on layoutMenu
          add tWidth to tLeft
       end if
    end repeat
-   
+
    local tTutorial, tLabelWidth
    put revIDETutorialInProgress() into tTutorial
    if tTutorial is not empty then
       hide group "upgrade" of me
-      
+
       add kPadding/2 to tLeft
       show group "tutorial" of me
       show tLastDivide
-      set the text of field "label" of group "tutorial" of me to tTutorial["lesson"] 
+      set the text of field "label" of group "tutorial" of me to tTutorial["lesson"]
       set the width of field "label" of group "tutorial" of me to 1000
       set the height of field "label" of group "tutorial" of me to the formattedHeight of field "label" of group "tutorial" of me
-      
+
       put the formattedwidth of field "label" of group "tutorial" of me into tLabelWidth
       set the width of field "label" of group "tutorial" of me to tLabelWidth
       set the topleft of field "label" of group "tutorial" of me to 0, 0
-      
+
       set the backcolor of graphic "Trough" of group "progress" of me to "white"
       set the backcolor of graphic "Bar" of group "progress" of me to "black"
       set the rect of graphic "Trough" of group "progress" of me to 0, 0, tLabelWidth, kPadding / 2
@@ -629,44 +629,44 @@ on layoutMenu
       set the rect of group "progress" of me to the formattedRect of group "progress" of me
       set the loc of group "progress" of me to the loc of field "label" of me
       set the top of group "progress" of me to the bottom of field "label" of group "tutorial" of me + kPadding / 5
-      
+
       set the topleft of widget "skip" of group "actions" of group "tutorial" of me to 0,0
       set the topleft of widget "stop" of group "actions" of group "tutorial" of me to kTutorialActionSize + kPadding / 2, 0
       set the rect of group "actions" of group "tutorial" of me to the formattedRect of group "actions" of group "tutorial" of me
       set the loc of group "actions" of group "tutorial" of me to the loc of field "label" of me
       set the top of group "actions" of group "tutorial" of me to the bottom of group "progress" of me + kPadding / 2
-      
+
       set the rect of group "tutorial" of me to the formattedRect of group "tutorial" of me
       set the loc of group "tutorial" of me to the loc of group "toolbar" of me
       set the left of group "tutorial" of me to tLeft
-      
+
       add the width of group "tutorial" of me + kPadding to tLeft
    else if ideShouldShowUpgradeOptions?() then
       hide group "tutorial" of me
-      
+
       add kPadding/2 to tLeft
       show group "upgrade" of me
       show tLastDivide
-      
+
       put the height of me into tHeight
-      
+
       local tMenuBarHeight = 0
       if the platform is not "MacOS" then
          subtract kMenuBarHeight from tHeight
          put kMenuBarHeight into tMenuBarHeight
       end if
-      
+
       set the topLeft of group "upgrade" of me to \
             tLeft, \
             tMenuBarHeight + (tHeight - the height of group "upgrade" of me) / 2
-      
+
       add the width of group "upgrade" of me + kPadding to tLeft
    else
       hide tLastDivide
       hide group "tutorial" of me
       hide group "upgrade" of me
-   end if	
-   
+   end if
+
    set the width of me to tLeft
    set the height of group "revMenuBar" of me to kMenuBarHeight
    set the width of group "revMenuBar" of me to the width of me
@@ -674,10 +674,10 @@ on layoutMenu
    set the rect of button "Divider" of group "revMenuBar" of me to 0, kMenuBarHeight - kDividerWidth, tLeft + kPadding, kMenuBarHeight
    set the topleft of me to tTopLeft
    unlock messages
-   
+
    updateButtonState
    unlock screen
-end layoutMenu	
+end layoutMenu
 
 private function menubar.Items
    return "Inspector,Code,Message Box,Divide,Group,Edit Group,Select Grouped,Divide,Messages,Errors,Divide,Sample Stacks,Tutorials,Resources,Dictionary,Divide,Test,Divide"
@@ -689,17 +689,17 @@ private command updateMenubarPreference
    local tShowIcons, tShowText
    put revIDEGetPreference("cToolbarIcons") is not false into tShowIcons
    put revIDEGetPreference("cToolbarText") is not false into tShowText
-   
+
    local tTopLeft
    put the topleft of me into tTopLeft
-   
+
    local tButtonRef
    repeat for each line tButton in the childControlNames of group "toolbar" of me
       if tButton is "Divide" then next repeat
       if there is not a button tButton of group "toolbar" of me then
          next repeat
       end if
-      
+
       put the long id of button tButton of group "toolbar" into tButtonRef
       if tShowIcons and tShowText then
          set the height of tButtonRef to 43
@@ -708,7 +708,7 @@ private command updateMenubarPreference
       else if tShowText then
          set the height of tButtonRef to 14
       end if
-      
+
       if tShowIcons then
          set the showIcon of tButtonRef to true
       else
@@ -719,8 +719,8 @@ private command updateMenubarPreference
       else
          set the showName of tButtonRef to false
       end if
-   end repeat 
-   
+   end repeat
+
    if the platform is "macos" then
       if tShowIcons is false and tShowText is false then
          set the height of me to 0
@@ -745,39 +745,39 @@ private command updateMenubarPreference
          set the height of me to 75
       end if
    end if
-   
+
    set the width of field "label" of group "upgrade" of me to 1000
    set the height of field "label" of group "upgrade" of me to the formattedHeight of field "label" of group "upgrade" of me
    local tLabelWidth
    put the formattedwidth of field "label" of group "upgrade" of me into tLabelWidth
    set the width of field "label" of group "upgrade" of me to tLabelWidth
    set the loc of field "label" of group "upgrade" of me to 0,0
-   
+
    if tShowIcons is false then
       set the visible of graphic "bg" of group "upgrade" of me to false
       set the textColor of field "label" of group "upgrade" of me to "black"
    else
       set the visible of graphic "bg" of group "upgrade" of me to true
       set the textColor of field "label" of group "upgrade" of me to "white"
-      
+
       local tHeight
       put the height of me - kPadding into tHeight
-      
+
       if the platform is not "MacOS" then
          subtract kMenuBarHeight from tHeight
       end if
-      
+
       local tRect
       put the rect of field "label" of group "upgrade" of me into tRect
       put item 1 of tRect - kUpgradeButtonMarginHorizontal, \
             -tHeight div 2, \
             item 3 of tRect + kUpgradeButtonMarginHorizontal, \
             tHeight div 2 into tRect
-      
+
       set the rect of graphic "bg" of group "upgrade" of me to tRect
    end if
    set the rect of group "upgrade" of me to the formattedRect of group "upgrade" of me
-   
+
    set the topleft of me to tTopLeft
    unlock messages
    unlock screen
@@ -810,13 +810,13 @@ end enableToolbar
 private command updateButtonHilite pTargetName, pValue
    lock screen
    lock messages
-   
+
    local tTargetLongID
    put the long id of button pTargetName of group "toolbar" of me into tTargetLongID
-   
+
    local tShowIcon
    put the showIcon of tTargetLongID into tShowIcon
-   
+
    setButtonHilite tTargetLongID, pValue
    set the label of tTargetLongID to menubar.ButtonText(pTargetName, pValue)
    if pValue then
@@ -824,9 +824,9 @@ private command updateButtonHilite pTargetName, pValue
    else
       set the icon of tTargetLongID to the cIcon of tTargetLongID
    end if
-   
+
    set the showIcon of tTargetLongID to tShowIcon
-   
+
    unlock messages
    unlock screen
 end updateButtonHilite
@@ -839,35 +839,35 @@ local sToolbarHighlight
 private command updateButtonState
    lock screen
    lock messages
-   
+
    enableToolbar
-   
+
    local tSelObj
    put revIDESelectedObjects() into tSelObj
-   
+
    local tControlSelected
-   put tSelObj is not empty and word 1 of tSelObj \ 
+   put tSelObj is not empty and word 1 of tSelObj \
          is not among the items of "card,stack" into tControlSelected
-   
+
    local tUserStack
    put not revIDEStackIsIDEStack(the topstack) into tUserStack
-   
+
    local tGroupHilite
    put word 1 of tSelObj is "group" and the number of lines in tSelobj is 1 into tGroupHilite
    updateButtonHilite "Group", tGroupHilite
-   
+
    -- Group button should be disabled if no controls are selected
    setToolbarButtonState "Group", tControlSelected
-   
+
    local tEditGroupHilite
    put the editBg of the topStack and word 1 of tSelObj is not "group" into tEditGroupHilite
    updateButtonHilite "Edit Group", tEditGroupHilite
-   
+
    -- If a group is selected, the Edit Group button should be enabled
    -- It should also be enabled (with label 'Stop Editing') if we're currently editing a group
    setToolbarButtonState "Edit Group", \
          tGroupHilite or the editBg of the topstack
-   
+
    # Click buttons don't stay hilited
    updateButtonHilite "Message Box", false
    updateButtonHilite "Inspector", false
@@ -877,32 +877,32 @@ private command updateButtonState
    updateButtonHilite "Tutorials", false
    updateButtonHilite "Resources", false
    updateButtonHilite "Dictionary", false
-   
+
    # Toggle buttons hilited according to state of property
    global gRevSuppressErrors, gRevSuppressMessages
    updateButtonHilite "Errors", gRevSuppressErrors
    updateButtonHilite "Messages", gRevSuppressMessages
    updateButtonHilite "Select Grouped", the selectGroupedControls
-   
+
    # Deal with enabled/disabled of code and inspector
    global gRevDevelopment
    local tCanInspect
    put tControlSelected or tUserStack or gRevDevelopment into tCanInspect
-   
+
    setToolbarButtonState "Code", tCanInspect
    setToolbarButtonState "Inspector", tCanInspect
-   
+
    # Deal with enabled/disabled of test
    setToolbarButtonState "Test", \
-         revIDEGetPreference("cDeployPlatforms") is not empty 
-   
+         revIDEGetPreference("cDeployPlatforms") is not empty
+
    if revIDETutorialInProgress() is not empty then
       disableToolbar
       if sToolbarHighlight is not empty then
          enable button sToolbarHighlight of group "toolbar" of me
       end if
    end if
-   
+
    unlock messages
    unlock screen
 end updateButtonState
@@ -937,7 +937,7 @@ private function menubar.ButtonText pName, pHilited
    if pHIlited is false then
       return pName
    end if
-   
+
    switch pName
       case "Group"
          return "Ungroup"
@@ -975,7 +975,7 @@ end localizeMenuItem
 private command setButtonDepressed pTarget
    lock screen
    lock messages
-   
+
    local tHilite, tShowIcon
    put the hilite of pTarget into tHilite
    put the showIcon of pTarget into tShowIcon
@@ -986,7 +986,7 @@ private command setButtonDepressed pTarget
    end if
    setButtonHilite pTarget, not the hilite of pTarget
    set the showIcon of pTarget to tShowIcon
-   
+
    unlock messages
    unlock screen
 end setButtonDepressed
@@ -1037,7 +1037,7 @@ end mouseUp
 
 /*
 There is no way to get the real screen rects of the mac menu buttons,
-so this function has the current values hard-coded. The easiest way 
+so this function has the current values hard-coded. The easiest way
 to find these values is to use 'the left of stack "Message Box" whilst aligning
 visually.
 
@@ -1094,7 +1094,7 @@ function absoluteRectOfObject pObject
          return rectOfMacMenuItem(pObject)
       end if
       put the rect of button pObject into tRect
-   else 
+   else
       if there is a button pObject of group "toolbar" of me then
          put the rect of button pObject of group "toolbar" of me into tRect
       else if pObject is "tutorial" then
@@ -1204,7 +1204,7 @@ end highlightMenuItem
 command revMenubarBuildMenus
    local tContext
    put buildMenuContext() into tContext
-   
+
    lock screen
    lock messages
    lock menus
@@ -1212,7 +1212,7 @@ command revMenubarBuildMenus
       set the text of button tMenu of group "revMenuBar" of me to revMenubarBuildMenu(tMenu, tContext)
       enable button tMenu of group "revMenuBar"
    end repeat
-   
+
    if revIDETutorialInProgress() is not empty then
       repeat for each item tMenu in menubar.Menus()
          # Don't disable the help menu during tutorials
@@ -1221,7 +1221,7 @@ command revMenubarBuildMenus
          end if
          disable button tMenu of group "revMenuBar" of me
       end repeat
-      
+
       repeat for each key tMenu in sMenuHighlight
          enable button tMenu of group "revMenuBar" of me
          highlightMenuItem tMenu, sMenuHighlight[tMenu]
@@ -1244,7 +1244,7 @@ function revMenubarBuildMenu pMenu, pContext
          return menubar.ObjectMenu(pContext)
       case "Text"
          return menubar.TextMenu(pContext)
-      case "Development"         
+      case "Development"
          return menubar.DevelopmentMenu(pContext)
       case "View"
          return menubar.ViewMenu(pContext)
@@ -1255,23 +1255,23 @@ function revMenubarBuildMenu pMenu, pContext
       default
          break
    end switch
-   
+
    return empty
 end revMenubarBuildMenu
 
 # Returns an array containing the context needed to build the menus. This is stuff like which images / objects / text is selected etc.
 function buildMenuContext
    local tContext
-   
+
    if (the selectedText) is empty then
-      put false into tContext["textSelected"]   
+      put false into tContext["textSelected"]
    else
       put true into tContext["textSelected"]
    end if
-   
+
    local tEnableText
    put false into tEnableText
-   
+
    local tObjectsSelected
    local tTextMenuSelection
    put empty into tTextMenuSelection
@@ -1283,17 +1283,17 @@ function buildMenuContext
    if the selectedField is not empty then
       local tSelField
       put the long id of the selectedField into tSelField
-      
+
       local tTargetStack
       put revTargetStack(tSelField) into tTargetStack
-      if revFilterStacksList(tTargetStack) is tTargetStack then 
+      if revFilterStacksList(tTargetStack) is tTargetStack then
          put true into tEnableText
          put "text" into tTextMenuSelection
       else
          local tName
          put the short name of tSelField into tName
          if word 1 of tTargetStack is "revPropertyPalette" then
-            switch tName 
+            switch tName
                case "label"
                case "htmlText"
                case "text"
@@ -1302,23 +1302,23 @@ function buildMenuContext
                   break
             end switch
          else if tTargetStack is "revMenuManager"
-         then if tName is "Menu Name" or tName is "Item Name" then 
+         then if tName is "Menu Name" or tName is "Item Name" then
             put true into tEnableText
             put "text" into tTextMenuSelection
          end if
       end if
    end if
-   
+
    --Flip/Rotate/Reshape enabling
    local tSelectedObject
    put the selobj into tSelectedObject
-   
+
    local tEnableFlipandRotate
    put true into tEnableFlipandRotate
-   
+
    local tAllGraphics
    put true into tAllGraphics
-   
+
    local tAllImages
    put true into tAllImages
    repeat for each line l in tSelectedObject
@@ -1337,7 +1337,7 @@ function buildMenuContext
             break
       end switch
    end repeat
-   
+
    put tEnableFlipandRotate into tContext["enableFlipAndRotate"]
    put tSelectedObject into tContext["selectedObject"]
    put tAllGraphics into tContext["allGraphics"]
@@ -1345,7 +1345,7 @@ function buildMenuContext
    put tEnableText into tContext["enableText"]
    put tTextMenuSelection into tContext["textMenuSelection"]
    put tObjectsSelected into tContext["objectsSelected"]
-   
+
    return tContext
 end buildMenuContext
 
@@ -1355,13 +1355,13 @@ private function menubar.FileMenu pContext
    local tIsUserTarget, tIsScriptOnly
    put the mode of the topStack is 1 into tIsUserTarget
    put the scriptOnly of the topStack into tIsScriptOnly
-   
+
    local tCanSaveStack
    put false into tCanSaveStack
    if not revIDEStackIsIDEStack(the topStack) or the mode of the topStack is 1 then
       put true into tCanSaveStack
    end if
-   
+
    local tFile
    put "&New Stack" & cr after tFile
    put tab & "Default Size" & cr after tFile
@@ -1374,26 +1374,26 @@ private function menubar.FileMenu pContext
    put tab & "iPad//Tablet Landscape (1024x768)" & cr after tFile
    put tab & "-" & cr after tFile
    put tab & "Script only Stack" & cr after tFile
-   
+
    if tIsUserTarget and not tIsScriptOnly then
       put "&New Substack of" && char 1 to 20 of the mainStack of the topStack & "/|New Substack" & cr after tFile
    else
       put "(&New Substack" & cr after tFile
    end if
-   
+
    put "&Open Stack.../O" & cr after tFile
-   
+
    if menuBar.RecentFiles() is not empty then
       put "Open Recent File" & cr after tFile
       put menuBar.RecentFiles() & cr after tFile
    else
       put "(Open Recent File" & cr after tFile
    end if
-   
+
    put enableMenuItem("&Close/W", the mode of the topStack <= 3 and the short name of the topstack is not "revMenubar") & cr after tFile
    put enableMenuItem("Close and Remove From Memor&y", tCanSaveStack) & cr after tFile
    put "-" & cr after tFile
-   
+
    put enableMenuItem("Import As Control", tIsUserTarget) & cr after tFile
    put tab & "Image File.../>|image" & cr after tFile
    put tab & "Audio File.../|audio" & cr after tFile
@@ -1409,7 +1409,7 @@ private function menubar.FileMenu pContext
    put tab & "All Audio Files in Folder.../|audio folder" & cr after tFile
    put tab & "All Video Files in Folder.../|video folder" & cr after tFile
    put tab & "All Text Files in Folder.../|text folder" & cr after tFile
-   
+
    put enableMenuItem("New Referenced Control", tIsUserTarget) & cr after tFile
    put tab & "Image File.../|image" & cr after tFile
    put tab & enableMenuItem("Video File.../|video", the platform is not "Linux") & cr after tFile
@@ -1417,26 +1417,26 @@ private function menubar.FileMenu pContext
    put tab & "All Images in Folder.../|image folder" & cr after tFile
    put tab & enableMenuItem("All Video Files in Folder.../|video folder", the platform is not "Linux") & cr after tFile
    put "-" & cr after tFile
-   
+
    put enableMenuItem("&Save/S", tCanSaveStack) & cr after tFile
    put enableMenuItem("Save &As...", tCanSaveStack) & cr after tFile
    put enableMenuItem("Move S&ubstack to File...", tIsUserTarget and the short name of the topStack is not the mainStack of the topStack) & cr after tFile
    put enableMenuItem("&Revert to Saved...", tIsUserTarget and the effective filename of the topStack is not empty) & cr after tFile
    put "-" & cr after tFile
-   
+
    put enableMenuItem("&Share this stack...", tCanSaveStack) & cr after tFile
    put "-" & cr after tFile
-   
+
    put enableMenuItem("Standalone Application Settings...", tIsUserTarget) & cr after tFile
    put enableMenuItem("Save as Standalone Application...", tIsUserTarget) & cr after tFile
    put "-" & cr after tFile
-   
+
    put "P&age Setup..." & cr after tFile
    put enableMenuItem("&Print Card.../P", tIsUserTarget) & cr after tFile
    put enableMenuItem("Print Field...", word 1 of (the selObj) is "field") & cr after tFile
-   
+
    put "-" & cr after tFile
-   
+
    ## EJB 2014-08-26
    ## [[Bug 12880]]
    if the platform is "Linux" then
@@ -1444,7 +1444,7 @@ private function menubar.FileMenu pContext
    else
       put "E&xit" & cr after tFile
    end if
-   
+
    return modifyMenu("File", tFile)
 end menubar.FileMenu
 
@@ -1462,18 +1462,18 @@ private function menubar.EditMenu pContext
          put empty into tObjectsLabel
       end if
    end if
-   
+
    local tSelectionLabel
    if the selectedImage is not empty then
       put "Image Selection" into tSelectionLabel
    else if pContext["textSelected"] then
       put "Text" into tSelectionLabel
-   else if pContext["objectsSelected"] then	
+   else if pContext["objectsSelected"] then
       put tObjectsLabel into tSelectionLabel
    else
       put empty into tSelectionLabel
    end if
-   
+
    local tClipboardLabel
    switch the clipboard
       case "empty"
@@ -1495,7 +1495,7 @@ private function menubar.EditMenu pContext
          put "Image" into tClipboardLabel
          break
    end switch
-   
+
    put "&Undo/Z" & cr after tEdit
    put "-" & cr after tEdit
    put enableMenuItem("Cu&t" && tSelectionLabel & "/X|cut", tSelectionLabel is not empty) & cr after tEdit
@@ -1515,7 +1515,7 @@ private function menubar.EditMenu pContext
    put "Find and Replace.../F" & cr after tEdit
    put "-" & cr after tEdit
    put "Pre&ferences" after tEdit
-   
+
    return modifyMenu("Edit", tEdit)
 end menubar.EditMenu
 
@@ -1523,21 +1523,21 @@ end menubar.EditMenu
 
 private function menubar.ToolsMenu pContext
    local tTools
-   
+
    put markMenuItem("&Browse Tool/9", the tool is "browse tool") & cr after tTools
    put markMenuItem("&Pointer Tool/0", the tool is "pointer tool") & cr after tTools
    put "-" & cr after tTools
    put toggleMenuItem("&Tools Palette/T", revIDEPaletteIsVisible("tools")) & cr after tTools
    put toggleMenuItem("&Paint and Draw Tools", "paint" is among the items of revIDEGetPreference("revTools_show")) & cr after tTools
    put "-" & cr after tTools
-   
+
    put toggleMenuItem("Project Browser", revIDEPaletteIsVisible("project browser")) & cr after tTools
    put toggleMenuItem("&Message Box/M", revIDEPaletteIsVisible("message box")) & cr after tTools
    put toggleMenuItem("Extension Manager", revIDEPaletteIsVisible("extension manager")) & cr after tTools
    put toggleMenuItem("Extension Builder", revIDEPaletteIsVisible("extension builder")) & cr after tTools
    put "-" & cr after tTools
    put toggleMenuItem(enableMenuItem("Menu Builder", the mode of the topStack is 1), revIDEPaletteIsVisible("menu builder")) & cr after tTools
-   
+
    return modifyMenu("Tools", tTools)
 end menubar.ToolsMenu
 
@@ -1545,95 +1545,95 @@ end menubar.ToolsMenu
 
 private function menubar.TextMenu pContext
    local tText,tFont,tSize,tAlign,tStyle,tColor
-   
+
    if not pContext["enableText"] then
       put sTextMenuDisabledText into tText
-   else   
-      put sTextMenuText into tText   
-      if pContext["textMenuSelection"] is "objects" then   
-         --selected object   
-         put "(!nSubscript" & cr & "(!nSuperscript" into line 11 to 12 of tText   
+   else
+      put sTextMenuText into tText
+      if pContext["textMenuSelection"] is "objects" then
+         --selected object
+         put "(!nSubscript" & cr & "(!nSuperscript" into line 11 to 12 of tText
          try
-            put the textFont of the selectedObject into tFont   
-            put the textSize of the selectedObject into tSize   
-            put the textStyle of the selectedObject into tStyle   
-            put the textColor of the selectedObject into tColor   
-            put the textAlign of the selectedObject into tAlign   
-            if the number of lines in (the selObj) > 1 then   
-               repeat for each line l in (the selObj)   
-                  if the textFont of l is not tFont then put "MULTIPLE" into tFont   
-                  if the textSize of l is not tSize then put "MULTIPLE" into tSize   
-                  if the textStyle of l is not tStyle then put "MULTIPLE" into tStyle   
-                  if the textColor of l is not tColor then put "MULTIPLE" into tColor   
-                  if the textAlign of l is not tAlign then put empty into tAlign   
-               end repeat   
-            end if   
+            put the textFont of the selectedObject into tFont
+            put the textSize of the selectedObject into tSize
+            put the textStyle of the selectedObject into tStyle
+            put the textColor of the selectedObject into tColor
+            put the textAlign of the selectedObject into tAlign
+            if the number of lines in (the selObj) > 1 then
+               repeat for each line l in (the selObj)
+                  if the textFont of l is not tFont then put "MULTIPLE" into tFont
+                  if the textSize of l is not tSize then put "MULTIPLE" into tSize
+                  if the textStyle of l is not tStyle then put "MULTIPLE" into tStyle
+                  if the textColor of l is not tColor then put "MULTIPLE" into tColor
+                  if the textAlign of l is not tAlign then put empty into tAlign
+               end repeat
+            end if
          end try
-      else   
-         --selected text   
-         put item 1 of the textFont of the selectedChunk into tFont   
-         put the textSize of the selectedChunk into tSize   
+      else
+         --selected text
+         put item 1 of the textFont of the selectedChunk into tFont
+         put the textSize of the selectedChunk into tSize
          put the textStyle of the selectedChunk into tStyle
          if tStyle is empty then put "plain" into tStyle
-         
+
          local tShift
-         put the textShift of the selectedChunk into tShift   
-         put the textColor of the selectedChunk into tColor   
-         --text shift   
-         if tShift is empty then put 0 into tShift   
-         if tShift > 0 then put "!cSubscript" into line 11 of tText   
-         else put "!nSubscript" into line 11 of tText   
-         if tShift < 0 then put "!cSuperscript" into line 12 of tText   
-         else put "!nSuperscript" into line 12 of tText   
-      end if   
-      --font   
-      if tFont is empty then put "Use Owner's Font" into tFont   
+         put the textShift of the selectedChunk into tShift
+         put the textColor of the selectedChunk into tColor
+         --text shift
+         if tShift is empty then put 0 into tShift
+         if tShift > 0 then put "!cSubscript" into line 11 of tText
+         else put "!nSubscript" into line 11 of tText
+         if tShift < 0 then put "!cSuperscript" into line 12 of tText
+         else put "!nSuperscript" into line 12 of tText
+      end if
+      --font
+      if tFont is empty then put "Use Owner's Font" into tFont
       local tLineNo
-      put lineOffset(tFont,tText) into tLineNo   
-      if tLineNo is not 0 then   
-         --if it is 0, auto unhiliting will occur as text is set to default   
-         put "c" into char 2 of line tLineNo of tText   
-      end if   
-      --size   
+      put lineOffset(tFont,tText) into tLineNo
+      if tLineNo is not 0 then
+         --if it is 0, auto unhiliting will occur as text is set to default
+         put "c" into char 2 of line tLineNo of tText
+      end if
+      --size
       local tStartNum
-      put lineOffset("Size"&cr,tText) into tStartNum   
-      if tSize is empty then put "Use Owner's Size" into tSize   
-      
-      put lineOffset(tSize,tText,tStartNum)+tStartNum into tLineNo   
-      if tLineNo is not 0 and tSize is not "Multiple" then   
-         if tSize is not among the items of "Use Owner's Size,8,9,10,12,14,18,24,36,48" then put lineOffset("Other..."&cr,tText) into tLineNo   
-         put "c" into char 2 of line tLineNo of tText   
-      end if   
-      --style   
-      replace "threedbox" with "3D Box" in tStyle   
-      repeat for each item tItem in tStyle   
-         put lineOffset(tItem, tText) into tLineNo   
-         if tLineNo is not 0 then put "c" into char 2 of line tLineNo of tText   
-      end repeat   
-      --color   
-      if tColor is "0,0,0" then put "Black" into tColor   
-      if tColor is "255,255,255" then put "White" into tColor   
-      if tcolor is "255,0,0" then put "Red" into tColor   
-      if tColor is "0,255,0" then put "Green" into tColor   
-      if tColor is "0,0,255" then put "Blue" into tColor   
-      if tColor is "255,255,0" then put "Yellow" into tColor   
-      put lineOffset("Color"&cr,tText) into tStartNum   
-      if tColor is empty then put "Use Owner's Color" into tColor   
-      if tColor is the penColor then put "pen color" into tColor   
-      put lineOffset(tColor,tText,tStartNum)+tStartNum into tLineNo   
-      if tLineNo is not 0 and tLineNo is not tStartNum then   
-         put "c" into char 2 of line tLineNo of tText   
-      end if   
-      --align   
+      put lineOffset("Size"&cr,tText) into tStartNum
+      if tSize is empty then put "Use Owner's Size" into tSize
+
+      put lineOffset(tSize,tText,tStartNum)+tStartNum into tLineNo
+      if tLineNo is not 0 and tSize is not "Multiple" then
+         if tSize is not among the items of "Use Owner's Size,8,9,10,12,14,18,24,36,48" then put lineOffset("Other..."&cr,tText) into tLineNo
+         put "c" into char 2 of line tLineNo of tText
+      end if
+      --style
+      replace "threedbox" with "3D Box" in tStyle
+      repeat for each item tItem in tStyle
+         put lineOffset(tItem, tText) into tLineNo
+         if tLineNo is not 0 then put "c" into char 2 of line tLineNo of tText
+      end repeat
+      --color
+      if tColor is "0,0,0" then put "Black" into tColor
+      if tColor is "255,255,255" then put "White" into tColor
+      if tcolor is "255,0,0" then put "Red" into tColor
+      if tColor is "0,255,0" then put "Green" into tColor
+      if tColor is "0,0,255" then put "Blue" into tColor
+      if tColor is "255,255,0" then put "Yellow" into tColor
+      put lineOffset("Color"&cr,tText) into tStartNum
+      if tColor is empty then put "Use Owner's Color" into tColor
+      if tColor is the penColor then put "pen color" into tColor
+      put lineOffset(tColor,tText,tStartNum)+tStartNum into tLineNo
+      if tLineNo is not 0 and tLineNo is not tStartNum then
+         put "c" into char 2 of line tLineNo of tText
+      end if
+      --align
       if tAlign is not empty then
          local tAlignSkip
          put lineOffset("&Align",tText) into tAlignSkip
          --items including right,left,center could be included in Font menu
          put lineOffset(tAlign,tText,tAlignSkip) + tAlignSkip into tAlignSkip
          put "c" into char 2 of line tAlignSkip of tText
-      end if  
+      end if
    end if
-   
+
    return modifyMenu("Text", tText)
 end menubar.TextMenu
 
@@ -1641,11 +1641,11 @@ end menubar.TextMenu
 
 private function menubar.ObjectMenu pContext
    local tObject
-   
+
    local tIsObjectTarget, tIsUserTarget
    put (the selObj) is not empty and word 1 of (the selObj) is not "stack" into tIsObjectTarget
    put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
-   
+
    ### Initial sections
    put enableMenuItem("&Object Inspector", tIsObjectTarget) & cr after tObject
    put enableMenuItem("&Card Inspector", tIsUserTarget) & cr after tObject
@@ -1655,35 +1655,35 @@ private function menubar.ObjectMenu pContext
    put enableMenuItem("Card Script", tIsUserTarget) & cr after tObject
    put enableMenuItem("Stack Script", tIsUserTarget) & cr after tObject
    put "-" & cr after tObject
-   
+
    ### Lines 9 to 11: Group, Edit Group, Remove Group
    local tGroupLines
    if the selectedImage is empty and pContext["objectsSelected"] then
-      if word 1 of (the selObj) is "group" and the number of lines in (the selObj) is 1 then   
-         put "&Ungroup Selected/G" & cr & "&Edit Group/R" & cr & "Remove Group"into tGroupLines   
+      if word 1 of (the selObj) is "group" and the number of lines in (the selObj) is 1 then
+         put "&Ungroup Selected/G" & cr & "&Edit Group/R" & cr & "Remove Group"into tGroupLines
       else if word 1 of (the selObj) is not among the items of "card,stack" then
          put "&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group"into tGroupLines
       else
          put "(&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group" into tGroupLines
       end if
    else
-      put "(&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group" into tGroupLines   
+      put "(&Group Selected/G" & cr & "(&Edit Group/R" & cr & "(Remove Group" into tGroupLines
    end if
    if the editBackground of the topStack and word 1 of (the selObj) is not "group" then
       put "&Stop Editing Group" into line 2 of tGroupLines
    end if
    put tGroupLines & cr after tObject
-   
+
    ### Line 12: Place group, with the list of groups
    local tGroupNames
    put buildGroupSubmenu(the short name of the topStack) into tGroupNames
-   if the mode of the topStack is not 1 or tGroupNames is empty then 
-      put "(Place Group" & cr after tObject   
+   if the mode of the topStack is not 1 or tGroupNames is empty then
+      put "(Place Group" & cr after tObject
    else
-      put "Place Group" & cr & tGroupNames & cr after tObject 
+      put "Place Group" & cr & tGroupNames & cr after tObject
    end if
    put "-" & cr after tObject
-   
+
    ### New Card and Delete Card
    put enableMenuItem("&New Card/N", tIsUserTarget) & cr after tObject
    put enableMenuItem("Delete Card", tIsUserTarget) & cr after tObject
@@ -1693,7 +1693,7 @@ private function menubar.ObjectMenu pContext
    put enableMenuItem("New Widget", the mode of the topStack is 1) & cr after tObject
    put menubar.NewWidgetSubmenu() & cr after tObject
    put "-" & cr after tObject
-   
+
    local tFlipText, tRotateText, tReshapeText
    if not pContext["enableFlipAndRotate"] or pContext["selectedObject"] is empty then
       put "(Flip" into tFlipText
@@ -1709,7 +1709,7 @@ private function menubar.ObjectMenu pContext
          put "Rotate Graphic" into tRotateText
          if "revReshapeLibrary" is in revInternal__ListLoadedLibraries() then
             put "!cReshape Graphic" into tReshapeText
-         else 
+         else
             put "Reshape Graphic" into tReshapeText
          end if
       else
@@ -1718,40 +1718,40 @@ private function menubar.ObjectMenu pContext
          put "(Reshape Graphic" into tReshapeText
       end if
    end if
-   
+
    ### Flip, with a submenu. Rotate, with a submenu. And Reshape graphic
    put tFlipText & cr after tObject
    put buildFlipSubmenu() & cr after tObject
-   
+
    put tRotateText & cr after tObject
    put buildRotateSubmenu() & cr after tObject
-   
+
    put tReshapeText & cr after tObject
-   
+
    put "-" & cr after tObject
-   
+
    ### Align selected controls, with a submenu
    put enableMenuItem("Align Selected Controls", the number of lines in (the selObj) >= 2) & cr after tObject
    put buildAlignSubmenu() & cr after tObject
-   
+
    put "-" & cr after tObject
-   
+
    local tCanRelayer = true
    local tCanMoveBack = true
    local tCanMoveForward = true
    if pContext["objectsSelected"] then
       local tSelectedObjects
       put the selectedObjects into tSelectedObjects
-      
+
       local tOwner
       put the long owner of (line 1 of tSelectedObjects) into tOwner
-      
+
       local tNumSelected
       put the number of lines of (tSelectedObjects) into tNumSelected
       if tNumSelected is the number of controls of tOwner then
          put false into tCanRelayer
       end if
-      
+
       if tCanRelayer then
          local tID
          repeat for each line tID in tSelectedObjects
@@ -1768,27 +1768,27 @@ private function menubar.ObjectMenu pContext
          end repeat
       end if
    end if
-   
+
    ### Send to back, Move Backward, Move Forward and Bring to Front
    put enableMenuItem("&Send to Back", pContext["objectsSelected"] and tCanRelayer and tCanMoveBack) & cr after tObject
    put enableMenuItem("Move Backward/[", pContext["objectsSelected"] and tCanRelayer and tCanMoveBack) & cr after tObject
    put enableMenuItem("Move For&ward/]", pContext["objectsSelected"] and tCanRelayer and tCanMoveForward) & cr after tObject
    put enableMenuItem("Bring to &Front", pContext["objectsSelected"] and tCanRelayer and tCanMoveForward) & cr after tObject
-   
+
    return modifyMenu("Object", tObject)
 end menubar.ObjectMenu
 
 private function menubar.NewControlSubmenu
    local tControlsA, tControlList
    put revIDEAvailableControls() into tControlsA
-   
+
    put the keys of tControlsA into tControlList
-   
+
    # Sort alphabetically
    sort tControlList
    # Then group by type
    sort lines of tControlList by tControlsA[each]["type"]
-   
+
    local tControlMenu, tItem, tLastType, tType
    put tControlsA[line 1 of tControlList]["type"] into tLastType
    repeat for each line tLine in tControlList
@@ -1797,7 +1797,7 @@ private function menubar.NewControlSubmenu
          put return & tab & "-" after tControlMenu
          put tType into tLastType
       end if
-      
+
       put tab & tLine & "/|" & tControlsA[tLine]["kind"] into tItem
       if tControlMenu is empty then
          put tItem into tControlMenu
@@ -1811,12 +1811,12 @@ end menubar.NewControlSubmenu
 private function menubar.NewWidgetSubmenu
    local tWidgetsA, tWidgetList
    put revIDEAvailableWidgets() into tWidgetsA
-   
+
    put the keys of tWidgetsA into tWidgetList
-   
+
    # Sort alphabetically
    sort tWidgetList
-   
+
    local tWidgetMenu, tItem
    repeat for each line tLine in tWidgetList
       put tab & tLine & "/|" & tWidgetsA[tLine]["kind"] into tItem
@@ -1832,7 +1832,7 @@ end menubar.NewWidgetSubmenu
 private function buildFlipSubmenu
    return \
          tab & "Horizontal" & cr & \
-         tab & "Vertical" 
+         tab & "Vertical"
 end buildFlipSubmenu
 
 private function buildRotateSubmenu
@@ -1871,17 +1871,17 @@ end buildAlignSubmenu
 private function buildGroupSubmenu pStack
    local tStack
    put the long id of stack pStack into tStack
-   
+
    local tUnplacedIds
    put the revUnplacedGroupIds of tStack into tUnplacedIds
-   
+
    local tFinalGroups
-   repeat for each line tGroup in tUnplacedIds   
+   repeat for each line tGroup in tUnplacedIds
       put tab & the short name of control id tGroup of tStack & "/|" & tGroup & cr after tFinalGroups
-   end repeat   
+   end repeat
    delete last char of tFinalGroups
-   sort tFinalGroups   
-   
+   sort tFinalGroups
+
    return tFinalGroups
 end buildGroupSubmenu
 
@@ -1893,9 +1893,9 @@ private function menubar.HelpMenu pContext
    put "Start Center/|Start Center" & cr after tHelp
    put "User Guide" & cr after tHelp
    put "Dictionary (API)/|Dictionary" & cr after tHelp
-   
+
    put "-" & cr  after tHelp
-   
+
    put "Sample Stacks" & cr after tHelp
    put "Sample Scripts" & cr after tHelp
    put "-" & cr after tHelp
@@ -1916,7 +1916,7 @@ private function menubar.HelpMenu pContext
    put "Check For Updates/|Update" & cr after tHelp
    put "-" & cr after tHelp
    put "About LiveCode/|About" after tHelp
-   
+
    return modifyMenu("Help", tHelp)
 end menubar.HelpMenu
 
@@ -1924,7 +1924,7 @@ end menubar.HelpMenu
 
 private function menubar.ViewMenu pContext
    global gREVPalettes, gREVShowStacks
-   
+
    local tView
    put enableMenuItem("Go &First/1", the mode of the topStack is 1) & cr after tView
    put enableMenuItem("Go Pre&v/2", the mode of the topStack is 1) & cr after tView
@@ -1943,7 +1943,7 @@ private function menubar.ViewMenu pContext
    put toggleMenuItem("Show IDE Stacks In Lists", gREVShowStacks) & cr after tView
    put "-" & cr after tView
    put toggleMenuItem("Show &Invisible Objects" , the showInvisibles) & cr after tView
-   
+
    return modifyMenu("View", tView)
 end menubar.ViewMenu
 
@@ -1951,10 +1951,10 @@ end menubar.ViewMenu
 
 private function menubar.DevelopmentMenu pContext
    global gREVSuppressErrors, gREVSuppressMessages
-   
+
    local tIsUserTarget
    put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
-   
+
    local tDevelopment
    put "Object Library" & cr after tDevelopment
    put "Image Library" & cr after tDevelopment
@@ -1966,8 +1966,8 @@ private function menubar.DevelopmentMenu pContext
    put tab & "Plugin Settings" & cr after tDevelopment
    put "-" & cr after tDevelopment
    put menubar.SimulatorSubmenu() after tDevelopment
-   put "-" & cr after tDevelopment   
-   
+   put "-" & cr after tDevelopment
+
    if revEnvironmentEditionProperty("script_profiler") then
       local tProfiler
       put the long id of stack "com.livecode.library.scriptprofiler" into tProfiler
@@ -1978,7 +1978,7 @@ private function menubar.DevelopmentMenu pContext
       end if
       put "-" & cr after tDevelopment
    end if
-   
+
    put toggleMenuItem("Script Debug Mode", revDebuggerEnabled()) & cr after tDevelopment
    put"Clear All Breakpoints" & cr after tDevelopment
    put "Message Watcher" & cr after tDevelopment
@@ -1987,22 +1987,22 @@ private function menubar.DevelopmentMenu pContext
    put toggleMenuItem("Suppress Messages", gREVSuppressMessages) & cr after tDevelopment
    put "-" & cr after tDevelopment
    put "Suspend Development Tools" & cr after tDevelopment
-   
+
    return modifyMenu("Development", tDevelopment)
 end menubar.DevelopmentMenu
 
 private function menubar.SimulatorSubmenu
    local tSimulators
    put revIDEDeployListTargets() into tSimulators
-   
+
    if tSimulators is not an array then
       return "(Test/|Simulate" & cr & "(Test Target" & cr & tab & "(No targets configured" & cr
    end if
-   
+
    local tCurrentTarget
    dispatch function "revIDEDeployTestTarget" to stack "revDeployLibrary"
    put the result into tCurrentTarget
-   
+
    local tMenu
    put enableMenuItem("Test/|Simulate", tCurrentTarget is not empty) & cr after tMenu
    put "Test Target/|Simulator Version" & cr after tMenu
@@ -2022,16 +2022,16 @@ end menubar.SimulatorSubmenu
 
 private function menubar.WindowMenu pContext
    revIDEUpdateWindowList
-   
+
    setupWindowMenu
-   
+
    local tWindow
    if sWindowMenuWindows is empty then
       put "(No Windows Open" into tWindow
    else
       put sWindowMenuWindows & cr & "-" & cr & "Send Window to Back/`" into tWindow
    end if
-   
+
    return modifyMenu("Window", tWindow)
 end menubar.WindowMenu
 
@@ -2051,7 +2051,7 @@ private function menubar.AdditionalContextMenu pIndent
    --      put tab after tIndent
    --   end repeat
    put indents(pIndent) into tIndent
-   
+
    local tText
    put cr & tIndent & "-" after tText
    put cr & tIndent & "Show In Project Browser" after tText
@@ -2065,7 +2065,7 @@ private function menubar.SendContextMenu pObject, pIndent
    --      put tab after tIndent
    --   end repeat
    put indents(pIndent) into tIndent
-   
+
    local tHandlerList, tText
    put listMenuHandlers(pObject, the cSort of stack "revPreferences", pIndent + 1) into tHandlerList
    put tIndent & enableMenuItem("Send Message", tHandlerList is not tIndent & tab) after tText
@@ -2077,13 +2077,13 @@ end menubar.SendContextMenu
 
 private function menubar.StackContextMenu pStack, pIndent
    global gRevLanguageNames
-   
+
    local tIndent
    --   repeat pIndent
    --      put tab after tIndent
    --   end repeat
    put indents(pIndent) into tIndent
-   
+
    local tText
    put tIndent & "Edit Script" & cr after tText
    put tIndent & enableMenuItem("Edit Behavior Script", \
@@ -2117,7 +2117,7 @@ private function menubar.StackContextMenu pStack, pIndent
    put tIndent & "Standalone Application Settings..." & cr after tText
    put tIndent & "Save As Standalone Application..." & cr after tText
    put tIndent & "-" & cr after tText
-   
+
    if there is a stack "com.livecode.library.scriptprofiler" then
       local tProfiler
       put the long id of stack "com.livecode.library.scriptprofiler" into tProfiler
@@ -2128,10 +2128,10 @@ private function menubar.StackContextMenu pStack, pIndent
       end if
       put tIndent & "-" & cr after tText
    end if
-   
+
    put menubar.SendContextMenu(pStack, pIndent) after tText
    put menubar.AdditionalContextMenu(pIndent) after tText
-   
+
    return tText
 end menubar.StackContextMenu
 
@@ -2141,10 +2141,10 @@ private function menuBar.CardContextMenu pCard, pIndent
    --      put tab after tIndent
    --   end repeat
    put indents(pIndent) into tIndent
-   
+
    local tTargetStack
    put revIDEStackOfObject(pCard) into tTargetStack
-   
+
    local tText
    put menuBar.StandardContextMenu(pCard, pIndent) & cr into tText
    put tIndent & "-" & cr after tText
@@ -2164,7 +2164,7 @@ private function menuBar.ObjectContextMenu pExtraText, pObject, pIndent, pSelect
    --      put tab after tIndent
    --   end repeat
    put indents(pIndent) into tIndent
-   
+
    local tText
    put menuBar.StandardContextMenu(pObject, pIndent, pSelectable) & cr into tText
    repeat for each line tLine in pExtraText
@@ -2182,7 +2182,7 @@ private function menuBar.StandardContextMenu pObject, pIndent, pSelectable
    --      put tab after tIndent
    --   end repeat
    put indents(pIndent) into tIndent
-   
+
    local tText
    put tIndent & "Edit Script" & cr after tText
    put tIndent & enableMenuItem("Edit Behavior Script", \
@@ -2200,10 +2200,10 @@ private function buildContextSensitiveMenu pExtraText, pTarget, pType, pSelectab
       put menubar.StackContextMenu(pTarget, 0) into tText
       return tText
    end if
-   
+
    local tTargetStack
    put revIDEStackOfObject(pTarget) into tTargetStack
-   
+
    if word 1 of pTarget is "card" then
       put menuBar.CardContextMenu(pTarget,0) into tText
       put cr & "-" after tText
@@ -2211,7 +2211,7 @@ private function buildContextSensitiveMenu pExtraText, pTarget, pType, pSelectab
       put cr & menubar.StackContextMenu(tTargetStack, 1) after tText
       return tText
    end if
-   
+
    put menuBar.ObjectContextMenu(pExtraText, pTarget,0, pSelectable) into tText
    put cr & "-" after tText
    put cr & enableMenuItem("Clear", pSelectable) after tText
@@ -2227,7 +2227,7 @@ end buildContextSensitiveMenu
 function menubar.ContextMenu pType, pTarget
    local tSelectable
    put revIDEObjectsAreSelectable(sMenuTarget) into tSelectable
-   
+
    local tText
    switch pType
       case "group"
@@ -2283,9 +2283,9 @@ function menubar.ContextMenu pType, pTarget
          put enableMenuItem("TopLevel Panel Stack", the menuName of pTarget is not empty) & cr after tText
          break
    end switch
-   
+
    put buildContextSensitiveMenu(tText, pTarget, , tSelectable) into tText
-   
+
    return modifyMenu(pType, tText)
 end menubar.ContextMenu
 
@@ -2301,10 +2301,10 @@ command revMenubarPopupContextualMenu pTargets
    else
       put the long id of the target into tTarget
    end if
-   
+
    local tTargetStack
    put revTargetStack(tTarget) into tTargetStack
-   
+
    put empty into sMenuTarget
    repeat for each line tLine in pTargets
       if sMenuTarget is empty then
@@ -2313,7 +2313,7 @@ command revMenubarPopupContextualMenu pTargets
          put return & tLine after sMenuTarget
       end if
    end repeat
-   
+
    if the number of lines in sMenuTarget > 1 then
       menubar.SetContextMenu "multiple", tTarget
    else
@@ -2355,7 +2355,7 @@ private function modifyMenu pMenuName, pMenu
    if the last char of pMenu is not return then
       put return after pMenu
    end if
-   
+
    return pMenu
 end modifyMenu
 
@@ -2399,14 +2399,14 @@ end markMenuItem
 private function listMenuHandlers pObject, pSort, pIndentationLevel
    local tRawHandlers
    put the revAvailableHandlers of pObject into tRawHandlers
-   
+
    local tIndent
    if pIndentationLevel is an integer then
       repeat pIndentationLevel times
          put tab after tIndent
       end repeat
    end if
-   
+
    local tFormattedHandlers
    repeat for each line tHandler in tRawHandlers
       if char 1 of tHandler is "P" then
@@ -2418,14 +2418,14 @@ private function listMenuHandlers pObject, pSort, pIndentationLevel
          #put tIndent & word 2 to -1 of tHandler & cr after tFormattedHandlers
          put tIndent & word 2 of tHandler & cr after tFormattedHandlers
       end if
-      
+
    end repeat
-   
+
    # OK-2009-04-02 : Bug 7874 - Include behavior handlers if applicable
    if the behavior of pObject is not empty and there is a (the behavior of pObject) then
       local tBehaviorHandlers
       put the revAvailableHandlers of the behavior of pObject into tBehaviorHandlers
-      
+
       # Only behavior handlers that are non-private, of type "command" and not overridden by the
       # object are included.
       repeat for each line tBehaviorHandler in tBehaviorHandlers
@@ -2434,7 +2434,7 @@ private function listMenuHandlers pObject, pSort, pIndentationLevel
          else if char 1 of tBehaviorHandler is among the items of "S,G,F" then
             next repeat
          end if
-         
+
          # For each behavior handler, find out if it was overridden by the object before including it
          local tOverridden
          put false into tOverridden
@@ -2444,23 +2444,23 @@ private function listMenuHandlers pObject, pSort, pIndentationLevel
                exit repeat
             end if
          end repeat
-         
+
          if not tOverridden then
             put tIndent & word 2 of tBehaviorHandler & cr after tFormattedHandlers
          end if
       end repeat
    end if
    delete the last char tFormattedHandlers
-   
+
    if pSort then
       sort lines of tFormattedHandlers
    end if
-   
+
    if tFormattedHandlers is empty then
       put tIndent into tFormattedHandlers
    end if
-   
-   return tFormattedHandlers  
+
+   return tFormattedHandlers
 end listMenuHandlers
 
 on unIconifyStack
@@ -2468,17 +2468,17 @@ on unIconifyStack
    set cursor to watch
    lock messages
    set the iconic of stack "revMenubar" to false
-   
+
    local tOpenStackslist, tNoLines, l
    put the cREVMaxList of stack "revmenuBar" into tOpenStackslist
    put the number of lines in tOpenStacksList into tNoLines
    repeat with i = tNoLines down to 1
       put line i of tOpenStacksList into l
       if l is "revMenuBar" then next repeat
-      
+
       -- Fix for stacks reappearing if they were hidden before a minimize.
       if revMetaDataGet(the name of stack l, "general", "AlreadyHidden") then next repeat
-      
+
       if there is a stack l and not the visible of stack l then
          show stack l
       end if
@@ -2499,10 +2499,10 @@ on iconifyStack
    put the openStacks into tOpenStackslist
    repeat for each line l in tOpenStacksList
       if l is "revMenuBar" then next repeat
-      
+
       -- Fix for stacks reappearing if they were hidden before a minimize.
       revMetaDataSet the name of stack l, "general", "AlreadyHidden", not the visible of stack l
-      
+
       --if the visible of stack l then
       put l & cr after tMaxlist
       hide stack l
@@ -2520,7 +2520,7 @@ end iconifyStack
 #                 MENU PICK
 #
 ################################################################################
-# We handle all menu picks here 
+# We handle all menu picks here
 
 on revMenubarMenuPick pWhich
    switch the short name of the target
@@ -2549,7 +2549,7 @@ on revMenubarMenuPick pWhich
          menubar.WindowMenu.Pick pWhich
          break
       case "Help"
-         menubar.HelpMenu.Pick pWhich 
+         menubar.HelpMenu.Pick pWhich
          break
    end switch
 end revMenubarMenuPick
@@ -2561,7 +2561,7 @@ end menubar.ContextMenuPick
 private command menubar.ContextMenuPickTarget pWhich, pTarget
    local tTargetStack
    put revIDEStackOfObject(line 1 of pTarget) into tTargetStack
-   
+
    set the itemdelimiter to "|"
    switch item 1 of pWhich
       ######## OBJECTS #########
@@ -2619,7 +2619,7 @@ private command menubar.ContextMenuPickTarget pWhich, pTarget
          break
       case "Magnify"
          revIDEToggleMagnifyOfImage pTarget
-         break 
+         break
       case "Make Original Size"
          revIDEMakeImageOriginalSize pTarget
          break
@@ -2643,7 +2643,7 @@ private command menubar.ContextMenuPickTarget pWhich, pTarget
       case "Pause"
          revIDETogglePauseOfPlayer
          break
-         
+
          ######## MENU SPECIFIC #########
       case "TopLevel Panel Stack"
          toplevel the menuname of pTarget
@@ -2683,16 +2683,16 @@ private command menubar.ContextMenuPickTarget pWhich, pTarget
       case "Save As Standalone Application..."
          revIDESaveAsStandalone tTargetStack
          break
-      case "Start Profiling Scripts" 
+      case "Start Profiling Scripts"
          scriptprofilerStartProfiler the short name of tTargetStack
          break
-      case "Stop Profiling Scripts..." 
+      case "Stop Profiling Scripts..."
          scriptprofilerStopProfiler
          break
          ######## MULTI OBJECT SPECIFIC #########
       case "Align"
-         revIDEAlignControls pTarget, item 2 of pWhich 
-         break     
+         revIDEAlignControls pTarget, item 2 of pWhich
+         break
       case "Send Message"
          revIDESendMessageToObject item 2 of pWhich, pTarget
          break
@@ -2768,7 +2768,7 @@ private command menubar.FileMenu.Pick pWhich
       default
          set the itemDel to "|"
          local tType
-         switch item 1 of pWhich      
+         switch item 1 of pWhich
             case "New Stack"
                local tStackType
                put item 2 of pWhich into tStackType
@@ -2797,7 +2797,7 @@ private command menubar.FileMenu.Pick pWhich
                   case "text"
                   case "graph"
                      revIDEActionImportControl tType
-                     break 
+                     break
                   case "Snapshot of Screen"
                      revIDEImportSnapshot "screen"
                      break
@@ -2939,7 +2939,7 @@ private command menubar.ObjectMenu.Pick pWhich
          break
       case "Stack Inspector"
          revIDEActionInspectStack
-         break 
+         break
       case "Object Script"
          revIDEActionEditScriptOfObjects
          break
@@ -3015,13 +3015,13 @@ end menubar.ObjectMenu.Pick
 
 private command menubar.TextMenu.Pick pWhich
    local tPickedItem, tPickedParams
-   
+
    // tPickedItem could have parameters
    set the itemdel to "|"
    if the number of items of pWhich > 1 then
       put toLower(item 2 to -1 of pWhich) into tPickedParams
       put toLower(item 1 of pWhich) into tPickedItem
-   else 
+   else
       put pWhich into tPickedItem
    end if
 
@@ -3076,7 +3076,7 @@ private command menubar.DevelopmentMenu.Pick pWhich
    local tWhich
    set the itemDelimiter to "|"
    put item 1 of pWhich into tWhich
-   
+
    switch tWhich
       case "Message Watcher"
          revIDEOpenPalette "message watcher"
@@ -3124,10 +3124,10 @@ private command menubar.DevelopmentMenu.Pick pWhich
                break
          end switch
          break
-      case "Start Profiling Scripts" 
+      case "Start Profiling Scripts"
          scriptprofilerStartProfiler the short name of the topStack
          break
-      case "Stop Profiling Scripts..." 
+      case "Stop Profiling Scripts..."
          scriptprofilerStopProfiler
          break
    end switch
@@ -3211,3 +3211,196 @@ private command menubar.HelpMenu.Pick pWhich
          break
    end switch
 end menubar.HelpMenu.Pick
+
+----------------------- this is a fix (mainly for Linux, but also MacOS) --------------------------
+---------- hides the tools and message box if the desktop / finder is clicked ----------------
+-- tperry 24-4-24 -- this was spotted by overclockedmind, and also confirmed by others --
+--------------------------------------------------------------------------------------------------------
+-- trying to keep all the window focussing and restore things in one chunk here
+-- just so it's easier to find for other people. See frontscriptlibrary #buntuBug
+
+constant sIDEWindows = "revTools,message box,revPropertyInspector 1,revScriptEditor 1,revNewScriptEditor 1"
+local tPaletteList
+
+-- mwieder fixed these two send parameters 2025.06.29
+on suspendstack
+   if not (the pendingmessages contains "hSwitchedAway") then send "hSwitchedAway" to me in 1 millisecond
+   pass suspendstack
+end suspendstack
+on resumestack
+   if not (the pendingmessages contains "fIDEWindows") then send "fIDEWindows show" to me in 1 millisecond
+   pass resumestack
+end resumestack
+
+private function linuxWindowID
+   local tShellCmd
+   local tresult
+   
+   put "xprop -root|grep '^_NET_ACTI'" into tShellCmd
+   set the hideConsoleWindows to true
+   put shell(tShellCmd) into tResult
+   --
+   replace "#" with cr in tResult
+   put line 2 of tResult into tResult
+   replace " " with empty in tResult
+   replace comma with cr in tResult
+   return word 1 of line 1 of tResult
+end linuxWindowID
+
+on hSwitchedAway
+   local tSwitchedTo
+   
+   if the cDesktopClickToHide of stack "revPreferences" is not true then exit hSwitchedAway
+   set the tLastTop of stack "revTools" to the top of stack "revTools"  -- save tools wd vert pos (tperry 11,5,24)
+   put "" into tSwitchedTo
+   if the platform contains "mac" then
+      local tAppleScript
+      put "tell application " & QUOTE & "System Events" & QUOTE & cr & ¬
+      "set activeApp to name of first application process whose frontmost is true" & cr & ¬
+      "return activeApp" & return & ¬
+      "end tell" into tAppleScript
+      do tApplescript as "AppleScript"
+      put the result into tSwitchedTo
+   else if the platform contains "linux" then
+      local tShellCmd
+      local tresult
+      local tWindowID, tWindowList
+      
+      put linuxWindowID() into tWindowID
+      put "xwininfo -id " & tWindowID into tShellCmd
+      put shell(tShellCmd) into tResult
+      
+      filter lines of tResult without empty
+      put line 1 of tResult into tResult
+      replace tWindowID with cr in tResult
+      put line 2 of tResult into tSwitchedTo
+      replace QUOTE with empty in tSwitchedTo
+      -- added to wd hide show list, 15-11-24 (tperry)
+      -- I am compensating for the engine in Linux here
+      put word 1 of tSwitchedTo into tSwitchedTo
+      revIDEUpdateWindowList
+      put the cWindowList of stack "revmenubar" into tWindowList
+      
+      local tByWDOne
+      put empty into tByWDOne
+      repeat for each line wdIter in tWindowList
+         put word 1 of wdIter & cr after tByWDone
+      end repeat
+      replace cr with comma in tByWDOne
+      -- this should also gather all names of active IDE windows
+      local tAdditList
+      put revLoadedStacks("all") into tAdditList
+      
+      local tByWDTwo
+      put empty into tByWDTwo
+      repeat for each line wdIter in tAdditList
+         if there is a stack wdIter then
+            put word 1 of the title of stack wdIter & cr after tByWDTwo
+         end if
+      end repeat
+      filter lines of tByWDTwo without empty
+      replace cr with comma in tByWDTwo
+      
+      -- this is a list of the windows to ignore for window hiding/showing (things in tExitWdCases are considered part of the IDE) -- tperry 15-11-24
+      local tExitWdCases
+      put tByWDOne & "," & tByWDTwo into tExitWdCases
+      if not (tSwitchedTo is among the items of tExitWdCases) then
+         put empty into tPaletteList -- clear palettelist
+         -- mwieder fixed the syntax 2025.06.29
+         fIDEWindows "hide" -- oops! missed this 15-11-24 (tperry)
+      end if
+   end if
+   if tSwitchedTo contains "Finder" or tSwitchedTo contains "Desktop" then
+      -- mwieder fixed the syntax 2025.06.29
+      fIDEWindows "hide"
+   end if
+end hSwitchedAway
+
+on hSwitchedBack
+   if the cDesktopClickToHide of stack "revPreferences" is true \
+   and the cSwitchedBack of stack "revMenuBar" is not true then
+      -- mwieder fixed the syntax 2025.06.29
+      fIDEWindows "show"
+   end if
+end hSwitchedBack
+
+# called from frontscript
+on hFixUpRestoreState
+   -- just making sure things restore as they should (tperry 17-11-24)
+   if not (the pendingmessages contains "hFixUpRestoreState") then
+      send "MBMakeStackVisibleDelayed revNewScriptEditor 1" to me in 1 millisecond
+      send "MBMakeStackVisibleDelayed revPropertyInspector 1" to me in 1 millisecond
+      send "MBMakeStackVisibleDelayed revTools" to me in 1 millisecond
+   end if
+end hFixUpRestoreState
+
+command MBMakeStackVisibleDelayed pstack
+   if there is a stack pstack then
+      set the visible of stack (pstack) to true
+   end if
+end MBMakeStackVisibleDelayed
+
+command fIDEWindows pWhat # pWhat is "show" or "hide"
+   local tWDsToConsider
+   local tStacks
+   
+   lock screen
+   lock messages
+   put sIDEWindows into tWDsToConsider
+   put the stacks into tStacks
+   filter tStacks without "*revmenubar*"
+   filter tStacks without empty
+   repeat for each line tLine in tStacks
+      if the visible of stack tLine is true then
+         --		 put comma & tLine after tWDsToConsider
+      end if
+   end repeat
+   
+   switch pWhat
+      case "hide"
+         -- we hide the IDEs windows
+         repeat for each item tItem in tWDsToConsider
+            if there is a stack tItem then
+               if the effective visible of stack tItem is true then
+                  if not(tPaletteList contains tItem) then
+                     put tItem & cr after tPaletteList
+                  end if
+               end if
+            end if
+         end repeat
+         
+         replace comma with cr in tPaletteList
+         filter lines of tPaletteList without empty
+         
+         repeat for each item tLine in tWDsToConsider
+            if there is a stack tLine then
+               hide stack tLine
+            end if
+         end repeat
+         
+         set the cSwitchedBack of stack "revMenuBar" to false
+         break
+      case "show"
+         -- we show the IDEs windows
+         repeat for each item tLine in tWDsToConsider
+            if there is a stack tLine then
+               show stack tLine
+            end if
+         end repeat
+         set the cSwitchedBack of stack "revMenuBar" to true
+         -- hide the updater
+         if there is a stack "updater" then
+            close stack "updater"
+         end if
+         -- also, don't forget about the topstack
+         local tTopStack
+         put the short name of the topStack into tTopStack
+         if there is a stack tTopStack then
+            show stack tTopStack
+         end if
+   end switch
+   unlock messages
+   unlock screen
+end fIDEWindows
+-- ends this section about window focus and restore --
+-- as mentioned, want to keep the above all together as much as possible --

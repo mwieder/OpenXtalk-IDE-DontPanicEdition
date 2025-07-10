@@ -162,7 +162,7 @@ command revIDEExtensionUninstall pName
 end revIDEExtensionUninstall
 
 # Returns the extension data
-function revIDEExtensions pType, pStatus, pWithoutInvisible, pEditionType
+function revIDEExtensions pType, pStatus, pWithoutInvisible
    # No type passed so return all extensions
    
    # Repeat over the extension array looking for elements with matching type
@@ -186,12 +186,6 @@ function revIDEExtensions pType, pStatus, pWithoutInvisible, pEditionType
          next repeat
       end if
       
-      if pEditionType is not empty and \
-            pEditionType is not "professional" and \
-            tExtension["editionType"] is "professional" then
-         next repeat
-      end if
-
       put tExtension into tExtensions[tExtension["name"]]
    end repeat
    return tExtensions
@@ -654,28 +648,35 @@ private command __ProcessInspectorMetadata @xMetadataA
 end __ProcessInspectorMetadata
 
 private function __extensionPropertyInfoFromManifest pId, pManifestPath
-   local tManifestA
-   put extensionFetchMetadata(pManifestPath) into tManifestA
-
+   if not there is a file pManifestPath then return empty
+   # Create the XML tree
+   local tXMLTree, tProperties, tExtensionData, tPropertyNodes
+   put revXMLCreateTreeFromFile(pManifestPath,true,true,false) into tXMLTree
+   
+   put revXMLChildNames(tXMLTree,"package",return,"property",true) into tPropertyNodes
+   
    local tCacheID
    put __extensionCacheID("name", pID) into tCacheId
    
-   local tPropertyNames, tPropertyXMLData, tMaxOrder
-   repeat for each element tProperty in tManifestA["properties"]
+   local tPropertyNames, tPropertyXMLData, tPropNameList, tMaxOrder
+   repeat for each line tPropertyNode in tPropertyNodes      
       local tName
-      put tProperty["name"] into tName
-      put __extensionPropertyGet(tCacheId, tName) \
-         into tPropertyXMLData[tName]["data"]
-      put tProperty["set"] into tPropertyXMLData[tName]["set"]
-      put tProperty["get"] into tPropertyXMLData[tName]["get"]
+      put revXMLAttribute(tXMLTree,"package" & "/" & tPropertyNode,"name") into tName
+      put __extensionPropertyGet(tCacheId, tName) into tPropertyXMLData[tName]["data"]
+      put revXMLAttribute(tXMLTree,"package" & "/" & tPropertyNode,"set") into \
+            tPropertyXMLData[tName]["set"]
+      put revXMLAttribute(tXMLTree,"package" & "/" & tPropertyNode,"get") into \
+            tPropertyXMLData[tName]["get"]
+      put tName into tPropNameList[tPropertyNode]
       put max(tMaxOrder, tPropertyXMLData[tName]["data"]["order"]) into tMaxOrder
    end repeat
    
    -- Sort by ordered props, then by order of appearance
-   repeat for each element tProperty in tManifestA["properties"]
-      if tPropertyXMLData[tProperty["name"]]["data"]["order"] is empty then
+   repeat for each line tPropertyNode in tPropertyNodes
+      if tPropertyXMLData[tPropNameList[tPropertyNode]]["data"]["order"] \
+            is empty then
          add 1 to tMaxOrder 
-         put tMaxOrder into tPropertyXMLData[tProperty["name"]]["data"]["order"]
+         put tMaxOrder into tPropertyXMLData[tPropNameList[tPropertyNode]]["data"]["order"]
       end if
    end repeat
    
@@ -696,7 +697,7 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
       
       local tReadOnly, tSetter
       put tPropertyXMLData[tProperty]["set"] into tSetter
-      if tSetter is empty then
+      if tSetter is empty or tSetter begins with "xmlerr" then
          put true into tReadOnly
       else
          put false into tReadOnly
@@ -718,8 +719,19 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
    end repeat
    
    # Fetch property override metadata
+   local tMetadataValue, tMetadataKey
+   local tMetadataNodes, tMetadataA, tDataA
+   put revXMLChildNames(tXMLTree, "package",return,"metadata",true) into tMetadataNodes
+   repeat for each line tMetadata in tMetadataNodes
+      put revXMLAttribute(tXMLTree,"package" & "/" & tMetadata,"key") into tMetadataKey
+      put revXMLNodeContents(tXMLTree,"package" & "/" & tMetadata) into tMetadataValue
+      if tMetadataValue is empty or tMetadataValue begins with "xmlerr" then
+         put empty into tMetadataValue
+      end if
+      __SetMetadata tMetadataKey, tMetadataValue, tDataA
+   end repeat
    
-   repeat for each key tProperty in tManifestA["metadata-keys"]
+   repeat for each key tProperty in tDataA
       if tPropertyXMLData[tProperty] is not empty then
          next repeat
       end if
@@ -729,7 +741,7 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
          # if this is a control property that we are overriding,
          # tData might be non-empty for the property even though
          # there was no property node in the XML
-         union tPropertyDataA[tProperty] with tManifestA[tProperty]
+         union tPropertyDataA[tProperty] with tDataA[tProperty]
          
          # Now take any default property info that was not specified
          # in the manifest
@@ -738,7 +750,8 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
    end repeat
    
    __ProcessInspectorMetadata tPropertyDataA
-
+   
+   revXMLDeleteTree tXMLTree
    return tPropertyDataA
 end __extensionPropertyInfoFromManifest
 
@@ -760,8 +773,7 @@ command revIDEExtensionSetInfo pTypeID
    
    local tManifest
    put tFolder & slash & "manifest.xml" into tManifest
-   if there is not a file tManifest and \
-         there is not a file (tManifest & ".bin") then 
+   if there is not a file tManifest then 
       exit revIDEExtensionSetInfo
    end if
    
@@ -956,17 +968,6 @@ on __extensionPropertySet pCacheIndex, pProperty, pValue
    put pValue into sExtensions[pCacheIndex][pProperty]
 end __extensionPropertySet
 
-private command __extensionSetCommonProperties \
-      pCacheIndex, \
-      pId, \
-      pFolder
-
-   __extensionPropertySet \
-      pCacheIndex, \
-      "manifests", \
-      __extensionManifests(pID, pFolder)
-end __extensionSetCommonProperties
-
 # Loads an extension
 private command __extensionLoad pID, pExtensionDataA
    local tLoadedDataA, tToLoadA
@@ -1071,7 +1072,6 @@ private command __LoadExtension pCacheIndex, pExtensionType, pSourceType, \
       if not __extensionNeedsLoad(pExtensionType) then
          put "installed" into pStatus
       else
-         local tResult
          if pSourceType is "lcb" then
             local tResources, tModule, tCode
             put revIDEExtensionBytecodeFilename(true) into tFileToLoad
@@ -1092,23 +1092,12 @@ private command __LoadExtension pCacheIndex, pExtensionType, pSourceType, \
             else
                load extension from file tModule
             end if
-            put the result into tResult
-         else if pExtensionType is "widget" then
-            /* Script widget - just load the stack into memory */
-            if there is a stack (pFolder & slash & pSourceFile) then
-               get the long id of stack (pFolder & slash & pSourceFile)
-               put empty into tResult
-            else
-               put "No stack" && (pFolder & slash & pSourceFile) && "found" \
-                     into tResult
-            end if
          else
             set the itemdelimiter to "."
             revInternal__LoadLibrary item 1 of pSourceFile, pFolder & slash & pSourceFile
             put pSourceFile into tFileToLoad
-            put the result into tResult
          end if
-         if tResult is not empty then
+         if the result is not empty then
             put toUpper(char 1 of the result) & \
                   char 2 to -1 of the result into xError
             put "error" into pStatus
@@ -1172,8 +1161,6 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    
    # Check for sample stacks
    __extensionPropertySet tCacheIndex, "samples", __extensionSampleStacks(pID,pFolder)
-
-   __extensionSetCommonProperties tCacheIndex, pId, pFolder
    
    # Store the extension's metadata
    revIDEExtensionSetInfo pID
@@ -1293,7 +1280,6 @@ private command __revIDELCSExtensionLoad pFullPath, pFolder, pVersion, pStatus, 
    __extensionPropertySet tCacheIndex, "title", pAdditionalInfoA["title"]
    __extensionPropertySet tCacheIndex, "svgicon", pAdditionalInfoA["svgicon"]
    __extensionPropertySet tCacheIndex, "version", pAdditionalInfoA["version"]
-   __extensionPropertySet tCacheIndex, "platforms", pAdditionalInfoA["platforms"]
    
    repeat for each key tKey in pAdditionalInfoA["uses"]
       local tSettingString
@@ -1312,10 +1298,8 @@ private command __revIDELCSExtensionLoad pFullPath, pFolder, pVersion, pStatus, 
    __extensionPropertySet tCacheIndex, "uservisible", true
    __extensionPropertySet tCacheIndex, "support_files", pAdditionalInfoA["support_files"]
    
-   __extensionSetCommonProperties tCacheIndex, tId, pFolder
-
    # Store the extension's property metadata
-   revIDEExtensionSetInfo tID
+   --  revIDEExtensionSetInfo pID
    
    # Deal with the various icon possibilities
    if sExtensionProperties[tID]["svgicon"] is empty then
@@ -1415,29 +1399,6 @@ function __extensionSampleStacks pID, pFolder
    
    return tSampleArray
 end __extensionSampleStacks
-
-function __extensionManifests pID, pFolder
-   local tManifestsFolder, tManifests, tManifestArray
-
-   # Get the paths to manifests in the bundle
-   put pFolder & slash & "manifests" into tManifestsFolder
-   if there is a folder tManifestsFolder then
-      put files(tManifestsFolder) into tManifests
-      set the itemDelimiter to "."
-      repeat for each line tManifest in tManifests
-         switch tManifest
-         case "android.xml"
-         case "ios.plist"
-         case "mac.plist"
-            put tManifestsFolder & slash & tManifest \
-               into tManifestArray[item 1 of tManifest]
-            break
-         end switch
-      end repeat
-   end if
-
-   return tManifestArray
-end __extensionManifests
 
 ##############################
 # CALLBACKS
@@ -1567,27 +1528,21 @@ function revIDEExtensionFileData pID
    local tCacheIndex
    put __extensionCacheID("name", pID) into tCacheIndex
    
-   local tFolder, tFile
+   local tSourceType, tFolder, tFile
    put __extensionPropertyGet(tCacheIndex, "install_path") into tFolder
+   put __extensionPropertyGet(tCacheIndex, "source_type") into tSourceType
    put __extensionPropertyGet(tCacheIndex, "file") into tFile
    
    local tDataA
+   put tSourceType into tDataA["type"]
    put tFolder & slash & tFile into tDataA["file"]
-
-   put __extensionPropertyGet(tCacheIndex, "source_type") \
-      into tDataA["source_type"]
-   put __extensionPropertyGet(tCacheIndex, "type") \
-      into tDataA["type"]
-
    return tDataA
 end revIDEExtensionFileData
 
-private command __UnloadExtension pCacheIndex, pType, pSourceType, pSourceFile, pTypeId
+private command __UnloadExtension pCacheIndex, pSourceType, pSourceFile, pTypeId
    local tError, tStatus
    if pSourceType is "lcb" then
       unload extension pTypeId
-   else if pType is "widget" then
-      delete stack pTypeId
    else
       set the itemdelimiter to "."
       revInternal__UnloadLibrary item 1 of pSourceFile
@@ -1611,12 +1566,8 @@ command revIDEExtensionUnload pKind
    
    local tDataA
    put sExtensions[tCacheIndex] into tDataA
-   __UnloadExtension \
-         tCacheIndex, \
-         tDataA["type"], \
-         tDataA["source_type"], \
-         tDataA["source_file"], \
-         pKind
+   __UnloadExtension tCacheIndex, tDataA["source_type"], \
+         tDataA["source_file"], pKind
 end revIDEExtensionUnload
 
 function revIDEExtensionLibraryHandlers pLibraryID
@@ -1667,11 +1618,6 @@ end revIDEExtensionShowSnippet
 local sSampleFileName
 local sOpenedStacksA
 on ideOpenStack pCard
-   if there is not a stack sSampleFileName then
-      revIDEUnsubscribe "ideOpenStack"
-      exit ideOpenStack
-   end if
-
    local tStack
    put the long id of the owner of pCard into tStack
    if tStack is the long id of stack sSampleFileName then
