@@ -2,13 +2,13 @@
 on preOpenStack
    lock screen
    dispatch "setAsBehavior" to revIDEFrameBehavior() with the long id of this me
-   
+
    set the behavior of card "search" of me to the long id of stack "revIDEExtensionManagerStoreBehavior"
    set the behavior of card "list" of me to the long id of stack "revIDEExtensionManagerListBehavior"
    set the zoomBox of this stack to false
-   
+
    clearFrameData
-   
+
    # Navigation
    addFrameItem "widget","header", "navigation", "Widgets", "", "","showList", the long id of me,"widget"
    addFrameItem "library","header", "navigation", "Libraries", "", "","showList", the long id of me,"library"
@@ -16,7 +16,7 @@ on preOpenStack
    addFrameItem "snippet","header", "navigation", "Snippets", "", "","showList", the long id of me,"snippet"
    addFrameItem "store","header", "navigation", "Store", "", "","showExtensionStore", the long id of me,"store"
    addFrameItem "install", "header", "action", "Install extension", "plus", "","installNew", the long id of me
-   
+
    set the hilitedTabColor of me to "255,255,255"
    set the navigationDisplayStyle of me to "names"
    unlock screen
@@ -24,16 +24,18 @@ end preOpenStack
 
 on showList pSection
    lock screen
-   send "showList pSection" to card "list" of this stack
+#   send "showList pSection" to card "list" of this stack
+   dispatch "showList" to card "list" of this stack with pSection
    unlock screen
 end showList
 
 command refreshList
    lock screen
-   send "refreshList" to card "list" of this stack
+#   send "refreshList" to card "list" of this stack
+   dispatch "refreshList" to card "list" of this stack
    unlock screen
 end refreshList
-   
+
 on showExtensionStore
    lock screen
    go to card "search" of this stack
@@ -52,7 +54,7 @@ on installNew
 end installNew
 
 on installExtension pExtensionURL, pTypeID, pType
-   lock screen  
+   lock screen
    showList pType
    if pExtensionURL begins with "http" then
       // get from extensions store

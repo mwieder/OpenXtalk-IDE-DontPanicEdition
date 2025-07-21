@@ -378,25 +378,34 @@ private command generateMenubarUI
                create invisible image (tItem & "-" & tStyle) in group "icons" of me
                set the id of it to revIDENewIconID()
                set the filename of image (tItem & "-" & tStyle) of me to tFilename
-               if tStyle is "hilited" then
-                  set the cHighlightedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
-               else if tStyle is "depressed" then
-                  set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
-               else if tStyle is "hilited-depressed" then
-                  set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
-               else if tStyle is "disabled" then
+               switch tStyle
+                  case "hilited"
+                     set the cHighlightedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                     break
+                  case "depressed"
+                     set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                     break
+                  case "hilited-depressed"
+                    set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                    break
+                  case "disabled"
                   set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
-               end if
+               end switch
             else
-               if tStyle is "hilited" then
-                  set the cHighlightedIcon of the templatebutton to the cIcon of the templatebutton
-               else if tStyle is "disabled" then
-                  set the disabledIcon of the templatebutton to the cIcon of the templatebutton
-               else if tStyle is "depressed" then
-                  set the cDepressedIcon of the templatebutton to the cIcon of the templatebutton
-               else if tStyle is "hilited-depressed" then
-                  set the cHighlightedDepressedIcon of the templatebutton to the cDepressedIcon of the templatebutton
-               end if
+               switch tStyle
+                  case "hilited"
+                     set the cHighlightedIcon of the templatebutton to the cIcon of the templatebutton
+                     break
+                  case "depressed"
+                     set the cDepressedIcon of the templatebutton to the cIcon of the templatebutton
+                     break
+                  case "hilited-depressed"
+                     set the cHighlightedDepressedIcon of the templatebutton to the cDepressedIcon of the templatebutton
+                     break
+                  case "disabled"
+                     set the disabledIcon of the templatebutton to the cIcon of the templatebutton
+                     break
+               end switch
             end if
          end repeat
 
@@ -422,6 +431,7 @@ private command generateMenubarUI
 end generateMenubarUI
 
 private command generateTutorialGroup
+   lock screen
    if there is a group "tutorial" of me then
       delete group "tutorial" of me
    end if
@@ -457,9 +467,11 @@ private command generateTutorialGroup
    set the traversalOn of it to false
 
    hide group "tutorial" of me
+   unlock screen
 end generateTutorialGroup
 
 private command generateUpgradeGroup
+   lock screen
    if there is a group "upgrade" of me then
       delete group "upgrade" of me
    end if
@@ -485,9 +497,11 @@ private command generateUpgradeGroup
    set the textColor of it to "white"
 
    hide group "upgrade" of me
+   unlock screen
 end generateUpgradeGroup
 
 private command generateMenuGroup
+   lock screen
    lock messages
    if there is a group "revMenuBar" of me then
       delete group "revMenuBar" of me
@@ -547,9 +561,11 @@ private command generateMenuGroup
    end if
    reset the templatebutton
    unlock messages
+   unlock screen
 end generateMenuGroup
 
 command generateContextMenu
+   lock screen
    if there is a button "context" of me then
       delete button "context" of me
    end if
@@ -559,6 +575,7 @@ command generateContextMenu
    set the visible of the templatebutton to false
 
    create button "context"
+   unlock screen
 end generateContextMenu
 
 constant kPadding = 10

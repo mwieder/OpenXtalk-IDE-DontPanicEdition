@@ -9,9 +9,9 @@ on returnInField
       revIDEConsoleHistoryAdd(the text of me)
    end if
    revInitialise
-   
-   # It's possible to close the message box or change the card while 
-   # the above is executing, so ensure the field is still open before 
+
+   # It's possible to close the message box or change the card while
+   # the above is executing, so ensure the field is still open before
    # selecting its text
    if revIDEObjectIsOpen(the long id of me) then
       select the text of me
@@ -33,13 +33,13 @@ on textChanged
 end textChanged
 
 on arrowKey pKey
-   if pKey is "up" then 
+   if pKey is "up" then
       revNextLine
-   else if pKey is "down" then 
+   else if pKey is "down" then
       revPrevLine
-   else if pKey is "right" and field "auto complete" is not empty  then 
+   else if pKey is "right" and field "auto complete" is not empty  then
       revIDEAcceptAutoComplete
-   else 
+   else
       pass arrowKey
    end if
 end arrowKey
@@ -47,7 +47,7 @@ end arrowKey
 on commandKeyDown pKey
    if pKey is "P" and the platform is not "MacOS" then revPrevLine
    if pKey is "N" and the platform is not "MacOS" then revNextLine
-   if pKey is "U" then 
+   if pKey is "U" then
       put empty into me
       put empty into field "auto complete"
       exit commandKeyDown
@@ -63,22 +63,24 @@ end commandKeyDown
 
 command revInitialise
    set the textStyle of me to empty
-   
+
    local tLine, tInHistory
-   
+
    put revIDEGetPreference("IDESingleLineMessageHistory") into lHistory
    put number of lines of lHistory into lNumInHistory
    if the text of me is not empty then
       repeat for each line tLine in lHistory
-         if tLine is the text of me then 
+         if tLine is the text of me then
             put "yes" into tInHistory
             exit repeat
-         end if 
+         end if
       end repeat
-      if tInHistory is "yes"
-      then put 1 into lHistoryIndex
-      else put 0 into lHistoryIndex
-   else
+      if tInHistory is "yes" then
+         put 1 into lHistoryIndex
+      else
+         put 0 into lHistoryIndex
+      end if
+   else # the text of me is not empty
       put 0 into lHistoryIndex
    end if
 end revInitialise
@@ -89,8 +91,8 @@ command revDisplayAutoComplete pString
    lock screen
    local tString
    put revIDEAutoComplete(pString) into tString
-   
-   if tString is not empty then 
+
+   if tString is not empty then
       put tString into lMatchingHistory
       put the number of lines in lMatchingHistory into lNumMatching
       put 1 into lMatchingIndex
@@ -102,7 +104,7 @@ command revDisplayAutoComplete pString
       end if
       put it into field "auto complete"
       set the hscroll of field "auto complete" to the hscroll of field "message"
-   else 
+   else
       put empty into field "auto complete"
    end if
    cancel sColorizeAutocompleteMsg
@@ -120,14 +122,18 @@ command revNextLine
    lock messages
    if field "auto complete" is empty then
       add 1 to lHistoryIndex
-      if lHistoryIndex > lNumInHistory then put 1 into lHistoryIndex
+      if lHistoryIndex > lNumInHistory then
+         put 1 into lHistoryIndex
+      end if
       put line lHistoryIndex of lHistory into field "message"
    else
       add 1 to lMatchingIndex
-      if lMatchingIndex > lNumMatching then put 1 into lMatchingIndex
+      if lMatchingIndex > lNumMatching then
+         put 1 into lMatchingIndex
+      end if
       put field "message" & char (the number of chars of field "message" + 1) to (the number of chars of line lMatchingIndex of lMatchingHistory) of line lMatchingIndex of lMatchingHistory into field "auto complete"
    end if
-   select after field "message" 
+   select after field "message"
     _internal script colorize char 1 to (the number of chars of me) of me
    unlock messages
 end revNextLine
@@ -136,14 +142,18 @@ command revPrevLine
    lock messages
    if field "auto complete" is empty then
       add -1 to lHistoryIndex
-      if lHistoryIndex < 1 then put lNumInHistory into lHistoryIndex
+      if lHistoryIndex < 1 then
+         put lNumInHistory into lHistoryIndex
+      end if
       put line lHistoryIndex of lHistory into field "message"
    else
       add -1 to lMatchingIndex
-      if lMatchingIndex < 1 then put lNumMatching into lMatchingIndex
+      if lMatchingIndex < 1 then
+         put lNumMatching into lMatchingIndex
+      end if
       put field "message" & char (the number of chars of field "message" + 1) to (the number of chars of line lMatchingIndex of lMatchingHistory) of line lMatchingIndex of lMatchingHistory into field "auto complete"
    end if
-   select after field "message" 
+   select after field "message"
     _internal script colorize char 1 to (the number of chars of me) of me
    unlock messages
 end revPrevLine

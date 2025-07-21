@@ -1,23 +1,23 @@
 ﻿script "revStandaloneSettingsStacksBehavior"
 on preOpenCard
    lock messages
-   
-   local tEnabled, tPlatform
-   put canIncludeStackFiles() into tEnabled
-   set the enabled of group "Basic Options" to tEnabled
-   set the enabled of group "Advanced Options" to tEnabled
-   
+
+   local tEnabled?, tPlatform
+   put canIncludeStackFiles() into tEnabled?
+   set the enabled of group "Basic Options" to tEnabled?
+   set the enabled of group "Advanced Options" to tEnabled?
+
    -- Disable the stack encryption options in Community edition
-   put (tEnabled and revEnvironmentEditionProperty("password_protection")) into tEnabled
-   set the enabled of button "encrypt" to tEnabled
-   set the enabled of field "encrypt" to tEnabled
-   
+   put (tEnabled? and revEnvironmentEditionProperty("password_protection")) into tEnabled?
+   set the enabled of button "encrypt" to tEnabled?
+   set the enabled of field "encrypt" to tEnabled?
+
    local tStackFiles
    revSBRelativeStackFilesList the cRevTargetStack of this stack, tStackFiles
    put tStackFiles["relative"] into field "stackfiles"
    set the cStackPaths of field "stackfiles" to tStackFiles["full"]
    set the hilitedLines of field "stackfiles" to 1
-   send "mouseUp" to field "stackfiles"
+   dispatch "mouseUp" to field "stackfiles"
    unlock messages
    pass preOpenCard
 end preOpenCard
@@ -29,14 +29,14 @@ on revIncludeStackFiles pIncludeList
    put tStackFiles["relative"] into field "stackfiles"
    set the cStackPaths of field "stackfiles" to tStackFiles["full"]
    set the hilitedLines of field "stackfiles" to min(2,the number of lines of tStackFiles["relative"])
-   send "mouseUp" to field "stackfiles"
+   dispatch "mouseUp" to field "stackfiles"
    revSetEdit
 end revIncludeStackFiles
 
 local sStackFileList
 
 on revRemoveStackFiles pRemoveList
-   put "" into sStackFileList
+   put empty into sStackFileList
    repeat for each line tStackFile in the cStackPaths of field "stackFiles"
       revRecursiveRemoveStackFiles tStackFile,pRemoveList,sStackFileList
    end repeat
@@ -52,14 +52,14 @@ command updateCard
    put the cRevStandaloneSettings["renameGeneric"] of tFirstStack into tSettings["renameGeneric"]
    put the cRevStandaloneSettings["substackFolder"] of tFirstStack into tSettings["substackFolder"]
    repeat for each line tLine in (line 2 to -1 of tHilitedFiles)
-      if the cRevStandaloneSettings["moveSubstacks"] of stack tLine <> tSettings["moveSubstacks"] then 
+      if the cRevStandaloneSettings["moveSubstacks"] of stack tLine <> tSettings["moveSubstacks"] then
          put false into tSettings["moveSubstacks"]
       end if
-      if the cRevStandaloneSettings["renameGeneric"] of stack tLine <> tSettings["renameGeneric"] then 
+      if the cRevStandaloneSettings["renameGeneric"] of stack tLine <> tSettings["renameGeneric"] then
          put false into tSettings["renameGeneric"]
       end if
-      if the cRevStandaloneSettings["substackFolder"] of stack tLine <> tSettings["substackFolder"] then 
-         put "" into tSettings["substackFolder"]
+      if the cRevStandaloneSettings["substackFolder"] of stack tLine <> tSettings["substackFolder"] then
+         put empty into tSettings["substackFolder"]
       end if
    end repeat
    if the number of lines in tHilitedFiles is not 1 then
@@ -77,7 +77,7 @@ command updateCard
    end if
    set the hilite of button "moveSubstacks" to (tSettings["moveSubstacks"] = true)
    set the hilite of button "renameFiles" to (tSettings["renameGeneric"] = true)
-   set the hilite of button "Data stacks directory" to (tSettings["substackFolder"] <> "")
+   set the hilite of button "Data stacks directory" to (tSettings["substackFolder"] is not empty)
    put tSettings["substackFolder"] into field "substackFolder"
    set the enabled of group "moveSubstacks" to (tSettings["moveSubstacks"] = true)
 end updateCard

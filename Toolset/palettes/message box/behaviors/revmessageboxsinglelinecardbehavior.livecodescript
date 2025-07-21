@@ -3,15 +3,19 @@ on openCard
    lock screen
    --show relevant frame items
    showFrameItem "outputSource"
-   if revIDEGetPreference("IDELockedToStack") is true
-   then showFrameItem "unlockDefaultStack"
-   else showFrameItem "lockDefaultStack"
+   if revIDEGetPreference("IDELockedToStack") is true then
+      showFrameItem "unlockDefaultStack"
+   else
+      showFrameItem "lockDefaultStack"
+   end if
 
-   send "revInitialise" to field "message" of me
+   dispatch "revInitialise" to field "message" of me
 
-   if revIDEGetPreference("IDESingleLineMessageHistory") is not empty
-   then put line 1 of revIDEGetPreference("IDESingleLineMessageHistory") into field "message"
-   else put empty into field "message"
+   if revIDEGetPreference("IDESingleLineMessageHistory") is not empty then
+      put line 1 of revIDEGetPreference("IDESingleLineMessageHistory") into field "message"
+   else
+      put empty into field "message"
+   end if
 
    dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of field "message" of me
 
@@ -28,7 +32,7 @@ on openCard
 
    -- make sure "message" field is selected (tperry 27-4-24)
    -- fixed by mwieder 2025.06.29
-   if the visible of fld "message" of cd "Single Line" of stack "Message Box" then
+   if the visible of field "message" of card "Single Line" of stack "Message Box" then
       send tMsgSelect to this card in 50 ticks
    end if
 
@@ -37,7 +41,7 @@ on openCard
 end openCard
 
 on tMsgSelect
-   select text of fld "message" of cd "Single Line" of stack "Message Box"
+   select text of field "message" of card "Single Line" of stack "Message Box"
 end tMsgSelect
 
 on closeCard

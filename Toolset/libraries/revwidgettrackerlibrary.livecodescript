@@ -32,18 +32,19 @@ on mouseDoubleDown
 end mouseDoubleDown
 
 on mouseMove x,y
-  if lTracking then
-    put x,y into tLoc
-    if within (gREVCurrentWidget,tLoc) then
-      if the icon of gREVCurrentWidget is not lTrackingIcon then
-        set the icon of gREVCurrentWidget to lTrackingIcon
-        if lTrackingIcon is 201319 then revAddToField
-        else if lTrackingIcon is 201318 then revSubtractFromField
+   local tLoc
+   if lTracking then
+      put x,y into tLoc
+      if within (gREVCurrentWidget,tLoc) then
+         if the icon of gREVCurrentWidget is not lTrackingIcon then
+            set the icon of gREVCurrentWidget to lTrackingIcon
+            if lTrackingIcon is 201319 then revAddToField
+            else if lTrackingIcon is 201318 then revSubtractFromField
+         end if
+      else
+         set the icon of gREVCurrentWidget to 201317
       end if
-    else
-      set the icon of gREVCurrentWidget to 201317
-    end if
-  end if
+   end if
 end mouseMove
 
 on revStartMouse 
@@ -72,7 +73,7 @@ end mouseRelease
 on revAddToField
   lock screen
   if the text of the fld (the cTargetField of gREVCurrentWidget) < the cMaxValue of fld (the cTargetField of gREVCurrentWidget) then add 1 to fld (the cTargetField of gREVCurrentWidget)
-  send "closeField" to fld (the cTargetField of gREVCurrentWidget)
+  dispatch "closeField" to fld (the cTargetField of gREVCurrentWidget)
   select the text of fld (the cTargetField of gREVCurrentWidget)
   unlock screen
 end revAddTofield
@@ -80,7 +81,7 @@ end revAddTofield
 on revSubtractFromField
   lock screen
   if the text of the fld (the cTargetField of gREVCurrentWidget) > the cMinValue of fld (the cTargetField of gREVCurrentWidget) then subtract 1 from fld (the cTargetField of gREVCurrentWidget)
-  send "closeField" to fld (the cTargetField of gREVCurrentWidget)
+  dispatch "closeField" to fld (the cTargetField of gREVCurrentWidget)
   select the text of fld (the cTargetField of gREVCurrentWidget)
   unlock screen
 end revSubtractFromField

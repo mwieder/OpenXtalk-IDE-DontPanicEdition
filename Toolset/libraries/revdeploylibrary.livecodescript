@@ -52,7 +52,7 @@ command revIDEDeployAction
    
    -- Make sure we save the stack if it needs it
    set the defaultStack to tStack
-   if not revSaveCheck(tStack) then
+   if not revSaveCheck?(tStack) then
       exit revIDEDeployAction
    end if
    
@@ -69,7 +69,7 @@ command revIDEDeployAction
    -- Invoke the action in the appropriate platform-specific library
    local tError
    if there is a stack ("revDeployLibrary" & tPlatform)  then
-      dispatch "deployDo" to stack ("revDeployLibrary"&tPlatform)  with tStack, tTarget
+      dispatch "deployDo" to stack ("revDeployLibrary"&tPlatform) with tStack, tTarget
       put the result into tError
    else
       put "Unknown deployment platform - " & tPlatform into tError
@@ -242,22 +242,20 @@ end revIDEDeployTargetsChanged
 //  calls provide this in a sane manner.
 //
 
-# However, none of thesae are used anywhere.
+function revIDEDeployIOSIsValidSDK pVersion, pPath
+   dispatch function "deployIsValidSDK" to stack "revDeployLibraryiOS" with pVersion, pPath
+   return the result
+end revIDEDeployIOSIsValidSDK
 
---function revIDEDeployIOSIsValidSDK pVersion, pPath
---   dispatch function "deployIsValidSDK" to stack "revDeployLibraryiOS" with pVersion, pPath
---   return the result
---end revIDEDeployIOSIsValidSDK
+function revIDEDeployIOSGetSimulatorVersions
+  dispatch function "deployGetSimulatorVersions" to stack "revDeployLibraryiOS"
+  return the result
+end revIDEDeployIOSGetSimulatorVersions
 
---function revIDEDeployIOSGetSimulatorVersions
---   dispatch function "deployGetSimulatorVersions" to stack "revDeployLibraryiOS"
---   return the result
---end revIDEDeployIOSGetSimulatorVersions
-
---function revIDEDeployIOSGetSDKVersions
---   dispatch function "deployGetSDKVersions" to stack "revDeployLibraryiOS"
---   return the result
---end revIDEDeployIOSGetSDKVersions
+function revIDEDeployIOSGetSDKVersions
+  dispatch function "deployGetSDKVersions" to stack "revDeployLibraryiOS"
+  return the result
+end revIDEDeployIOSGetSDKVersions
 
 // SN-2015-05-01: [[ Refactor iOS SDK Version ]] Wrappers added
 function revIDEDeployIOSGetMinimumVersions
@@ -265,49 +263,49 @@ function revIDEDeployIOSGetMinimumVersions
    return the result
 end revIDEDeployIOSGetMinimumVersions
 
---function revIDEDeployIOSGetIphoneOSes
---   dispatch function "deployGetIphoneOSes" to stack "revDeployLibraryiOS"
---   return the result
---end revIDEDeployIOSGetIphoneOSes
+function revIDEDeployIOSGetIphoneOSes
+   dispatch function "deployGetIphoneOSes" to stack "revDeployLibraryiOS"
+   return the result
+end revIDEDeployIOSGetIphoneOSes
 
---command revIDEDeployIOSUpdateSimulators
---   dispatch "deployUpdateSimulators" to stack "revDeployLibraryiOS"
---end revIDEDeployIOSUpdateSimulators
+command revIDEDeployIOSUpdateSimulators
+  dispatch "deployUpdateSimulators" to stack "revDeployLibraryiOS"
+end revIDEDeployIOSUpdateSimulators
 
---command revIDEDeployIOSUpdateSDKs
---   dispatch "deployUpdateSDKs" to stack "revDeployLibraryiOS"
---end revIDEDeployIOSUpdateSDKs
+command revIDEDeployIOSUpdateSDKs
+  dispatch "deployUpdateSDKs" to stack "revDeployLibraryiOS"
+end revIDEDeployIOSUpdateSDKs
 
---function revIDEDeployIOSUsableSDKs
---   dispatch function "deployUsableIosSdk" to stack "revDeployLibraryiOS"
---   return the result
---end revIDEDeployIOSUsableSDKs
+function revIDEDeployIOSUsableSDKs
+  dispatch function "deployUsableIosSdk" to stack "revDeployLibraryiOS"
+  return the result
+end revIDEDeployIOSUsableSDKs
 
---function revIDEDeployIOSGetDeviceSDK pVersion
---   dispatch function "deployGetDeviceSDK" to stack "revDeployLibraryiOS" with pVersion
---   return the result
---end revIDEDeployIOSGetDeviceSDK
+function revIDEDeployIOSGetDeviceSDK pVersion
+  dispatch function "deployGetDeviceSDK" to stack "revDeployLibraryiOS" with pVersion
+  return the result
+end revIDEDeployIOSGetDeviceSDK
 
---function revIDEDeployIOSSanitizeSystemVersion
---   dispatch function "deploySanitizeSystemVersion" to stack "revDeployLibraryiOS"
---   return the result
---end revIDEDeployIOSSanitizeSystemVersion
+function revIDEDeployIOSSanitizeSystemVersion
+  dispatch function "deploySanitizeSystemVersion" to stack "revDeployLibraryiOS"
+  return the result
+end revIDEDeployIOSSanitizeSystemVersion
 
 //SN-2015-04-30: [[ Bug 15300 ]]  Refactor functions used from revDeployLibraryIOS
---function revIDEDeployIOSGetInvalidityMessage piOSXcodePairs
---   dispatch function "deployGetInvalidityMessage" to stack "revDeployLibraryIOS" with piOSXcodePairs
---   return the result
---end revIDEDeployIOSGetInvalidityMessage
+function revIDEDeployIOSGetInvalidityMessage piOSXcodePairs
+  dispatch function "deployGetInvalidityMessage" to stack "revDeployLibraryIOS" with piOSXcodePairs
+  return the result
+end revIDEDeployIOSGetInvalidityMessage
 
---function revIDEDeployIOSGetLatestSDKInstalled @rVersion
---   local tTooltip // Not used
---   local tVersions
---   dispatch function "deployCheckLatestSDKIsInstalled" to stack "revDeployLibraryIOS" with tTooltip, tVersions
---   put the last item of tVersions into tVersions
---   if char 1 of tVersions is space then delete char 1 of tVersions
---   put tVersions into rVersion
---   return the result
---end revIDEDeployIOSGetLatestSDKInstalled
+function revIDEDeployIOSGetLatestSDKInstalled @rVersion
+  local tTooltip // Not used
+  local tVersions
+  dispatch function "deployCheckLatestSDKIsInstalled" to stack "revDeployLibraryIOS" with tTooltip, tVersions
+  put the last item of tVersions into tVersions
+  if char 1 of tVersions is space then delete char 1 of tVersions
+  put tVersions into rVersion
+  return the result
+end revIDEDeployIOSGetLatestSDKInstalled
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -315,27 +313,25 @@ end revIDEDeployIOSGetMinimumVersions
 //  calls provide this in a sane manner.
 //
 
-# However, none of thesae are used anywhere.
+function revIDEDeployAndroidRequiredSDK
+   dispatch function "deployRequiredSDK" to stack "revDeployLibraryAndroid"
+   return the result
+end revIDEDeployAndroidRequiredSDK
 
---function revIDEDeployAndroidRequiredSDK
---   dispatch function "deployRequiredSDK" to stack "revDeployLibraryAndroid"
---   return the result
---end revIDEDeployAndroidRequiredSDK
-
-function revIDEDeployAndroidIsValidSDK pPath
+function Deploy.Android.IsValidSDK? pPath
    dispatch function "deploy.IsValidSDK?" to stack "revDeployLibraryAndroid" with pPath
    return the result
-end revIDEDeployAndroidIsValidSDK
+end Deploy.Android.IsValidSDK?
 
---function revIDEDeployAndroidIsValidJDK pPath
---   dispatch function "deployIsValidJDK" to stack "revDeployLibraryAndroid" with pPath
---   return the result
---end revIDEDeployAndroidIsValidJDK
+function Deploy.Android.IsValidJDK? pPath
+   dispatch function "deploy.IsValidJDK?" to stack "revDeployLibraryAndroid" with pPath
+   return the result
+end Deploy.Android.IsValidJDK?
 
---function revIDEDeployAndroidGetJDK
---   dispatch function "deployGetJDK" to stack "revDeployLibraryAndroid"
---   return the result
---end revIDEDeployAndroidGetJDK
+function Deploy.Android.GetJDK
+   dispatch function "deploy.GetJDK" to stack "revDeployLibraryAndroid"
+   return the result
+end Deploy.Android.GetJDK
 
 command deploy.Android.Initialize
    dispatch "deployInitialize" to stack "revDeployLibraryAndroid"
@@ -344,18 +340,18 @@ end deploy.Android.Initialize
 
 // SN-2015-05-13: [[ AndroidVersions ]] Make the available Android minimum versions
 //  something changeable from a script-only stack
-function revIDEDeployAndroidGetVersionsList
+function deploy.Android.GetVersionsList
    local tMap
    dispatch function "deployGetVersionsMap" to stack "revDeployLibraryAndroid"
    put the result into tMap
    combine tMap with cr
    return tMap
-end revIDEDeployAndroidGetVersionsList
+end deploy.Android.GetVersionsList
 
---function revIDEDeployAndroidApiFromVersion pVersion
---   dispatch function "deployGetApiFromVersion" to stack "revDeployLibraryAndroid" with pVersion
---   return the result
---end revIDEDeployAndroidApiFromVersion
+function revIDEDeployAndroidApiFromVersion pVersion
+   dispatch function "deployGetApiFromVersion" to stack "revDeployLibraryAndroid" with pVersion
+   return the result
+end revIDEDeployAndroidApiFromVersion
 
 function deploy.Android.GetAPIsList
    local tMap,tAPIs

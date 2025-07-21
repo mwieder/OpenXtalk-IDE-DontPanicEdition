@@ -18,17 +18,17 @@ on preOpenCard
       set the hilite of button "Copy Referenced Files" to false
       set the enabled of group "Destination Group" to false
    end if
-   
+
    local tDestination
    put getSetting("referencedfilesdestination") into tDestination
-   if tDestination is empty then 
+   if tDestination is empty then
       put "Referenced Files" into tDestination
    end if
    put tDestination into field "Destination"
    set the enabled of button "Copy Referenced Files" to not getSetting("ios")
-   
+
    checkForWarning
-   
+
    pass preOpenCard
 end preOpenCard
 
@@ -46,18 +46,18 @@ command checkForWarning
       hide field "Warning"
       exit checkForWarning
    end if
-   
-   local tMustWarn, tIndex
-   put false into tMustWarn
+
+   local tMustWarn?, tIndex
+   put false into tMustWarn?
    set the itemDelimiter to slash
    put 1 into tIndex
    repeat for each line tLine in field "files"
       if item 1 of tLine is "Resources" then
-         put true into tMustWarn
+         put true into tMustWarn?
          set the textColor of line tIndex of field "files" to "red"
          set the textStyle of line tIndex of field "files" to "bold"
       end if
       add 1 to tindex
    end repeat
-   set the visible of field "Warning" to tMustWarn
+   set the visible of field "Warning" to tMustWarn?
 end checkForWarning

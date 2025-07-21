@@ -3,7 +3,7 @@
 on extensionInitialize
    if the target is not me then
       pass "extensionInitialize"
-   end if	
+   end if
    insert the script of me into front
 end extensionInitialize
 
@@ -21,14 +21,14 @@ on saveStackRequest
 
    global gREVMessageDispatch
    repeat for each line l in gREVMessageDispatch["revSaveStackRequest"]
-      send "revSaveStackRequest" to this cd of stack l
+      dispatch "revSaveStackRequest" to this card of stack l
    end repeat
-   
+
    revIDESetUnedited the short name of revIDEStackOfObject(the long id of the target)
 
    if "revReshapeLibrary" is in revInternal__ListLoadedLibraries() then
       select empty
-      send "revSetMarkers true" to stack "revReshapeLibrary"
+      dispatch "revSetMarkers" to stack "revReshapeLibrary" with true
       revInternal__UnloadLibrary "revReshapeLibrary"
    end if
 
@@ -46,20 +46,20 @@ end saveStackRequest
 
 on nameChanged pOldname, pNewName, pTarget
    global gREVMessageDispatch, gREVStackName
-   
+
    if revTargetStack(the target) is "answer dialog" then pass nameChanged
-   
+
    local tTarget
    lock screen
    if pTarget is not empty then put pTarget into tTarget
    else put the long id of the target into tTarget
    if word 1 of tTarget is "stack"
    then replace comma with "_" in pNewName--engine seems to do this
-   
+
    local tPalettes
    put revPalettesList() into tPalettes
    set the wholeMatches to true
-   
+
    local tLinkedObjects
    repeat for each line l in tPalettes
       if word 1 of tTarget is "stack" and the cREVLinked of stack l is not empty then
@@ -77,7 +77,7 @@ on nameChanged pOldname, pNewName, pTarget
                put tWordOffset + 1 into tStackOffset
                put char 2 to -2 of word tStackOffset of tObject into tStackName
                if tStackName is pOldName then
-                  put quote&pNewName&quote into word tStackOffset of tObject
+                  put q(pNewName) into word tStackOffset of tObject
                   exit repeat
                end if
             end repeat
@@ -86,60 +86,60 @@ on nameChanged pOldname, pNewName, pTarget
          delete last char of tLinkedObjects
          set the cREVLinked of stack l to tLinkedObjects
       end if
-      
+
       local tObjects
       if the cREVLinked of stack l is not empty
       then put the cREVLinked of stack l into tObjects
       else put (the selobj) into tObjects
-      
+
       # LG-2008-03-17
       # Bug 6092
       # It is possible that the object tObjects refers to may have been
       # deleted if messages are locked.
       if tObjects is empty or there is a tObjects then                  # LG 2008-08-13, Bug 6694
          set the title of stack l to revPaletteTitle(tObjects)
-         send "revUpdatePalette" to this cd of stack l
+         dispatch "revUpdatePalette" to this card of stack l
       end if
    end repeat
-   
+
    # OK-2008-03-11 : Update the script editor so that the object's new name is displayed.
    put the long id of the target into tTarget
-   send "revSEObjectNameChanged tTarget, pOldName, pNewName" to revScriptEditorMain()
-   
+   dispatch "revSEObjectNameChanged" to revScriptEditorMain() with  tTarget, pOldName, pNewName
+
    if pNewName is empty and word 1 of tTarget is "stack" then
       lock messages
       set the name of tTarget to pOldName
       put pOldName into pNewName
       unlock messages
    end if
-   
+
    repeat for each line l in gREVMessageDispatch["revNameChanged"]
-      send "revNameChanged pNewName, pOldName" to this cd of stack l
+      dispatch "revNameChanged" to this card of stack l with  pNewName, pOldName
    end repeat
-   
+
    --if name is empty need to match id
    if pOldName is empty
    then put word 1 to 3 of tTarget into pOldName
-   
+
    --update Application Overview global variables/custom properties with new name
    if word 1 of tTarget is "stack" and pOldName is gREVStackName then
       --stack name has changed
       put pNewName into gREVStackName
    end if
-   
+
    local tTargetStack
    put revTargetStack(tTarget) into tTargetStack
-   
+
    local tHCAddressing
    put the hcAddressing of stack tTargetStack into tHCAddressing
    set the hcAddressing of stack tTargetStack to false
-   
+
    if there is a stack "revApplicationOverview" then
-      send "revNameChanged the long id of tTarget, pOldName, pNewName" to stack "revApplicationOverview"
+      dispatch "revNameChanged" to stack "revApplicationOverview" with the long id of tTarget, pOldName, pNewName
    end if
-   
+
    set the hcAddressing of stack tTargetStack to tHCAddressing
-   
+
    revSetActiveStacks
    unlock screen
    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass nameChanged
@@ -148,12 +148,12 @@ end nameChanged
 on idChanged pOldId, pNewId
    global gREVMessageDispatch
    repeat for each line l in gREVMessageDispatch["revIdChanged"]
-      send "revIdChanged pOldId, pNewId" to this cd of stack l
+      dispatch "revIdChanged" to this card of stack l with pOldId, pNewId
    end repeat
 
    local tObject
    put the long id of the target into tObject
-   send "revSEObjectIdChanged tObject, pOldId, pNewId" to revScriptEditorMain()
+   dispatch "revSEObjectIdChanged" to revScriptEditorMain() with tObject, pOldId, pNewId
 
    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
       pass idChanged
@@ -165,7 +165,7 @@ on mainstackChanged pOldStackName, pNewStackName
    local tStack
    put the long id of the target into tStack
 
-   send "revSEMainstackChanged tStack, pOldStackName, pNewStackName" to revScriptEditorMain()
+   dispatch "revSEMainstackChanged" to revScriptEditorMain() with tStack, pOldStackName, pNewStackName
    pass mainstackChanged
 end mainstackChanged
 
@@ -188,7 +188,7 @@ on editScript pObject, pAt
    if tResult is "pass" then
       pass editScript
    end if
-   
+
    local tEditor
    put revScriptEditor(pObject)  into tEditor
    send "setCursorAtLoc pAt, tEditor" to me in 0 seconds
@@ -202,7 +202,7 @@ on resumeStack
 
    global gREVMessageDispatch
    repeat for each line l in gREVMessageDispatch["revResumeStack"]
-      send "revResumeStack" to this cd of stack l
+      dispatch "revResumeStack" to this card of stack l
    end repeat
 
    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass resumeStack
@@ -234,28 +234,29 @@ end revSetActiveStacks
 # handler that deals with the opening of new stacks.
 on preOpenStack
    revIDEHandleNewStack the long id of the target
-   
+
    local tScaleFactor
    put the cREVGeneral["scalefactor"] of this stack into tScaleFactor
    if tScaleFactor is a number and tScaleFactor is not 1 then
       set the scalefactor of this stack to tScaleFactor
-   end if 
-   
+   end if
+
    local tTarget
    put the long id of the target into tTarget
-   
+
    local tStack
    put revTargetStack(tTarget) into tStack
-   
+
    if revIDEObjectIsOnIDEStack(tTarget) then
       # IM-2016-03-01: [[ Bug 16244 ]] IDE stacks should always hide invisible objects
       set the showInvisibles of stack tStack to false
       set the _ideoverride of stack tStack to true
    end if
-   
+
    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass preOpenStack
 end preOpenStack
 
+# user pressed the F1 key
 on rawKeyUp pWhich
    if pWhich is 65386 then
       revIDEHelpKeyPressed
@@ -272,7 +273,7 @@ on openStack
 
       if revIDEStackNameIsIDEStack(tStackName) and the mode of stack tStackName is 4 and the visible of stack tStackName is false then
          revIDETogglePaletteView
-         
+
          local tScreenRect
          put revIDEStackScreenRect(tStackName, true) into tScreenRect
          if the bottom of stack tStackName > item 4 of tScreenRect or the right of stack tStackName > item 3 of tScreenRect then
@@ -297,22 +298,24 @@ on preOpenCard
    local tTarget
    put revTargetStack() into tTarget
    if not revIDEStackNameIsIDEStack(tTarget) and "cREVGeometryCache" is among the lines of the customPropertySets of the target \
-          and (the cREVGeometryCache["order"] of this cd is empty \
-          or the cREVGeometryCache["total"] of this cd is not the number of controls \
-          or the number of words in the customKeys["cREVGeometryCacheIDs"] of this cd is 0) \
+          and (the cREVGeometryCache["order"] of this card is empty \
+          or the cREVGeometryCache["total"] of this card is not the number of controls \
+          or the number of words in the customKeys["cREVGeometryCacheIDs"] of this card is 0) \
           then
       revCacheGeometry
    else if "cREVGeometryCache" is among the lines of the customPropertySets of stack revTargetStack() and the cREVGeometryCache["stackID"] of stack revTargetStack() is not the id of stack revTargetStack() then
       revCacheGeometry
-      repeat with i = 1 to the number of cds
-         set the cREVGeometryCache["order"] of cd i to empty
+      repeat for each line tCard in the cardids of this stack
+         set the cREVGeometryCache["order"] of card id tCard to empty
       end repeat
    end if
-   if the cREVGeometry["preOpenCardUpdate"] of this cd of stack tTarget is true then revUpdateGeometry
+   if the cREVGeometry["preOpenCardUpdate"] of this card of stack tTarget is true then
+      revUpdateGeometry
+   end if
 
    global gREVMessageDispatch
    repeat for each line l in gREVMessageDispatch["revPreOpenCard"]
-      send "revPreOpenCard" to this cd of stack l
+      dispatch "revPreOpenCard" to this card of stack l
    end repeat
 
 
@@ -326,7 +329,7 @@ local lPrefsSaveTime
 on closeStack
    global gREVTargetStack, gREVShowStacks, gREVShutDown
 
-   put "stack" && quote & revTargetStack() & quote into gREVTargetStack
+   put "stack" && q(revTargetStack()) into gREVTargetStack
 
    send "revUpdateScriptEdit" to me in 10 milliseconds
    send "revCloseUpdate" to me in 100 milliSeconds
@@ -380,7 +383,7 @@ on closeStack
             put true into tAllClosed
             repeat for each line l in tStacksList
                if l is empty then next repeat
-               if quote & l & quote is word 2 of gREVTargetStack then next repeat
+               if q(l) is word 2 of gREVTargetStack then next repeat
                if the mode of stack l is 0 then
                   put true into tAllClosed
                else
@@ -393,11 +396,11 @@ on closeStack
             put revTargetStack() into tStackName
 
             local tFileName
-            
+
             local tIsBuildingStandalone
             put (there is a stack "revStandaloneProgress" and \
                   the mode of stack "revStandaloneProgress" > 0) into tIsBuildingStandalone
-            
+
             # OK-2008-08-05 : Bug 6562 - Bug where the user was being prompted to delete the home stack on startup,
             # caused by revIDEStack returning true/false instead of empty/non-empty.
             if not tIsBuildingStandalone and tAllClosed and not revIDEStackNameIsIDEStack(tStackName) then
@@ -426,7 +429,7 @@ on closeStack
 
    global gREVMessageDispatch
    repeat for each line l in gREVMessageDispatch["revCloseStack"]
-      send "revCloseStack" to this cd of stack l
+      dispatch "revCloseStack" to this card of stack l
    end repeat
 
    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass closeStack
@@ -441,8 +444,9 @@ end revDeleteStack
 
 on revCheckStackOpen pStack, pStacks
    if there is a stack "revApplicationOverview" then
-      if the mode of stack "revApplicationOverview" is not 0 and there is not a stack pStack
-      then send "revAODeleteStack pStack, pStacks" to stack "revApplicationOverview"
+      if the mode of stack "revApplicationOverview" is not 0 and there is not a stack pStack then
+         dispatch "revAODeleteStack" to stack "revApplicationOverview" with pStack, pStacks
+      end if
    end if
 end revCheckStackOpen
 
@@ -482,7 +486,9 @@ on revCloseUpdate
          put the customProperties["cREVLoadInfo"] of stack l into tLoadArray
       end if
       repeat for each line x in keys(tLoadArray)
-         if tLoadArray[x] is true and l is not among the lines of gREVMessageDispatch[x] then put l into line (the number of lines in gREVMessageDispatch[x]+1) of gREVMessageDispatch[x]
+         if tLoadArray[x] is true and l is not among the lines of gREVMessageDispatch[x] then
+            put l into line (the number of lines in gREVMessageDispatch[x]+1) of gREVMessageDispatch[x]
+         end if
       end repeat
    end repeat
    delete last char of gREVStacksList
@@ -547,12 +553,18 @@ on openField
    if the mode of tStack is 1 then
       revIDESetEdited the short name of tStack
    end if
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass openField
+   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+      pass openField
+   end if
 end openField
 
 on closeField
-  if the cREVGetsUpdate of stack revTargetStack() is not empty then set the backPattern of the target to empty
-  if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass closeField
+  if the cREVGetsUpdate of stack revTargetStack() is not empty then
+      set the backPattern of the target to empty
+   end if
+  if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+      pass closeField
+   end if
 end closeField
 
 on scrollBarDrag
@@ -630,12 +642,12 @@ end revCheckDelete
 
 on backspaceKey
    lock screen
-   if revCheckDelete() then 
-      if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then 
+   if revCheckDelete() then
+      if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
          --PM-2015-10-30: [[ Bug 16304 ]] Balance lock screen
          unlock screen
          pass backspaceKey
-      else 
+      else
          pass backSpaceKey to metaCard
       end if
    end if
@@ -644,8 +656,8 @@ end backspaceKey
 
 on deleteKey
    lock screen
-   if revCheckDelete() then 
-      if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then 
+   if revCheckDelete() then
+      if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
          unlock screen
          pass deleteKey
       else
@@ -674,29 +686,34 @@ on revVerboseDebug pWhat
    end if
 end revVerboseDebug
 
-on messageHandled t, m
-  global gREVVerboseDebug
+on messageHandled pTime, pMessage
   if lEmptyFile > 50000 then -- about 10MB
     close file "verboseLog.txt"
     delete file "verboseLog.txt"
     open file "verboseLog.txt" for text write
     put 1 into lEmptyFile
   end if
-  if gREVVerboseDebug then
-    write "messageHandled" && the long time && t, m, the long id of the target & cr to file "verboseLog.txt"
-    add 1 to lEmptyFile
-  end if
-  send "recordMessage t, m, the long id of the target, true" to card 1 of stack "revMessageWatcher"
+   dispatchVerboseMessage pTime, pMessage, true
 end messageHandled
 
-on messageNotHandled t, m
+on messageNotHandled pTime, pMessage
+   dispatchVerboseMessage pTime, pMessage, false
+end messageNotHandled
+
+private command dispatchVerboseMessage pTime, pMessage, pIsHandled
   global gREVVerboseDebug
+   local tHandled
   if gREVVerboseDebug then
-    write "messageNotHandled" && the long time && t, m, the long id of the target & cr to file "verboseLog.txt"
+      if pIsHandled then
+         put "messageHandled" into tHandled
+      else
+         put "messageNotHandled" into tHandled
+      end if
+    write tHandled && the long time && pTime, pMessage, the long id of the target & cr to file "verboseLog.txt"
     add 1 to lEmptyFile
   end if
-  send "recordMessage t, m, the long id of the target, false" to card 1 of stack "revMessageWatcher"
-end messageNotHandled
+  dispatch "recordMessage" to card 1 of stack "revMessageWatcher" with pTime, pMessage, the long id of the target, pIsHandled
+end dispatchVerboseMessage
 
 on scriptParsingError pWhich
    global gREVSuppressErrors
@@ -711,12 +728,12 @@ end scriptParsingError
 
 function revOKTarget pWhich
    local tTarget
-   if pWhich is not empty then 
+   if pWhich is not empty then
       put pWhich into tTarget
-   else 
+   else
       put the long id of the target into tTarget
    end if
-   
+
    return revIDEObjectIsOnIDEStack(tTarget)
 end revOKTarget
 
@@ -753,13 +770,13 @@ on revCheckStackCollision pStack
    else
       put pStack into tTarget
    end if
-   
+
    local tOffset
    put wordOffset("stack",tTarget) into tOffset
-   
+
    local tLongStack
    put word tOffset to -1 of tTarget into tLongStack
-   
+
    local tStacks
    # check just the stack names first
    put the short name of tLongStack into tStacks
@@ -767,19 +784,19 @@ on revCheckStackCollision pStack
       # no collision in short names
       exit revCheckStackCollision
    end if
-   
+
    local tFilePath
    put the fileName of tLongStack into tFilePath
    if the substacks of tLongStack is not empty then
       put cr & the substacks of tLongStack after tStacks
    end if
-   
+
    local tMainStacks
    put the mainStacks into tMainStacks
-   
+
    local tFileInfo
    put empty into tFileInfo
-   
+
    local tFilePath2, tStacks2
    repeat for each line l in tMainStacks
       put the fileName of stack l into tFilePath2
@@ -795,7 +812,7 @@ on revCheckStackCollision pStack
             if tFilePath2 is not empty then
                put "in file" && tFilePath2 & space into tFileInfo
             end if
-            answer warning "A stack" && quote & m & quote && tFileInfo & \
+            answer warning "A stack" && q(m) && tFileInfo & \
                   "is already in memory.  The LiveCode UI does not distinguish stacks which have identical names, so editing these stack files while both are in memory could result in data loss."
             exit repeat
          end if
@@ -804,5 +821,9 @@ on revCheckStackCollision pStack
 end revCheckStackCollision
 
 private command log pMessage
-  put pMessage & return after msg
+  put pMessage & cr after msg
 end log
+
+private function q pText
+   return quote & pText & quote
+end q

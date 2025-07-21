@@ -1,31 +1,31 @@
 ﻿script "revStandaloneSettingsBehavior"
 on preOpenStack
    --local tLicenseType
-   
+
    start using stack "revSaveAsStandalone"
-   
+
    if getTargetStackName() is not among the lines of the mainStacks then
       revStandaloneSettings the mainStack of the topStack
    end if
-   
+
    repeat with X=1 to the number of buttons of group "flavors" of card "Unix"
       set the enabled of button X of group "flavors" of card "Unix" to true
    end repeat
-   
+
    --updateCardSize
-   
+
    navigateToCard "General"
    repeat with X=1 to the number of btns of group "cards"
       set the style of button X of group "cards" to "rectangle"
       set the showBorder of button X of group "cards" to false
    end repeat
    helpButtons
-   
+
    if not isMacEngineFat?() then
       hide button "MacOSX arm64" of card "OS X"
    else
       show button "MacOSX arm64" of card "OS X"
-      
+
       /* Building for arm64 is not supported on macOS < 10.13 as codesign does
       * not have the required support for the arm64 slice. */
       set the itemDelimiter to "."
@@ -44,7 +44,7 @@ private command updateTabButtons pSettings
       put tEnableMacTick or pSettings[tItem] into tEnableMacTick
    end repeat
    set the visible of button "OSXchecked" of group "checks" of me to tEnableMacTick
-   
+
    set the visible of button "Windowschecked" of group "checks" of me to pSettings["Windows"] = true or \
          pSettings["Windows x86-64"] = true
    // SN-2015-01-13: [[ Bug 14373 ]] Check also if Linux 64 or Linux ARM are checked
@@ -56,14 +56,14 @@ private command updateTabButtons pSettings
    set the visible of button "BugsChecked" of group "checks" of me to pSettings["errorDialog"] = true
    set the visible of button "EmscriptenChecked" of group "checks" of me to \
          pSettings["EmscriptenJS"] = true or pSettings["EmscriptenWASM"] = true
-   
+
    repeat for each item tItem in "SolIntel,SolSparc,Iris,Odt,rs6000,Linux,Bsd,Hp9k700,SPARC"
       if pSettings[tItem] then
          set the visible of button "Unixchecked" of group "checks" of me to true
          exit repeat
-      end if 
+      end if
    end repeat
-   
+
    show button "Windows" of group "cards" of me
    show button "OS X" of group "cards" of me
    show button "Bug Reports" of group "cards" of me
@@ -71,10 +71,10 @@ private command updateTabButtons pSettings
    show button "Unix" of group "cards" of me
    show button "iOS" of group "cards" of me
    show button "Emscripten" of group "cards" of me
-   
+
    local tLeft
    put 0 into tLeft
-   
+
    local tV
    put item 2 of the loc of button "OS X" of group "cards" of me -10 into tV
    repeat for each item tItem in kButtonList
@@ -82,7 +82,7 @@ private command updateTabButtons pSettings
          set the left of button tItem of group "cards" of me to tLeft
          put the right of button tItem of group "cards" of me into tLeft
       end if
-      
+
       local tCheck
       put replaceText(tItem," ","")&"checked" into tCheck
       if there is a button tCheck of group "checks" of me then
@@ -91,7 +91,7 @@ private command updateTabButtons pSettings
          set the topLeft of button tCheck of group "checks" of me to tTopLeft
       end if
    end repeat
-   
+
    set the enabled of button "OS X" of group "cards" of me to true
    set the enabled of button "Windows" of group "cards" of me to true
    set the enabled of button "Unix" of group "cards" of me to true
@@ -122,7 +122,7 @@ on helpButtons
   repeat with tCard =1 to the number of cards
     repeat with tBtn = 1 to the number of buttons of card tCard
       if the short name of button tBtn of card tCard = "help" then
-        set the margins of button tBtn of cd tCard to 4
+        set the margins of button tBtn of card tCard to 4
         set the hiliteBorder of button tBtn of card tCard to false
         set the showBorder of button tBtn of card tCard to tShowBorder
         set the icon of button tBtn of card tCard to tIcon
@@ -138,20 +138,24 @@ end helpButtons
 
 on revStandaloneSettings pStack
    lock screen
-   if pStack = "" then 
+   replace quote with empty in pStack
+   if pStack is empty then
       put the short name of the topStack into pStack
    end if
    put the mainStack of stack pStack into pStack
    set the defaultStack to pStack
-   if the fileName of stack pStack is "" then
+   if the fileName of stack pStack is empty then
       revSaveAs pStack
-      if the fileName of stack pStack is "" then exit revStandaloneSettings
+      if the fileName of stack pStack is empty then
+         unlock screen
+         exit revStandaloneSettings
+      end if
    end if
    set the cRevTargetStack of stack "revStandaloneSettings" to pStack
-   
+
    local tSettings
    put getSettings() into tSettings
-   revSBDefaultStandaloneSettings pStack, tSettings
+   dispatch "revSBDefaultStandaloneSettings" to stack "revStandaloneSettings" with pStack, tSettings
    setSettings tSettings
    modeless "revStandaloneSettings"
    dispatch "preOpenCard" to this card of stack "revStandaloneSettings"
@@ -160,7 +164,7 @@ on revStandaloneSettings pStack
 end revStandaloneSettings
 
 on revSetEdit pStack
-   if pStack = "" then 
+   if pStack is empty then
       put getTargetStackName() into pStack
    end if
    revIDESetEdited pStack
@@ -212,9 +216,9 @@ end utilityTargetStackPath
 command layoutCardsGroup
    local tX
    put 2 into tX
-   
+
    local tNumButtons
-   put the number of buttons of group "cards" into tNumButtons  
+   put the number of buttons of group "cards" into tNumButtons
    repeat with i = 1 to tNumButtons
       local tWidth
       put kButtonWidth into tWidth
@@ -243,7 +247,7 @@ end validateIdentifier
 on revUpdateStandaloneProgress pMessage
    lock screen
    put pMessage into field 1 of stack "revStandaloneProgress"
-   if the mode of stack "revStandaloneProgress" is 0 then 
+   if the mode of stack "revStandaloneProgress" is 0 then
       lock messages
       modeless "revStandaloneProgress"
       set the loc of stack "revStandaloneProgress" to the screenLoc
@@ -267,14 +271,14 @@ function selectImageFile pDimensions
    if tFile is empty then
       return empty
    end if
-   
+
    if pDimensions is not empty then
       if getImageDimensions(tFile) is not pDimensions then
          answer warning "Image is not of the required dimensions (" & pDimensions & ")"
          --exit chooseImageFileWithDimension
       end if
    end if
-   
+
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectImageFile
 
@@ -286,7 +290,7 @@ function selectAdaptiveIconsResFolder
    if tResourcesFolder is empty then
       return empty
    end if
-   
+
    return utilityMakePathRelative(tResourcesFolder, utilityTargetStackPath())
 end selectAdaptiveIconsResFolder
 
@@ -297,7 +301,7 @@ function selectFontMapFile
    if tFile is empty then
       return empty
    end if
-   
+
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectFontMapFile
 
@@ -308,7 +312,7 @@ function selectKeyStoreFile
    if tFile is empty then
       return empty
    end if
-   
+
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectKeyStoreFile
 
@@ -352,7 +356,7 @@ command setSettings pSettings
 end setSettings
 
 command setSetting pKey, pValue
-   set the cRevStandaloneSettings[pKey] of getTargetStack() to pValue 
+   set the cRevStandaloneSettings[pKey] of getTargetStack() to pValue
    revSetEdit
 end setSetting
 
@@ -368,7 +372,7 @@ function updateIncludeStackFilesList pIncludeList, pPrev
          if the fileName of stack tInclude is among the lines of pPrev then
             answer error ("<p>"&tInclude&"<p>is already included.") with "OK"
          else
-            if char 1 to tChars of the fileName of stack tInclude = tMainStack then 
+            if char 1 to tChars of the fileName of stack tInclude = tMainStack then
                put char tChars+1 to -1 of the fileName of stack tInclude into tPath
             else
                put the fileName of stack tInclude into tPath
@@ -380,7 +384,7 @@ function updateIncludeStackFilesList pIncludeList, pPrev
          answer error "File "&tInclude&" is not a stack!"
       end if
    end repeat
-   
+
    local tStackFiles
    revSBRelativeStackFilesList getTargetStackName(), tStackFiles
    return tStackFiles
@@ -388,6 +392,7 @@ end updateIncludeStackFilesList
 
 on revRecursiveRemoveStackFiles pStack,pRemoveList, @xStackFileList
   local tNewStackFiles,tRef,tStack,tOldStackFiles
+
   put the stackFiles of stack pStack into tOldStackFiles
   repeat for each line tRef in the stackFiles of stack pStack
     if there is a stack item 1 of tRef then
@@ -405,7 +410,8 @@ on revRecursiveRemoveStackFiles pStack,pRemoveList, @xStackFileList
     set the stackFiles of stack pStack to tNewStackFiles
     revSetEdit the short name of stack pStack
   end if
-  put "" into tNewStackFiles
+
+  put empty into tNewStackFiles
   repeat for each line tStack in the substacks of stack pStack
     put the stackFiles of stack pStack into tOldStackFiles
     repeat for each line tRef in the stackFiles of stack tStack of stack pStack
@@ -418,14 +424,14 @@ on revRecursiveRemoveStackFiles pStack,pRemoveList, @xStackFileList
           end if
         end if
       end if
-    end repeat
+    end repeat # for each line tRef
     delete char -1 of tNewStackFiles
     if tNewStackFiles <> tOldStackFiles then
       set the stackFiles of stack tStack of stack pStack to tNewStackFiles
       revSetEdit the mainstack of stack tStack
     end if
-    put "" into tNewStackFiles
-  end repeat
+    put empty into tNewStackFiles
+  end repeat # for each line tStack
 end revRecursiveRemoveStackFiles
 
 on navigateToCard pCardName
@@ -434,12 +440,12 @@ on navigateToCard pCardName
          exit navigateToCard
       end if
    end if
-   
+
    lock screen
    go cd pCardName
-   
+
    repeat with X=1 to the number of btns of group "cards" of me
-      if the short name of btn X of group "cards" of me <> pCardName then 
+      if the short name of btn X of group "cards" of me <> pCardName then
          set the textStyle of btn X of group "cards" of me to "plain"
          set the textFont of btn X of group "cards" of me to ""
          set the textSize of btn X of group "cards" of me to ""
@@ -464,19 +470,19 @@ function androidIdentifierValid
    // Check identifier
    local tIdentifier
    put field "identifier" of card "Android" into tIdentifier
-   
+
    if not validateIdentifier(tIdentifier) then
       local tError
       put "Invalid Android identifier. The identifier can contain any number" & \
             " of items separated by a '.' character. Each item must only contain" & \
             " letters 'a-z', numbers '0-9' and the following special characters '_'." & \
-            " No item can be numerical only. For example com.runrev.app_1 is" & \ 
+            " No item can be numerical only. For example com.runrev.app_1 is" & \
             " valid while com.runrev.app.1 is invalid." into tError
       answer error tError
       send "selectIdentifier" to card "Android" in 0 milliseconds
       return false
    end if
-   
+
    return true
 end androidIdentifierValid
 
@@ -493,10 +499,10 @@ end addProfilesToList
 
 function revGetPropertyProfilesList
    local tLine,tStackNames,tStack,tCard,tControl,tFinalList,tProfilesList
-   
+
     local tStackFiles
    revSBStackFilesList getTargetStackName(), tStackFiles
-  
+
    repeat for each line tLine in tStackFiles
       put the mainStack of stack tLine into tStackNames
       put cr & the subStacks of stack tStackNames after tStackNames
@@ -516,7 +522,7 @@ function revGetPropertyProfilesList
    unlock messages
    repeat for each line tLine in tProfilesList
       if tLine is empty then next repeat
-      if tLine is not among the lines of tFinalList then 
+      if tLine is not among the lines of tFinalList then
          put tLine into line (the number of lines in tFinalList)+1 of tFinalList
       end if
    end repeat
@@ -539,11 +545,11 @@ command setStandaloneName pName
    if item -1 of pName is among the items of "exe.app" then
       put item 1 to -2 of pName into pName
    end if
-   
+
    if revFolderNameIsIllegal(pName) then
       put revFolderNameMakeLegal(pName) into pName
    end if
-   
+
    setSetting "name", pName
 end setStandaloneName
 
@@ -552,7 +558,7 @@ function revRelativePath pPath
    set the itemDel to "/"
    put item 1 to -2 of the effective filename of getTargetStack() & "/" into tMainStackPath
    put the number of chars of tMainStackPath into tChars
-   if char 1 to tChars of pPath = tMainStackPath then 
+   if char 1 to tChars of pPath = tMainStackPath then
       delete char 1 to tChars of pPath
    end if
    return pPath
@@ -569,36 +575,37 @@ function canIncludeStackFiles
    return tCan
 end canIncludeStackFiles
 
-local sIsMacEngineFat
+local sIsMacEngineFat?
 private function isMacEngineFat?
-   if sIsMacEngineFat is not empty then
-      return sIsMacEngineFat
+   if sIsMacEngineFat? is not empty then
+
+      /* Get the path to the engine used to build for macOS */
+      local tPath
+      --put revSBEnginePath("MacOSX") into tPath
+      dispatch function "revSBEnginePath" to stack "revStandaloneSettings" with "MacOSX"
+      put it into tPath
+
+      /* Read the first four bytes of the engine file */
+      local tHeader
+      open file tPath for binary read
+      if the result is empty then
+         read from file tPath for 4 bytes
+         put it into tHeader
+         close file tPath
+      end if
+
+      local tHeaderHex
+      get binaryDecode("H8", tHeader, tHeaderHex)
+      switch tHeaderHex
+         case "bebafeca"
+         case "cafebabe"
+            put true into sIsMacEngineFat?
+            break
+         default
+            put false into sIsMacEngineFat?
+            break
+      end switch
    end if
-   
-   /* Get the path to the engine used to build for macOS */
-   local tPath
-   put revSBEnginePath("MacOSX") into tPath
-   
-   /* Read the first four bytes of the engine file */
-   local tHeader
-   open file tPath for binary read
-   if the result is empty then
-      read from file tPath for 4 bytes
-      put it into tHeader
-      close file tPath
-   end if
-   
-   local tHeaderHex
-   get binaryDecode("H8", tHeader, tHeaderHex)
-   switch tHeaderHex
-      case "bebafeca"
-      case "cafebabe"
-         put true into sIsMacEngineFat
-         break
-      default
-         put false into sIsMacEngineFat
-         break
-   end switch
-   
-   return sIsMacEngineFat
+
+   return sIsMacEngineFat?
 end isMacEngineFat?

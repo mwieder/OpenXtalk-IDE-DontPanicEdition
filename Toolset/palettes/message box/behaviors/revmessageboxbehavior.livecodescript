@@ -18,27 +18,49 @@ on setBehaviors
    dispatch "setAsBehavior" to revIDEFrameBehavior() with the long id of this me
 end setBehaviors
 
-on openStack   
+private command addHeaderItem pName, pLabel, pIcon
+   addFrameItem pName, "header", "navigation", pLabel, pIcon, pIcon, "showCard", the long id of me, pLabel
+end addHeaderItem
+
+private command addFooterItem pName, pLabel, pIcon, pParameter
+   addFrameItem pName, "footer", "action", pLabel, pIcon, pIcon, "showCard", pParameter, the long id of me
+   hideFrameItem pName
+end addFooterItem
+
+on openStack
    lock screen
    lock messages
    --set the zoomBox of this stack to false
    unlock messages
    clearFrameData
-   
+
    ##GH : the labels will need localising
    #Navigation
-   --frame item: Name                     Location   Type            Label                       Icon      Icon     Callback Message  Callback Target   Parameter
-   addFrameItem "single line",             "header",  "navigation",   "Single Line",             "minus",  "minus",  "showCard",            the long id of me,  "Single Line"
-   addFrameItem "multiple lines",        "header",  "navigation",   "Multiple Lines",        "reorder",   "reorder",   "showCard",           the long id of me,  "Multiple Lines"
-   addFrameItem "global properties",   "header",  "navigation",   "Global Properties",   "file powerpoint alt",   "file powerpoint alt",  "showCard",            the long id of me,  "Global Properties"
-   addFrameItem "global variables",     "header",  "navigation",   "Global Variables",     "file excel alt",   "file excel alt",  "showCard",            the long id of me,  "Global Variables"
-   addFrameItem "pending messages", "header",  "navigation",  "Pending Messages", "envelope alt",   "envelope alt",  "showCard",            the long id of me,  "Pending Messages"
-   addFrameItem "front scripts",           "header",  "navigation",  "Front Scripts",          "file",   "file",  "showCard",            the long id of me,  "Front Scripts"
-   addFrameItem "back scripts",           "header",  "navigation",  "Back Scripts",           "paste",    "paste",  "showCard",            the long id of me,  "Back Scripts"
-   addFrameItem "stacks in use",          "header",  "navigation",  "Stacks in Use",         "files alt",    "files alt",  "showCard",            the long id of me,  "Stacks in Use"
-   
+   --frame item: Name  Location   Type Label Icon Icon  Callback Message  Callback Target   Parameter
+
+   addHeaderItem "single line", "Single Line", "minus"
+   addHeaderItem "multiple lines", "Multiple Lines", "reorder"
+   addHeaderItem "global properties", "Global Properties", "file powerpoint alt"
+   addHeaderItem "global variables", "Global Variables", "file excel alt"
+   addHeaderItem "pending messages", "Pending Messages", "envelope alt"
+   addHeaderItem "front scripts", "Front Scripts", "file"
+   addHeaderItem "back scripts", "Back Scripts", "file"
+   addHeaderItem "stacks in use", "Stacks in Use", "files alt"
+
    #Actions - footers
-   --frame item: Name                        Location   Type          Label                                  Icon         Icon     Callback Message      Callback Target
+   --frame item: Name Location   Type Label Icon  Icon  Callback Message  Callback Target
+
+   addFooterItem "outputSource", "Show last output source", "bullseye", "showOutputSource"
+   addFooterItem "lockDefaultStack", "Lock the defaultStack", "unlock alt", "lockDefaultStack"
+   addFooterItem "unlockDefaultStack", "Unlock the defaultStack", "lock", "unlockDefaultStack"
+   addFooterItem "removeSelected", "Remove selected variable", "trash", "removeSelected"
+   addFooterItem "removeAll", "Remove all", "trash", "removeAll"
+   addFooterItem "newGlobalVariable", "New global variable", "file alt", "newGlobalVariable"
+   addFooterItem "update", "Update pending messages", "refresh", "updateMessages"
+   addFooterItem "cancelAll", "Cancel all messages", "remove", "cancelAllMessages"
+   addFooterItem "addStack", "Add library stack", "plus", "addLibraryStack"
+
+/*
    addFrameItem "outputSource",          "footer",     "action",      "Show last output source",    "bullseye",     "bullseye",    "showOutputSource",the long id of me
    addFrameItem "lockDefaultStack",     "footer",     "action",      "Lock the defaultStack",         "unlock alt",     "unlock alt",    "lockDefaultStack",    the long id of me
    addFrameItem "unlockDefaultStack", "footer",     "action",      "Unlock the defaultStack",     "lock",     "lock",    "unlockDefaultStack",the long id of me
@@ -48,10 +70,10 @@ on openStack
    addFrameItem "update",                    "footer",     "action",      "Update pending messages", "refresh",    "refresh",    "updateMessages",     the long id of me
    addFrameItem "cancelAll",                 "footer",     "action",      "Cancel all messages",           "remove",    "remove",    "cancelAllMessages",  the long id of me
    addFrameItem "addStack",                 "footer",     "action",      "Add library stack",                "plus",    "plus",    "addLibraryStack",      the long id of me
-   
+
    --GH : hiding footers as every footer is not necessary on all cards; footers are shown on releveant cards
    hideFrameItem "lockDefaultStack"
-   hideFrameItem "unlockDefaultStack" 
+   hideFrameItem "unlockDefaultStack"
    hideFrameItem "outputSource"
    hideFrameItem "removeSelected"
    hideFrameItem "removeAll"
@@ -59,18 +81,19 @@ on openStack
    hideFrameItem "update"
    hideFrameItem "cancelAll"
    hideFrameItem "addStack"
-   
+*/
+
    #Preferences
    --frame item: Name                                            Location  Type              Label                                           Value Type  Value                                         Callback Message      Callback Target
    addFrameItem "ideMessageBox_autoupdate",           "header",  "preference",  "Auto Update Pending Messages",  "boolean",     "true,false",                                  "preferenceChanged",  the long id of me
    addFrameItem "ideMessageBox_intelligenceobject", "header",  "preference",  "Select Intelligence Object",            "enum",         "selectedObject,mouseControl",   "preferenceChanged",  the long id of me
-   
+
    hiliteFrameItem "single line"
    showCard "Single Line"
-   
+
    --if there is a stack currently being debugged then the debug mode is true, if no stack is currently being debugged then the debug mode is false
    revIDESetActiveStack
-   
+
    local tIntelligence
    put revIDEGetPreference("ideMessageBox_intelligenceobject") into tIntelligence
    if tIntelligence is empty then
@@ -78,24 +101,24 @@ on openStack
    end if
    revIDESetPreference "ideMessageBox_intelligenceobject", "selectedObject"
    revIDEUpdateIntelligenceObject
-   
+
    revIDESubscribe "idePreferenceChanged:cShowRevolutionStacks"
    revIDESubscribe "idePreferenceChanged:revPaletteFrameSize"
    revIDESubscribe "idePreferenceChanged:cScriptEditor,editor,backgroundcolor"
    revIDESubscribe "idePreferenceChanged:cScriptEditor,editor,font"
    revIDESubscribe "idePreferenceChanged:cScriptEditor,editor,fontSize"
-   
+
    revIDESubscribe "ideActiveStacksChanged"
-   
+
    if revIDEGetPreference("revPaletteFrameSize") is empty then revIDESetPreference "revPaletteFrameSize", "small"
-   
+
    local tMinHeight
    put 4*kHalfMessageFieldHeight + the headerHeight of me + the footerHeight of me into tMinHeight
-   
+
    lock messages
    set the minHeight of me to tMinHeight
    moveMsgBoxStack
-   
+
    __UpdateMessageColors
    __UpdateMessageFont
    unlock messages
@@ -105,30 +128,30 @@ end openStack
 on ideMsgChanged pTarget, pHandler, pLine, pMsg
    lock messages
    lock screen
-   
+
    if the mode of me is 0 then
       go stack (the short name of me)
    end if
-   
+
    local tField
    if the short name of this card of me is "Multiple Lines" then
       put the long id of field "results" of card "Multiple Lines" of me into tField
    else
       put the long id of field "results" of card "Single Line" of me into tField
    end if
-   
+
    set the text of tField to pMsg
-   
+
    -- PM-2015-06-26: [[ Bug 15478 ]] Make msg box to auto scroll
    local tLines, tHeight
    put the number of lines of the text of tField into tLines
    put the effective textHeight of tField into tHeight
-   set the vScroll of tField to tLines * tHeight 
-   
+   set the vScroll of tField to tLines * tHeight
+
    put pTarget into sLastMsg["target"]
    put pHandler into sLastMsg["handler"]
    put pLine into sLastMsg["line"]
-   
+
    unlock screen
    unlock messages
 end ideMsgChanged
@@ -147,25 +170,25 @@ end closeStack
 
 command setUpDataView
    --setting up a data view for cards "Pending Messages","Front Scripts", "Back Scripts" and "Pending Messages"
-   
+
    lock screen
    local theStylesA
-   
+
    set the behavior of group "objectList" of me to revIDEDataViewBehavior()
    send "ResetView" to group "objectList" of me
-   
+
    put the long id of group "pendingMessagesRow" of card "templates" of me into theStylesA["pendingMessages"]
    put the long id of group "frontScriptsRow" of card "templates" of me into theStylesA["frontScripts"]
    put the long id of group "frontScriptsRow" of card "templates" of me into theStylesA["backScripts"]
    put the long id of group "stacksRow" of card "templates" of me into theStylesA["stacksInUse"]
-   
+
    set the viewProp["row style templates"] of group "objectList" of me to theStylesA
-   
+
    set the viewProp["hilite color"] of group "objectList" of me to revIDEColor("dataView_hiliteColor")
    set the viewProp["background color"] of group "objectList" to empty
    set the viewProp["row color"] of group "objectList" of me to revIDEColor("dataView_rowColor")
    set the viewProp["alternate row color"] of group "objectList" of me to revIDEColor("dataView_rowAlternateColor")
-   
+
    set the viewProp["fixed row height"] of group "objectList" of me to "true"
    set the viewProp["row height"] of group "objectList" of me to 24
    set the viewProp["cache"] of group "objectList" of me to "none"
@@ -179,9 +202,9 @@ command showCard pCard
    ##GH : will need localising
    --set the title of this stack to revIDELocalisedString("Message Box" && "(" & lSelectedCard & ")")
    set the title of me to "Message Box" && "(" & lSelectedCard & ")"
-   
+
    --get message history for Single Line and Multiple Lines
-    if pCard is among the items of "Single Line,Multiple Lines" then 
+    if pCard is among the items of "Single Line,Multiple Lines" then
       replace space with "" in pCard
       put "IDE" & pCard & "MessageHistory" into lCardHistoryPref
    end if
@@ -220,13 +243,13 @@ command showOutputSource
          revIDEObjectIsOnIDEStack(sLastMsg["target"]) and not gRevDevelopment then
       exit showOutputSource
    end if
-   
+
    edit script of sLastMsg["target"] at sLastMsg["line"]
 end showOutputSource
 
 on removeSelected
    if lSelectedCard is not "Global Variables" then exit removeSelected
-   
+
    local tSelectedVar, tDoString
    put line (the hilitedLine of field "type" of card "Global Variables" of me) of field "type" of card "Global Variables" of me into tSelectedVar
    ##will need localising
@@ -240,7 +263,7 @@ on removeSelected
       unlock screen
    end if
 end removeSelected
-   
+
 command removeAll
    lock screen
    switch lSelectedCard
@@ -262,7 +285,7 @@ command removeAll
          end repeat
          revIDEUpdateFrontScripts
          break
-         
+
       case "Back Scripts"
          --remove all back scripts from the back
          local tBackScripts, tBackScript
@@ -281,7 +304,7 @@ command removeAll
          end repeat
          revIDEUpdateBackScripts
          break
-         
+
       case "Stacks in Use"
          --stop using all stacks in use
          local tStacksInUse, tStack
@@ -347,30 +370,30 @@ end scriptAction
 command addGlobalVariable
    local tNewVariable
    if lSelectedCard is not "Global Variables" then exit addGlobalVariable
-   
+
    ##GH : will need localising
    --ask revIDELocalisedString("Enter the name of the new variable:")
    ask "Enter the name of the new variable:"
    put it into tNewVariable
    if the result is "cancel" then exit addGlobalVariable
-   
+
    --the new variable must not be empty or contain more than one word
    if tNewVariable is empty then exit addGlobalVariable
-   if the number of words in tNewVariable > 1 then 
+   if the number of words in tNewVariable > 1 then
       beep
       ##GH : will need localising
       --answer revIDELocalisedString("The name of the variable must be a single word only")
       answer "The name of the variable must be a single word only"
       addGlobalVariable "Global Variables"
    end if
-   
+
    revIDEAddGlobal tNewVariable,"Global Variables"
 end addGlobalVariable
 
 command revIDEAddGlobal pNewGlobal, pCard
    local tDoString
    if pCard is not "Global Variables" then exit revIDEAddGlobal
-   
+
    put "global" && pNewGlobal & return & "put empty into" && pNewGlobal into tDoString
    do tDoString
    lock messages
@@ -388,12 +411,12 @@ end updateMessages
 command cancelAllMessages
    local tPendingMessages, tMessage
    if lSelectedCard is not "Pending Messages" then exit cancelAllMessages
-   
+
    put the cREVPendingMessages of me into tPendingMessages
    repeat for each line tMessage in tPendingMessages
       cancel item 1 of tMessage
    end repeat
-   
+
    lock screen
    revIDEPendingMessagesRefresh
    disableFrameItem "cancelAll"
@@ -403,7 +426,7 @@ end cancelAllMessages
 command addLibraryStack
    local tNewLibStack
    modal stack "revAddLibraryStack"
-   
+
    if the cREVResult of stack "revAddLibraryStack" is not "OK" then exit addLibraryStack
    put the cREVStack of stack "revAddLibraryStack" into tNewLibStack
    if tNewLibStack is among the lines of stacksInUse then
@@ -413,7 +436,7 @@ command addLibraryStack
       answer error "Stack" && tNewLibStack && "has already been placed into the message path."
       exit addLibraryStack
    end if
-   
+
    lock screen
    lock messages
    start using stack tNewLibStack
@@ -438,7 +461,7 @@ on preferenceChanged pPreference, pValue
          break
    end switch
    unlock screen
-end preferenceChanged 
+end preferenceChanged
 
 on idePreferenceChanged pPreference, pValue
    lock screen
@@ -480,14 +503,14 @@ private command __UpdateMessageFont
    local tFont, tSize
    put revIDEGetPreference("cScriptEditor,editor,font") into tFont
    put revIDEGetPreference("cScriptEditor,editor,fontSize") into tSize
-   
+
    set the textFont of field "script" of card "Multiple Lines" of me to tFont
    set the textFont of field "message" of card "Single Line" of me to tFont
    set the textFont of field "auto complete" of card "Single Line" of me to tFont
    set the textSize of field "script" of card "Multiple Lines" of me to tSize
    set the textSize of field "message" of card "Single Line" of me to tSize
    set the textSize of field "auto complete" of card "Single Line" of me to tSize
-   
+
    dispatch "layoutCard" to card "Single Line" of me
 end __UpdateMessageFont
 
@@ -500,9 +523,9 @@ end __UpdateMessageColors
 
 command positionOpenStacksButton
    lock screen
-   
+
    local tSize, tTextSize, tMargin, tLeft, tWidth, tBottom, tHeight, tXLoc, tYLoc, tPadding, tIcon
-   
+
    put revIDEGetPreference("revPaletteFrameSize") into tSize
    switch tSize
       case "large"
@@ -521,7 +544,7 @@ command positionOpenStacksButton
          put 172079 into tIcon
          break
    end switch
-   
+
    lock messages
    if there is a group "Stacks" of this card of me then
       set the showBorder of button "Open Stacks" of group "Stacks" of me to true
@@ -536,13 +559,13 @@ command positionOpenStacksButton
       set the height of graphic "pipe" to barHeight(tSize)
       set the left of graphic "pipe" to barRight(tSize) + 5
       set the bottom of graphic "pipe" to barHeight(tSize)
-   end if 
-   
+   end if
+
    try
       set the layer of group "background" of card 1 of me to bottom
    end try
    unlock messages
-   
+
    unlock screen
 end positionOpenStacksButton
 
@@ -562,7 +585,7 @@ end revIDEAutoComplete
 command revIDEAcceptAutoComplete
    if lSelectedCard is not "Single Line" then exit revIDEAcceptAutoComplete
    if field "auto complete" is empty then exit revIDEAcceptAutoComplete
-   
+
    lock screen
    lock messages
    put field "auto complete" into field "message" of card "Single Line" of me
@@ -576,20 +599,20 @@ end revIDEAcceptAutoComplete
 command revIDEConsoleHistoryAdd pScript
    local tMessageHistory, tLine, tCount, tInHistory
    if pScript is empty then exit revIDEConsoleHistoryAdd
-   
+
    put revIDEGetPreference(lCardHistoryPref) into tMessageHistory
-   
+
    --check if pScript is already in the message history and remove it if it is
    put 0 into tCount
    repeat for each line tLine in tMessageHistory
       add 1 to tCount
-      if tLine is pScript then 
+      if tLine is pScript then
          put true into tInHistory
          exit repeat
       end if
    end repeat
    if tInHistory is true then delete line tCount of tMessageHistory
-   
+
    --add pScript to the top of the message history
    put pScript & return before tMessageHistory
    if the number of lines in tMessageHistory > kHistoryMax then delete line (kHistoryMax+1) to -1 of tMessageHistory
@@ -598,26 +621,26 @@ end revIDEConsoleHistoryAdd
 
 command ideMessageBoxExecuteScript pScript
    lock messages
-   if exists(card lSelectedCard of me) then 
+   if exists(card lSelectedCard of me) then
       put empty into field "results" of card lSelectedCard of me
    end if
    unlock messages
-   
+
    if lSelectedCard is "Single Line" then put empty into field "auto complete" of card lSelectedCard of me
    if pScript is empty then exit ideMessageBoxExecuteScript
-   
+
    local tDefaultStack
    put revIDEGetPreference("IDEActiveStack") into tDefaultStack
-   
+
    local tIntelligencePref, tIntelligenceObject
    put the cREVIntelligenceObject of me into tIntelligencePref
-   
+
    try
       do "put the long id of the" && tIntelligencePref && "into tIntelligenceObject"
    catch tError
       put the long id of stack tDefaultStack into tIntelligenceObject
    end try
-   
+
    local tValidScript
    ideExecuteScript pScript, tIntelligenceObject, ideIsDebugging(), tValidScript
    if the result is not empty then
@@ -625,10 +648,10 @@ command ideMessageBoxExecuteScript pScript
    else if it is not empty then
       put ideMessageBoxFormatErrorForDisplay(it, "execution error") into field "results" of card lSelectedCard of me
    end if
-   
+
    return tValidScript
-end ideMessageBoxExecuteScript 
-   
+end ideMessageBoxExecuteScript
+
 function ideMessageBoxFormatErrorForDisplay pErrorTrace, pErrorType
    --if there is an error, then this will be formatted and then displayed in the results field
    ##GH : will need localising
@@ -643,7 +666,7 @@ function ideMessageBoxFormatErrorForDisplay pErrorTrace, pErrorType
       end if
    else
       put tError into tErrorDisplay
-   end if 
+   end if
    return tErrorDisplay
 end ideMessageBoxFormatErrorForDisplay
 
@@ -686,15 +709,15 @@ end ideMouseMove
 command revIDEUpdateIntelligenceObject
    local tIntelligence
    put revIDEGetPreference("ideMessageBox_intelligenceobject") into tIntelligence
-   
-   if tIntelligence is "selectedObject" then 
+
+   if tIntelligence is "selectedObject" then
       revIDESubscribe "ideSelectedObjectChanged"
       revIDEUnsubscribe "ideMouseMove"
    else if tIntelligence is "mouseControl" then
       revIDESubscribe "ideMouseMove"
       revIDEUnsubscribe "ideSelectedObjectChanged"
    end if
-   
+
    set the cREVIntelligenceObject of me to tIntelligence
    __UpdateIntelligenceDisplay
 end revIDEUpdateIntelligenceObject
@@ -705,7 +728,7 @@ end ideActiveStacksChanged
 
 command revIDESetActiveStack
    local tMode, tTraceStack, tLock, tLink, tTopStack
-   
+
    lock screen
    put revIDEGetPreference("IDEDebugMode") into tMode
    if tMode is true and the traceStack is not empty then
@@ -715,15 +738,15 @@ command revIDESetActiveStack
       disableFrameItem "unlockDefaultStack"
       lock messages
       set the label of button "Open Stacks" of group "Stacks" of me to tTraceStack
-      disable button "Open Stacks" of group "Stacks" of me 
+      disable button "Open Stacks" of group "Stacks" of me
       unlock messages
    else
       put revIDEGetPreference("IDELockedToStack") into tLock
       put revIDEGetPreference("IDELinkedToStack") into tLink
       enableFrameItem "lockDefaultStack"
       enableFrameItem "unlockDefaultStack"
-      
-      if tLock is true and there is a stack tLink then 
+
+      if tLock is true and there is a stack tLink then
          revIDESetPreference "IDEActiveStack",tLink
          lock messages
          set the label of button "Open Stacks" of group "Stacks" of me to tLink
@@ -740,14 +763,14 @@ command revIDESetActiveStack
       end if
    end if
    unlock screen
-end revIDESetActiveStack 
+end revIDESetActiveStack
 
 command revUpdateActiveStack pOldName, pNewName
    if revIDEGetPreference("IDELockedToStack") is false then
       send "revSetActiveStacks" to stack "revfrontscriptlibrary"
       exit revUpdateActiveStack
    end if
-   
+
    if revIDEGetPreference("IDELinkedToStack") is pOldName then
       lock screen
       local tDefaultStack
@@ -767,12 +790,12 @@ end revUpdateActiveStack
 
 command revIDEUpdateGlobalVariables
    local tVariableNames, tShow, tFilteredVariables
-   
+
    put revIDEGlobalVariables() into tVariableNames
    replace comma with return in tVariableNames
    sort tVariableNames
    put revIDEGetPreference("cShowRevolutionStacks") into tShow
-   
+
    if tShow is false then
       repeat for each line tLine in tVariableNames
          if char 1 to 4 of tLine is "gREV" then next repeat
@@ -780,7 +803,7 @@ command revIDEUpdateGlobalVariables
       end repeat
       delete last char of tFilteredVariables
    else put tVariableNames into tFilteredVariables
-   
+
    lock screen
    put tFilteredVariables into field "type" of card "Global Variables" of me
    put empty into field "contents" of card "Global Variables" of me
@@ -830,11 +853,11 @@ end revIDERequireWarning
 
 on rawKeyDown pKey
    if word 1 of the target is not "field" then pass rawKeyDown
-   if pKey is 65308 then scrollUp 
+   if pKey is 65308 then scrollUp
    else if pKey is 65309 then scrollDown
    else if pKey is 65310 then scrollLeft
    else if pKey is 65311 then scrollRight
-   else 
+   else
       pass rawKeyDown
    end if
 end rawKeyDown

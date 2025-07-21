@@ -3,53 +3,55 @@ on preOpenCard
    local tStandaloneSettingsA
    put getSettings() into tStandaloneSettingsA
    set the itemdelimiter to ","
-   local tEnabled
-   put false into tEnabled
+   local tEnabled?
+   put false into tEnabled?
    repeat for each item tItem in "Windows,Windows x86-64"
-   		put tStandaloneSettingsA[tItem] = true or tEnabled into tEnabled
-   		set the hilite of btn tItem of group "platforms" to tStandaloneSettingsA[tItem] = true
+   		put tStandaloneSettingsA[tItem] = true or tEnabled? into tEnabled?
+   		set the hilite of button tItem of group "platforms" to tStandaloneSettingsA[tItem] = true
+   end repeat
+   set the enabled of group "Windows" to tEnabled?
+
+   put tStandaloneSettingsA["Windows,iconFile"] into field "iconFile"
+   put tStandaloneSettingsA["Windows,documenticonFile"] into field "documenticonFile"
+   put tStandaloneSettingsA["Windows,fileDescription"] into field "fileDescription"
+   put tStandaloneSettingsA["Windows,LegalCopyright"] into field "LegalCopyright"
+   put tStandaloneSettingsA["Windows,comments"] into field "comments"
+   put tStandaloneSettingsA["Windows,internalName"] into field "internalName"
+   put tStandaloneSettingsA["Windows,productName"] into field "productName"
+   put tStandaloneSettingsA["Windows,privateBuild"] into field "privateBuild"
+   put tStandaloneSettingsA["Windows,companyName"] into field "companyName"
+   put tStandaloneSettingsA["Windows,originalFilename"] into field "originalFilename"
+   put tStandaloneSettingsA["Windows,legalTrademarks"] into field "legalTrademarks"
+   put tStandaloneSettingsA["Windows,specialBuild"] into field "specialBuild"
+   repeat with X=1 to 4
+      put tStandaloneSettingsA["Windows,productVersion"&X] into field ("productVersion"&X)
+      put tStandaloneSettingsA["Windows,fileVersion"&X] into field ("fileVersion"&X)
    end repeat
 
-   set the enabled of group "Windows" to tEnabled
-   put tStandaloneSettingsA["Windows,iconFile"] into fld "iconFile"
-   put tStandaloneSettingsA["Windows,documenticonFile"] into fld "documenticonFile"
-   put tStandaloneSettingsA["Windows,fileDescription"] into fld "fileDescription"
-   put tStandaloneSettingsA["Windows,LegalCopyright"] into fld "LegalCopyright"
-   put tStandaloneSettingsA["Windows,comments"] into fld "comments"
-   put tStandaloneSettingsA["Windows,internalName"] into fld "internalName"
-   put tStandaloneSettingsA["Windows,productName"] into fld "productName"
-   put tStandaloneSettingsA["Windows,privateBuild"] into fld "privateBuild"
-   put tStandaloneSettingsA["Windows,companyName"] into fld "companyName"
-   put tStandaloneSettingsA["Windows,originalFilename"] into fld "originalFilename"
-   put tStandaloneSettingsA["Windows,legalTrademarks"] into fld "legalTrademarks"
-   put tStandaloneSettingsA["Windows,specialBuild"] into fld "specialBuild"
-   repeat with X=1 to 4
-      put tStandaloneSettingsA["Windows,productVersion"&X] into fld ("productVersion"&X)
-      put tStandaloneSettingsA["Windows,fileVersion"&X] into fld ("fileVersion"&X)
-   end repeat
-   
    # OK-2009-09-25: UAC stuff, initialize the UI.
    enable button "UAC Execution Level"
-   
+
    local tExecutionLevel
    put tStandaloneSettingsA["Windows,uacExecutionLevel"] into tExecutionLevel
    if tExecutionLevel is empty then
       put "default" into tExecutionLevel
    end if
-   
+
    set the cValue of button "UAC Execution Level" of me to tExecutionLevel
    uacUpdateInfoField tExecutionLevel
-   
+
    // IM-2014-08-15: [[ Bug 13118 ]] HiDPI settings initialisation
    enable button "usePixelScaling"
    local tUsePixelScaling
    put tStandaloneSettingsA["Windows,usePixelScaling"] into tUsePixelScaling
-   if tUsePixelScaling is empty then put true into tUsePixelScaling
-   
-   
+   if tUsePixelScaling is empty then
+      put true into tUsePixelScaling
+   end if
+
+
    # OK-2009-09-25: Attempting to make the fonts consistent for the label fields
    initializeFonts
-   
+
    pass preOpenCard
 end preOpenCard
 
@@ -64,7 +66,8 @@ end initializeFonts
 # Adavanced Settings would be run, a new UUID would be generated.
 on checkUUId
    if getSetting("Windows,UUID") is empty then
-      setSetting "Windows,UUID", revSBGenerateUUID()
+      #setSetting "Windows,UUID", revSBGenerateUUID()
+      setSetting "Windows,UUID", uuid()
    end if
 end checkUUId
 
@@ -94,7 +97,6 @@ function uacManifestOptionToInfo pManifestOption
       default
          put "Runs with default UAC access. No manifest is included." into tMessage
    end switch
-   
+
    return tMessage
 end uacManifestOptionToInfo
-

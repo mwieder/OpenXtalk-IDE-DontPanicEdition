@@ -63,11 +63,12 @@ function revIsPICT pWhatPath
       end if
 
       local tFinal
-      if tPict then
-         put true into tFinal
-      else
-         put false into tFinal
-      end if
+#      if tPict then
+#         put true into tFinal
+#      else
+#         put false into tFinal
+#      end if
+      put tPict into tFinal
    else
       put false into tFinal
    end if
@@ -82,22 +83,24 @@ on revCheckQuit
 
    local tListOfStacks
    put empty into tListOfStacks
-   repeat for each line l in tMainStacks
-      if the substacks of stack l is empty
-      then put l & cr after tListOfStacks
-      else put l & cr & the substacks of stack l & cr after tListOfStacks
+   repeat for each line tStack in tMainStacks
+      if the substacks of stack tStack is empty then
+         put tStack & cr after tListOfStacks
+      else
+         put tStack & cr & the substacks of stack tStack & cr after tListOfStacks
+      end if
    end repeat
    delete last char of tListOfStacks
 
    local tEditors, tFinalList
-   repeat for each line l in tListOfStacks -- script editors first
-      if word 1 of l is "revScriptEditor" then
-         put l & cr after tEditors
+   repeat for each line tStack in tListOfStacks -- script editors first
+      if word 1 of tStack is "revScriptEditor" then
+         put tStack & cr after tEditors
       else
-         put l & cr after tFinalList
+         put tStack & cr after tFinalList
       end if
    end repeat
-   delete last char of tFinalList
+   delete last char of tFinalList # remove trailing cr
    if the number of lines in tEditors is not 0 then
       delete last char of tEditors
       put tEditors & cr before tFinalList
@@ -105,25 +108,28 @@ on revCheckQuit
    put tFinalList into tListOfStacks
 
    local tCheck
-   repeat for each line l in tListOfStacks
-      set the defaultStack to l
-      put revSaveCheck(l,false) into tCheck
+   repeat for each line tStack in tListOfStacks
+      set the defaultStack to tStack
+      put revSaveCheck?(tStack, false) into tCheck
       if tCheck is false then return false -- exit appleEvent handler too
    end repeat
    set the cSelectGrouped of stack "revPreferences" to the selectGroupedControls
 
    local tMode
-   repeat for each line l in gREVShutdownlist
+   repeat for each line tStack in gREVShutdownlist
       lock messages
-      put the cREVLoadInfo["mode"] of stack l into tMode
+      put the cREVLoadInfo["mode"] of stack tStack into tMode
       unlock messages
-      if tMode is "invisible" then go inv stack l
-      else do "go stack" && quote & l & quote && "as" && tMode
+      if tMode is "invisible" then
+         go invisible stack tStack
+      else
+         do "go stack" && q(tStack) && "as" && tMode
+      end if
    end repeat
 
    global gREVMessageDispatch
-   repeat for each line l in gREVMessageDispatch["revShutDown"]
-      send "revShutDown" to this cd of stack l
+   repeat for each line tStack in gREVMessageDispatch["revShutDown"]
+      dispatch "revShutDown" to this card of stack tStack
    end repeat
 
    local tPalettes
@@ -134,10 +140,10 @@ on revCheckQuit
    put empty into tOpenTabPositions
    lock screen
    lock error dialogs --close the properties palettes with the errors locked in case they're giving the quit errors
-   repeat for each line l in tPalettes
-      if the cREVLinked of stack l is empty
-      then put the cREVCurrentTabs of stack l & tab & the topLeft of stack l & cr after tOpenTabPositions
-      close stack l
+   repeat for each line tStack in tPalettes
+      if the cREVLinked of stack tStack is empty
+      then put the cREVCurrentTabs of stack tStack & tab & the topLeft of stack tStack & cr after tOpenTabPositions
+      close stack tStack
    end repeat
    unlock error dialogs
 
@@ -186,9 +192,9 @@ on revUpdateSizeandPosition pTarget
 
    local tPalettes
    put revPropertyPalettes(pTarget) into tPalettes
-   repeat for each line l in tPalettes
-      if the short name of this cd of stack l is "revSize&Position"
-      then send "revUpdatePalette" to this cd of stack l
+   repeat for each line tStack in tPalettes
+      if the short name of this card of stack tStack is "revSize&Position"
+      then dispatch "revUpdatePalette" to this card of stack tStack
    end repeat
 end revUpdateSizeandPosition
 
@@ -408,12 +414,14 @@ on revBuildPalette
    local tControlsList
    --start with the controls that disable when there are multiple objects selected
    set the defaultStack to the target
-   if the revAllowMultipleList of this cd is empty then
+   if the revAllowMultipleList of this card is empty then
       repeat with i = 1 to the number of controls
-         if the revAllowMultiple of control i is false then put the name of control i & cr after tControlsList
+         if the revAllowMultiple of control i is false then
+            put the name of control i & cr after tControlsList
+         end if
       end repeat
       delete last char of tControlsList
-      set the revAllowMultipleList of this cd to tControlsList
+      set the revAllowMultipleList of this card to tControlsList
       answer "Palette" && the short name of the target && "rebuilt.  Save?" with "No" or "Yes"
       if it is "Yes" then save this stack
    end if
@@ -438,8 +446,8 @@ on revMovePalettesForSheet
    end repeat
 end revMovePalettesForSheet
 
-function revSaveCheck pStack, pNoWarning
-   if the secureMode then return true
+function revSaveCheck? pStack, pNoWarning
+  if the secureMode then return true
    put the short name of stack pStack into pStack
    if revIDEStackIsEdited(pStack) and the short name of stack \
          (the mainstack of stack pStack) is not the short name of revScriptEditorMain() then
@@ -453,9 +461,9 @@ function revSaveCheck pStack, pNoWarning
 
       local tWarning
       if tStackPath is empty then
-         put "<p><b>Do you want to save changes to stack" && quote & pStack & quote & "</b>" & "<b> before closing?</b><font size=" & quote & "11" & quote & "></p></font>" & cr & "<p><font size=" & quote & "11" & quote & "> </font></p>" & cr & "<p><font size=" & quote & "11" & quote & ">If you don't save, your changes will be lost.</p>" into tWarning
+         put "<p><b>Do you want to save changes to stack" && q(pStack) & "</b>" & "<b> before closing?</b><font size=" & q("11") & "></p></font>" & cr & "<p><font size=" & q("11") & "> </font></p>" & cr & "<p><font size=" & q("11") & ">If you don't save, your changes will be lost.</p>" into tWarning
       else
-         put "<p><b>Do you want to save changes to stack" && quote & pStack & quote && "and all other stacks in the file" && quote & tStackPath & quote && "before closing?</b><font size=" & quote & "11" & quote & "></p></font>" & cr & "<p> </p>" & cr & "<p><font size=" & quote & "11" & quote & ">If you don't save, your changes will be lost.</p>" into tWarning
+         put "<p><b>Do you want to save changes to stack" && q(pStack) && "and all other stacks in the file" && q(tStackPath) && "before closing?</b><font size=" & q("11") & "></p></font>" & cr & "<p> </p>" & cr & "<p><font size=" & q("11") & ">If you don't save, your changes will be lost.</p>" into tWarning
       end if
 
       local tHideStack
@@ -510,7 +518,7 @@ function revSaveCheck pStack, pNoWarning
       unlock messages
    end if
    return true
-end revSaveCheck
+end revSaveCheck?
 
 on appleEvent p1, p2, p3
    if p1&p2 is "aevtodoc" then
@@ -592,6 +600,20 @@ function revFixPath pPath
    return tReturnPath
 end revFixPath
 
+private function dontSuppressMessage?
+   local tAllowPassThrough?
+   put false into tAllowPassThrough?
+
+   if gREVSuppressMessages then
+      if revOKTarget() then
+         put true into tAllowPassThrough?
+      end if
+   else
+      put true into tAllowPassThrough?
+   end if
+   return tAllowPassThrough?
+end dontSuppressMessage?
+
 on newGroup
    selectedObjectChanged
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
@@ -602,14 +624,18 @@ on newGroup
    end repeat
 
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newGroup
+   if dontSuppressMessage?() then
+      pass newGroup
+   end if
 end newGroup
 
 
 on newButton
    revNewButton the long id of the target
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newButton
+   if dontSuppressMessage?() then
+      pass newButton
+   end if
 end newButton
 
 on revNewButton pTarget
@@ -637,7 +663,7 @@ on revNewButton pTarget
 
       local tCheck
       repeat
-         put "btn" && quote & tName & quote into tCheck
+         put "button" && q(tName) into tCheck
          if not exists(tCheck) then exit repeat
          add 1 to word -1 of tName
       end repeat
@@ -662,7 +688,9 @@ on newField
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
    // PM-2015-09-17: [[ Bug 13826 ]] Allow a new field to appear offscreen
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newField
+   if dontSuppressMessage?() then
+      pass newField
+   end if
 end newField
 
 on newScrollbar
@@ -683,14 +711,18 @@ on newScrollbar
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
    // PM-2015-09-17: [[ Bug 13826 ]] Allow a new scrollbar to appear offscreen
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newScrollbar
+   if dontSuppressMessage?() then
+      pass newScrollbar
+   end if
 end newScrollbar
 
 on newImage
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
    // PM-2015-09-17: [[ Bug 13826 ]] Allow a new image to appear offscreen
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newImage
+   if dontSuppressMessage?() then
+      pass newImage
+   end if
 end newImage
 
 on newEPS
@@ -704,7 +736,9 @@ on newEPS
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
    // PM-2015-09-17: [[ Bug 13826 ]] Allow a new EPS to appear offscreen
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newEPS
+   if dontSuppressMessage?() then
+      pass newEPS
+   end if
 end newEPS
 
 
@@ -713,7 +747,9 @@ on newGraphic
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
    // PM-2015-09-17: [[ Bug 13826 ]] Allow a new graphic to appear offscreen
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newGraphic
+   if dontSuppressMessage?() then
+      pass newGraphic
+   end if
 end newGraphic
 
 on newPlayer
@@ -724,14 +760,19 @@ on newPlayer
    set the cREVGeneral["revUniqueID"] of the target to the milliseconds
    // PM-2015-09-17: [[ Bug 13826 ]] Allow a new player to appear offscreen
    revUpdateAOControls
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newPlayer
+   if dontSuppressMessage?() then
+      pass newPlayer
+   end if
 end newPlayer
 
 on newCard
    if there is a stack "revApplicationOverview" then
-      if the mode of stack "revApplicationOverview" is not 0
-      then send "revUpdateCards revTargetStack(the long id of the target)" to stack "revApplicationOverview"
-      if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newCard
+      if the mode of stack "revApplicationOverview" is not 0 then
+         dispatch "revUpdateCards" to stack "revApplicationOverview" with revTargetStack(the long id of the target)
+      end if
+      if dontSuppressMessage?() then
+         pass newCard
+      end if
    end if
 end newCard
 
@@ -757,8 +798,9 @@ on newStack
    end if
    send "revUpdatePaletteStack" to me in 100 milliseconds
    if there is a stack "revApplicationOverview" then
-      if the mode of stack "revApplicationOverview" is not 0
-      then send "revNewStack the short name of the target" to stack "revApplicationOverview"
+      if the mode of stack "revApplicationOverview" is not 0 then
+         dispatch "revNewStack" to stack "revApplicationOverview" with the short name of the target
+      end if
    end if
    unlock screen
    unlock messages
@@ -782,19 +824,19 @@ end revIDEHandleObjectDeleted
 # Description
 #   Updates the script editor in response to pObject being deleted.
 private command revIDEUpdateScriptEditorOnObjectDeletion pObject
-   send "revSEObjectDeleted pObject" to revScriptEditorMain()
+   dispatch "revSEObjectDeleted" to revScriptEditorMain() with pObject
 end revIDEUpdateScriptEditorOnObjectDeletion
 
 on deleteButton
    revIDEHandleObjectDeleted the long id of the target
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteButton
    end if
 end deleteButton
 
 on deleteField
    revIDEHandleObjectDeleted the long id of the target
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteField
    end if
 end deleteField
@@ -803,38 +845,38 @@ on deleteGroup
    revIDEHandleObjectDeleted the long id of the target
 
    if the mode of stack "revMenuManager" is not 0 and there is a stack (the cREVDefaultStack of stack "revMenuManager") and (there is a background id (the cREVMenuID of stack "revMenuManager") of stack (the cREVDefaultStack of stack "revMenuManager")) and the long id of the target is the long id of background id (the cREVMenuID of stack "revMenuManager") of stack (the cREVDefaultStack of stack "revMenuManager") then
-      send "revDeleteMenuManagerGroup" to card 1 of stack "revMenuManager"
+      dispatch "revDeleteMenuManagerGroup" to card 1 of stack "revMenuManager"
    end if
 
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteGroup
    end if
 end deleteGroup
 
 on deleteGraphic
    revIDEHandleObjectDeleted the long id of the target
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteGraphic
    end if
 end deleteGraphic
 
 on deletePlayer
    revIDEHandleObjectDeleted the long id of the target
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deletePlayer
    end if
 end deletePlayer
 
 on deleteScrollbar
    revIDEHandleObjectDeleted the long id of the target
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteScrollbar
    end if
 end deleteScrollbar
 
 on deleteImage
    revIDEHandleObjectDeleted the long id of the target
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteImage
    end if
 end deleteImage
@@ -848,7 +890,7 @@ on deleteCard
    end if
    revIDEUpdateScriptEditorOnObjectDeletion the long id of the target
 
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteCard
    end if
 end deleteCard
@@ -864,7 +906,7 @@ on deleteStack
    catch e
    end try
 
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass deleteStack
    end if
 end deleteStack
@@ -872,11 +914,11 @@ end deleteStack
 on newTool
    global gREVMessageDispatch
    repeat for each line l in gREVMessageDispatch["revNewTool"]
-      send "revNewTool" to this cd of stack l
+      dispatch "revNewTool" to this card of stack l
    end repeat
 
    if "revShortCutsLibrary" is in revInternal__ListLoadedLibraries() then
-      send "revNewTool" to stack "revShortCutsLibrary"
+      dispatch "revNewTool" to stack "revShortCutsLibrary"
    end if
 
    if the tool is "browse tool" then
@@ -885,16 +927,18 @@ on newTool
       if there is a stack "revApplicationOverview" then
          if the mode of stack "revApplicationOverview" is not 0 \
                and the short name of this cd of stack "revApplicationOverview" is "Cards and Controls" then
-            send "revRefreshControls true, true" to stack "revApplicationOverview"
+            dispatch "revRefreshControls" to stack "revApplicationOverview" with true, true
          end if
       end if
    end if
 
    if "revReshapeLibrary" is in revInternal__ListLoadedLibraries() then
-      send "revNewTool" to stack "revReshapeLibrary"
+      dispatch "revNewTool" to stack "revReshapeLibrary"
    end if
 
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newTool
+   if dontSuppressMessage?() then
+      pass newTool
+   end if
 end newTool
 
 function revCheckGroupDelete
@@ -996,7 +1040,7 @@ on reloadStack pStackName, pFileName
    end if
 
    if there is a stack "revApplicationOverview" then
-      send "revNewStack the short name of stack pFileName" to stack "revApplicationOverview"
+      dispatch "revNewStack" to stack "revApplicationOverview" with the short name of stack pFileName
    end if
 end reloadStack
 
@@ -1005,9 +1049,10 @@ on revAOUpdateForDeleteStack pStackName
       if the mode of stack "revApplicationOverview" is not 0 then
          local tStacks
          put pStackName into tStacks
-         if the substacks of stack pStackName is not empty
-         then put cr & the substacks of stack pStackName after tStacks
-         send "revAODeleteStack pStackName, tStacks" to stack "revApplicationOverview"
+         if the substacks of stack pStackName is not empty then
+            put cr & the substacks of stack pStackName after tStacks
+         end if
+         dispatch "revAODeleteStack" to stack "revApplicationOverview" with  pStackName, tStacks
       end if
    end if
 end revAOUpdateForDeleteStack
@@ -1141,7 +1186,7 @@ on updateForSelectedObjectChanged
 
    --make sure plugins are still sent legacy messages
    repeat for each line l in gREVMessageDispatch["revSelectedObjectChanged"]
-      send "revSelectedObjectChanged" to this cd of stack l
+      dispatch "revSelectedObjectChanged" to this card of stack l
    end repeat
 
    ideMessageSend "ideSelectedObjectChanged"
@@ -1158,7 +1203,9 @@ on preOpenStack
    end if
    unlock screen
 
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass preOpenStack
+   if dontSuppressMessage?() then
+      pass preOpenStack
+   end if
 end preOpenStack
 
 function revStyle pWhichString
@@ -1202,7 +1249,9 @@ on openField
       send "revUpdateSelectionChanged" to me in 400 milliseconds
       put the result into lSelectionTimerID
    end if
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass openField
+   if dontSuppressMessage?() then
+      pass openField
+   end if
 end openField
 
 
@@ -1212,7 +1261,9 @@ end revUpdateSelectionChanged
 
 on exitField
    selectionChanged
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass exitField
+   if dontSuppressMessage?() then
+      pass exitField
+   end if
 end exitField
 
 on closeField
@@ -1225,7 +1276,7 @@ on closeField
    if the cREVGetsUpdate of stack revTargetStack() is not empty then
       set the backPattern of the target to empty
    end if
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+   if dontSuppressMessage?() then
       pass closeField
    end if
 end closeField
@@ -1244,7 +1295,7 @@ on mouseDoubleUp pButtonNo, pTarget
    else
       if revCheckEdit(pTarget) then
          revIDEOpenInspectorForObjects revIDESelectedObjects()
-      else if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+      else if dontSuppressMessage?() then
          pass mouseDoubleUp
       end if
    end if
@@ -1253,15 +1304,22 @@ end mouseDoubleUp
 on libraryStack
    if the mode of stack "Message Box" is not 0 \
          and the short name of this cd of stack "Message Box" is "stacksInUse"
-   then send "revUpdateLibraryStacks" to this cd of stack "Message Box"
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass libraryStack
+   then
+      dispatch "revUpdateLibraryStacks" to this card of stack "Message Box"
+   end if
+   if dontSuppressMessage?() then
+      pass libraryStack
+   end if
 end libraryStack
 
 on releaseStack
    if the mode of stack "Message Box" is not 0 \
-         and the short name of this cd of stack "Message Box" is "stacksInUse"
-   then send "revUpdateLibraryStacks" to this cd of stack "Message Box"
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass releaseStack
+         and the short name of this card of stack "Message Box" is "stacksInUse" then
+      dispatch "revUpdateLibraryStacks" to this card of stack "Message Box"
+   end if
+   if dontSuppressMessage?() then
+      pass releaseStack
+   end if
 end releaseStack
 
 on keyDown pWhich
@@ -1275,8 +1333,9 @@ end keyDown
 
 on mainStackChanged
    if there is a stack "revApplicationOverview" then
-      if the mode of stack "revApplicationOverview" is not 0
-      then send "revMainStackChanged the long id of the target" to stack "revApplicationOverview"
+      if the mode of stack "revApplicationOverview" is not 0 then
+         dispatch "revMainStackChanged" to stack "revApplicationOverview" with the long id of the target
+      end if
    end if
 end mainStackChanged
 
@@ -1305,10 +1364,10 @@ on revKillRedundantPalettes
    lock screen
    local tPalettes
    put revPalettesList() into tPalettes
-   repeat for each line l in tPalettes
-      repeat for each line m in the cREVLinked of stack l
+   repeat for each line tStack in tPalettes
+      repeat for each line m in the cREVLinked of stack tStack
          if (there is not a m) then
-            close stack l
+            close stack tStack
             exit repeat
          end if
       end repeat
@@ -1321,9 +1380,9 @@ on revKillAllLinkedPalettes
 
    local tPalettes
    put revPalettesList() into tPalettes
-   repeat for each line l in tPalettes
-      if the cREVLinked of stack l is not empty
-      then close stack l
+   repeat for each line tStack in tPalettes
+      if the cREVLinked of stack tStack is not empty
+      then close stack tStack
    end repeat
    unlock screen
 end revKillAllLinkedPalettes
@@ -1351,7 +1410,7 @@ private function _revScriptEditorsNew pStack
    local tFoundEditors
    repeat for each line tEditor in tScriptEditors
       local tTargetObjects
-      send "revSEGetTargetObjects" to tEditor
+      dispatch "revSEGetTargetObjects" to tEditor
       put the result into tTargetObjects
 
       repeat for each line tTargetObject in tTargetObjects
@@ -1420,7 +1479,7 @@ command revEditScriptInNewWindow pObject, pSpecial
    set the cIDETransient of it to true
 
    put the long id of it into tEditor
-   send "setBehaviors" to tEditor
+   dispatch "setBehaviors" to tEditor
 
    if tTemplateVisibility then
       set the visible of revScriptEditorTemplate() to true
@@ -1463,7 +1522,7 @@ function revListScriptEditors
 
    local tFullStacks
    repeat for each line tStack in tStacks
-      put the long id of stack tStack & return after tFullStacks
+      put the long id of stack tStack & cr after tFullStacks
    end repeat
    delete the last char of tFullStacks
 
@@ -1579,9 +1638,11 @@ function revBackgroundNames pStack
    local tBackgroundNames
    put empty into tBackgroundNames
    repeat for each line l in tBackgroundIDS
-      if quote is in the name of bg id l of stack pStack
-      then put the short name of bg id l of stack pStack &cr after tBackgroundNames
-      else put the name of bg id l of stack pStack & cr after tBackgroundNames
+      if quote is in the name of bg id l of stack pStack then
+         put the short name of bg id l of stack pStack & cr after tBackgroundNames
+      else
+         put the name of bg id l of stack pStack & cr after tBackgroundNames
+      end if
    end repeat
    return tBackgroundNames
 end revBackgroundNames
@@ -1591,13 +1652,15 @@ function revBackgroundIDs pStack
    put empty into tBackgrounds
 
    local tNumBgs
-   put the num of bgs in stack pStack into tNumBgs
+   put the number of backgrounds in stack pStack into tNumBgs
    repeat with i = 1 to tNumBgs
-      if the id of bg i of stack pStack is not among the lines of tBackgrounds
-      then put the id of bg i of stack pStack & cr after tBackgrounds
-      repeat with j = 1 to the num of grps in bg i of stack pStack
-         if the id of grp j of bg i of stack pStack is not among the lines of tBackgrounds
-         then put the id of grp j of bg i of stack pStack & cr after tBackgrounds
+      if the id of background i of stack pStack is not among the lines of tBackgrounds then
+         put the id of background i of stack pStack & cr after tBackgrounds
+      end if
+      repeat with j = 1 to the number of groups in background i of stack pStack
+         if the id of group j of background i of stack pStack is not among the lines of tBackgrounds then
+            put the id of group j of background i of stack pStack & cr after tBackgrounds
+         end if
       end repeat
    end repeat
    delete last char of tBackgrounds
@@ -1959,7 +2022,7 @@ private function _revScriptEditorNew pObject
    local tFoundEditor
    repeat for each line tEditor in tEditors
       local tTargetObjects
-      send "revSEGetTargetObjects" to tEditor
+      dispatch "revSEGetTargetObjects" to tEditor
       put the result into tTargetObjects
 
       if revRuggedId(pObject) is among the lines of tTargetObjects then
@@ -1985,8 +2048,8 @@ on revUpdatePaletteStack
       lock screen
       repeat for each line l in gREVStacksList
          if word 1 of l is "revPropertyPalette" then
-            send "revUpdateTabs" to stack l
-            send "revUpdatePalette" to this cd of stack l
+            dispatch "revUpdateTabs" to stack l
+            dispatch "revUpdatePalette" to this card of stack l
          end if
       end repeat
       unlock screen
@@ -2036,7 +2099,7 @@ constant kDontHide = "revMenuBar,revErrorDisplay,revVariableWatcher,revMessageWa
 #   pStackname : the short name of a stack
 # Returns
 #   Whether or not the stack pStackname is part of the script editor.
-private function revSEStackIsScriptEditor pStackname
+private function revSEStackIsScriptEditor? pStackname
    # The script editor mainstack is just a container for the script editor's components,
    # if this stack is open it means we're editing the script editor, so effectively the stack
    # is not part of the script editor.
@@ -2050,7 +2113,7 @@ private function revSEStackIsScriptEditor pStackname
    end if
 
    return false
-end revSEStackIsScriptEditor
+end revSEStackIsScriptEditor?
 
 on revSEHidePalettes
    cancel sPalettesMsgID
@@ -2080,7 +2143,7 @@ on revSEDelayTogglePalettes pShow
          local tStack
          put revTargetStack(tObject) into tStack
          if tStack is "Answer dialog" or "revVariableWatcher" is in tStack or \
-               "revMessageWatcher" is in tStack or revSEStackIsScriptEditor(tStack) then
+               "revMessageWatcher" is in tStack or revSEStackIsScriptEditor?(tStack) then
             exit revSEDelayTogglePalettes
          end if
       end if
@@ -2096,7 +2159,7 @@ on revSEDelayTogglePalettes pShow
          show stack tHiddenStack
          if the mode of stack tHiddenStack is 0 then--Unix Window Managers
             if word 1 of tHiddenStack is "revPropertyPalette" then
-               send "revUpdateTabs" to stack tHiddenStack
+               dispatch "revUpdateTabs" to stack tHiddenStack
             end if
          end if
       end repeat
@@ -2255,22 +2318,28 @@ on revUpdateAOControls pTarget
    local tHCAddressing
    put the hcAddressing of stack tTargetStack into tHCAddressing
    set the hcAddressing of stack tTargetStack to false
-   if pTarget is empty then put the long id of the target into pTarget
-   else put the long id of pTarget into pTarget -- id with HCAddressing false
+   if pTarget is empty then
+      put the long id of the target into pTarget
+   else
+      put the long id of pTarget into pTarget -- id with HCAddressing false
+   end if
    if there is a stack "revApplicationOverview" then
-      send "revClearControlCache pTarget" to stack "revApplicationOverview"
+      dispatch "revClearControlCache" to stack "revApplicationOverview" with pTarget
       if the mode of stack "revApplicationOverview" is not 0 \
             and revTargetStack(pTarget) is gREVStackName \
-            and the short name of this cd of stack "revApplicationOverview" is "Cards and Controls" then
+            and the short name of this card of stack "revApplicationOverview" is "Cards and Controls" then
 
-         if lUpdateAOControlsTimerID is not empty then cancel lUpdateAOControlsTimerID
-         send "revRefreshControls true, false" to cd "Cards and Controls" of stack "revApplicationOverview" in 1 second
+         if lUpdateAOControlsTimerID is not empty then
+            cancel lUpdateAOControlsTimerID
+         end if
+         send "revRefreshControls true, false" to card "Cards and Controls" of stack "revApplicationOverview" in 1 second
          put the result into lUpdateAOControlsTimerID
       end if
    end if
    set the hcAddressing of stack tTargetStack to tHCAddressing
 end revUpdateAOControls
 
+constant kEXTERNALS = "revdb,revxml,revvideograbber,revspeech"
 function revExternalVersion pExternal
    local tExternalVersion
    put empty into tExternalVersion
@@ -2283,13 +2352,15 @@ function revExternalVersion pExternal
 
    local tExternals
    repeat for each line i in tCheckExternals
-      repeat for each item j in "revdb,revxml,revvideograbber,revspeech"
+      repeat for each item j in kEXTERNALS
          if i contains j then
             put j & "," after tExternals
          end if
       end repeat
    end repeat
-   if the last char of tExternals is comma then delete the last char of tExternals
+   if the last char of tExternals is comma then
+      delete the last char of tExternals
+   end if
    repeat for each item k in tExternals
       switch k
          case "revxml"
@@ -2338,8 +2409,8 @@ on revUpdateAB
    if there is a stack "revApplicationOverview" then
       if the mode of stack "revApplicationOverview" is not 0 then
          lock screen
-         send "revRetainStacks" to stack "revApplicationOverview"
-         send "revInitAppBrowser" to stack "revApplicationOverview"
+         dispatch "revRetainStacks" to stack "revApplicationOverview"
+         dispatch "revInitAppBrowser" to stack "revApplicationOverview"
          unlock screen
       end if
    end if
@@ -2407,6 +2478,7 @@ function revDatabaseDriverList
       # OK-2007-09-14 : Bug 5394 : On linux the engine does not convert the line endings
       # correctly resulting in only the first line of the drivers list being returned. We
       # work around this for now until the bug is fixed in the engine.
+# TODO: Is this fixed in the engine now?
       if the platform is "Linux" then
          # Windows line endings
          replace (numToChar(10) & numToChar(13)) with numToChar(10) in tUserList
@@ -2418,7 +2490,7 @@ function revDatabaseDriverList
       end if
 
       repeat for each line tDriver in tUserList
-         put item 1 of tDriver & return after tDrivers
+         put item 1 of tDriver & cr after tDrivers
       end repeat
    else
       put revDatabaseDriverBuildList() into tEnvironmentList
@@ -2426,10 +2498,10 @@ function revDatabaseDriverList
 
    repeat for each line tDriver in tEnvironmentList
       if item 1 of tDriver is not among the lines of tDrivers then
-         put item 1 of tDriver & return after tDrivers
+         put item 1 of tDriver & cr after tDrivers
       end if
    end repeat
-   delete the last char of tDrivers
+   delete the last char of tDrivers # remove the trailing cr
 
    return tDrivers
 end revDatabaseDriverList
@@ -2443,7 +2515,7 @@ private function revExternalsBuildList
       get lineOffset(word 1 of tExternal, the externals of stack "Home")
       if it is not 0 then
          set the itemDelimiter to slash
-         put word 2 to -1 of tExternal, the last item of line it of the externals of stack "Home" & return after tList
+         put word 2 to -1 of tExternal, the last item of line it of the externals of stack "Home" & cr after tList
          set the itemDelimiter to comma
       end if
    end repeat
@@ -2476,10 +2548,12 @@ function revExternalsList
       put revExternalsBuildList() into tEnvironmentDrivers
    end if
 
-   repeat for each line l in tEnvironmentDrivers
-      if item 1 of l is not among the lines of tDrivers then put item 1 of l & cr after tDrivers
+   repeat for each line tDriver in tEnvironmentDrivers
+      if item 1 of tDriver is not among the lines of tDrivers then
+         put item 1 of tDriver & cr after tDrivers
+      end if
    end repeat
-   delete last char of tDrivers
+   delete last char of tDrivers # remove the trailing cr
    return tDrivers
 end revExternalsList
 
@@ -2567,8 +2641,11 @@ function revDBDriverPath pDriver, pPlatform, pArchitecture
    set the itemDel to comma
 
    local tReturn
-   repeat with i = 2 to the number of items in tLine
-      put tBasePath & slash & item i of tLine & cr after tReturn
+#   repeat with i = 2 to the number of items in tLine
+#      put tBasePath & slash & item i of tLine & cr after tReturn
+   delete item 1 of tLine
+   repeat for each item tItem in tLine
+      put tBasePath & slash & tItem & cr after tReturn
    end repeat
    delete last char of tReturn
    return tReturn
@@ -2598,27 +2675,33 @@ function revExternalPath pDriver, pPlatform, pArchitecture
 
    # OK-2009-01-31 : Bug 7433 - Added support for legacy externals.
    local tEnvironmentfile, tUserFile, tLegacyFile
+   local tArch
+   put pPlatform into tArch
    switch pPlatform
       case "MacOSX"
          if pArchitecture is empty then
             put "Universal" into pArchitecture
          end if
-         put revEnvironmentRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+         put "Mac OS X" into tArch
+#         put revEnvironmentRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+#         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+#         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
          break
-      case "Windows"
-         put revEnvironmentRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-         break
+#      case "Windows"
+#         put revEnvironmentRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+#         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+#         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+#         break
          # OK-2007-08-14 : Linux support reinstated
-      case "Linux"
-         put revEnvironmentRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-         break
+#      case "Linux"
+#         put revEnvironmentRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+#         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+#         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+#         break
    end switch
+         put revEnvironmentRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+         put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
 
    local tUserDrivers
    put url ("file:" & tUserFile) into tUserDrivers
@@ -2664,8 +2747,11 @@ function revExternalPath pDriver, pPlatform, pArchitecture
    set the itemDelimiter to comma
 
    local tReturn
-   repeat with i = 2 to the number of items in tLine
-      put tBasePath & slash & item i of tLine & return after tReturn
+#   repeat with i = 2 to the number of items in tLine
+#      put tBasePath & slash & item i of tLine & cr after tReturn
+   delete item 1 of tLine
+   repeat for each item tItem in tLine
+      put tBasePath & slash & tItem & cr after tReturn
    end repeat
    delete last char of tReturn
    return tReturn
@@ -2694,8 +2780,9 @@ private function revDirectoryWalking pFolder
 
       local tDirList
       put the folders into tDirList
-      repeat with i = 2 to the number of lines of tDirList
-         put revDirectoryWalking (pFolder & "/" & (line i of tDirList)) after tFilesList
+      delete line 1 of tDirList
+      repeat for each line tFile in tDirList
+         put revDirectoryWalking (pFolder & "/" & tFile) after tFilesList
       end repeat
       return tFilesList
    end if
@@ -2750,17 +2837,23 @@ on revCompress pFolder, pSavePath, pName
    set the cSourceFolderName of stack tStackName to tFolderName
    set the cSourceFilesList of stack tStackName to tFileList
    set the cFilesList of stack tStackName to tList
-   repeat with i = 1 to the number of lines in tFileList
-      set the cBinFile[line i of tList] of stack tStackName to URL ("binfile:" & line i of tFileList)
-      set the cResFile[line i of tList] of stack tStackName to URL ("resfile:" & line i of tFileList)
+   repeat for each line tFile in tFileList
+#   repeat with i = 1 to the number of lines in tFileList
+#      set the cBinFile[line i of tList] of stack tStackName to URL ("binfile:" & line i of tFileList)
+#      set the cResFile[line i of tList] of stack tStackName to URL ("resfile:" & line i of tFileList)
+      set the cBinFile[tFile] of stack tStackName to URL ("binfile:" & line i of tFileList)
+      set the cResFile[tFile] of stack tStackName to URL ("resfile:" & line i of tFileList)
       if the platform is "MacOS" then
          set the itemDelimiter to comma
          local tType
-         put item 11 of line i of tDetailedFileList into tType
+#         put item 11 of line i of tDetailedFileList into tType
+         put item 11 of tFile into tType
          if tType is empty then
-            set the cFileType[line i of tList] of stack tStackName to "        "
+#            set the cFileType[line i of tList] of stack tStackName to "        "
+            set the cFileType[tFile] of stack tStackName to "        "
          else
-            set the cFileType[line i of tList] of stack tStackName to tType
+#            set the cFileType[line i of tList] of stack tStackName to tType
+            set the cFileType[tFile] of stack tStackName to tType
          end if
          set the itemDelimiter to "/"
       end if
@@ -2858,30 +2951,35 @@ function revBeforeRemovingStackFromMemory pStack
    local tStack, tStacksList, tInstructions, tCheckScriptEditors
 
    put the mainStack of stack pStack into tStack
-   if the substacks of stack tStack is empty
-   then put tStack into tStacksList
-   else put tStack & cr & the substacks of stack tStack into tStacksList
+   if the substacks of stack tStack is empty then
+      put tStack into tStacksList
+   else
+      put tStack & cr & the substacks of stack tStack into tStacksList
+   end if
    put revCheckLockedInspectors(tStacksList) into tInstructions
    put revCheckScriptEditors(tStacksList) into tCheckScriptEditors
    if tCheckScriptEditors is not empty then put cr & tCheckScriptEditors after tInstructions
 
    if the mode of stack "revMenuManager" is not 0 and \
-         the cREVDefaultStack of stack "revMenuManager" is among the lines of tStacksList
-   then put cr & "Close the Menu Builder." after tInstructions
+         the cREVDefaultStack of stack "revMenuManager" is among the lines of tStacksList then
+      put cr & "Close the Menu Builder." after tInstructions
+   end if
 
-   if the mode of stack "revSearch" is not 0
-   then put cr & "Close the Find and Replace dialog." after tInstructions
+   if the mode of stack "revSearch" is not 0 then
+      put cr & "Close the Find and Replace dialog." after tInstructions
+   end if
 
    # AL-2015-05-21: [[ Bug 14873 ]] revDBQuerySetup stack is no longer supported
    if there is a stack "revDBQuerySetup" and \
          the mode of stack "revDBQuerySetup" is not 0 and \
-         the short name of the topStack is among the lines of tStacksList
-   then put cr & "Close the Database Query Builder." after tInstructions
+         the short name of the topStack is among the lines of tStacksList then
+      put cr & "Close the Database Query Builder." after tInstructions
+   end if
 
    if the mode of stack "revStandaloneSettings" is not 0 and \
-         the cREVTargetStack of stack "revStandaloneSettings" is among the lines of tStacksList
-   then put cr & "Close the Standalone Application Settings dialog." after tInstructions
-
+         the cREVTargetStack of stack "revStandaloneSettings" is among the lines of tStacksList then
+      put cr & "Close the Standalone Application Settings dialog." after tInstructions
+   end if
    if (the cREVLockedtoStack of stack "Message Box") and \
          the cREVLinkedStack of stack "Message Box" is among the lines of tStacksList
    then put cr & "Unlock the Message Box." after tInstructions
@@ -3064,16 +3162,16 @@ end revIDEHandleMouseUp
 # Returns
 #   Either empty if the caller should decide whether to pass the message, or one of the following:
 #   "exit", "exit to top", "pass".
-command revIDEHandleCloseStackRequest   pTarget
+command revIDEHandleCloseStackRequest pTarget
    local tFocusedObject
    put the focusedObject into tFocusedObject
    if word 1 of tFocusedObject is "field" and word 1 of revTargetStack(tFocusedObject) is "revPropertyPalette" then
-      send "closeField" to tFocusedObject
+      dispatch "closeField" to tFocusedObject
    end if
 
    # OK-2008-02-27 : Bug 5915
-   if revSaveCheck(revTargetStack(pTarget)) then
-      if gREVSuppressMessages and not (gREVSuppressMessages and revOKTarget()) then
+   if revSaveCheck?(revTargetStack(pTarget)) then
+      if dontSuppressMessage?() is false then
          lock messages
          close stack revTargetStack(pTarget)
          unlock messages
@@ -3132,7 +3230,7 @@ command revIDEHandleMouseDown pWhich, pTarget
          if not revOKTarget(tTarget) or (revOKTarget(tTarget) and gREVPopups) then
             revIDEPopupContextualMenu the selectedObjects
          end if
-         send "selectedObjectChanged" to me
+         dispatch "selectedObjectChanged" to me
       end if
       revIDESetEdited the short name of revIDEStackOfObject(tTarget)
 
@@ -3180,7 +3278,9 @@ command revIDEHandleNewStack pTarget
          put the customProperties["cREVLoadInfo"] of stack l into tLoadArray
       end if
       repeat for each line x in keys(tLoadArray)
-         if tLoadArray[x] is true and l is not among the lines of gREVMessageDispatch[x] then put l into line (the number of lines in gREVMessageDispatch[x]+1) of gREVMessageDispatch[x]
+         if tLoadArray[x] is true and l is not among the lines of gREVMessageDispatch[x] then
+            put l into line (the number of lines in gREVMessageDispatch[x]+1) of gREVMessageDispatch[x]
+         end if
       end repeat
    end repeat
 
@@ -3194,12 +3294,12 @@ command revIDEHandleNewStack pTarget
    if there is a stack "revApplicationOverview" then
       if the mode of stack "revApplicationOverview" is not 0 then
          put revTargetStack(the long id of stack tStackName) into tStack
-         send "revNewStack tStack" to stack "revApplicationOverview"
+         dispatch "revNewStack" to stack "revApplicationOverview" with tStack
       end if
    end if
 
-   repeat for each line l in gREVMessageDispatch["revPreOpenStack"]
-      send "revPreOpenStack" to this cd of stack l
+   repeat for each line tStack in gREVMessageDispatch["revPreOpenStack"]
+      dispatch "revPreOpenStack" to this card of stack tStack
    end repeat
 end revIDEHandleNewStack
 
@@ -3243,7 +3343,7 @@ private function utilityCanonicalizePath pPath
 
    revIDEPushDefaultFolder tFolder
 
-   set the caseSensitive to utilityPathIsCaseSensitive(pPath)
+   set the caseSensitive to utilityPathIsCaseSensitive?(pPath)
 
    local tFiles
    put the files into tFiles
@@ -3271,7 +3371,7 @@ private function utilityCanonicalizePath pPath
 end utilityCanonicalizePath
 
 # Returns whether the path pPath is case sensitive. pPath must point to a file.
-private function utilityPathIsCaseSensitive pPath
+private function utilityPathIsCaseSensitive? pPath
   local tFolder
 
   local tOriginalFolder
@@ -3280,23 +3380,23 @@ private function utilityPathIsCaseSensitive pPath
   set the itemDelimiter to slash
   put item 1 to -2 of pPath into tFolder
 
-  local tIsCaseSensitive
-  put false into tIsCaseSensitive
+  local tIsCaseSensitive?
+  put false into tIsCaseSensitive? # set the default
 
   set the folder to tolower(tFolder)
   if the result is not empty then
-    put true into tIsCaseSensitive
+    put true into tIsCaseSensitive?
   end if
 
   set the folder to toupper(tFolder)
   if the result is not empty then
-    put true into tIsCaseSensitive
+    put true into tIsCaseSensitive?
   end if
 
   set the folder to tOriginalFolder
 
-  return tIsCaseSensitive
-end utilityPathIsCaseSensitive
+  return tIsCaseSensitive?
+end utilityPathIsCaseSensitive?
 
 /*
 
@@ -3372,3 +3472,7 @@ on msgChanged pHandler, pLine
       pass msgChanged
    end if
 end msgChanged
+
+private function q pText
+   return quote & pText & quote
+end q
