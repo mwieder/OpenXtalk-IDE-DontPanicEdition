@@ -14,18 +14,19 @@ end extensionFinalize
 
 ################################################################################
 #
-# Metadata library, this allows the setting and getting of metadata items on 
-# LiveCode objects. The metadata is divided into types, which map to the 
+# Metadata library, this allows the setting and getting of metadata items on
+# LiveCode objects. The metadata is divided into types, which map to the
 # custom property sets cREVGeneral, cREVDatabase etc.
 #
 ################################################################################
 
 constant kTypePrefix = "cREV"
+constant kMETADATATYPES = "general,database,geometry,table,debugger"
 
 # Returns
 #   A list of available metadata types
 private function metadataTypes
-  return "general,database,geometry,table,debugger"
+  return kMETADATATYPES
 end metadataTypes
 
 # Parameters
@@ -46,7 +47,7 @@ function revMetadataGet pObject, pType, pTag
    if pType is not among the items of metadataTypes() then
       throw "invalid_type: " & pType
    end if
-   
+
    local tPropertyName
    put metadataPropertySetFromTypeName(pType) & "[" & pTag & "]" into tPropertyName
    lock messages
@@ -56,7 +57,7 @@ function revMetadataGet pObject, pType, pTag
 end revMetadataGet
 
 private command log pMessage
-   put pMessage & return after msg
+   put pMessage & cr after msg
 end log
 
 # Parameters
@@ -70,15 +71,12 @@ command revMetadataSet pObject, pType, pTag, pValue
    if pType is not among the items of metadataTypes() then
       throw "invalid_type: " & pType
    end if
-   
+
    local tPropertyName
    put metadataPropertySetFromTypeName(pType) & "[" & pTag & "]" into tPropertyName
-   
+
    # Lock messages around this for now to ensure that revCommon does not interfere with this..
    lock messages
    set the tPropertyName of pObject to pValue
    unlock messages
 end revMetadataSet
-
-
-

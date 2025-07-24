@@ -23,9 +23,9 @@ on libraryStack
    put the long id of stack tStackName into sMsgLongID
 end libraryStack
 
-on MessageBoxIsEmpty
+function MessageBox.IsEmpty?
    return field 1 of this card of sMsgLongID is empty
-end MessageBoxIsEmpty
+end MessageBox.IsEmpty?
 
 on MessageBoxSetEmpty
    put empty into field 1 of this card of sMsgLongID

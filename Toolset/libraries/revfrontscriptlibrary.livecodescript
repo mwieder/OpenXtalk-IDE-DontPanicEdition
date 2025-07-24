@@ -823,7 +823,3 @@ end revCheckStackCollision
 private command log pMessage
   put pMessage & cr after msg
 end log
-
-private function q pText
-   return quote & pText & quote
-end q

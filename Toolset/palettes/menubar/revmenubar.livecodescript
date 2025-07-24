@@ -726,6 +726,7 @@ on tNewDictionaryDisplay
          put (tnopeFolder & "/Plugins/Quick Dictionary.livecode") into tQuickDict
          open stack (tQuickDict) as modeless
       else
+         local tNewDict
          put (tnopeFolder & "/Documentation/html_viewer/resources/data/api/oxt_dictionary.oxtstack") into tNewDict
          -- put tNewDict -- debug
          tFullyCloseStack "Quick Dictionary" -- close this off if it's open (tperry 16-4-24)
@@ -899,7 +900,7 @@ on hConditionalDataGrid
    repeat 2 -- double tap!
 
       repeat for each item tClose in tCloseTheseStacks
-         put tClose into tStackToClose
+         #put tClose into tStackToClose
          if there is a stack tClose then
             set the destroyStack of stack tClose to true # remove from memory
             close stack tClose
@@ -909,6 +910,7 @@ on hConditionalDataGrid
 end hConditionalDataGrid
 
 on tOpenNewGuides
+   local tFilePath
    -- this should open the user submitted guides
    set the itemdelimiter to slash
    put item 1 to -3 of the filename of stack "revMenubar" & "/userguides/userguides.oxtstack" into tFilePath
@@ -916,6 +918,7 @@ on tOpenNewGuides
 end tOpenNewGuides
 
 on tOpenAllGuides
+   local tFilePath
    -- this should open the new 'All Guides' stack
    set the itemdelimiter to slash
    put item 1 to -3 of the filename of stack "revMenubar" & "/userguides/allguides.oxtstack" into tFilePath
@@ -2270,7 +2273,7 @@ end menubar.HelpMenu
 
 private function menubar.ViewMenu pContext
    global gREVPalettes, gREVShowStacks
-
+   
    local tView
    put enableMenuItem("Go &First/1", the mode of the topStack is 1) & cr after tView
    put enableMenuItem("Go Pre&v/2", the mode of the topStack is 1) & cr after tView
@@ -2289,11 +2292,14 @@ private function menubar.ViewMenu pContext
    put toggleMenuItem("Show IDE Stacks In Lists", gREVShowStacks) & cr after tView
    put "-" & cr after tView
    put toggleMenuItem("Show &Invisible Objects" , the showInvisibles) & cr after tView
-
+   
    put "-" & cr after tView
+   local tDis
    if the platform contains "linux" then
       put "(" into tDis
-   else put "" into tDis
+   else
+      put empty into tDis
+   end if
    put "Appearance" & cr after tView
    put tab & tDis & "Default" & cr after tView
    put tab & tDis & "Dark mode" & cr after tView
@@ -2303,13 +2309,14 @@ private function menubar.ViewMenu pContext
    put tab & "-" & cr after tView
    put tab & "Ignore default IDE theme in this stack" & cr after tView
    tApplyGridSetting -- tperry (make sure grid checkbox is correct in menu 21-1-24)
-
+   
    return modifyMenu("View", tView)
 end menubar.ViewMenu
 
 ################################################################################
 
 on tApplyGridSetting
+   local tGridSzTest
    -- tperry, 2-12-23 (moved this after the gridSize is set first, before potentially turning it on)
    if the cGrid of stack "revPreferences" is true then
       set the grid to true
@@ -3533,7 +3540,7 @@ private command menubar.ViewMenu.Pick pWhich
          revIDEGoCard "recent"
          break
       case "Card Navigator"
-         dispatch tNavigatorPick to this stack
+         dispatch "tNavigatorPick" to this stack
          break
       case "Toolbar Text"
       case "Toolbar Icons"
@@ -3841,6 +3848,7 @@ on tIgnoreThemingInThisStack
 end tIgnoreThemingInThisStack
 
 on tApplyMBCardScript
+   local tNewCardScript
    -- set the script on the card because livecodescript files don't store card scripts on save
    put "on movestack" & cr &¬
    "   if not (the pendingmessages contains " & q("hSetMBOffsets") & ") then send hSetMBOffsets to this card in 400 milliseconds" & cr &¬
@@ -3862,7 +3870,3 @@ on tApplyMBCardScript
    "end hSetMBOffsets" into tNewCardScript
    set the script of card 1 of stack "revMenubar" to tNewCardScript
 end tApplyMBCardScript
-
-private function q pText
-   return quote & pText & quote
-end q

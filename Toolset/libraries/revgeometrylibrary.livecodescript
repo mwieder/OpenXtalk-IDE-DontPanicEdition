@@ -22,69 +22,69 @@ on resizeStack p1, p2, p3, p4
   put p3 into lOrigWidth
   put p4 into lOrigHeight
   repeat for each line tStack in gREVMessageDispatch["revChangeWindowSize"]
-    send "revResizeStack" to this card of stack tStack
+    dispatch "revResizeStack" to this card of stack tStack
   end repeat
-  
+
   # OK-2007-08-10: Added declaration for global, previously this block would not have worked as intended.
   global gREVSuppressMessages
   if char 1 to 3 of REVTargetStack() is "rev" then
-    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then 
+    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
       pass resizeStack
     end if
   end if
-  
-  if "cREVGeometryCache" is among the lines of the customPropertySets of this card of stack REVTargetStack() then 
+
+  if "cREVGeometryCache" is among the lines of the customPropertySets of this card of stack REVTargetStack() then
     revUpdateGeometry
   end if
-  
+
   if the environment is "development" then
-    if lTimerID is not empty then 
+    if lTimerID is not empty then
       cancel lTimerID
     end if
-    
+
     put revTargetStack(the long id of the target) into tStack
-    
+
     local tPalettes
     put revPropertyPalettes(the long id of stack tStack) into tPalettes
     repeat for each line tPalette in tPalettes
       if the short name of this card of stack tPalette is "revStackSize&Position" and not the cDontUpdate of stack tPalette then
-        send "revUpdatePalette" to this cd of stack tPalette in 1 second
+        send "revUpdatePalette" to this card of stack tPalette in 1 second
         put the result into lTimerID
         exit repeat
       end if
     end repeat
-    
+
   end if
-  if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then 
+  if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
     pass resizeStack
   end if
 end resizeStack
 
 on revUpdateGeometry
    lock messages
-   
+
    -- 2006-05-22:O.K:Fix for 3413
    local tDefaultStack
    put the defaultStack into tDefaultStack
    set the defaultStack to REVTargetStack()
-   
-   if (the cREVGeometryCache["order"] of this card is empty) or (the cREVGeometryCache["total"] of this card is not the number of controls) or (the number of words in the customKeys["cREVGeometryCacheIDs"] of this card is 0) then 
+
+   if (the cREVGeometryCache["order"] of this card is empty) or (the cREVGeometryCache["total"] of this card is not the number of controls) or (the number of words in the customKeys["cREVGeometryCacheIDs"] of this card is 0) then
       revCacheGeometry
    end if
-   
+
    local tCardWidth
-   put the width of this stack + the cREVGeneral["virtualWidth"] of this cd into tCardWidth
-   
+   put the width of this stack + the cREVGeneral["virtualWidth"] of this card into tCardWidth
+
    local tCardHeight
-   put the height of this stack + the cREVGeneral["virtualHeight"] of this cd into tCardHeight
+   put the height of this stack + the cREVGeneral["virtualHeight"] of this card into tCardHeight
    add the vScroll of this stack to tCardHeight
-   
+
    local tCardLoc
    put trunc(tCardWidth / 2), trunc(tCardHeight / 2) into tCardLoc
-   
+
    local tIDArray
    put the customProperties["cREVGeometryCacheIDs"] of this card into tIDArray
-   
+
    # OK-2007-08-10 : The below block of code was modifying the repeat loop control, which would have caused unexpected consequences.
    # Added the tControlId variable to fix this problem
    local tControlId
@@ -93,41 +93,41 @@ on revUpdateGeometry
       if not (there is a control id tControlId) then
          revCacheGeometry
          exit repeat
-      end if     
+      end if
    end repeat
-   
+
    # OK-2007-08-10 : Not sure why these two lines are necessary...
    set the defaultStack to REVTargetStack()
    put the customProperties["cREVGeometryCacheIDs"] of this card into tIDArray
-   
+
    # OK-2007-08-10 : Modified the below repeat loop to remove the unreadable use of "l", and also to
    # prevent the modifying of the repeat loop control variable, which could have had unexpected consequences.
    repeat for each line tControl in the cREVGeometryCache["order"] of this card
       put tIDArray[tControl] into tControlId
-      if the number of words in tControlId is 0 then 
+      if the number of words in tControlId is 0 then
          next repeat
       end if
-      
+
       local tProfileName
       put the cREVGeneral["profile"] of control id tControlId into tProfileName
-      if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of control id tControlId then 
+      if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of control id tControlId then
          put "Master" into tProfileName
       end if
-      
-      if the cREVGeometry[tProfileName] of control id tControlId is not true then 
+
+      if the cREVGeometry[tProfileName] of control id tControlId is not true then
          next repeat
       end if
-      
+
       local tGroupLockLocation
       if word 1 of the name of control id tControlId is "group" then
          put the lockLocation of control id tControlId into tGroupLockLocation[tControlId]
          set the lockLocation of control id tControlId to true
       end if
-      
+
       local tObjectRect
       put the rect of control id tControlId into tObjectRect
       if the cREVGeometry[tProfileName,"moveH"] of control id tControlId is true then
-         
+
          --HORIZONTAL MOVEMENT
          local tObjectH
          put item 1 of the loc of control id tControlId into tObjectH
@@ -140,7 +140,7 @@ on revUpdateGeometry
                if the cREVGeometry[tProfileName,"moveHObjectSide"] of control id tControlId is "left" then
                   local tHMoved
                   put the left of this card + tDistance into tHMoved
-                  
+
                   local tDifference
                   put tHMoved - tObjectH into tDifference
                   add tDifference to item 1 of tObjectRect
@@ -159,7 +159,7 @@ on revUpdateGeometry
             else
                --move H in absolute reference to an object
                put the cREVGeometry[tProfileName,"moveHDistance"] of control id tControlId into tDistance
-               
+
                local tObjectRef
                put the cREVGeometry[tProfileName,"moveHObjectRef"] of control id tControlId into tObjectRef
                put tIDArray[tObjectRef] into tObjectRef
@@ -196,13 +196,13 @@ on revUpdateGeometry
                put the cREVGeometry[tProfileName,"moveHObjectRef"] of control id tControlId into tObjectRef
                put tIDArray[tObjectRef] into tObjectRef
                put round(tDistance * tCardWidth) into tDistance
-               
+
                # TH-2008-07-07 :: Bug 6391, The linked object should remain a fixed percentage of the width of the card away
                # from the right of the object it is linked to.  Previously this section used item 1 of the loc of the object being linked to
                # instead of the right, this caused an initial jump in location of the linked object.
                --put item 1 of the loc of control id tObjectRef + tDistance into tHMoved
                put item 3 of the rect of control id tObjectRef + tDistance into tHMoved
-               
+
                put tHMoved - tObjectH into tDifference
                add tDifference to item 1 of tObjectRect
                add tDifference to item 3 of tObjectRect
@@ -250,10 +250,10 @@ on revUpdateGeometry
                   put the cREVGeometry[tProfileName,"scaleLeftObjectRef"] of control id tControlId into tObjectRef
                   put tIDArray[tObjectRef] into tObjectRef
                   put round(tDistance * tCardWidth) into tDistance
-                  # TH-2008-07-07 :: Bug 6391, similar problem to elsewhere, shouldn't be 
+                  # TH-2008-07-07 :: Bug 6391, similar problem to elsewhere, shouldn't be
                   # using loc, instead item of rect
                   --put item 1 of the loc of control id tObjectRef+tDistance into item 1 of tObjectRect
-                  put item 3 of the rect of control id tObjectRef+tDistance into item 1 of tObjectRect 
+                  put item 3 of the rect of control id tObjectRef+tDistance into item 1 of tObjectRect
                end if
             end if
          end if
@@ -297,11 +297,11 @@ on revUpdateGeometry
                   put the cREVGeometry[tProfileName,"scaleRightObjectRef"] of control id tControlId into tObjectRef
                   put tIDArray[tObjectRef] into tObjectRef
                   put round(tDistance * tCardWidth) into tDistance
-                  
+
                   # TH-2008-07-07 :: Bug 6391, similar problem to elsewhere, should be making use of the
                   # right not item 1 of the loc
                   --put item 1 of the loc of control id tObjectRef+tDistance into item 3 of tObjectRect
-                  put item 3 of the rect of control id tObjectRef+tDistance into item 3 of tObjectRect                  
+                  put item 3 of the rect of control id tObjectRef+tDistance into item 3 of tObjectRect
                end if
             end if
          end if
@@ -310,7 +310,7 @@ on revUpdateGeometry
       --VERTICAL
       if the cREVGeometry[tProfileName,"moveV"] of control id tControlId is true then
          --VERTICAL MOVEMENT
-         
+
          local tObjectV
          put item 2 of the loc of control id tControlId into tObjectV
          if the cREVGeometry[tProfilename,"moveVAbsolute"] of control id tControlId is true then
@@ -373,13 +373,13 @@ on revUpdateGeometry
                put the cREVGeometry[tProfileName,"moveVObjectRef"] of control id tControlId into tObjectRef
                put tIDArray[tObjectRef] into tObjectRef
                put round(tDistance * tCardHeight) into tDistance
-               
+
                # TH-2008-07-07 :: Bug 6391, The linked object should remain a fixed percentage of the height of the card away
                # from the top of the object it is linked to.  Previously this section used item 2 of the loc of the object being linked to
                # instead of the bottom, this caused an initial jump in location of the linked object.
                --put item 2 of the loc of control id tObjectRef + tDistance into tVMoved
                put item 4 of the rect of control id tObjectRef + tDistance into tVMoved
-               
+
                put tVMoved - tObjectV into tDifference
                add tDifference to item 2 of tObjectRect
                add tDifference to item 4 of tObjectRect
@@ -427,7 +427,7 @@ on revUpdateGeometry
                   put the cREVGeometry[tProfileName,"scaleTopObjectRef"] of control id tControlId into tObjectRef
                   put tIDArray[tObjectRef] into tObjectRef
                   put round(tDistance * tCardHeight) into tDistance
-                  # TH-2008-07-07 :: Bug 6391, similar problem to elsewhere, shouldn't be 
+                  # TH-2008-07-07 :: Bug 6391, similar problem to elsewhere, shouldn't be
                   # using loc, instead item of rect
                   --put item 2 of the loc of control id tObjectRef+tDistance into item 2 of tObjectRect
                   put item 4 of the rect of control id tObjectRef+tDistance into item 2 of tObjectRect
@@ -474,7 +474,7 @@ on revUpdateGeometry
                   put the cREVGeometry[tProfileName,"scaleBottomObjectRef"] of control id tControlId into tObjectRef
                   put tIDArray[tObjectRef] into tObjectRef
                   put round(tDistance * tCardHeight) into tDistance
-                  
+
                   # TH-2008-07-07 :: Bug 6391, similar problem to elsewhere, should be making use of the
                   # top not item item 2 of the loc
                   --put item 2 of the loc of control id tObjectRef+tDistance into item 4 of tObjectRect
@@ -488,7 +488,7 @@ on revUpdateGeometry
       if word 1 of the name of control id tControlId is "field" then
          if the cREVGeometry[tProfileName,"showHScroll"] of control id tControlId is true then
             --show H scrollbar if text too small
-            
+
             local tWidth
             put the formattedWidth of control id tControlId into tWidth
             if item 3 of tObjectRect - item 1 of tObjectRect < tWidth then
@@ -499,7 +499,7 @@ on revUpdateGeometry
          end if
          if the cREVGeometry[tProfileName,"showVScroll"] of control id tControlId is true then
             --show V scrollbar if text too small
-            
+
             local tHeight
             put the formattedHeight of control id tControlId into tHeight
             if item 4 of tObjectRect - item 2 of tObjectRect < tHeight then
@@ -515,7 +515,7 @@ on revUpdateGeometry
          --don't CLIP text - all object types
          local tPassH
          put false into tPassH
-         
+
          local tPassV
          put false into tPassV
          if word 1 of the name of control id tControlId is "field" then
@@ -569,7 +569,7 @@ on revUpdateGeometry
       --CHECK edges left,right,top,bottom
       if the cREVGeometry[tProfileName,"minLeft"] of control id tControlId is not empty then
          --check left of object
-         
+
          local tMinLeft
          put the cREVGeometry[tProfileName,"minLeft"] of control id tControlId into tMinLeft
          if item 1 of tObjectRect < tMinLeft then
@@ -581,7 +581,7 @@ on revUpdateGeometry
       end if
       if the cREVGeometry[tProfileName,"maxRight"] of control id tControlId is not empty then
          --check right of object
-         
+
          local tMaxRight
          put the cREVGeometry[tProfileName,"maxRight"] of control id tControlId into tMaxRight
          if item 3 of tObjectRect > tMaxRight then
@@ -593,7 +593,7 @@ on revUpdateGeometry
       end if
       if the cREVGeometry[tProfileName,"minTop"] of control id tControlId is not empty then
          --check top of object
-         
+
          local tMinTop
          put the cREVGeometry[tProfileName,"minTop"] of control id tControlId into tMinTop
          if item 2 of tObjectRect < tMinTop then
@@ -605,7 +605,7 @@ on revUpdateGeometry
       end if
       if the cREVGeometry[tProfileName,"maxBottom"] of control id tControlId is not empty then
          --check bottom of object
-         
+
          local tMaxBottom
          put the cREVGeometry[tProfileName,"maxBottom"] of control id tControlId into tMaxBottom
          if item 4 of tObjectRect > tMaxBottom then
@@ -665,52 +665,52 @@ end revSetHeight
 
 on resizeControl
    global gREVStacksList
-   if "development" is in the environment 
+   if "development" is in the environment
    then revUpdateSizeandPosition the long id of the target
-   
+
    global gREVMessageDispatch
    repeat for each line tStack in gREVMessageDispatch["revResizeControl"]
-      send "revResizeControl" to this cd of stack tStack
+      dispatch "revResizeControl" to this cd of stack tStack
    end repeat
-   
+
    if "cREVGeometryCache" is among the lines of the customPropertySets of this cd then
       set the cREVGeometryCache["order"] of this card to empty
    end if
-   
+
    local tTarget
    put the long id of this cd of stack revTargetStack() into tTarget
    -- KM added executionContexts check to ensure resized using pointer tool not by the new message in 3.5
-   if char 1 to 3 of revTargetStack() is not "rev" and "cREVGeometryCache" is among the lines of the customPropertySets of tTarget and the number of lines in the executionContexts is 1 then 
-      send "revCacheGeometry true" to tTarget
+   if char 1 to 3 of revTargetStack() is not "rev" and "cREVGeometryCache" is among the lines of the customPropertySets of tTarget and the number of lines in the executionContexts is 1 then
+      dispatch "revCacheGeometry" to tTarget with true
    end if
-   
+
    # OK-2007-08-10 : Another use of an undeclared global variable was found here meaning that this message would have never been passed
    # Added the declaration in the line below.
    global gREVSuppressMessages
-   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then 
+   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
       pass resizeControl
    end if
 end resizeControl
 
 on moveControl
   global gREVMessageDispatch
-  
+
   if "development" is in the environment and the mode of stack "revRestore" is 0
   then revUpdateSizeandPosition the long id of the target
-   
+
   repeat for each line tStack in gREVMessageDispatch["revMoveControl"]
-    send "revMoveControl" to this cd of stack tStack
+    dispatch "revMoveControl" to this cd of stack tStack
   end repeat
-  
+
   if "cREVGeometryCache" is among the lines of the customPropertySets of this cd then
     set the cREVGeometryCache["order"] of this card to empty
   end if
-  
+
   local tTarget
   put the long id of this cd of stack revTargetStack() into tTarget
   if char 1 to 3 of revTargetStack() is not "rev" and "cREVGeometryCache" is among the lines of the customPropertySets of tTarget \
-      then send "revCacheGeometry true" to tTarget
-  
+      then dispatch "revCacheGeometry" to tTarget with true
+
   # OK-2007-08-10 : Another use of an undeclared global variable was found here meaning that this message would have never been passed
   # Added the declaration in the line below.
   global gREVSuppressMessages
@@ -726,20 +726,21 @@ end revSetGeometryObject
 
 local lIDArray
 
+constant kOBJECTREFS = "scaleLeftObjectRef,scaleRightObjectRef,scaleTopObjectRef,scaleBottomObjectRef,moveHObjectRef,moveVObjectRef"
 on revCacheGeometry pUpdateSizes
   lock messages
   revCheckGeoDefaultStack
-  
+
   local tNoControls
   put the number of controls into tNoControls
   delete local lIDArray
-  
+
   local tNumber
   put the milliseconds into tNumber
   repeat with i = 1 to tNoControls
     local tAltID
     put the cREVGeneral["revUniqueID"] of control i into tAltID
-    
+
     local tAltIDsList
     if tAltID is empty or tAltID is among the lines of tAltIDsList then
       set the cREVGeneral["revUniqueID"] of control i to tNumber
@@ -749,15 +750,19 @@ on revCacheGeometry pUpdateSizes
     put tAltID & cr after tAltIDsList
     put the id of control i into lIDArray[tAltID]
   end repeat
-  
+
   local tProfileName
   repeat with i = 1 to tNoControls
     put the cREVGeneral["profile"] of control i into tProfileName
-    if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of control i then put "Master" into tProfileName
-    if the cREVGeometry[tProfileName] of control i is not true then next repeat
+    if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of control i then
+      put "Master" into tProfileName
+    end if
+    if the cREVGeometry[tProfileName] of control i is not true then
+      next repeat
+    end if
     put the long id of control i into lGeometryObject
     if pUpdateSizes then revCalculateGeometryDistances
-    
+
     local tCardRanking
     put the cREVGeometry[tProfilename & comma & "cardRanking"] of control i into tCardRanking
     if tCardRanking > 0 then
@@ -767,10 +772,10 @@ on revCacheGeometry pUpdateSizes
       --the tricky part - go through all the 6 sides and follow them up to find out how far away from the card the object is
       local tDistanceCounter
       put 0 into tDistanceCounter
-      repeat for each item l in "scaleLeftObjectRef,scaleRightObjectRef,scaleTopObjectRef,scaleBottomObjectRef,moveHObjectRef,moveVObjectRef"
+      repeat for each item l in kOBJECTREFS
         local tBreakOut
         put 0 into tBreakOut
-        
+
         local tNextObject
         put the cREVGeometry[tProfileName,l] of control i into tNextObject
         if there is a control id lIDArray[tNextObject] then
@@ -784,7 +789,7 @@ on revCacheGeometry pUpdateSizes
             if tNextProfileName is empty or tNextProfileName is the cREVGeneral["masterName"] of control i then
               put "Master" into tNextProfileName
             end if
-            
+
             # OK-2007-08-10 : Previously the first clause of this if condition refered to the variable "tNextProfileNames", which was
             # undeclared and not refered to anywhere else. I changed this to tNextProfileName
             if tNextProfileName is empty or tNextProfileName is the cREVGeneral["masterName"] of control id tNextObject then
@@ -821,9 +826,23 @@ on revCacheGeometry pUpdateSizes
   unlock messages
 end revCacheGeometry
 
+private command setDefaultDimensions
+  if lOrigWidth is empty then
+    put the width of this card into lOrigWidth
+  end if
+  if lOrigHeight is empty then
+    put the height of this card into lOrigHeight
+  end if
+end setDefaultDimensions
+
 on revCalculateGeometryDistances pWhichNumber
-  if lOrigWidth is empty then put the width of this stack into lOrigWidth
-  if lOrigHeight is empty then put the height of this stack into lOrigHeight
+#  if lOrigWidth is empty then
+#    put the width of this stack into lOrigWidth
+#  end if
+#  if lOrigHeight is empty then
+#    put the height of this stack into lOrigHeight
+#  end if
+  setDefaultDimensions
   repeat for each item tEdge in "left,right,top,bottom"
     if revGetGeometry("scale" & tEdge) is not true then next repeat
     if revGetGeometry("scale" & tEdge & "Absolute") is false then
@@ -879,19 +898,24 @@ function revCalculateMoveDistance pWhichSide
   local tObjectEdge
   if pWhichSide is not empty then
     put pWhichSide into tObjectEdge
-  else 
+  else
     put "center" into tObjectEdge
   end if
-  
+
   local tTargetEdge
   put revGetGeometry("move"&tObjectEdge&"ObjectSide") into tTargetEdge
   revCheckGeoDefaultStack
-  if lOrigWidth is empty then put the width of this card into lOrigWidth
-  if lOrigHeight is empty then put the height of this card into lOrigHeight
-  
+#  if lOrigWidth is empty then
+#    put the width of this card into lOrigWidth
+#  end if
+#  if lOrigHeight is empty then
+#    put the height of this card into lOrigHeight
+#  end if
+  setDefaultDimensions
+
   local tCardWidth
   put lOrigWidth + the cREVGeneral["virtualWidth"] of this card into tCardWidth
-  
+
   local tCardHeight
   put lOrigHeight + the cREVGeneral["virtualHeight"] of this card + the scroll of this stack into tCardHeight
   if revGetGeometry("move"&tObjectEdge& "ObjectRef") is "card" then
@@ -926,9 +950,9 @@ on revCheckGeoDefaultStack
    local tDefaultStack
    put revTargetStack() into tDefaultStack
    if word 1 of tDefaultStack is "revPropertyInspector" then
-      if the cSelectedObjects of stack tDefaultStack is not empty then 
+      if the cSelectedObjects of stack tDefaultStack is not empty then
          set the defaultStack to revIDEStackOfObject(line 1 of the cSelectedObjects of stack tDefaultStack)
-      else 
+      else
          set the defaultStack to the topStack
       end if
    end if
@@ -936,13 +960,15 @@ end revCheckGeoDefaultStack
 
 function revCalculateScaleDistance pWhichside
   revCheckGeoDefaultStack
-  if lOrigWidth is empty then put the width of this card into lOrigWidth
-  if lOrigHeight is empty then put the height of this card into lOrigHeight
+#  if lOrigWidth is empty then put the width of this card into lOrigWidth
+#  if lOrigHeight is empty then put the height of this card into lOrigHeight
+  setDefaultDimensions
   local tCardWidth
   put lOrigWidth + the cREVGeneral["virtualWidth"] of this card into tCardWidth
-  
+
   local tCardHeight
   put lOrigHeight + the cREVGeneral["virtualHeight"] of this card + the scroll of this stack into tCardHeight
+
   if pWhichSide is not empty then
     local tObjectEdge
     put pWhichSide into tObjectEdge
@@ -958,7 +984,7 @@ function revCalculateScaleDistance pWhichside
   if revGetGeometry("scale"&tObjectEdge& "ObjectRef") is "card" then
     local tObjectLoc
     put trunc(tCardWidth / 2), trunc(tCardHeight / 2) into tObjectLoc
-    
+
     local tObjectRect
     put 0, 0, tCardWidth, tCardHeight into tObjectRect
   else
@@ -1014,7 +1040,7 @@ on revSetGeometry pWhichProperty,pWhatValue
    local tDefaultStack
    put the defaultStack into tDefaultStack
    set the defaultStack to ideStackOfObject(lGeometryObject)
-   
+
    local tTargetCard
    put revIDECardOfObject(lGeometryObject) into tTargetCard
    --empty card cache
@@ -1024,7 +1050,7 @@ on revSetGeometry pWhichProperty,pWhatValue
    if "revCacheGeometry" is not in the pendingMessages then
       send "revCacheGeometry true" to tTargetCard in 50 milliseconds
    end if
-   --determine the profile to edit 
+   --determine the profile to edit
    local tProfileName
    put the cREVGeneral["profile"] of lGeometryObject into tProfileName
    if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of lGeometryObject then
@@ -1033,7 +1059,7 @@ on revSetGeometry pWhichProperty,pWhatValue
    --check that some geo has been set
    set the cREVGeometry[tProfileName] of lGeometryObject to true
    --update expected rect
-   
+
    set the cREVGeometry[tProfileName & comma & "expectedRect"] of lGeometryObject to the rect of lGeometryObject
    --check if property contains "objectRef" and replace with milliseconds ID if so
    if "objectRef" is in pWhichProperty and pWhatValue is not "card" and there is a control pWhatValue then
@@ -1052,7 +1078,7 @@ function revGetGeometry pWhichValue
    put the cREVGeneral["profile"] of lGeometryObject into tProfileName
    if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of lGeometryObject then put "Master" into tProfileName
    --check that some geo has been set
-   
+
    if pWhichValue is empty then
       local tKeys, tValue
       put the customkeys["cRevGeometry"] of lGeometryObject into tKeys
@@ -1062,7 +1088,7 @@ function revGetGeometry pWhichValue
       end repeat
       return tValue
    end if
-   
+
    return the cREVGeometry[tProfileName,pWhichValue] of lGeometryObject
 end revGetGeometry
 
@@ -1084,7 +1110,7 @@ end revCalculateGeometryCardRank
 # Returns
 #   The name of the object that matches the specified unique id. Returns pWhich if
 #   pWhich contains only whitespace. Note: if pWhich is non-empty, but no object is found
-#   that matches it, pWhich will be returned. This is due to the cREVGeneral getprop setting 
+#   that matches it, pWhich will be returned. This is due to the cREVGeneral getprop setting
 #   the result, and revUniqueIDToName failing to reset it.
 function revUniqueIDToName pWhich
   local tReturn
@@ -1092,7 +1118,7 @@ function revUniqueIDToName pWhich
   if the number of words in pWhich is 0 then
     return pWhich
   end if
-  
+
   set the defaultStack to revTargetStack(line 1 of (the selObj))
   repeat with i = 1 to the number of controls
     if the cREVGeneral["revUniqueID"] of control i is pWhich then
@@ -1111,12 +1137,12 @@ command revClearExtraGeometrySettings
    put the cREVGeneral["profile"] of lGeometryObject into tProfileName
    if tProfileName is empty or tProfileName is the cREVGeneral["masterName"] of lGeometryObject \
          then put "Master" into tProfileName
-   
+
    local tGeometry, tKeys, tSettingsUsed
    put the customProperties["cRevGeometry"] of lGeometryObject into tGeometry
    put the keys of tGeometry into tKeys
    put 0 into tSettingsUsed
-   
+
    local tExtraKeys
    repeat for each item tSetting in "moveH,moveV,scaleLeft,scaleRight,scaleTop,scaleBottom"
       --check to see if each geometry setting is used

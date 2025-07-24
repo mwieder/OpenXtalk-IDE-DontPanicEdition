@@ -59,7 +59,7 @@ on mouseDown pButtonNumber
       writeError (tError)
     end if
   end try
-  
+
   # OK-2008-03-06 : Bug 6007 and 6009, Exit here to allow engine to handle the mouseDown as normal
   pass mouseDown to metacard
 end mouseDown
@@ -252,7 +252,7 @@ on commandKeyDown pWhich
       writeError (tError)
     end if
   end try
-  
+
   pass commandKeyDown to metacard
 end commandKeyDown
 
@@ -358,7 +358,7 @@ on returnInField
       writeError (tError)
     end if
   end try
-  
+
   pass returnInField to metacard
 end returnInField
 
@@ -372,7 +372,7 @@ on enterInField
       writeError (tError)
     end if
   end try
-  
+
   pass enterInField to metacard
 end enterInField
 
@@ -386,7 +386,7 @@ on returnKey
       writeError (tError)
     end if
   end try
-  
+
   pass returnKey to metacard
 end returnKey
 
@@ -400,7 +400,7 @@ on enterKey
       writeError (tError)
     end if
   end try
-  
+
   pass enterKey to metacard
 end enterKey
 
@@ -426,7 +426,7 @@ on controlKeyDown pKey
       writeError (tError)
     end if
   end try
-  
+
   pass controlKeyDown to metacard
 end controlKeyDown
 
@@ -549,7 +549,7 @@ on closeStackRequest
   if revOKTarget() then
     pass closeStackRequest
   end if
-   
+
   local tTarget
   put the long id of the target into tTarget
   try
@@ -1176,8 +1176,9 @@ end scriptParsingError
 on scrollbarBeginning pStart
   if revOKTarget() then pass scrollbarBeginning
   try
-    if "scrollbarBeginning" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarBeginning pStart" to stack "revFrontScriptLibrary"
-    if "scrollbarBeginning" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarBeginning pStart" to stack "revBackScriptLibrary"
+#    if "scrollbarBeginning" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarBeginning pStart" to stack "revFrontScriptLibrary"
+#    if "scrollbarBeginning" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarBeginning pStart" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "scrollbarBeginning", pStart
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1188,8 +1189,9 @@ end scrollbarBeginning
 on scrollbarEnd pEnd
   if revOKTarget() then pass scrollbarEnd
   try
-    if "scrollbarEnd" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarEnd pEnd" to stack "revFrontScriptLibrary"
-    if "scrollbarEnd" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarEnd pEnd" to stack "revBackScriptLibrary"
+#    if "scrollbarEnd" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarEnd pEnd" to stack "revFrontScriptLibrary"
+#    if "scrollbarEnd" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarEnd pEnd" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "scrollbarEnd", pEnd
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1200,8 +1202,9 @@ end scrollbarEnd
 on scrollbarLineDec pPosition
   if revOKTarget() then pass scrollbarLineDec
   try
-    if "scrollbarLineDec" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarLineDec pPosition" to stack "revFrontScriptLibrary"
-    if "scrollbarLineDec" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarLineDec pPosition" to stack "revBackScriptLibrary"
+#    if "scrollbarLineDec" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarLineDec pPosition" to stack "revFrontScriptLibrary"
+#    if "scrollbarLineDec" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarLineDec pPosition" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "scrollbarLineDec", pPosition
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1212,8 +1215,9 @@ end scrollbarLineDec
 on scrollbarLineInc pPosition
   if revOKTarget() then pass scrollbarLineInc
   try
-    if "scrollbarLineInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarLineInc pPosition" to stack "revFrontScriptLibrary"
-    if "scrollbarLineInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarLineInc pPosition" to stack "revBackScriptLibrary"
+#    if "scrollbarLineInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarLineInc pPosition" to stack "revFrontScriptLibrary"
+#    if "scrollbarLineInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarLineInc pPosition" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "scrollbarLineInc", pPosition
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1224,8 +1228,9 @@ end scrollbarLineInc
 on scrollbarPageInc pPosition
   if revOKTarget() then pass scrollbarPageInc
   try
-    if "scrollbarPageInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarPageInc pPosition" to stack "revFrontScriptLibrary"
-    if "scrollbarPageInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarPageInc pPosition" to stack "revBackScriptLibrary"
+#    if "scrollbarPageInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "scrollbarPageInc pPosition" to stack "revFrontScriptLibrary"
+#    if "scrollbarPageInc" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "scrollbarPageInc pPosition" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "scrollbarPageInc", pPosition
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1236,8 +1241,9 @@ end scrollbarPageInc
 on signal pSignalNo
   if revOKTarget() then pass signal
   try
-    if "signal" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "signal pSignalNo" to stack "revFrontScriptLibrary"
-    if "signal" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "signal pSignalNo" to stack "revBackScriptLibrary"
+#    if "signal" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "signal pSignalNo" to stack "revFrontScriptLibrary"
+#    if "signal" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "signal pSignalNo" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "signal", pSignalNo
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1248,8 +1254,9 @@ end signal
 on socketError pID, pError
   if revOKTarget() then pass socketError
   try
-    if "socketError" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "socketError pID, pError" to stack "revFrontScriptLibrary"
-    if "socketError" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "socketError pID, pError" to stack "revBackScriptLibrary"
+#    if "socketError" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "socketError pID, pError" to stack "revFrontScriptLibrary"
+#    if "socketError" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "socketError pID, pError" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "socketError", pID,pError
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1260,8 +1267,9 @@ end socketError
 on socketTimeout pID
   if revOKTarget() then pass socketTimeout
   try
-    if "socketTimeout" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "socketTimeout pID" to stack "revFrontScriptLibrary"
-    if "socketTimeout" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "socketTimeout pID" to stack "revBackScriptLibrary"
+#    if "socketTimeout" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "socketTimeout pID" to stack "revFrontScriptLibrary"
+#    if "socketTimeout" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "socketTimeout pID" to stack "revBackScriptLibrary"
+    dispatchFrontOrBack "socketTimeout", pID
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1272,36 +1280,51 @@ end socketTimeout
 on tabKey
   if revOKTarget() then pass tabKey
   try
-    if "tabKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "tabKey" to stack "revFrontScriptLibrary"
-    if "tabKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "tabKey" to stack "revBackScriptLibrary"
+#    if "tabKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then
+#      dispatch "tabKey" to stack "revFrontScriptLibrary"
+#    end if
+#    if "tabKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then
+#      dispatch "tabKey" to stack "revBackScriptLibrary"
+#    end if
+    dispatchFrontOrBack "tabKey"
   catch tError
     if gREVDevelopment then
       writeError (tError)
     end if
   end try
-  
+
   pass tabKey to metacard
 end tabKey
 
 on undoKey
   if revOKTarget() then pass undoKey
   try
-    if "undoKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "undoKey" to stack "revFrontScriptLibrary"
-    if "undoKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "undoKey" to stack "revBackScriptLibrary"
+#    if "undoKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then
+#      dispatch "undoKey" to stack "revFrontScriptLibrary"
+#    end if
+#    if "undoKey" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then
+#      dispatch "undoKey" to stack "revBackScriptLibrary"
+#    end if
+    dispatchFrontOrBack "undoKey"
   catch tError
     if gREVDevelopment then
       writeError (tError)
     end if
   end try
-  
+
   pass undoKey to metacard
 end undoKey
 
 on uniconifyStack
   if revOKTarget() then pass uniconifyStack
   try
-    if "uniconifyStack" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "uniconifyStack" to stack "revFrontScriptLibrary"
-    if "uniconifyStack" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "uniconifyStack" to stack "revBackScriptLibrary"
+#    if "uniconifyStack" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then
+#      dispatch "uniconifyStack" to stack "revFrontScriptLibrary"
+#    end if
+#    if "uniconifyStack" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then
+#      dispatch "uniconifyStack" to stack "revBackScriptLibrary"
+#    end if
+    dispatchFrontOrBack "uniconifyStack"
   catch tError
     if gREVDevelopment then
       writeError (tError)
@@ -1309,24 +1332,27 @@ on uniconifyStack
   end try
 end uniconifyStack
 
+private command dispatchFrontOrBack pCommand, pParams
+    if pCommand is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then
+      dispatch pCommand to stack "revFrontScriptLibrary" with pParams
+    else if pCommand is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then
+      dispatch pCommand to stack "revBackScriptLibrary" with pParams
+    end if
+end dispatchFrontOrBack
+
 # OK-2008-03-13 : Bug 6009. The target will not be correct in the case of keyboard shortcuts. Function therefore
 # extended to allow a target to be explicity passed.
 function revOKTarget pWhich
    local tTarget
-   if pWhich is not empty then 
+   if pWhich is not empty then
       put pWhich into tTarget
-   else 
+   else
       put the long id of the target into tTarget
    end if
-   
+
    return revIDEObjectIsOnIDEStack(tTarget)
 end revOKTarget
 
 command writeError tError
   write tError & return to stderr
 end writeError
-
-
-
-
-

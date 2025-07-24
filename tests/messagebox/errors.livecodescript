@@ -17,14 +17,14 @@ You should have received a copy of the GNU General Public License
 along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
 local sSupportStack
-on TestSetup   
+on TestSetup
    set the itemdelimiter to slash
    local tSupportStack
    put the filename of me into tSupportStack
    put "_support.livecodescript" into item -1 of tSupportStack
    put tSupportStack into sSupportStack
    start using stack sSupportStack
-   
+
    put empty into msg
    MessageBoxSetEmpty
 end TestSetup
@@ -35,16 +35,15 @@ end TestTeardown
 
 on TestBug17380
    revIDELaunchResource("sample stacks")
-   MessageBoxIsEmpty
-   
-   TestAssert "message box is empty after opening revOnline stack", the result
+
+   TestAssert "message box is empty after opening revOnline stack", MessageBox.IsEmpty?()
 end TestBug17380
 
 on TestMessageBoxCompileError
    local tValidScript, tScript
    // Should be "if true then..."
    put "if true ten go home" into tScript
-   
+
    ideExecuteScript tScript, empty, false, tValidScript
    TestAssert "execute script with compile error result", line 1 of the result is "189,2,4,ten"
    TestAssert "execute script with compile error script invalid", tValidScript is empty
@@ -53,7 +52,7 @@ end TestMessageBoxCompileError
 on TestMessageBoxExecutionError
    local tValidScript, tScript
    put "edit the script of stack nonexistent" into tScript
-   
+
    ideExecuteScript tScript, empty, false, tValidScript
    TestAssert "execute script with script error result", \
          matchText(line 1 of it, "^91,\d+,1$")
@@ -63,7 +62,7 @@ end TestMessageBoxExecutionError
 on TestMessageBoxExecuteMultipleWithError
    local tValidScript, tScript
    put "put foo; throw bar" into tScript
-   
+
    ideExecuteScript tScript, empty, false, tValidScript
    TestAssert "execute multiline script with script error result", msg is "foo"
    TestAssert "execute multiline script with compile error script invalid", tValidScript is tScript
@@ -74,12 +73,12 @@ on TestIntelligenceObjectGetNonExistentFunction
    local tStack
 	create stack
 	put it into tStack
-	
+
    local tToExecute, tValidScript
 	put "get aNonExistentFunction()" into tToExecute
-	
+
 	ideExecuteScript tToExecute, tStack, false, tValidScript
-	
+
 	TestAssert "intelligence object non-existent function result", \
          matchText(line 1 of it, "^219,\d+,\d+,aNonExistentFunction$")
 	TestAssert "intelligence object non-existent function executed", tValidScript is tToExecute

@@ -3473,6 +3473,6 @@ on msgChanged pHandler, pLine
    end if
 end msgChanged
 
-private function q pText
+function q pText
    return quote & pText & quote
 end q

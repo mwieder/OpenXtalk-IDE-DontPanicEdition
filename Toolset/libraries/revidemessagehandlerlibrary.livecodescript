@@ -2,7 +2,7 @@
 on extensionInitialize
    if the target is not me then
       pass "extensionInitialize"
-   end if	
+   end if
    insert the script of me into front
 end extensionInitialize
 
@@ -20,7 +20,8 @@ local sSelectingObjects
 on selectedObjectChanged
    if not sSelectingObjects and \
          not revIDEObjectIsOnIDEStack(the long id of the target) then
-      send "ideMessageSend" &&  "ideSelectedObjectChanged" to stack "revIDELibrary" in 0 milliseconds
+#      send "ideMessageSend" &&  "ideSelectedObjectChanged" to stack "revIDELibrary" in 0 milliseconds
+      sendIDEMessage "ideSelectedObjectChanged"
    end if
    pass selectedObjectChanged
 end selectedObjectChanged
@@ -28,7 +29,8 @@ end selectedObjectChanged
 on objectSelectionStarted
    if not revIDEObjectIsOnIDEStack(the long id of the target) then
       put true into sSelectingObjects
-      send "ideMessageSend" &&  "ideObjectSelectionStarted" to stack "revIDELibrary" in 0 milliseconds
+#      send "ideMessageSend" &&  "ideObjectSelectionStarted" to stack "revIDELibrary" in 0 milliseconds
+      sendIDEMessage "ideObjectSelectionStarted"
    end if
    pass objectSelectionStarted
 end objectSelectionStarted
@@ -36,7 +38,9 @@ end objectSelectionStarted
 on objectSelectionEnded
    if not revIDEObjectIsOnIDEStack(the long id of the target) then
       put false into sSelectingObjects
-      send "ideMessageSend" &&  "ideSelectedObjectChanged" to stack "revIDELibrary" in 0 milliseconds
+# NOTE: mdw 2025.07.21 shouldn't this send "ideObjectSelectionEnded" ???
+#      send "ideMessageSend" &&  "ideSelectedObjectChanged" to stack "revIDELibrary" in 0 milliseconds
+      sendIDEMessage "ideSelectedObjectChanged"
    end if
    pass objectSelectionEnded
 end objectSelectionEnded
@@ -166,7 +170,7 @@ on deleteCard
    end if
    pass deleteCard
 end deleteCard
-   
+
 on deleteEPS
    local tTarget
    put the long id of the target into tTarget
@@ -179,8 +183,8 @@ end deleteEPS
 on deleteField
    local tTarget
    put the long id of the target into tTarget
-   if not revIDEObjectIsOnIDEStack(tTarget) then   
-      send "ideMessageSend ideControlDeleted","tTarget" to stack "revIDELibrary" in 0 milliseconds 
+   if not revIDEObjectIsOnIDEStack(tTarget) then
+      send "ideMessageSend ideControlDeleted","tTarget" to stack "revIDELibrary" in 0 milliseconds
    end if
    pass deleteField
 end deleteField
@@ -215,7 +219,7 @@ end deleteImage
 on deletePlayer
    local tTarget
    put the long id of the target into tTarget
-   if not revIDEObjectIsOnIDEStack(tTarget) then   
+   if not revIDEObjectIsOnIDEStack(tTarget) then
       send "ideMessageSend ideControlDeleted","tTarget" to stack "revIDELibrary" in 0 milliseconds
    end if
    pass deletePlayer
@@ -230,10 +234,10 @@ on deleteScrollbar
    pass deleteScrollbar
 end deleteScrollbar
 
-on deleteWidget 
+on deleteWidget
    local tTarget
    put the long id of the target into tTarget
-   if not revIDEObjectIsOnIDEStack(tTarget) then   
+   if not revIDEObjectIsOnIDEStack(tTarget) then
       send "ideMessageSend ideControlDeleted","tTarget" to stack "revIDELibrary" in 0 milliseconds
    end if
    pass deleteWidget
@@ -270,7 +274,7 @@ end releaseStack
 on nameChanged pOldName, pNewName
    local tTarget, tParams
    put the long id of the target into tTarget
-   if not revIDEObjectIsOnIDEStack(tTarget) then   
+   if not revIDEObjectIsOnIDEStack(tTarget) then
       put pOldName into tParams[1]
       put pNewName into tParams[2]
       put tTarget into tParams[3]
@@ -282,7 +286,7 @@ end nameChanged
 on openCard
    local tTarget
    put the long id of the target into tTarget
-   if not revIDEObjectIsOnIDEStack(tTarget) then   
+   if not revIDEObjectIsOnIDEStack(tTarget) then
       send "ideMessageSend" &&  "ideOpenCard","tTarget" to stack "revIDELibrary" in 0 milliseconds
    end if
    pass openCard
@@ -291,7 +295,7 @@ end openCard
 on openStack
    local tTarget
    put the long id of the target into tTarget
-   if not revIDEObjectIsOnIDEStack(tTarget) then   
+   if not revIDEObjectIsOnIDEStack(tTarget) then
       send "ideMessageSend" &&  "ideOpenStack","tTarget" to stack "revIDELibrary" in 0 milliseconds
    end if
    pass openStack
@@ -323,7 +327,7 @@ on moveStack pLeft, pTop
          set the top of stack revTargetStack() to the bottom of stack tMenuBar + 20
       end if
    end if
-   
+
    # IDE to notify any objects subscribed to the ideStackMoved Message
    local tLongID
    -- moveStack is sent to the card, so the owner of the target is the stack
@@ -390,7 +394,7 @@ on closeStackRequest
    local tLongID
    -- closeStackRequest is sent to the card, so the owner of the target is the stack
    put the long id of the owner of the target into tLongID
-   if not revIDEStackIsIDEStack(tLongID) then   
+   if not revIDEStackIsIDEStack(tLongID) then
       send "ideMessageSendWithParameters" &&  "ideCloseStackRequest, tLongID, tLongID" to stack "revIDELibrary" in 0 milliseconds
    end if
    pass closeStackRequest
@@ -399,7 +403,7 @@ end closeStackRequest
 on msgChanged pHandler, pLine
    local tTarget
    put the long id of the target into tTarget
-   
+
    local tParams
    put tTarget into tParams[1]
    put pHandler into tParams[2]
@@ -414,6 +418,11 @@ on logChanged pLog
 end logChanged
 
 on desktopChanged
-   send "ideMessageSend ideDesktopChanged" to stack "revIDELibrary" in 0 milliseconds
+#   send "ideMessageSend ideDesktopChanged" to stack "revIDELibrary" in 0 milliseconds
+   sendIDEMessage "ideDesktopChanged"
    pass desktopChanged
 end desktopChanged
+
+private command sendIDEMessage pMessage
+   send "ideMessageSend pMessage" to stack "revIDELibrary" in 0 milliseconds
+end sendIDEMessage

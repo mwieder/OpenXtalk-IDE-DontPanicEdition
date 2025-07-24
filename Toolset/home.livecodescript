@@ -78,7 +78,7 @@ on saveStackRequest
 end saveStackRequest
 
 on preOpenStack
-   local tEdition, tSplashPath
+   local tSplashPath
    if the short name of the owner of the target is not "Home" then
       pass preOpenStack
    end if
@@ -574,10 +574,10 @@ private command setupPaths
    end switch
 
    # The docs cache is per-version and edition
-   local tEdition
+   #local tEdition
    #   put tolower(sLicenseClass) into tEdition
 
-   put tolower("openxtalk") into tEdition
+   #put tolower("openxtalk") into tEdition
 
    local tVersion
    put the version into tVersion
@@ -2031,6 +2031,7 @@ private command CleanDocsCache
    switch revEnvironmentPlatform()
       case "Linux"
          put "~/.runrev/docs" into tOldDocsFolder
+#         put "~/.runrev/documentationcache/" & the version into tOldDocsFolder
          break
       case "MacOS X"
          put specialFolderPath("cusr") & "/Library/Application Support/RunRev/Docs" into tOldDocsFolder

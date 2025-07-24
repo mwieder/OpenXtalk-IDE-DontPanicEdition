@@ -13,9 +13,9 @@ on extensionInitialize
    if the target is not me then
       pass extensionInitialize
    end if
-   
+
    insert script of me into back
-   
+
    # Explicitly load extension utils first
    revInternal__LoadLibrary "extension-utils", __PathToExtensionUtils()
 
@@ -41,10 +41,10 @@ private function __ModuleVersion
 end __ModuleVersion
 
 function revIDEExtensionBytecodeFilename pUseVersion
-   if pUseVersion is empty then 
+   if pUseVersion is empty then
       put true into pUseVersion
    end if
-   
+
    if pUseVersion then
       return "module." & __ModuleVersion() & ".lcm"
    else
@@ -62,12 +62,12 @@ command revIDEExtensionDownloadAndInstall pExtensionPath, pType, pCallbackObject
    local tCacheIndex
    __extensionDownloadBegin pExtensionPath, pType, pCallbackObject, pCallbackMessage
    put it into tCacheIndex
-   
+
    if the result is not empty then
       answer error the result
       exit revIDEExtensionDownloadAndInstall
    end if
-   
+
    # Download the package and install
    __extensionPropertySet tCacheIndex, "package_url", pExtensionPath
    try
@@ -81,12 +81,12 @@ end revIDEExtensionDownloadAndInstall
 private function __extensionDependencyExists pExt
    return __extensionCacheID("name", pExt) is a number
 end __extensionDependencyExists
-   
+
 private command __extensionInstallPackage pPackageLocation
    if there is not a file pPackageLocation then
       throw "No package found at" && pPackageLocation
    end if
-   
+
    local tCacheIndex
    put __extensionCacheID("download_package_path", pPackageLocation) \
          into tCacheIndex
@@ -96,7 +96,7 @@ private command __extensionInstallPackage pPackageLocation
       __extensionUpdateUIWithPackage tCacheIndex, pPackageLocation
    end if
    __extensionPropertySet tCacheIndex, "status", "installing"
-   
+
    local tVerifyResult, tName
    __extensionDownloadVerify tCacheIndex
    put the result into tVerifyResult
@@ -104,9 +104,9 @@ private command __extensionInstallPackage pPackageLocation
       __extensionCacheRemove tCacheIndex
       throw "Error installing extension" && pPackageLocation & return & the result
    end if
-   
+
    put __extensionPropertyGet(tCacheIndex, "name") into tName
-   
+
    # Fetch the dependency list (minus builtin modules) and ensure all
    # are loaded
    local tDeps
@@ -134,7 +134,7 @@ command revIDEExtensionInstall pPackageLocation
 end revIDEExtensionInstall
 
 # Uninstalls the extension
-command revIDEExtensionUninstall pName 
+command revIDEExtensionUninstall pName
    local tCacheIndex, tName
    # Start the uninstall process
    if pName is a number then
@@ -144,7 +144,7 @@ command revIDEExtensionUninstall pName
       put __extensionCacheID("name", pName) into tCacheIndex
       put pName into tName
    end if
-   
+
    # Get the path to the package file
    local tExtensionPackageFile, tInstallPath
    put __extensionPropertyGet(tCacheIndex, "download_package_path") into tExtensionPackageFile
@@ -164,28 +164,28 @@ end revIDEExtensionUninstall
 # Returns the extension data
 function revIDEExtensions pType, pStatus, pWithoutInvisible, pEditionType
    # No type passed so return all extensions
-   
+
    # Repeat over the extension array looking for elements with matching type
    local tExtensions, tExtension
    repeat for each key tCacheId in sExtensions
       put sExtensions[tCacheId] into tExtension
-      if tExtension["name"] is empty then 
+      if tExtension["name"] is empty then
          __extensionCacheRemove tCacheId
          next repeat
       end if
-      if pType is not empty and tExtension["type"] is not pType then 
+      if pType is not empty and tExtension["type"] is not pType then
          next repeat
       end if
       if pStatus is not empty then
-         if tExtension["status"] is not pStatus then 
+         if tExtension["status"] is not pStatus then
             next repeat
          end if
       end if
-      
+
       if pWithoutInvisible and not tExtension["uservisible"] then
          next repeat
       end if
-      
+
       if pEditionType is not empty and \
             pEditionType is not "professional" and \
             tExtension["editionType"] is "professional" then
@@ -202,7 +202,7 @@ function revIDEExtensionProperties pTypeID
    return sExtensionProperties[pTypeID]
 end revIDEExtensionProperties
 
-# organise the property info into the structure that the inspectors 
+# organise the property info into the structure that the inspectors
 # expect, namely [<section>]["grouplist"][<group>]["proplist"][<prop>]
 private function __OrganiseInspectorMetadata pDataA
    local tExtensionPropsInfoA
@@ -213,7 +213,7 @@ private function __OrganiseInspectorMetadata pDataA
       put pDataA[tProp]["label"] into tGroup
       put pDataA[tProp]["section"] into tSection
       put tPropInfoA into tExtensionPropsInfoA[tSection]["grouplist"][tGroup]["proplist"][tProp]
-      
+
       put true into tExtensionPropsInfoA[tSection]["grouplist"][tGroup]["widget_prop"]
       put tOrder into tExtensionPropsInfoA[tSection]["grouplist"][tGroup]["order"]
    end repeat
@@ -223,7 +223,7 @@ end __OrganiseInspectorMetadata
 function revIDEExtensionPropertiesInfo pTypeId, pOrganise
    local tPropsA, tExtensionPropsInfoA
    put revIDEExtensionProperties(pTypeId) into tPropsA
-   
+
    if pOrganise then
       return __OrganiseInspectorMetadata(tPropsA)
    else
@@ -234,18 +234,18 @@ end revIDEExtensionPropertiesInfo
 function revIDEExtensionProperty pKind, pProperty
    local tExtensionID
    put __extensionCacheID("name", pKind) into tExtensionID
-   
+
    if pProperty is "api" then
       return __TypeToAPI(__extensionPropertyGet(tExtensionID, "type"))
    end if
-   
+
    return __extensionPropertyGet(tExtensionID, pProperty)
 end revIDEExtensionProperty
 
 command revIDEExtensionToggleUserVisibility pKind
    local tCacheId
    put __extensionCacheID("name", pKind) into tCacheId
-   
+
    local tUserVisible
    put __extensionPropertyGet(tCacheId, "uservisible") \
          into tUserVisible
@@ -281,7 +281,7 @@ end revIDEExtensionStandaloneSettings
 function revIDEExtensionStandaloneSettingsInfo pTypeId, pOrganise
    local tPropsA, tExtensionPropsInfoA
    put revIDEExtensionStandaloneSettings(pTypeId) into tPropsA
-   
+
    if pOrganise then
       return __OrganiseInspectorMetadata(tPropsA)
    else
@@ -299,25 +299,25 @@ private command __extensionDownloadBegin pExtensionUrl, pType, pCallbackObject, 
       return "Could not download extension. The extension must be a URL" && \
             "to a valid package:" && pExtensionUrl for error
    end if
-   
+
    # Get the ID of the extension in the cache
    local tCacheIndex
    put __extensionCacheID("package_url",pExtensionUrl) into tCacheIndex
-   
+
    if tCacheIndex is empty then
       put __extensionCacheID("download_package_path",pExtensionUrl) into tCacheIndex
    end if
-   
+
    # If the extension cache ID couldn't be found, generate a new one
-   if tCacheIndex is empty then 
+   if tCacheIndex is empty then
       put the number of elements of sExtensions + 1 into tCacheIndex
    end if
-   
+
    # Add callback data to cache
    __extensionPropertySet tCacheIndex, "callback_target", pCallbackObject
    __extensionPropertySet tCacheIndex, "callback_handler", pCallbackMessage
    __extensionPropertySet tCacheIndex, "name", "New Extension"
-   
+
    # AL-2015-03-06: [[ Bug 14820 ]] Set the type so that the icon is correct while downloading
    __extensionPropertySet tCacheIndex, "type", pType
    return tCacheIndex for value
@@ -333,7 +333,7 @@ private command __extensionUpdateUIWithPackage pCacheIndex, pPath
       delete the last item of tName
    end repeat
    __extensionPropertySet pCacheIndex, "name", tName
-   
+
    # Send update to refresh UI with new package installation
    doExtensionsChanged
 end __extensionUpdateUIWithPackage
@@ -343,29 +343,29 @@ private command __extensionDownload pCacheIndex
    # Check the file extension is correct
    local tURL
    put __extensionPropertyGet(pCacheIndex,"package_url") into tURL
-   
+
    set the itemdel to "."
-   if the last item of tURL is not "lce" then 
+   if the last item of tURL is not "lce" then
       return __extensionError(pCacheIndex, \
             "The package must have the file extension 'lce':" && tURL)
    end if
-   
+
    local tPackageFilePath
    set the itemdel to "/"
    put the last item of tURL into tPackageFilePath
-   
+
    __extensionPropertySet pCacheIndex, "download_package_path", revIDESpecialFolderPath("downloading extensions") & slash & tPackageFilePath
    __extensionPropertySet pCacheIndex, "status", "downloading"
    __extensionPropertySet pCacheIndex, "progress_message", "Downloading"
    __extensionPropertySet pCacheIndex, "progress", 0
    __extensionPropertySet pCacheIndex, "label", tPackageFilePath
    __extensionPropertySet pCacheIndex, "downloaded_from_store", true
-   
+
    __extensionUpdateUIWithPackage pCacheIndex, tPackageFilePath
-   
+
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Downloading", 0
-   
+
    # Download the extension to a file
    libURLDownloadToFile tURL, __extensionPropertyGet(pCacheIndex,"download_package_path"), "extensionDownloaded"
 end __extensionDownload
@@ -378,12 +378,12 @@ end extensionDownloaded
 private command __extensionDownloaded pURL, pDownloadStatus
    # Get the index of the extension
    local tCacheIndex
-   
+
    put __extensionCacheID("package_url", pURL) into tCacheIndex
-   
+
    # Update progress
    __extensionSendProgressUpdate tCacheIndex, "Download Complete", 100
-   
+
    local tPath
    put __extensionPropertyGet(tCacheIndex,"download_package_path") into tPath
    revIDEExtensionInstall tPath
@@ -393,36 +393,36 @@ end __extensionDownloaded
 private command __extensionDownloadVerify pCacheIndex
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Verifying extension", 0
-   
+
    # Get the path to the extension
    local tExtensionPath
    put __extensionPropertyGet(pCacheIndex, "download_package_path") into tExtensionPath
-   
+
    # Check the package exists
-   if there is not a file tExtensionPath then 
+   if there is not a file tExtensionPath then
       return __extensionError(pCacheIndex, \
             "Package does not exist: " && tExtensionPath)
    end if
-   
+
    # Check the file extension is valid
    set the itemdel to "."
-   if the last item of tExtensionPath is not "lce" then 
+   if the last item of tExtensionPath is not "lce" then
       return __extensionError(pCacheIndex, "The package extension '" & \
             the last item of tExtensionPath&"' is not valid." && \
             " Must be 'lce'.")
    end if
-   
+
    # Ensure the zip contains the things we expect
    local tManifestDataA
    extensionValidateLCEPackage tExtensionPath, tManifestDataA
    if the result is not empty then
       return the result
    end if
-   
+
    repeat for each key tKey in tManifestDataA
       __extensionPropertySet pCacheIndex, tKey, tManifestDataA[tKey]
    end repeat
-   
+
    # Build the type ID from the name and version
    __extensionPropertySet pCacheIndex, "type_id", \
          tManifestDataA["name"] & "." & tManifestDataA["version"]
@@ -434,7 +434,7 @@ private command __extensionInstall pCacheIndex, pPackage
    put __extensionPropertyGet(pCacheIndex, "type_id") into tTypeId
    put revIDESpecialFolderPath("user extensions") & slash & tTypeId into tInstallPath
    revIDEEnsurePath tInstallPath
-   
+
    __extensionInstallRemoveOlderVersions pCacheIndex, tName, 15
    __extensionInstallExtract pCacheIndex, tInstallPath, tTypeID, pPackage, 30
    __extensionInstallCopyInterfaceFile pCacheIndex, tName, tInstallPath, 50
@@ -444,7 +444,7 @@ end __extensionInstall
 
 on __extensionInstallRemoveOlderVersions pCacheIndex, pName, pProgress
    __extensionSendProgressUpdate pCacheIndex, "Removing older versions", pProgress
-   
+
    repeat for each key tCacheIndex in sExtensions
       if tCacheIndex is pCacheIndex then next repeat
       if sExtensions[tCacheIndex]["name"] is pName then
@@ -456,7 +456,7 @@ end __extensionInstallRemoveOlderVersions
 private command __extensionPackageExtract pPackage, pTargetFolder
    # Extract the icon,docs and executable module into the folder
    revZipOpenArchive pPackage, "read"
-   
+
    # Work out the root of the zip
    local tZipItems, tZipRoot
    put revZipEnumerateItems(pPackage) into tZipItems
@@ -465,7 +465,7 @@ private command __extensionPackageExtract pPackage, pTargetFolder
    else
       put empty into tZipRoot
    end if
-   
+
    # Extract all the files
    local tDirectory
    set the itemdel to slash
@@ -473,8 +473,8 @@ private command __extensionPackageExtract pPackage, pTargetFolder
       put pTargetFolder & slash & item 1 to -2 of tFile into tDirectory
       revIDEEnsurePath(tDirectory)
       revZipExtractItemToFile pPackage, tFile, pTargetFolder & slash & tFile
-   end repeat 
-   
+   end repeat
+
    revZipCloseArchive pPackage
 end __extensionPackageExtract
 
@@ -482,9 +482,9 @@ end __extensionPackageExtract
 private command __extensionInstallExtract pCacheIndex, pFinalPath, pTypeId, pPackage, pProgress
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Extracting extension", pProgress
-   
-   __extensionPropertySet pCacheIndex, "install_path", pFinalPath 
-   
+
+   __extensionPropertySet pCacheIndex, "install_path", pFinalPath
+
    # Extract into final directory
    __extensionPackageExtract pPackage, pFinalPath
 end __extensionInstallExtract
@@ -492,12 +492,12 @@ end __extensionInstallExtract
 private command __extensionInstallCopyInterfaceFile pCacheIndex, pName, pInstallFolder, pProgress
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Copying interface file", pProgress
-   
+
    # AL-2015-03-15: [[ Bug 15008 ]] Move interface file to interface folder
    local tInterfaceFile, tInterfacePath
    put pName & ".lci" into tInterfaceFile
    put pInstallFolder & slash & tInterfaceFile into tInterfacePath
-   
+
    if there is a file tInterfacePath then
       local tTargetFolder
       put revIDESpecialFolderPath("user extensions") & slash & \
@@ -513,13 +513,13 @@ private command __extensionInstallLoad pCacheIndex, pName, pInstallFolder, pProg
    if tFolderData is empty then
       throw "extension missing from" && pInstallFolder
    end if
-   
+
    local tDataA
    put tFolderData[pName][pInstallFolder] into tDataA["copies"][1]
-   
+
    -- add any previously cached info
    union tDataA["copies"][1] with sExtensions[pCacheIndex] recursively
-   
+
    local tExisting
    repeat for each key tExtensionID in sExtensions
       if tExtensionID is pCacheIndex then next repeat
@@ -527,11 +527,11 @@ private command __extensionInstallLoad pCacheIndex, pName, pInstallFolder, pProg
          put sExtensions[tExtensionID]["copies"] into tExisting
       end if
    end repeat
-   
+
    repeat for each key tKey in tExisting
       put tExisting[tKey] into tDataA["copies"][tKey + 1]
    end repeat
-   
+
    __extensionLoad pName, tDataA
 end __extensionInstallLoad
 
@@ -548,11 +548,11 @@ on __extensionInstallFinalise pCacheIndex, pTypeId
          revDeleteFile tTempInstallPackage
       end if
    end if
-   
+
    # Update the cache
    __extensionSendProgressUpdate  pCacheIndex, "Complete", 100
    __extensionPropertySet pCacheIndex, "status", "installed"
-   
+
    # Notify palettes
    __extensionsChanged
 end __extensionInstallFinalise
@@ -565,7 +565,7 @@ end __extensionInstallFinalise
 private command __extensionUninstallCheckInUse pCacheIndex, pProgress
    # Update progress
    if pCacheIndex is not a number then return __extensionError(pCacheIndex, "Could not remove extension '" & pCacheIndex & "' because it is not a valid index")
-   
+
    __extensionSendProgressUpdate pCacheIndex, "Checking if extension is in use", pProgress
 end __extensionUninstallCheckInUse
 
@@ -573,7 +573,7 @@ end __extensionUninstallCheckInUse
 private command __extensionUninstallUnload pCacheIndex, pName, pProgress
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Unloading extension", pProgress
-   
+
    revIDEExtensionUnload pName
 end __extensionUninstallUnload
 
@@ -581,12 +581,12 @@ end __extensionUninstallUnload
 private command __extensionUninstallDeleteFiles pCacheIndex, pName, pInstallPath, pProgress
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Deleting extension files", pProgress
-   
+
    # Make sure the path contains the folder extension as a check before deleting a folder
    if pInstallPath begins with revIDESpecialFolderPath("user extensions") then
       revDeleteFolder pInstallPath
    end if
-   
+
    # AL-2015-03-15: [[ Bug 15008 ]] Delete interface file from interface folder
    local tInterfaceFile
    put pName & ".lci" into tInterfaceFile
@@ -598,14 +598,14 @@ end __extensionUninstallDeleteFiles
 private command __extensionUninstallDeletePreferences pCacheIndex, pName, pProgress
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Deleting preferences", pProgress
-   
+
    revIDEDeletePreferenceSet pName
 end __extensionUninstallDeletePreferences
 
 private command __extensionUnload pCacheIndex, pName, pProgress
    # Update progress
    __extensionSendProgressUpdate pCacheIndex, "Unloading extension", pProgress
-   
+
    revIDEExtensionUnload pName
 end __extensionUnload
 
@@ -624,22 +624,22 @@ private command __ProcessInspectorMetadata @xMetadataA
       if xMetadataA[tKey]["section"] is empty then
          put "Basic" into xMetadataA[tKey]["section"]
       end if
-      
+
       if xMetadataA[tKey]["label"] is empty then
          put tKey into xMetadataA[tKey]["label"]
       end if
-      
+
       # Process value options, default and delimiter
       replace comma with return in xMetadataA[tKey]["options"]
       replace "\n" with return in xMetadataA[tKey]["delimiter"]
       if xMetadataA[tKey]["default"] is not empty then
          replace "\n" with return in xMetadataA[tKey]["default"]
       end if
-      
+
       if xMetadataA[tKey]["user_visible"] is empty then
          put true into xMetadataA[tKey]["user_visible"]
       end if
-      
+
       if xMetadataA[tKey]["properties"] is not empty then
          -- If there is a 'properties' value, delete the key
          -- and replace it with that value
@@ -659,7 +659,7 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
 
    local tCacheID
    put __extensionCacheID("name", pID) into tCacheId
-   
+
    local tPropertyNames, tPropertyXMLData, tMaxOrder
    repeat for each element tProperty in tManifestA["properties"]
       local tName
@@ -670,18 +670,18 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
       put tProperty["get"] into tPropertyXMLData[tName]["get"]
       put max(tMaxOrder, tPropertyXMLData[tName]["data"]["order"]) into tMaxOrder
    end repeat
-   
+
    -- Sort by ordered props, then by order of appearance
    repeat for each element tProperty in tManifestA["properties"]
       if tPropertyXMLData[tProperty["name"]]["data"]["order"] is empty then
-         add 1 to tMaxOrder 
+         add 1 to tMaxOrder
          put tMaxOrder into tPropertyXMLData[tProperty["name"]]["data"]["order"]
       end if
    end repeat
-   
+
    put the keys of tPropertyXMLData into tPropertyNames
    sort tPropertyNames by tPropertyXMLData[each]["data"]["order"]
-   
+
    local tPropertyDataA
    repeat for each line tProperty in tPropertyNames
       local tIDEPropertyInfo, tPropertyInfoA
@@ -693,7 +693,7 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
       else
          put tPropertyInfoA into tPropertyDataA[tProperty]
       end if
-      
+
       local tReadOnly, tSetter
       put tPropertyXMLData[tProperty]["set"] into tSetter
       if tSetter is empty then
@@ -702,7 +702,7 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
          put false into tReadOnly
       end if
       put tReadOnly into tPropertyDataA[tProperty]["read_only"]
-      
+
       if tPropertyDataA[tProperty]["editor"] is empty then
          local tType
          put tPropertyXMLData[tProperty]["get"] into tType
@@ -712,13 +712,13 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
             put "com.livecode.pi." & tolower(tType) into tPropertyDataA[tProperty]["editor"]
          end if
       end if
-      # Tag the property as a widget property, so we can order them 
+      # Tag the property as a widget property, so we can order them
       # correctly after the built-in props for the given section
       put true into tPropertyDataA[tProperty]["widget_prop"]
    end repeat
-   
+
    # Fetch property override metadata
-   
+
    repeat for each key tProperty in tManifestA["metadata-keys"]
       if tPropertyXMLData[tProperty] is not empty then
          next repeat
@@ -730,13 +730,13 @@ private function __extensionPropertyInfoFromManifest pId, pManifestPath
          # tData might be non-empty for the property even though
          # there was no property node in the XML
          union tPropertyDataA[tProperty] with tManifestA[tProperty]
-         
+
          # Now take any default property info that was not specified
          # in the manifest
          union tPropertyDataA[tProperty] with tIDEPropInfoA
       end if
    end repeat
-   
+
    __ProcessInspectorMetadata tPropertyDataA
 
    return tPropertyDataA
@@ -744,41 +744,41 @@ end __extensionPropertyInfoFromManifest
 
 command revIDEExtensionSetInfo pTypeID
    set the itemdelimiter to slash
-   
+
    # Get the internal cache ID
    local tCacheIndex
    put __extensionCacheID("name", pTypeID) into tCacheIndex
-   
+
    # Get the target folder
    local tFolder
    put __extensionPropertyGet(tCacheIndex, "install_path") into tFolder
-   
+
    # Get information from the download package path if the manifest was not found
    if tFolder is empty then
       put item 1 to -2 of __extensionPropertyGet(tCacheIndex, "download_package_path") into tFolder
    end if
-   
+
    local tManifest
    put tFolder & slash & "manifest.xml" into tManifest
    if there is not a file tManifest and \
-         there is not a file (tManifest & ".bin") then 
+         there is not a file (tManifest & ".bin") then
       exit revIDEExtensionSetInfo
    end if
-   
+
    __extensionSetExtensionInfoFromManifest tCacheIndex, tManifest
    __extensionSetPropertyInfoFromManifest pTypeID, tManifest
-   
+
    # Set the default name
    local tTitle
    put __extensionPropertyGet(tCacheIndex, "title") into tTitle
    put tTitle into sExtensionProperties[pTypeID]["name"]["default"]
-   
+
 end revIDEExtensionSetInfo
 
 private command __extensionSetExtensionInfoFromManifest pCacheIndex, pManifestPath
    local tDataA
    revIDEExtensionFetchMetadata pManifestPath, tDataA
-   
+
    repeat for each key tKey in tDataA
       __extensionPropertySet pCacheIndex, tKey, tDataA[tKey]
    end repeat
@@ -814,7 +814,7 @@ on __extensionSendProgressUpdate pCacheIndex, pMessage, pProgress
    # Get progress information for extension
    __extensionPropertySet pCacheIndex, "progress_message", pMessage
    __extensionPropertySet pCacheIndex, "progress", pProgress
-   
+
    local tName
    put __extensionPropertyGet(pCacheIndex, "name") into tName
    ideMessageSend "ideExtensionStatusChanged", (tName & comma & pMessage & comma & pProgress)
@@ -855,12 +855,12 @@ function revIDEExtensionsOrderByDependency pExtensions
       __extensionAddDependenciesToRequiresArray \
             tExtension, tRequiresA, tExtensions
    end repeat
-   
+
    return extensionOrderByDependency(the keys of tExtensions, tRequiresA)
 end revIDEExtensionsOrderByDependency
 
 private function isUserExtension pData
-   if pData["ide"] then 
+   if pData["ide"] then
       return 1
    end if
    return 0
@@ -871,7 +871,7 @@ private command addToList pElement, @xArray
 end addToList
 
 on __extensionsLoad
-   local tDataA   
+   local tDataA
    # Fetch all the available data about extensions in the search paths
    local tFoldersA, tExtensionFolder
    put revIDEExtensionFolders() into tFoldersA
@@ -885,12 +885,12 @@ on __extensionsLoad
          extensionFindInFolder tExtFolder, tKey is "user", true, tDataA
       end repeat
    end repeat
-   
+
    # Now loop through, checking the status of them
    local tExtensionsList, tExtensionsA, tExtensionCount, tExtensionCopyCount, tExtensionDataA
    put the keys of tDataA into tExtensionsList
    sort tExtensionsList
-   
+
    local tToLoadA, tDependentsA, tRequiresA
    set the itemdel to ","
    put 1 into tExtensionCount
@@ -908,18 +908,18 @@ on __extensionsLoad
          add 1 to tExtensionCopyCount
       end repeat
       put tExtensionDataA into tToLoadA[tTypeID]
-      
+
       put tExtensionDataA["copies"][1]["requires"] into tDependentsA
       repeat for each element tElement in tDependentsA
          addToList tElement, tRequiresA[tTypeId]
       end repeat
       put empty into tExtensionDataA
    end repeat
-   
+
    local tLoadOrder
    put extensionOrderByDependency(tExtensionsList, tRequiresA) into \
          tLoadOrder
-   
+
    repeat for each line tLine in tLoadOrder
       # Extension utils is explicitly loaded
       if tLine is kExtensionUtils then
@@ -972,7 +972,7 @@ private command __extensionLoad pID, pExtensionDataA
    local tLoadedDataA, tToLoadA
    # Only try to load the first copy in the load order
    put pExtensionDataA["copies"][1] into tToLoadA
-   
+
    local tFolder, tVersion, tStatus, tError, tIDEExtension, tSourceFile, tSourceType
    put tToLoadA["install_path"] into tFolder
    put tToLoadA["version"] into tVersion
@@ -995,11 +995,11 @@ private command __MapCodeLibraryForIDE pFolder
       local tExtension
       set the itemDelimiter to slash
       put item -2 of pFolder into tExtension
-      
+
       put files(specialFolderPath("engine") & "/" & tExtension) & return & \
             folders(specialFolderPath("engine") & "/" & tExtension) into tLibraries
       filter tLibraries without ".*"
-      
+
       if tLibraries is not empty then
          set the itemDelimiter to "."
          repeat for each line tLibrary in tLibraries
@@ -1012,9 +1012,9 @@ private command __MapCodeLibraryForIDE pFolder
          end repeat
       end if
    end if
-   
+
    -- code folders should be platform ID triples however for the
-   -- time being as we have no way to access the data required to 
+   -- time being as we have no way to access the data required to
    -- determine the options section of the platform ID so we filter only
    -- arch and platform and hope for the best. Ideally we would have
    -- access to a build options string and give a complete match precedence.
@@ -1031,7 +1031,7 @@ private command __MapCodeLibraryForIDE pFolder
          filter tCodeFolders with "*-"& toLower(the platform) & "*"
          break
    end switch
-   
+
    local tFilteredCodeFolders
    filter tCodeFolders with the processor & "-*" into tFilteredCodeFolders
    split tFilteredCodeFolders by return as set
@@ -1044,12 +1044,12 @@ private command __MapCodeLibraryForIDE pFolder
       split tUniveralFilteredCodeFolders by return as set
       union tFilteredCodeFolders with tUniveralFilteredCodeFolders
    end if
-   
+
    repeat for each key tFolder in tFilteredCodeFolders
       put files(pFolder & "/" & tFolder) & return & \
             folders(pFolder & "/" & tFolder) into tLibraries
       filter tLibraries without ".*"
-      
+
       if tLibraries is not empty then
          set the itemDelimiter to "."
          repeat for each line tLibrary in tLibraries
@@ -1128,13 +1128,13 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    # Find entry in the cache if it exists
    local tCacheIndex
    put __extensionCacheID("install_path", pFolder) into tCacheIndex
-   
+
    # If no entry is in the cache, create one
    if tCacheIndex is not a number then
       put the number of elements of sExtensions + 1 into tCacheIndex
       __extensionPropertySet tCacheIndex, "install_path", pFolder
    end if
-   
+
    local tSupportFiles
    put pAdditionalInfoA["support_files"] into tSupportFiles
    local tLoadOnStartup
@@ -1159,31 +1159,31 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
          end if
       end if
    else
-      __extensionPropertySet tCacheIndex, "status", "unloaded" 
+      __extensionPropertySet tCacheIndex, "status", "unloaded"
    end if
-   
+
    # Update name, status, error, and whether the extension comes with the IDE
    __extensionPropertySet tCacheIndex, "name", pID
-   __extensionPropertySet tCacheIndex, "type_id", pID  & "." & pVersion 
+   __extensionPropertySet tCacheIndex, "type_id", pID  & "." & pVersion
    __extensionPropertySet tCacheIndex, "ide", pIsIDEExtension
    __extensionPropertySet tCacheIndex, "source_file", pSourceFile
    __extensionPropertySet tCacheIndex, "source_type", "lcb"
    __extensionPropertySet tCacheIndex, "support_files", tSupportFiles
-   
+
    # Check for sample stacks
    __extensionPropertySet tCacheIndex, "samples", __extensionSampleStacks(pID,pFolder)
 
    __extensionSetCommonProperties tCacheIndex, pId, pFolder
-   
+
    # Store the extension's metadata
    revIDEExtensionSetInfo pID
-   
+
    local tUserVisiblePref
    put revIDEGetPreferenceOfSet(pID, "uservisible") into tUserVisiblePref
    if tUserVisiblePref is not empty then
       __extensionPropertySet tCacheIndex, "uservisible", tUserVisiblePref
    end if
-   
+
    # Deal with the various icon possibilities
    if sExtensionProperties[pID]["svgicon"] is empty then
       local tIconPath
@@ -1192,18 +1192,18 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
          __extensionPropertySet tCacheIndex, "icon", tIconPath
       end if
    end if
-   
+
    # Load the default script if there is one
    local tDefaultScript
    put revIDEExtensionFetchDefaultScript(pFolder, pID, true) into tDefaultScript
    __extensionPropertySet tCacheIndex, "defaultScript", tDefaultScript
-   
+
    # Generate extension API from source if there is not one present in the folder
    # Don't do in an installed IDE as we might not be able to generate the files in the appropriate location
    if not revEnvironmentIsInstalled() and not there is a file (pFolder & slash & "api.lcdoc") then
       revIDEExtensionUpdateAPI pFolder, pSourceFile
    end if
-   
+
    return pError
 end __revIDELCBExtensionLoad
 
@@ -1246,24 +1246,24 @@ end __extensionNeedsLoad
 
 private command __revIDELCSExtensionLoad pFullPath, pFolder, pVersion, pStatus, \
       pError, pIsIDEExtension, pSourceFile, pAdditionalInfoA, pIsStartup
-   
+
    # Find entry in the cache if it exists
    local tCacheIndex
    put __extensionCacheID("install_path", pFolder) into tCacheIndex
-   
+
    # If no entry is in the cache, create one
    if tCacheIndex is not a number then
       put the number of elements of sExtensions + 1 into tCacheIndex
       __extensionPropertySet tCacheIndex, "install_path", pFolder
    end if
-   
+
    if pAdditionalInfoA is empty then
       put __fetchExtensionManifestData(pFolder, pSourceFile) into pAdditionalInfoA
    end if
-   
+
    local tType
    put pAdditionalInfoA["type"] into tType
-   
+
    # Update name, status, error, and whether the extension comes with the IDE
    local tId
    if __extensionHasID(tType) then
@@ -1275,48 +1275,48 @@ private command __revIDELCSExtensionLoad pFullPath, pFolder, pVersion, pStatus, 
       # The manifest should contain an id
       put pAdditionalInfoA["name"] into tId
    end if
-   
+
    local tLoadOnStartup
    if pError is empty and __extensionNeedsLoad(tType) then
       put revIDEExtensionGetLoadOnStartup(tID) into tLoadOnStartup
    end if
-   if not pIsStartup or (tLoadOnStartup is not false) then   
+   if not pIsStartup or (tLoadOnStartup is not false) then
       __LoadExtension tCacheIndex, tType, "lcs", pSourceFile, pFolder, pStatus, pError
    else
-      __extensionPropertySet tCacheIndex, "status", "unloaded" 
+      __extensionPropertySet tCacheIndex, "status", "unloaded"
    end if
-   
+
    __extensionPropertySet tCacheIndex, "name", tId
-   __extensionPropertySet tCacheIndex, "type_id", tId  & "." & pVersion 
-   
+   __extensionPropertySet tCacheIndex, "type_id", tId  & "." & pVersion
+
    __extensionPropertySet tCacheIndex, "author", pAdditionalInfoA["author"]
    __extensionPropertySet tCacheIndex, "title", pAdditionalInfoA["title"]
    __extensionPropertySet tCacheIndex, "svgicon", pAdditionalInfoA["svgicon"]
    __extensionPropertySet tCacheIndex, "version", pAdditionalInfoA["version"]
    __extensionPropertySet tCacheIndex, "platforms", pAdditionalInfoA["platforms"]
-   
+
    repeat for each key tKey in pAdditionalInfoA["uses"]
       local tSettingString
       put empty into tSettingString
-      -- store info about settings (android permissions etc)            
+      -- store info about settings (android permissions etc)
       repeat for each element tSetting in pAdditionalInfoA["uses"][tKey]
          addToStringList tSettingString, tSetting, ","
       end repeat
       __extensionPropertySet tCacheIndex, __UseTypeToKey(tKey), tSettingString
    end repeat
-   
+
    __extensionPropertySet tCacheIndex, "source_file", pSourceFile
    __extensionPropertySet tCacheIndex, "ide", pIsIDEExtension
    __extensionPropertySet tCacheIndex, "source_type", "lcs"
    __extensionPropertySet tCacheIndex, "type", pAdditionalInfoA["type"]
    __extensionPropertySet tCacheIndex, "uservisible", true
    __extensionPropertySet tCacheIndex, "support_files", pAdditionalInfoA["support_files"]
-   
+
    __extensionSetCommonProperties tCacheIndex, tId, pFolder
 
    # Store the extension's property metadata
    revIDEExtensionSetInfo tID
-   
+
    # Deal with the various icon possibilities
    if sExtensionProperties[tID]["svgicon"] is empty then
       local tIconPath
@@ -1325,7 +1325,7 @@ private command __revIDELCSExtensionLoad pFullPath, pFolder, pVersion, pStatus, 
          __extensionPropertySet tCacheIndex, "icon", tIconPath
       end if
    end if
-   
+
    # If this is not startup, then auto-launch snippet or sample stack
    if not pIsStartup then
       if tType is "snippet" then
@@ -1350,7 +1350,7 @@ command revIDEExtensionReload pTypeId
          tDataA["source_file"], tDataA["install_path"], \
          "", tError
    if tError is not empty then
-      answer error tError 
+      answer error tError
    end if
 end revIDEExtensionReload
 
@@ -1369,21 +1369,21 @@ function revIDEExtensionFetchDefaultScript pFolder, pCacheIndex, pValidate
    if there is a stack (pCacheIndex& ".__DefaultScript") then
       return the script of stack (pCacheIndex& ".__DefaultScript")
    end if
-   
+
    local tDefaultScriptPath
    put pFolder & "/support/defaultscript.livecodescript" into tDefaultScriptPath
-   
+
    if there is not a file tDefaultScriptPath then
       return empty
    end if
-   
+
    lock messages
    try
       open stack tDefaultScriptPath
    catch tStackError
       return empty
    end try
-   
+
    local tScript
    if tStackError is empty then
       if pValidate then
@@ -1396,23 +1396,23 @@ function revIDEExtensionFetchDefaultScript pFolder, pCacheIndex, pValidate
       delete stack tDefaultScriptPath
    end if
    unlock messages
-   
+
    return tScript
 end revIDEExtensionFetchDefaultScript
 
 function __extensionSampleStacks pID, pFolder
    local tSampleFolder, tSamples, tSampleArray
-   
+
    # Get the paths to sample satcks in the bundle
    put pFolder & slash & "samples" into tSampleFolder
    if there is a folder tSampleFolder then
       put files(tSampleFolder) into tSamples
       filter tSamples without ".*"
       repeat for each line tStack in tSamples
-         put pFolder & slash & "samples/" & tStack into tSampleArray[tStack] 
+         put pFolder & slash & "samples/" & tStack into tSampleArray[tStack]
       end repeat
    end if
-   
+
    return tSampleArray
 end __extensionSampleStacks
 
@@ -1477,7 +1477,7 @@ function revIDEExtensionDocsData pForAPI
       put tExtension["install_path"] into tDataA[tCount]["folder"]
       put tExtension["title"] into tDataA[tCount]["title"]
       put tExtension["author"] into tDataA[tCount]["author"]
-      put tExtension["source_file"] into tDataA[tCount]["source_file"]      
+      put tExtension["source_file"] into tDataA[tCount]["source_file"]
       put tExtension["source_type"] into tDataA[tCount]["source_type"]
       put tExtension["name"] into tDataA[tCount]["name"]
    end repeat
@@ -1492,15 +1492,15 @@ on revIDEExtensionUpdateAPI pFolder, pExtensionSource
       if tFiles is empty then exit revIDEExtensionUpdateAPI
       put line 1 of tFiles into pExtensionSource
    end if
-   
+
    # Check timestamps to see if API  is out of date.
-   local tNeedUpdate, tError, tSource
+   local tNeedUpdate?, tError, tSource
    put pFolder & slash & pExtensionSource into tSource
    put revIDEIsFilesetStale(tSource, \
-         pFolder & slash & "api.lcdoc", false, tError) into tNeedUpdate
-   if tNeedUpdate is empty then put true into tNeedUpdate
-   
-   if tNeedUpdate then
+         pFolder & slash & "api.lcdoc", false, tError) into tNeedUpdate?
+   if tNeedUpdate? is empty then put true into tNeedUpdate?
+
+   if tNeedUpdate? then
       local tText
       if there is a stack tSource then
          put the long id of stack tSource into tSource
@@ -1508,10 +1508,10 @@ on revIDEExtensionUpdateAPI pFolder, pExtensionSource
       else
          put textDecode(url("binfile:" & tSource), "utf-8") into tText
       end if
-      
+
       local tAPI
       dispatch function "revDocsGenerateDocsFileFromText" to stack "revDocsParser" with tText, tSource
-      put the result into tAPI 
+      put the result into tAPI
       put textEncode(tAPI, "utf-8") into url ("binfile:" & pFolder & slash & "api.lcdoc")
       return "updated"
    end if
@@ -1523,11 +1523,11 @@ command revIDEExtensionCompile pFolder, pFile, pSupportFiles, pTargetFolder, pOu
       put pFolder & slash before line tLine of pSupportFiles
    end repeat
    put pFolder & slash before pFile
-   
+
    extensionCompile "", pFile, pSupportFiles, "", \
          revIDESpecialFolderPath("user extensions") & slash & \
          "interface", pTargetFolder, pOutputFilename
-   
+
    if the result is not empty then
       return the result for error
    end if
@@ -1538,7 +1538,7 @@ command revIDEExtensionMetadata pFolder, pFile, pType, @rDataA
    local tDataA, tResult
    revIDEExtensionFetchMetadata pFolder & slash & "manifest.xml", tDataA
    put the result into tResult
-   
+
    put tDataA into rDataA
    return tResult
 end revIDEExtensionMetadata
@@ -1554,23 +1554,23 @@ private command revIDEExtensionFetchMetadata pManifestPath, @rDataA
    if the result is not empty then
       return the result
    end if
-   
+
    # Make sure 'inspector' style metadata is processed
    __ProcessInspectorMetadata tDataA["standaloneSettings"]
-   
+
    put tDataA into rDataA
    return empty
 end revIDEExtensionFetchMetadata
 
-function revIDEExtensionFileData pID 
+function revIDEExtensionFileData pID
    # Get the internal cache index
    local tCacheIndex
    put __extensionCacheID("name", pID) into tCacheIndex
-   
+
    local tFolder, tFile
    put __extensionPropertyGet(tCacheIndex, "install_path") into tFolder
    put __extensionPropertyGet(tCacheIndex, "file") into tFile
-   
+
    local tDataA
    put tFolder & slash & tFile into tDataA["file"]
 
@@ -1599,7 +1599,7 @@ private command __UnloadExtension pCacheIndex, pType, pSourceType, pSourceFile, 
    else
       put "unloaded" into tStatus
    end if
-   
+
    __extensionPropertySet pCacheIndex, "status", tStatus
    __extensionPropertySet pCacheIndex, "error", tError
    __extensionsChanged
@@ -1608,7 +1608,7 @@ end __UnloadExtension
 command revIDEExtensionUnload pKind
    local tCacheIndex
    put __extensionCacheID("name", pKind) into tCacheIndex
-   
+
    local tDataA
    put sExtensions[tCacheIndex] into tDataA
    __UnloadExtension \
@@ -1622,11 +1622,11 @@ end revIDEExtensionUnload
 function revIDEExtensionLibraryHandlers pLibraryID
    local tCacheIndex
    put __extensionCacheID("name", pLibraryID) into tCacheIndex
-   
+
    return __extensionPropertyGet(tCacheIndex, "handlers")
 end revIDEExtensionLibraryHandlers
 
-command revIDEExtensionIconFromType pType, pID, @rIconName, @rIconPath         
+command revIDEExtensionIconFromType pType, pID, @rIconName, @rIconPath
    put revIDEExtensionProperty(pID, "svgIcon") into rIconPath
    switch pType
       case "widget"
@@ -1691,13 +1691,13 @@ command revIDEExtensionLaunchSampleStack pSampleStack
         open stack sOpenedStacksA[pSampleStack]
         exit revIDEExtensionLaunchSampleStack
     end if
-    
+
     // Otherwise open the stack from the file. Wait until we
     // get the openStack message before emptying the filename
     // otherwise we will get a long id clash
     revIDESubscribe "ideOpenStack"
     put pSampleStack into sSampleFileName
-    
+
     ## Open the sample stack
     open stack pSampleStack
 end revIDEExtensionLaunchSampleStack
