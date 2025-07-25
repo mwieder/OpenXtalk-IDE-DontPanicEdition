@@ -63,6 +63,7 @@ xcuserdata/
 _build/
 _cache/
 environment_log.txt
+Runtime/
 
 # Documentation #
 #################

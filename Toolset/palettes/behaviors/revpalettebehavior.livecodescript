@@ -19,9 +19,9 @@ CONSTANT TAB_DISABLED_COLOR = "200,200,200"
 local sNavStyle
 local sData
 
-local sHideFrame
+local sHideFrame?
 setProp frameHidden pValue
-   put pValue into sHideFrame
+   put pValue into sHideFrame?
    if pValue is false then
       generateFrame
    end if
@@ -245,7 +245,7 @@ function canonicalStackName
 end canonicalStackName
 
 on generateFrame
-   if sHideFrame is true then
+   if sHideFrame? is true then
       exit generateFrame
    end if
    
@@ -375,7 +375,7 @@ on generateFrame
 end generateFrame
 
 function barHeight pSize
-   if sHideFrame is true then
+   if sHideFrame? is true then
       return 0
    end if
    
@@ -539,7 +539,7 @@ on revIDEFrameSizeChanged pName, pValue
 end revIDEFrameSizeChanged
 
 after resizeStack
-   if sHideFrame is not true then
+   if sHideFrame? is not true then
       layoutFrame
    end if
 end resizeStack
@@ -560,7 +560,7 @@ end preOpenStack
 
 after preOpenStack
    revIDESubscribe "ideDesktopChanged"
-   if sHideFrame is not true then
+   if sHideFrame? is not true then
       put revIDEColor("edition_color") into TAB_SELECTED_TEXT_COLOR
       put revIDEColor("edition_color") into TAB_HOVER_TEXT_COLOR
       revIDESubscribe "idePreferenceChanged:revPaletteFrameSize"
@@ -579,8 +579,8 @@ end openStack
 
 # MDW-2015-12-21 [[ unsubscribe_on_closestack]] plays well with others
 on closeStack
-	revIDEUnsubscribeAll
-	pass closeStack
+   revIDEUnsubscribeAll
+   pass closeStack
 end closeStack
 
 after closeStack
@@ -668,7 +668,7 @@ before menupick pItem
 end menupick
 
 getProp contentRect
-   if sHideFrame is true then
+   if sHideFrame? is true then
       return 0,5,the height of me, the width of me
    end if
    

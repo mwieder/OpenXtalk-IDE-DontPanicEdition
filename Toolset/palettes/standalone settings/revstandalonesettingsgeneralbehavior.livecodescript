@@ -23,7 +23,9 @@ on preOpenCard
          put empty into tHilite
          put field "include profiles" into tList
          repeat for each line tLine in tList
-            if tLine is among the lines of tStandaloneSettingsA["includeProfiles"] then put tCount & "," after tHilite
+            if tLine is among the lines of tStandaloneSettingsA["includeProfiles"] then
+               put tCount & "," after tHilite
+            end if
             add 1 to tCount
          end repeat
          set the hilitedLines of field "include profiles" to char 1 to -2 of tHilite

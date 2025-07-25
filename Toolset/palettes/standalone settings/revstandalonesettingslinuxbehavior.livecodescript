@@ -40,5 +40,7 @@ end preOpenCard
 
 private command setAvailableButtonForPlatform pPlatform
    dispatch function "revEngineCheck?" to stack "revSBLibrary" with pPlatform
-   set the visible of button pPlatform to the result
+   if it is not "unhandled" then
+      set the visible of button pPlatform to the result
+   end if
 end setAvailableButtonForPlatform pPlatform
