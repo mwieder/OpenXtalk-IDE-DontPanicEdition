@@ -155,7 +155,7 @@ on revStandaloneSettings pStack
 
    local tSettings
    put getSettings() into tSettings
-   dispatch "revSBDefaultStandaloneSettings" to stack "revStandaloneSettings" with pStack, tSettings
+   dispatch "SBDefaultStandaloneSettings" to stack "revStandaloneSettings" with pStack, tSettings
    setSettings tSettings
    modeless "revStandaloneSettings"
    dispatch "preOpenCard" to this card of stack "revStandaloneSettings"

@@ -15,7 +15,7 @@ on preOpenCard
    put revSBAvailableInclusions() into sExtensionData
    setUpExtensionList
 
-   send "renderView" to group "extensionList" of me
+   dispatch "renderView" to group "extensionList" of me
    if sHasOpened? then
       set the viewProp["vscroll"] of group "extensionList" of me to tScroll
    end if
@@ -123,13 +123,13 @@ function getExtensionHiliteList pExtensionData
    local tHiliteList, tId, tShouldHilite?, tTitle, tElement, tSettings
    put the customProperties["cRevStandaloneSettings"] of \
          stack the cRevTargetStack of this stack into tSettings
-
+   
    repeat for each key tIndex in pExtensionData
       put pExtensionData[tIndex] into tElement
       put false into tShouldHilite?
       put tElement["id"] into tId
       put tElement["title"] into tTitle
-
+      
       switch tElement["type"]
          case "widget"
          case "library"
@@ -141,7 +141,7 @@ function getExtensionHiliteList pExtensionData
          case "external"
             put tTitle is among the lines of tSettings["scriptLibraries"] or \
                   tTitle is among the lines of tSettings["externals"] into tShouldHilite?
-
+            
             repeat for each item tItem in "ios,android"
                if tSettings[tItem & ",include" && tId] then
                   put true into tShouldHilite?
@@ -151,27 +151,33 @@ function getExtensionHiliteList pExtensionData
          case "inclusion"
             put tTitle is among the lines of tSettings["scriptLibraries"] or \
                   tSettings[tTitle] into tShouldHilite?
-
+            
             repeat for each item tItem in "ios,android"
-               if tSettings[revSBInclusionToMobileKey(tTitle, "external", tItem)] then
+               dispatch function "SBInclusionToMobileKey" to stack "revSBLibrary" with tTitle, "external", tItem
+               if tSettings[the result] then
+                  #if tSettings[SBInclusionToMobileKey(tTitle, "external", tItem)] then
                   put true into tShouldHilite?
                end if
             end repeat
             break
          case "database driver"
             put tTitle is among the lines of tSettings["databaseDrivers"] into tShouldHilite?
-
+            
             repeat for each item tItem in "ios,android"
-               if tSettings[revSBInclusionToMobileKey(tTitle, "database driver", tItem)] then
+               dispatch function "SBInclusionToMobileKey" to stack "revSBLibrary" with tTitle, "database driver", tItem
+               if tSettings[the result] then
+                  #if tSettings[SBInclusionToMobileKey(tTitle, "database driver", tItem)] then
                   put true into tShouldHilite?
                end if
             end repeat
             break
          case "resource"
             put tSettings[tID] into tShouldHilite?
-
+            
             repeat for each item tItem in "ios,android"
-               if tSettings[revSBInclusionToMobileKey(tID, "external", tItem)] then
+               dispatch function "SBInclusionToMobileKey" to stack "revSBLibrary" with tID, "external", tItem
+               if tSettings[the result] then
+                  #if tSettings[SBInclusionToMobileKey(tID, "external", tItem)] then
                   put true into tShouldHilite?
                end if
             end repeat
@@ -179,6 +185,6 @@ function getExtensionHiliteList pExtensionData
       end switch
       put tShouldHilite? into tHiliteList[tIndex]
    end repeat
-
+   
    return tHiliteList
 end getExtensionHiliteList

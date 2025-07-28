@@ -74,7 +74,7 @@ command resize
        tMyRect[4] - tFindHeight - tScriptScrollSize into tNewRect
    if the rect of tControls["gutter"] is not tNewRect then
       set the rect of tControls["gutter"] to tNewRect
-      send "resize" to tControls["gutter"]
+      dispatch "resize" to tControls["gutter"]
    end if
 
    -- If the script is encrypted, display the password layer over the
@@ -83,7 +83,7 @@ command resize
    if scriptProtected() then
       set the loc of tControls["password"] to (item 1 of the loc of me), (item 2 of the loc of tControls["password"])
       set the top of tControls["password"] to the top of me + (the height of me div 3)
-      send "openControl" to tControls["password"]
+      dispatch "openControl" to tControls["password"]
    else
       set the right of tControls["password"] to the left of me - 20
    end if
@@ -327,33 +327,33 @@ command selectionUpdate
    if the lockText of field "Script" of me is false then
       deSelectLastGoneToLine
    end if
-    
+   
    # Tell the script editor to update its panes. This is called here in particular
    # for the documentation pane to update itself when the user selects a new term.
    paneUpdateRequest
-    
+   
    # Update the variables that store the last selected line and handler list
    updateHandlerList
-    
+   
    updateSelectedHandler
    
    contextSave
-    
+   
    # Update the toolbar so that the handlers list can reflect the new selection. For efficiency we pass
    # a parameter to the update command which tells it that the selected handler can be assumed to be
    # up to date, so it doesn't need to evaluate it again (as we just updated it).
    local tTrueString
    put "true" into tTrueString
-     
+   
    # OK-2009-10-05: Optimized this a little. The previous call to update was doing quite a bit of stuff
    # that is not required here. I factored out the stuff that we actually need into a new method, which
    # is now called instead.
    -- send "update tTrueString" to group "Toolbar" of stack (revTargetStack(the long id of me))
-   send "updateSelectedHandler tTrueString" to group "Toolbar" of stack (revTargetStack(the long id of me))
+   dispatch "updateSelectedHandler" to group "Toolbar" of stack (revTargetStack(the long id of me)) with tTrueString
    # Update the left bar in the same way as the toolbar is updated
    # OK-2009-10-05: Some more optimization here, the update method was doing a lot of stuff that is not
    # needed, so I added a more specific method to handle this situation.
-   send "updateSelectedHandler" to group "Left Bar" of stack (revTargetStack(the long id of me))
+   dispatch "updateSelectedHandler" to group "Left Bar" of stack (revTargetStack(the long id of me))
    unlock screen
    pass selectionUpdate
 end selectionUpdate
@@ -362,12 +362,12 @@ end selectionUpdate
 #   pObjectId : reference to the object to set the script to. Must be one of the target objects of the script editor.
 # Description
 #   Sets the current target object of the editor group.
-command setObject pObjectId, pDontSendCallbacks
+command setObject pObjectId, pDontSendCallbacks?
    local tRuggedObjectId
    put seGetRuggedId(pObjectId) into tRuggedObjectId
 
    if getObjectID() is not empty and tRuggedObjectId is getObjectID() then
-      if not pDontSendCallbacks then
+      if not pDontSendCallbacks? then
          seSendCallbacks getObjectID(), the name of stack (revTargetStack(the long id of me))
       end if
       exit setObject
@@ -397,7 +397,7 @@ command setObject pObjectId, pDontSendCallbacks
    resize
    unlock screen
    
-   if not pDontSendCallbacks then
+   if not pDontSendCallbacks? then
       seSendCallbacks getObjectID(), the name of stack (revTargetStack(the long id of me))
    end if
 end setObject
@@ -447,8 +447,8 @@ end getObject
 #   pDontUpdate : if true, the selected handler is assumed to be up to date and the stored one is just returned.
 # Description
 #   Returns the last selected handler of the current object
-command getSelectedHandler pDontUpdate
-   if pDontUpdate is not "true" then
+command getSelectedHandler pDontUpdate?
+   if pDontUpdate? is not "true" then
       updateSelectedHandler
    end if
    return sLastSelectedHandler
@@ -535,9 +535,9 @@ end updateHandlerList
 # Description
 #   Clears the script cache for the specified object. This should be called when the object is being closed. The cache also
 #   includes selection information.
-command clearCache pObject, pDontCheckId
+command clearCache pObject, pDontCheckId?
    local tObject
-   if pDontCheckId then
+   if pDontCheckId? then
       put pObject into tObject
    else
       put seGetRuggedId(pObject) into tObject
@@ -593,7 +593,7 @@ end scriptProtected
 # Description
 #   Shows error indicators for the specified compilation errors
 command setCompilationErrors pErrors, pObject
-   send "setCompilationErrors pErrors, pObject" to group "Gutter" of me
+   dispatch "setCompilationErrors" to group "Gutter" of me with pErrors, pObject
    if seGetRuggedId(pObject) is getObjectID() then
       updateGutterRequest empty, empty, empty, empty, false, true
    end if
@@ -1814,10 +1814,10 @@ private function findBuildSearch pQuery, pIsRegExp, pUseWildcard, pWholeMatch, p
       put revTargetStack(tFocusedObject) into tStack
       
       if tStack is "revSEFind" then
-         send "getSearchString" to stack "revSEFind"
+         dispatch "getSearchString" to stack "revSEFind"
          put the result into sFindQuery["query"]
       else if sePrefGet("editor,findvisible") then
-         send "getSearchString" to group "Interactive Find" of me
+         dispatch "getSearchString" to group "Interactive Find" of me
          put the result into sFindQuery["query"]
       else if sFindQuery["query"] is empty then
          put findDefaultSearch() into sFindQuery
@@ -1972,7 +1972,7 @@ command showNextFindResult pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnor
       findText tScript, false, tStart, tSearch["end"], tSearch
       if the result is not empty then
          put the result into tResult
-         unlock screen
+         --unlock screen
          
          if tResult is sFirstFindLocation and getObjectID() is sFirstFindObject then
             --beep
@@ -2050,7 +2050,7 @@ private command findDispatchCallback pCallback, pCallbackTarget, pMessage
    
    local tResult
    try
-      send pCallback && "pMessage" to pCallbackTarget
+      dispatch pCallback to pCallbackTarget with pMessage
       put the result into tResult
    end try
    
@@ -2483,10 +2483,13 @@ private function tooltipTruncateValue pValue, pLines, pChars
    return tValue
 end tooltipTruncateValue
 
+/**
 # Parameters
 #   pText : the text to display as a tooltip
 # Description
 #   Sets the tooltip of the script field to pText
+#   Limits text to 500 chars
+*/
 private command tooltipDisplay pText
    local tText
    put char 1 to 500 of pText into tText
@@ -2508,7 +2511,7 @@ private function getSelectedVariable pStart, pEnd
    local tStart
    put pStart into tStart
    repeat with x = (pStart - 1) down to 1
-      if charAllowedInVariableName(char x of field "Script" of me) then
+      if charAllowedInVariableName?(char x of field "Script" of me) then
          subtract 1 from tStart
       else
          exit repeat
@@ -2519,7 +2522,7 @@ private function getSelectedVariable pStart, pEnd
    local tEnd
    put pEnd into tEnd
    repeat with x = (pEnd + 1) to the number of chars of field "Script" of me
-      if charAllowedInVariableName(char x of field "Script" of me) then
+      if charAllowedInVariableName?(char x of field "Script" of me) then
          add 1 to tEnd
       else
          exit repeat
@@ -2536,7 +2539,7 @@ constant kVariablePunctuators = "£$_`@'?."
 #   pChar : a single character
 # Returns
 #   Whether or not pChar is allowed in a Revolution variable name
-private function charAllowedInVariableName pChar
+private function charAllowedInVariableName? pChar
    # Numbers are allowed
    if pChar is a number then
       return true
@@ -2561,7 +2564,7 @@ private function charAllowedInVariableName pChar
    end if
    
    return false
-end charAllowedInVariableName
+end charAllowedInVariableName?
 
 # Description
 #   Resets the tooltip of the script field. Called when the user has moved the mouse away from any variable names.
