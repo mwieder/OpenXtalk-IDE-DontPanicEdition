@@ -1,4 +1,5 @@
 ﻿script "revideextensionlibrary"
+
 local sExtensions, sExtensionProperties, sModuleVersion
 
 constant kExtensionUtils = "com.livecode.library.extension-utils"
@@ -40,11 +41,11 @@ private function __ModuleVersion
    return sModuleVersion
 end __ModuleVersion
 
+--- Get the module filename, could be earlier version of module format. indicate with pUseVersion boolean
 function revIDEExtensionBytecodeFilename pUseVersion
    if pUseVersion is empty then
       put true into pUseVersion
    end if
-
    if pUseVersion then
       return "module." & __ModuleVersion() & ".lcm"
    else
@@ -161,7 +162,22 @@ command revIDEExtensionUninstall pName
    __extensionsChanged
 end revIDEExtensionUninstall
 
-# Returns the extension data
+
+/**
+Summary: Returns the extension data as an array
+
+Parameters:
+pType (optional string): "library","widgets","modules","plugins"
+pStatus (optional string): "installed" to limit results to installed extensions
+pWithoutInvisible (optional boolean): treu to exclude 'userInvisible' extensions
+
+Example:
+// list widget extensions of any install-status:
+put revIDEExtensions ("library",,false] into tArray; put the keys of tArray
+
+// list plugin add-on extensions:
+put revIDEExtensions ("plugin","installed",false) into tArray; put the keys of tArray
+**/
 function revIDEExtensions pType, pStatus, pWithoutInvisible
    # No type passed so return all extensions
 
@@ -191,9 +207,18 @@ function revIDEExtensions pType, pStatus, pWithoutInvisible
    return tExtensions
 end revIDEExtensions
 
-# Returns the extension data
-function revIDEExtensionProperties pTypeID
-   return sExtensionProperties[pTypeID]
+/**
+Summary: Returns an Array of an extension's properties
+
+Parameters:
+pExtID (string): an Extension name-space identifier string
+
+Example:
+// list extension property names:
+put revIDEExtensionProperties ("com.livecode.library.scriptitems") into tArray; put the keys of tArray
+**/
+function revIDEExtensionProperties pExtID
+   return sExtensionProperties[pExtID]
 end revIDEExtensionProperties
 
 # organise the property info into the structure that the inspectors
@@ -214,6 +239,18 @@ private function __OrganiseInspectorMetadata pDataA
    return tExtensionPropsInfoA
 end __OrganiseInspectorMetadata
 
+
+/**
+Summary: Returns an Array of an extension's properties
+
+Parameters:
+pTypeId (string): an Extension name-space identifier string
+pOrganise (optional boolean): true for the result array to be organized by section
+
+Example:
+// list extension property names for the Clock Widget:
+put revIDEExtensionPropertiesInfo ("com.livecode.widget.clock",false) into tArray; put the keys of tArray
+**/
 function revIDEExtensionPropertiesInfo pTypeId, pOrganise
    local tPropsA, tExtensionPropsInfoA
    put revIDEExtensionProperties(pTypeId) into tPropsA
@@ -225,9 +262,20 @@ function revIDEExtensionPropertiesInfo pTypeId, pOrganise
    end if
 end revIDEExtensionPropertiesInfo
 
-function revIDEExtensionProperty pKind, pProperty
+/**
+Summary: Returns a specfic properties of an extension's properties
+
+Parameters:
+pExtID (string): an Extension name-space identifier string
+pProperty (string): the name of the property to reteive
+
+Example:
+// get the extension title:
+put revIDEExtensionProperty("com.livecode.library.scriptitems","title")
+**/
+function revIDEExtensionProperty pExtID, pProperty
    local tExtensionID
-   put __extensionCacheID("name", pKind) into tExtensionID
+   put __extensionCacheID("name", pExtID) into tExtensionID
 
    if pProperty is "api" then
       return __TypeToAPI(__extensionPropertyGet(tExtensionID, "type"))
@@ -236,32 +284,72 @@ function revIDEExtensionProperty pKind, pProperty
    return __extensionPropertyGet(tExtensionID, pProperty)
 end revIDEExtensionProperty
 
-command revIDEExtensionToggleUserVisibility pKind
+/**
+Summary: Toggle an extension visibility to the IDE user
+
+Parameters:
+pExtID (string): an Extension name-space identifier string
+
+Example:
+// hide/show the Tree View widget
+revIDEExtensionToggleUserVisibility "com.livecode.widget.treeview"
+**/
+command revIDEExtensionToggleUserVisibility pExtID
    local tCacheId
-   put __extensionCacheID("name", pKind) into tCacheId
+   put __extensionCacheID("name", pExtID) into tCacheId
 
    local tUserVisible
    put __extensionPropertyGet(tCacheId, "uservisible") \
          into tUserVisible
    __extensionPropertySet tCacheId, "uservisible", not tUserVisible
-   revIDESetPreferenceOfSet pKind, "uservisible", not tUserVisible
+   revIDESetPreferenceOfSet pExtID, "uservisible", not tUserVisible
 end revIDEExtensionToggleUserVisibility
 
-command revIDEExtensionToggleLoadOnStartup pKind
+/**
+Summary: Toggle wether or not an extension loads aton IDE startup
+
+Parameters:
+pExtID (string): an Extension name-space identifier string
+
+Example:
+// Turn on/off loading of the Analog Clock widget
+revIDEExtensionToggleLoadOnStartup "com.livecode.widget.clock"
+**/
+command revIDEExtensionToggleLoadOnStartup pExtID
    local tLoadOnStartup
-   put revIDEGetPreferenceOfSet(pKind, "loadOnStartup") into tLoadOnStartup
+   put revIDEGetPreferenceOfSet(pExtID, "loadOnStartup") into tLoadOnStartup
    if tLoadOnStartup is empty then
       put true into tLoadOnStartup
    end if
    revIDEExtensionSetLoadOnStartup pKind, not tLoadOnStartup
 end revIDEExtensionToggleLoadOnStartup
 
-command revIDEExtensionSetLoadOnStartup pKind, pValue
-   revIDESetPreferenceOfSet pKind, "loadOnStartup", pValue
+/**
+Summary: Set wether or not an extension loads on IDE startup
+
+Parameters:
+pExtID (string): an Extension name-space identifier string
+pValue (Boolean): true or false
+
+Example:
+// Turn off loading of the Analog Clock widget
+revIDEExtensionToggleLoadOnStartup "com.livecode.widget.clock", false
+**/
+command revIDEExtensionSetLoadOnStartup pExtID, pValue
+   revIDESetPreferenceOfSet pExtID, "loadOnStartup", pValue
 end revIDEExtensionSetLoadOnStartup
 
-function revIDEExtensionGetLoadOnStartup pKind
-   return revIDEGetPreferenceOfSet(pKind, "loadOnStartup") is not false
+/**
+Summary: get wether or not an extension loads on IDE startup
+
+Parameters:
+pExtID (string): an Extension name-space identifier string
+
+Example:
+put revIDEExtensionGetLoadOnStartup("com.livecode.widget.clock")
+**/
+function revIDEExtensionGetLoadOnStartup pExtID
+   return revIDEGetPreferenceOfSet(pExtID, "loadOnStartup") is not false
 end revIDEExtensionGetLoadOnStartup
 
 function revIDEExtensionStandaloneSettings pID
@@ -272,6 +360,17 @@ function revIDEExtensionStandaloneSettings pID
    return __extensionPropertyGet(tCacheIndex, "standaloneSettings")
 end revIDEExtensionStandaloneSettings
 
+
+/**
+Summary: get the standalone settings for an extension
+
+Parameters:
+pTypeId (string): an Extension name-space identifier string
+pOrganise (optional Boolean): sert to SB ta panel
+
+Example:
+get revIDEExtensionStandaloneSettingsInfo("com.livecode.widget.clock", false); put the keys of it
+**/
 function revIDEExtensionStandaloneSettingsInfo pTypeId, pOrganise
    local tPropsA, tExtensionPropsInfoA
    put revIDEExtensionStandaloneSettings(pTypeId) into tPropsA
@@ -807,7 +906,16 @@ private function __extensionError pCacheIndex, pErrorMessage
    return pErrorMessage
 end __extensionError
 
-# Send notication that widget has been added/removed
+
+/**
+Send notication that widget has been added/removed.
+
+Description:
+Sends update notification with ideMessageSend "ideExtensionsChanged" to all
+objects that have subscribed to tha IDE message ideExtensionsChanged using <revIDESubscribe>.
+
+References: ideSubscribe (command), ideMessageSend (command)
+**/
 on doExtensionsChanged
    ideMessageSend "ideExtensionsChanged"
 end doExtensionsChanged
@@ -1338,6 +1446,9 @@ private command __revIDELCSExtensionLoad pFullPath, pFolder, pVersion, pStatus, 
    return pError
 end __revIDELCSExtensionLoad
 
+
+/**
+**/
 command revIDEExtensionReload pTypeId
    local tCacheIndex
    put __extensionCacheID("name", pTypeID) into tCacheIndex
@@ -1355,6 +1466,8 @@ command revIDEExtensionReload pTypeId
    end if
 end revIDEExtensionReload
 
+/**
+**/
 command revIDEExtensionLoad pType, pID, pFolder, pVersion, pStatus, pError, \
       pIDEExtension, pSourceFile, pAdditionalInfoA, pIsStartup
    if pType is "lcb" then
@@ -1443,6 +1556,7 @@ private function __TypeToAPI pType
    end switch
 end __TypeToAPI
 
+-- get revIDEExtensionDocsData("Script"); put the keys of it
 function revIDEExtensionDocsData pForAPI
    local tExtensionsA
    put revIDEExtensions("", "installed", true) into tExtensionsA
@@ -1541,6 +1655,20 @@ private command revIDEExtensionFetchMetadata pManifestPath, @rDataA
    return empty
 end revIDEExtensionFetchMetadata
 
+/**
+Summary: gets file data for a given Extension ID
+
+Parameters:
+pExtensionID (string): An IDE Extension identifier
+
+Example:
+// display the "file" key, a file path to the Extension's bytcode module
+put revIDEExtensionFileData ( "com.livecode.widget.treeview") into tData; put tData["file"]
+
+// display the file "type" key, will be either 'lcb' or 'lcs'
+put revIDEExtensionFileData ( "com.livecode.widget.treeview") into tData; put tData["file"]
+
+**/
 function revIDEExtensionFileData pID
    # Get the internal cache index
    local tCacheIndex
@@ -1578,6 +1706,16 @@ private command __UnloadExtension pCacheIndex, pSourceType, pSourceFile, pTypeId
    __extensionsChanged
 end __UnloadExtension
 
+/**
+Summary: unloads an Extension module for the given Extension ID
+
+Parameters:
+pExtensionID (string): An IDE Extension identifier
+
+Example:
+// Unload the Tree View Widget's module
+revIDEExtensionUnload  "com.livecode.widget.treeview"
+**/
 command revIDEExtensionUnload pKind
    local tCacheIndex
    put __extensionCacheID("name", pKind) into tCacheIndex
@@ -1588,6 +1726,16 @@ command revIDEExtensionUnload pKind
          tDataA["source_file"], pKind
 end revIDEExtensionUnload
 
+/**
+Summary: List public handlers of a Library module for the given Extension ID
+
+Parameters:
+pExtensionID (string): An IDE Extension identifier
+
+Example:
+// Get a list of handlers from the Toast Library
+put revIDEExtensionLibraryHandlers( "com.livecode.library.toast")
+**/
 function revIDEExtensionLibraryHandlers pLibraryID
    local tCacheIndex
    put __extensionCacheID("name", pLibraryID) into tCacheIndex
@@ -1595,6 +1743,8 @@ function revIDEExtensionLibraryHandlers pLibraryID
    return __extensionPropertyGet(tCacheIndex, "handlers")
 end revIDEExtensionLibraryHandlers
 
+/**
+**/
 command revIDEExtensionIconFromType pType, pID, @rIconName, @rIconPath
    put revIDEExtensionProperty(pID, "svgIcon") into rIconPath
    switch pType

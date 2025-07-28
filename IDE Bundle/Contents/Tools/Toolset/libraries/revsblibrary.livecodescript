@@ -694,7 +694,7 @@ function revFolderNameIsIllegal pName
 
    # This appears to be the max length from looking at older code. There was also a limit of
    # 27 chars on Mac, but i think this is left over from classic so removed it.
-   -- makes sese but old mac up to system 9 actually had 32 char filename limit (not 27) -- Paul
+   -- makes sense but old mac up to system 9 actually had 32 char filename limit (not 27) -- Paul
    if the length of pName > 246 then
       return true
    end if

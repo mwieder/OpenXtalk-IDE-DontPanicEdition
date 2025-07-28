@@ -2556,7 +2556,7 @@ on tmpLog pMsg
 end tmpLog
 
 private command log pMessage
-   put pMessage & return after msg
+   -- put pMessage & return after msg
 end log
 
 #####################################################################

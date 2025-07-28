@@ -1511,14 +1511,14 @@
 				"name":"processName",
 				"type":"",
 				"refparam":"false",
-				"description":"The file path to the process you opened with the open process command."
+				"description":"The file path / parameters that were used to run the process with the open process command."
 			}],
 			"examples":[{
 				"script":"close process \"/bin/sh\""
 			},{
 				"script":"close process tOpenProgram"
 			}],
-			"description":"Use the <close process> <command> to tell a <process> to <exit> after\nyou've finished using it.\n\nOn Unix and Windows systems, <close process> closes the\n<process|process's> <standard input>. The <process> then finishes\nprocessing whatever data remains, and exits when done. On <Mac OS|Mac OS\nsystems>, the <close process> <command> has no effect; you can use the\n<kill> <command> instead to quit an application that the engine launched.\n\nThe process takes a short time to exit after you issue the\n<close process> <command>. Since two <process|processes> cannot have the\nsame name, you need to wait for a <process> to exit before opening a new\n<process> with the same name. To reopen the same <process> after closing\nit, use the <wait> <command> to delay until the <process> has finished\nexiting:\n\n    close process myProcess\n    wait until myProcess is not among the lines of the openProcesses\n    open process myProcess\n\n\nIf a process was opened with the access mode neither, it exits\nautomatically when it finishes running, and does not need to be closed.",
+			"description":"Use the <close process> <command> to tell a <process> to <exit> after\nyou've finished using it.\n\nOn desktop systems, <close process> tells a\n<process|process's> <standard input> to end running. The <process> then finishes\nprocessing whatever data remains, and then exits.\n\nOnce opened a <process> may remain in the openProcesses list but its ID number\nin the the openProcessIDs list will be 0 (zero) if the process is not actually\nrunning. If a process was opened with the access mode neither, it exits\nautomatically when it finishes running, and does not need to be closed.\n\nYou can use the <kill> <command> instead to quit a process.\n\nThe process may take a short time to exit after you issue the\n<close process> <command>. Since two <process|processes> cannot have the\nsame name, you need to wait for a <process> to exit before opening a new\n<process> with the same name.\n\nTo reopen the same <process> after closing\nit, use the <wait> <command> to delay until the <process> has finished\nexiting:\n\n    close process myProcess\n    wait until myProcess is not among the lines of the openProcesses\n    open process myProcess\n\n>*Note:* Child process related syntax may behave differently on various platforms.",
 			"references":{
 				"command":["wait","kill","read from process","quit","open process"],
 				"function":["openProcesses"],
@@ -5365,17 +5365,17 @@
 				"name":"signalNumber",
 				"type":"",
 				"refparam":"false",
-				"description":"The number of the Unix signal to send to the process. \n>*Note:* The <signalNumber> parameter is ignored on Mac OS and Windows systems."
+				"description":"The number of the Unix signal to send to the process.\n>*Note:* The <signalNumber> parameter is ignored on Windows systems."
 			},{
 				"name":"signalName",
 				"type":"",
 				"refparam":"false",
-				"description":"The name of a Unix signal, minus the leading \"SIG\". (For example, to\nsend SIGHUP to a process, use HUP as the <signalName>.)\n>*Note:* The <signalName> parameter is ignored on Mac OS and Windows systems."
+				"description":"The name of a Unix signal, minus the leading \"SIG\". (For example, to\nsend SIGHUP to a process, use HUP as the <signalName>.)\n>*Note:* The <signalName> parameter is ignored on Windows systems."
 			},{
 				"name":"processName",
 				"type":"",
 				"refparam":"false",
-				"description":"The name of a currently executing process."
+				"description":"The name and parameters, if any, for the running sub-process."
 			}],
 			"examples":[{
 				"script":"kill process \"rnews\""
@@ -5384,7 +5384,7 @@
 			},{
 				"script":"kill QUIT process it"
 			}],
-			"description":"Use the <kill> command to send a signal to a <process> (on <Unix|Unix\nsystems>), or to terminate a <process> with extreme prejudice.\n\nOn Mac OS systems, the <kill> <command> sends a \"Quit Application\"\n<Apple Event|Apple event> to the specified application.\n\nOn Unix systems, the <kill> command sends the specified signal to the\n<process>. If no signal is specified, the <kill> command sends SIGTERM.\nCheck the <Unix> documentation for information about available signals.\nThe <file> /usr/include/sys/signal.h lists signals and their\ncorresponding signal numbers.\n\nIf possible, use the <close process> command instead of the <kill>\n<command> to terminate a <process>. The <kill> <command> causes an\nimmediate <exit>, and may prevent the <process> from removing temporary\n<files> or doing other cleanup tasks.",
+			"description":"Use the <kill> command to send a signal to a <process> telling it\nto terminate processing with extreme prejudice.\n\nOn Unix based systems Mac and Linux systems, the <kill> command sends the\nspecified signal to a <process>. If no signal is specified, the <kill> command\nsends SIGTERM. Check the systems 'kill' command documentation for information\nabout available signals.\n\nIf possible, use the <close process> command instead of the <kill>\n<command> to terminate a <process>. The <kill> <command> causes an\nimmediate <exit>, and may prevent the <process> from removing temporary\n<files> or doing other cleanup tasks.",
 			"references":{
 				"keyword":["file"],
 				"message":["signal"],
@@ -11430,7 +11430,7 @@
 				"name":"processName",
 				"type":"string",
 				"refparam":"false",
-				"description":"The processName specifies the name and location of the process you want\nto read from. It must be the same as the path you used with the open\nprocess command.\n>*Important:*  The <processName> is <case-sensitive>, even on\n> <platform|platforms> where file names are not <case-sensitive>. It\n> must be exactly the same--including the case of characters--as the\n> name you used with the <open process> <command>."
+				"description":"The processName specifies the name and location of the process you want\nto read from. It must be the same as the path and any parameters that was used\nwith the open process command.\n>*Important:*  The <processName> is <case-sensitive>, even on\n> <platform|platforms> where file names are not <case-sensitive>. It\n> must be exactly the same--including the case of characters--as the\n> name you used with the <open process> <command>."
 			},{
 				"name":"start",
 				"type":"string",
@@ -11450,7 +11450,7 @@
 				"name":"string",
 				"type":"string",
 				"refparam":"false",
-				"description":"The <string> is any <expression> that <evaluate|evaluates> to a\n<string>. When OpenXTalk encounters the <string> in the <process> output,\nit stops reading. If the <string> is not encountered, the <read from\nprocess> <command> continues reading as long as there is data to be\nread. "
+				"description":"The <string> is any <expression> that <evaluate|evaluates> to a\n<string>. When OpenXTalk encounters the <string> in the <process> output,\nit stops reading. If the <string> is not encountered, the <read from\nprocess> <command> continues reading as long as there is data to be\nread."
 			},{
 				"name":"amount",
 				"type":"integer",
@@ -11473,7 +11473,7 @@
 				"type":"",
 				"description":"The process to read from must be opened first with the <open process>\n<command>, and the mode the <process> was opened in must be read or\nupdate. If the process is not running or is write-only, the <result>\n<function> is set to \"Process is not open for read.\". If the <read from\nprocess> <command> encounters the end of the data output, the <result>\n<function> is set to \"eof\". If you specify a <time> and the read is not\ncompleted when that time has elapsed, the <result> <function> is set to\n\"time out\". If the read was successful, the result is set to empty."
 			}],
-			"description":"Use the <read from process> <command> to get the output data from\nanother program.\n\nThe **until** form reads data until the specified string is\nencountered. \nThe until end and until eof forms read data until the\nprocess specifies it is finished. \nWhen until empty is used the data is read in at specified time intervals.\nIf, when checked, the data is empty, the <openProcesses> <function> is used \nto check whether the process has finished. ",
+			"description":"Use the <read from process> <command> to get the output data from\nanother program.\n\nThe **until** form reads data until the specified string is\nencountered.\nThe until end and until eof forms read data until the\nprocess specifies it is finished.\nWhen until empty is used the data is read in at specified time intervals.\nIf, when checked, the data is empty, the <openProcesses> <function> is used\nto check whether the process has finished.",
 			"references":{
 				"keyword":["uInt2","string","int1","characters","int4","integer","int2","real4","uInt4","stdin","it","uInt1","character","real8"],
 				"constant":["EOF"],
@@ -11482,7 +11482,7 @@
 				"control structure":["function"],
 				"glossary":["platform","binary file","variable","byte","case-sensitive","expression","evaluate","command","process"]
 			},
-			"changes":"Support for using the read from process command on OS X systems was\nadded in version 2.0."
+			"changes":"Support for using the read from process command on Mac OS X (10) and above\nsystems was added in Runtime Revolution version 2.0."
 		},{
 			"id":"script-268",
 			"name":"read_from_socket",
@@ -32182,7 +32182,7 @@
 			"display syntax":[
 				"the openProcessIDs"
 			],
-			"summary":"<return|Returns> the <process> IDs of <process|processes> that have been\nopened with the <open process> <command>, but have not yet\n<exit|exited>. ",
+			"summary":"<return|Returns> the <process> IDs of <process|processes> that have been\nopened with the <open process> <command>.",
 			"introduced":"1.0",
 			"OS":["mac","windows","linux"],
 			"platforms":["desktop","server"],
@@ -32197,7 +32197,7 @@
 				"type":"",
 				"description":"The <openProcessIDs> <function> <return|returns> a list of\n<integer|integers>, one per <line>."
 			}],
-			"description":"Use the <openProcessIDs> <function> to communicate with\n<process|processes> you have opened with the <open process> <command>.\n\nCertain Unix commands such as \"kill\" require a process ID. You can use\nthese commands to act on processes you opened by using the shell\n<command> :\n\n    put \"kill -9\" && line 1 of the openProcessIDs into whatToExecute\n    get shell(whatToExecute)\n\n\nOn Mac OS and OS X systems, there is no process ID. Instead, the\n<openProcessIDs> function <return|returns> a list of <integer|integers>.\nThe first application started up (with the <open process> or <launch>\n<command>) during a session is assigned the number 1, the second is\nassigned the number 2, and so on. After an application quits, its\n<process> number is not re-used, so you can use the <openProcessIDs>\n<function> to determine how many times OpenXTalk has started up an\napplication during the current session.\n\nThe list of process IDs is in the same order used by openProcesses\n<function>, which is the same order that the <process|processes> were\nopened. \n\nPrograms that were not started by OpenXTalk are not included in the list\nreturned by the <openProcessIDs> <function>.",
+			"description":"Use the <openProcessIDs> <function> to communicate with\n<process|processes> you have opened with the <open process> <command>.\n\nCertain Unix commands such as \"kill\" require a PID (process ID) number.\nYou can use these commands to act on processes by using the shell\n<command> :\n\n    put \"kill -9\" && line 1 of the openProcessIDs into whatToExecute\n    get shell(whatToExecute)\n\nThe list of process IDs is in the same order used by openProcesses\n<function>, which is the same order that the <process|processes> were\nopened.\n\nPrograms that were not started by OpenXTalk are not included in the list\nreturned by the <openProcessIDs> <function>.",
 			"references":{
 				"keyword":["line"],
 				"command":["launch","kill","open process"],
@@ -82621,6 +82621,876 @@
 			"description":"The revAvailableHandlers is an object-level property that is a list of handler\nwhich are exposed to and available to use by the object, in other words, the\nmessages that may be sent to or functions used by the specified object.\n\nThe returned list is a list of script handler names, each proceeded by\na handler type indicating character. M stands for a Message type handler, F\nstands for a Function, S for custom property setProp, PF for Private Function\nand PF for private message. The handlers names are followed by information\nabout the location of the handlers script, which is a line number range, and may\nbe followed by the file path of the script's stack, which is typically the case\nwith behavior scripts or script extensions.\n\nThe effective form includes ALL available to an object, regardless of whether\nor not the object is actually using the handler of not. In this form of returned\nlists contents should include the items that would appear in the left side\nhandler pane in the IDE script editor if you were to edit the script of\nan object, as well as any other handlers available to an object including those\nexposed by the IDE.\nWARNING:when using the effective form of revAvailableHandlers while running\nin development mode (as opposed to in a standalone), the list may include\navailable handlers that are exposed by the stacks that make up the IDE itself.\nYou must be cautious if you intend to use these handlers. Some may crash the\nIDE if used improperly. These handlers aren't likely to have\nmuch practical use outside of the context of the IDE, but may be useful for\ndeveloping an IDE add-on or extension.\n"
 		},{
 			"id":"script-2285",
+			"name":"ide_docs_library",
+			"display name":"IDE Docs library",
+			"library":"script",
+			"type":"library",
+			"display syntax":[
+				"IDE Docs library"
+			],
+			"associations":["ide docs library"],
+			"summary":"The IDE Docs library that fecthes Dictionary data. revIDEDocumentationLibrary",
+			"description":"The IDE Docs library that fecthes Dictionary data. revIDEDocumentationLibrary"
+		},{
+			"id":"script-2286",
+			"name":"idedocsfetchlcsdataoftype",
+			"display name":"ideDocsFetchLCSDataOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCSDataOfType(<pEntryName>,<pType>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCSDataOfType(<i>pEntryName</i>,<i>pType</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for the script dictionary entry with name <pEntryName>\nand type <pType>",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"An array of data pertaining to the unique script dictionary entry with the\ngiven name and type."
+			}],
+			"description":"Fetch the data for the script dictionary entry with name <pEntryName>\nand type <pType>"
+		},{
+			"id":"script-2287",
+			"name":"idedocsfetchextensionelementoftype",
+			"display name":"ideDocsFetchExtensionElementOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchExtensionElementOfType(<pID>,<pEntryName>,<pType>,<pElement>)"
+			],
+			"display syntax":[
+				"ideDocsFetchExtensionElementOfType(<i>pID</i>,<i>pEntryName</i>,<i>pType</i>,<i>pElement</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch a specific element of the array of data for the entry in the API for extension <pID>\nwith name <pEntryName> and type <pType>.",
+			"parameters":[{
+				"name":"pID",
+				"type":"",
+				"refparam":"false",
+				"description":"a namespace idemtifier sich as an extension ID"
+			},{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			},{
+				"name":"pElement",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"Either a string or an array\nof data describing the element of the array of data\npertaining to the entry in the API for the given extension with the given name and type."
+			}],
+			"description":"Fetch a specific element of the array of data for the entry in the API for extension <pID>\nwith name <pEntryName> and type <pType>."
+		},{
+			"id":"script-2288",
+			"name":"idedocsfetchextensionentries",
+			"display name":"ideDocsFetchExtensionEntries",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchExtensionEntries(<pID>)"
+			],
+			"display syntax":[
+				"ideDocsFetchExtensionEntries(<i>pID</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for all entries in the API for extension <pID>",
+			"parameters":[{
+				"name":"pID",
+				"type":"",
+				"refparam":"false",
+				"description":"a namespace idemtifier sich as an extension ID"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data pertaining to an entry in the API for the given extension."
+			}],
+			"description":"Fetch the data for all entries in the API for extension <pID>"
+		},{
+			"id":"script-2289",
+			"name":"idedocsfetchscriptdata",
+			"display name":"ideDocsFetchScriptData",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchScriptData(<pEntryName>)"
+			],
+			"display syntax":[
+				"ideDocsFetchScriptData(<i>pEntryName</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for LCS entries with name <pEntryName>, including extensions",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a entry to fetch documentation for"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data\npertaining to a Script API entry with the given name."
+			}],
+			"description":"Fetch the data for LCS entries with name <pEntryName>, including extensions"
+		},{
+			"id":"script-2290",
+			"name":"idedocsfetchextensionelementsoftype",
+			"display name":"ideDocsFetchExtensionElementsOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchExtensionElementsOfType(<pID>,<pType>)"
+			],
+			"display syntax":[
+				"ideDocsFetchExtensionElementsOfType(<i>pID</i>,<i>pType</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch all docs element of the given type in the script dictionary.",
+			"parameters":[{
+				"name":"pID",
+				"type":"",
+				"refparam":"false",
+				"description":"a namespace idemtifier sich as an extension ID"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array of data, each element of which is an array of data\npertaining to a script dictionary entry with the given type."
+			}],
+			"description":"Fetch all docs element of the given type in the script dictionary."
+		},{
+			"id":"script-2291",
+			"name":"idedocsfetchextensiondataoftype",
+			"display name":"ideDocsFetchExtensionDataOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchExtensionDataOfType(<pID>,<pEntryName>,<pType>)"
+			],
+			"display syntax":[
+				"ideDocsFetchExtensionDataOfType(<i>pID</i>,<i>pEntryName</i>,<i>pType</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for the entry in the API for extension <pID> with name <pEntryName>\nand type <pType>",
+			"parameters":[{
+				"name":"pID",
+				"type":"",
+				"refparam":"false",
+				"description":"a namespace idemtifier sich as an extension ID"
+			},{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"An array\nof data pertaining to the unique entry in the API for the given extension with the\ngiven name and type."
+			}],
+			"description":"Fetch the data for the entry in the API for extension <pID> with name <pEntryName>\nand type <pType>"
+		},{
+			"id":"script-2292",
+			"name":"idedocsfetchlcsentries",
+			"display name":"ideDocsFetchLCSEntries",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCSEntries()"
+			],
+			"display syntax":[
+				"ideDocsFetchLCSEntries()"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for all entries in the script dictionary",
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data\npertaining to an entry in the script dictionary."
+			}],
+			"description":"Fetch the data for all entries in the script dictionary"
+		},{
+			"id":"script-2293",
+			"name":"idedocsfetchlcbelementsoftype",
+			"display name":"ideDocsFetchLCBElementsOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCBElementsOfType(<pType>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCBElementsOfType(<i>pType</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch all docs element of the given type in the builder dictionary.",
+			"parameters":[{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array of data, each element of which is an array of data\npertaining to a builder dictionary entry with the given type."
+			}],
+			"description":"Fetch all docs element of the given type in the builder dictionary."
+		},{
+			"id":"script-2294",
+			"name":"idedocsfetchlibrarynames",
+			"display name":"ideDocsFetchLibraryNames",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLibraryNames()"
+			],
+			"display syntax":[
+				"ideDocsFetchLibraryNames()"
+			],
+			"associations":["ide docs library"],
+			"summary":"Returns a list of library names, one per line, which have API entries in the dictionary.",
+			"description":"Returns a list of library names, one per line, which have API entries in the dictionary."
+		},{
+			"id":"script-2295",
+			"name":"idedocsfetchextensiondata",
+			"display name":"ideDocsFetchExtensionData",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchExtensionData(<pID>,<pEntryName>)"
+			],
+			"display syntax":[
+				"ideDocsFetchExtensionData(<i>pID</i>,<i>pEntryName</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for entries in the API for extension <pID> with name <pEntryName>",
+			"parameters":[{
+				"name":"pID",
+				"type":"",
+				"refparam":"false",
+				"description":"a namespace idemtifier sich as an extension ID"
+			},{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data pertaining to an entry in the API for the given extension with the given name."
+			}],
+			"description":"Fetch the data for entries in the API for extension <pID> with name <pEntryName>"
+		},{
+			"id":"script-2296",
+			"name":"idedocsfetchlcselementoftype",
+			"display name":"ideDocsFetchLCSElementOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCSElementOfType(<pEntryName>,<pType>,<pElement>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCSElementOfType(<i>pEntryName</i>,<i>pType</i>,<i>pElement</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch a specific element of the array of data for the script dictionary entry\nwith name <pEntryName> and type <pType>.",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			},{
+				"name":"pElement",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"Either a string or an array\nof data describing the element of the array of data\npertaining to the script dictionary entry with the given name and type."
+			}],
+			"description":"Fetch a specific element of the array of data for the script dictionary entry\nwith name <pEntryName> and type <pType>."
+		},{
+			"id":"script-2297",
+			"name":"idedocsfetchlcsdata",
+			"display name":"ideDocsFetchLCSData",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCSData(<pEntryName>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCSData(<i>pEntryName</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for script dictionary entries with name <pEntryName>",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data\npertaining to a  script dictionary entry with the given name."
+			}],
+			"description":"Fetch the data for script dictionary entries with name <pEntryName>"
+		},{
+			"id":"script-2298",
+			"name":"idedocsfetchlcbdataoftype",
+			"display name":"ideDocsFetchLCBDataOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCBDataOfType(<pEntryName>,<pType>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCBDataOfType(<i>pEntryName</i>,<i>pType</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for the builder dictionary entry with name <pEntryName>\nand type <pType>",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"An array\nof data pertaining to the unique builder dictionary entry with the\ngiven name and type."
+			}],
+			"description":"Fetch the data for the builder dictionary entry with name <pEntryName>\nand type <pType>"
+		},{
+			"id":"script-2299",
+			"name":"idedocsfetchlcbdata",
+			"display name":"ideDocsFetchLCBData",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCBData(<pEntryName>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCBData(<i>pEntryName</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for builder dictionary entries with name <pEntryName>",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			},{
+				"name":"pElement",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data\npertaining to a builder dictionary entry with the given name."
+			}],
+			"description":"Fetch the data for builder dictionary entries with name <pEntryName>"
+		},{
+			"id":"script-2300",
+			"name":"idedocsfetchlcbelementoftype",
+			"display name":"ideDocsFetchLCBElementOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCBElementOfType(<pEntryName>,<pType>,<pElement>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCBElementOfType(<i>pEntryName</i>,<i>pType</i>,<i>pElement</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch a specific element of the array of data for the builder dictionary entry\nwith name <pEntryName> and type <pType>.",
+			"parameters":[{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			},{
+				"name":"pElement",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"Either a string or an array\nof data describing the element of the array of data\npertaining to the builder dictionary entry with the given name and type."
+			}],
+			"description":"Fetch a specific element of the array of data for the builder dictionary entry\nwith name <pEntryName> and type <pType>."
+		},{
+			"id":"script-2301",
+			"name":"idedocsfetchlcbentries",
+			"display name":"ideDocsFetchLCBEntries",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCBEntries()"
+			],
+			"display syntax":[
+				"ideDocsFetchLCBEntries()"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for all entries in the builder dictionary",
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data\npertaining to an entry in the builder dictionary."
+			}],
+			"description":"Fetch the data for all entries in the builder dictionary"
+		},{
+			"id":"script-2302",
+			"name":"idedocsfetchlibraryentries",
+			"display name":"ideDocsFetchLibraryEntries",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLibraryEntries(<pLibraryName>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLibraryEntries(<i>pLibraryName</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch the data for all entries in a given library",
+			"parameters":[{
+				"name":"pID",
+				"type":"",
+				"refparam":"false",
+				"description":"a namespace idemtifier sich as an extension ID"
+			},{
+				"name":"pEntryName",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of a script entry to fetch documentation for"
+			},{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			},{
+				"name":"pElement",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array, each element of which is the array\nof data pertaining to an entry in the given library API."
+			}],
+			"description":"Fetch the data for all entries in a given library"
+		},{
+			"id":"script-2303",
+			"name":"idedocsfetchlcselementsoftype",
+			"display name":"ideDocsFetchLCSElementsOfType",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"ideDocsFetchLCSElementsOfType(<pType>)"
+			],
+			"display syntax":[
+				"ideDocsFetchLCSElementsOfType(<i>pType</i>)"
+			],
+			"associations":["ide docs library"],
+			"summary":"Fetch all docs element of the given type in the script dictionary.",
+			"parameters":[{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"need to fill this entree in later"
+			}],
+			"value":[{
+				"name":"return",
+				"type":"",
+				"description":"A numerically keyed array of data, each element of which is an array of data\npertaining to a script dictionary entry with the given type.\n"
+			}],
+			"description":"Fetch all docs element of the given type in the script dictionary."
+		},{
+			"id":"script-2304",
+			"name":"revideextensions",
+			"display name":"revIDEExtensions",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensions(<pType>,<pStatus>,<pWithoutInvisible>)"
+			],
+			"display syntax":[
+				"revIDEExtensions(<i>pType</i>,<i>pStatus</i>,<i>pWithoutInvisible</i>)"
+			],
+			"summary":"Returns the extension data as an array",
+			"parameters":[{
+				"name":"pType",
+				"type":"",
+				"refparam":"false",
+				"description":"\"library\",\"widgets\",\"modules\",\"plugins\""
+			},{
+				"name":"pStatus",
+				"type":"",
+				"refparam":"false",
+				"description":"\"installed\" to limit results to installed extensions"
+			},{
+				"name":"pWithoutInvisible",
+				"type":"",
+				"refparam":"false",
+				"description":"treu to exclude 'userInvisible' extensions"
+			}],
+			"examples":[{
+				"script":"// list widget extensions of any install-status:\nput revIDEExtensions (\"library\",,false] into tArray; put the keys of tArray\n\n// list plugin add-on extensions:\nput revIDEExtensions (\"plugin\",\"installed\",false) into tArray; put the keys of tArray"
+			}],
+			"description":"Returns the extension data as an array"
+		},{
+			"id":"script-2305",
+			"name":"revideextensionpropertiesinfo",
+			"display name":"revIDEExtensionPropertiesInfo",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionPropertiesInfo(<pTypeId>,<pOrganise>)"
+			],
+			"display syntax":[
+				"revIDEExtensionPropertiesInfo(<i>pTypeId</i>,<i>pOrganise</i>)"
+			],
+			"summary":"Returns an Array of an extension's properties",
+			"parameters":[{
+				"name":"pTypeId",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			},{
+				"name":"pOrganise",
+				"type":"",
+				"refparam":"false",
+				"description":"true for the result array to be organized by section"
+			}],
+			"examples":[{
+				"script":"// list extension property names for the Clock Widget:\nput revIDEExtensionPropertiesInfo (\"com.livecode.widget.clock\",false) into tArray; put the keys of tArray"
+			}],
+			"description":"Returns an Array of an extension's properties"
+		},{
+			"id":"script-2306",
+			"name":"revideextensionlibraryhandlers",
+			"display name":"revIDEExtensionLibraryHandlers",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionLibraryHandlers(<pLibraryID>)"
+			],
+			"display syntax":[
+				"revIDEExtensionLibraryHandlers(<i>pLibraryID</i>)"
+			],
+			"summary":"List public handlers of a Library module for the given Extension ID",
+			"parameters":[{
+				"name":"pExtensionID",
+				"type":"",
+				"refparam":"false",
+				"description":"An IDE Extension identifier"
+			}],
+			"examples":[{
+				"script":"// Get a list of handlers from the Toast Library\nput revIDEExtensionLibraryHandlers( \"com.livecode.library.toast\")"
+			}],
+			"description":"List public handlers of a Library module for the given Extension ID"
+		},{
+			"id":"script-2307",
+			"name":"revideextensionsetloadonstartup",
+			"display name":"revIDEExtensionSetLoadOnStartup",
+			"library":"script",
+			"type":"command",
+			"syntax":[
+				"revIDEExtensionSetLoadOnStartup <pExtID>,<pValue>"
+			],
+			"display syntax":[
+				"revIDEExtensionSetLoadOnStartup <i>pExtID</i>,<i>pValue</i>"
+			],
+			"summary":"Set wether or not an extension loads on IDE startup",
+			"parameters":[{
+				"name":"pExtID",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			},{
+				"name":"pValue",
+				"type":"",
+				"refparam":"false",
+				"description":"true or false"
+			}],
+			"examples":[{
+				"script":"// Turn off loading of the Analog Clock widget\nrevIDEExtensionToggleLoadOnStartup \"com.livecode.widget.clock\", false"
+			}],
+			"description":"Set wether or not an extension loads on IDE startup"
+		},{
+			"id":"script-2308",
+			"name":"revideextensiontoggleuservisibility",
+			"display name":"revIDEExtensionToggleUserVisibility",
+			"library":"script",
+			"type":"command",
+			"syntax":[
+				"revIDEExtensionToggleUserVisibility <pExtID>"
+			],
+			"display syntax":[
+				"revIDEExtensionToggleUserVisibility <i>pExtID</i>"
+			],
+			"summary":"Toggle an extension visibility to the IDE user",
+			"parameters":[{
+				"name":"pExtID",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			}],
+			"examples":[{
+				"script":"// hide/show the Tree View widget\nrevIDEExtensionToggleUserVisibility \"com.livecode.widget.treeview\""
+			}],
+			"description":"Toggle an extension visibility to the IDE user"
+		},{
+			"id":"script-2309",
+			"name":"revideextensionproperties",
+			"display name":"revIDEExtensionProperties",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionProperties(<pExtID>)"
+			],
+			"display syntax":[
+				"revIDEExtensionProperties(<i>pExtID</i>)"
+			],
+			"summary":"Returns an Array of an extension's properties",
+			"parameters":[{
+				"name":"pExtID",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			}],
+			"examples":[{
+				"script":"// list extension property names:\nput revIDEExtensionProperties (\"com.livecode.library.scriptitems\") into tArray; put the keys of tArray"
+			}],
+			"description":"Returns an Array of an extension's properties"
+		},{
+			"id":"script-2310",
+			"name":"revideextensionstandalonesettingsinfo",
+			"display name":"revIDEExtensionStandaloneSettingsInfo",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionStandaloneSettingsInfo(<pTypeId>,<pOrganise>)"
+			],
+			"display syntax":[
+				"revIDEExtensionStandaloneSettingsInfo(<i>pTypeId</i>,<i>pOrganise</i>)"
+			],
+			"summary":"get the standalone settings for an extension",
+			"parameters":[{
+				"name":"pTypeId",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			},{
+				"name":"pOrganise",
+				"type":"",
+				"refparam":"false",
+				"description":"sert to SB ta panel"
+			}],
+			"examples":[{
+				"script":"get revIDEExtensionStandaloneSettingsInfo(\"com.livecode.widget.clock\", false); put the keys of it"
+			}],
+			"description":"get the standalone settings for an extension"
+		},{
+			"id":"script-2311",
+			"name":"revideextensionunload",
+			"display name":"revIDEExtensionUnload",
+			"library":"script",
+			"type":"command",
+			"syntax":[
+				"revIDEExtensionUnload <pKind>"
+			],
+			"display syntax":[
+				"revIDEExtensionUnload <i>pKind</i>"
+			],
+			"summary":"unloads an Extension module for the given Extension ID",
+			"parameters":[{
+				"name":"pExtensionID",
+				"type":"",
+				"refparam":"false",
+				"description":"An IDE Extension identifier"
+			}],
+			"examples":[{
+				"script":"// Unload the Tree View Widget's module\nrevIDEExtensionUnload  \"com.livecode.widget.treeview\""
+			}],
+			"description":"unloads an Extension module for the given Extension ID"
+		},{
+			"id":"script-2312",
+			"name":"revideextensionproperty",
+			"display name":"revIDEExtensionProperty",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionProperty(<pExtID>,<pProperty>)"
+			],
+			"display syntax":[
+				"revIDEExtensionProperty(<i>pExtID</i>,<i>pProperty</i>)"
+			],
+			"summary":"Returns a specfic properties of an extension's properties",
+			"parameters":[{
+				"name":"pExtID",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			},{
+				"name":"pProperty",
+				"type":"",
+				"refparam":"false",
+				"description":"the name of the property to reteive"
+			}],
+			"examples":[{
+				"script":"// get the extension title:\nput revIDEExtensionProperty(\"com.livecode.library.scriptitems\",\"title\")"
+			}],
+			"description":"Returns a specfic properties of an extension's properties"
+		},{
+			"id":"script-2313",
+			"name":"revideextensionfiledata",
+			"display name":"revIDEExtensionFileData",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionFileData(<pID>)"
+			],
+			"display syntax":[
+				"revIDEExtensionFileData(<i>pID</i>)"
+			],
+			"summary":"gets file data for a given Extension ID",
+			"parameters":[{
+				"name":"pExtensionID",
+				"type":"",
+				"refparam":"false",
+				"description":"An IDE Extension identifier"
+			}],
+			"examples":[{
+				"script":"// display the \"file\" key, a file path to the Extension's bytcode module\nput revIDEExtensionFileData ( \"com.livecode.widget.treeview\") into tData; put tData[\"file\"]\n\n// display the file \"type\" key, will be either 'lcb' or 'lcs'\nput revIDEExtensionFileData ( \"com.livecode.widget.treeview\") into tData; put tData[\"file\"]"
+			}],
+			"description":"gets file data for a given Extension ID"
+		},{
+			"id":"script-2314",
+			"name":"revideextensiontoggleloadonstartup",
+			"display name":"revIDEExtensionToggleLoadOnStartup",
+			"library":"script",
+			"type":"command",
+			"syntax":[
+				"revIDEExtensionToggleLoadOnStartup <pExtID>"
+			],
+			"display syntax":[
+				"revIDEExtensionToggleLoadOnStartup <i>pExtID</i>"
+			],
+			"summary":"Toggle wether or not an extension loads aton IDE startup",
+			"parameters":[{
+				"name":"pExtID",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			}],
+			"examples":[{
+				"script":"// Turn on/off loading of the Analog Clock widget\nrevIDEExtensionToggleLoadOnStartup \"com.livecode.widget.clock\""
+			}],
+			"description":"Toggle wether or not an extension loads aton IDE startup"
+		},{
+			"id":"script-2315",
+			"name":"doextensionschanged",
+			"display name":"doExtensionsChanged",
+			"library":"script",
+			"type":"command",
+			"syntax":[
+				"doExtensionsChanged"
+			],
+			"display syntax":[
+				"doExtensionsChanged"
+			],
+			"summary":"Send notication that widget has been added/removed.",
+			"description":"Sends update notification with ideMessageSend \"ideExtensionsChanged\" to all\nobjects that have subscribed to tha IDE message ideExtensionsChanged using <revIDESubscribe>.",
+			"references":{
+				"command":["ideSubscribe","ideMessageSend"]
+			}
+		},{
+			"id":"script-2316",
+			"name":"revideextensiongetloadonstartup",
+			"display name":"revIDEExtensionGetLoadOnStartup",
+			"library":"script",
+			"type":"function",
+			"syntax":[
+				"revIDEExtensionGetLoadOnStartup(<pExtID>)"
+			],
+			"display syntax":[
+				"revIDEExtensionGetLoadOnStartup(<i>pExtID</i>)"
+			],
+			"summary":"get wether or not an extension loads on IDE startup",
+			"parameters":[{
+				"name":"pExtID",
+				"type":"",
+				"refparam":"false",
+				"description":"an Extension name-space identifier string"
+			}],
+			"examples":[{
+				"script":"put revIDEExtensionGetLoadOnStartup(\"com.livecode.widget.clock\")\n"
+			}],
+			"description":"get wether or not an extension loads on IDE startup"
+		},{
+			"id":"script-2317",
 			"name":"aiff",
 			"display name":"AIFF",
 			"library":"script",
@@ -82635,7 +83505,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2286",
+			"id":"script-2318",
 			"name":"ascii",
 			"display name":"ASCII",
 			"library":"script",
@@ -82650,7 +83520,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2287",
+			"id":"script-2319",
 			"name":"au",
 			"display name":"AU",
 			"library":"script",
@@ -82665,7 +83535,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2288",
+			"id":"script-2320",
 			"name":"avi",
 			"display name":"AVI",
 			"library":"script",
@@ -82680,7 +83550,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2289",
+			"id":"script-2321",
 			"name":"alt_key",
 			"display name":"Alt key",
 			"library":"script",
@@ -82695,7 +83565,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2290",
+			"id":"script-2322",
 			"name":"animation_library",
 			"display name":"Animation library",
 			"library":"script",
@@ -82711,7 +83581,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2291",
+			"id":"script-2323",
 			"name":"apple_event",
 			"display name":"Apple Event",
 			"library":"script",
@@ -82725,7 +83595,7 @@
 				"glossary":["file","protocol","Mac OS","OS X"]
 			}
 		},{
-			"id":"script-2292",
+			"id":"script-2324",
 			"name":"apple_menu",
 			"display name":"Apple menu",
 			"library":"script",
@@ -82740,7 +83610,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2293",
+			"id":"script-2325",
 			"name":"applescript",
 			"display name":"AppleScript",
 			"library":"script",
@@ -82754,7 +83624,7 @@
 				"glossary":["file","Mac OS","OS X","folder"]
 			}
 		},{
-			"id":"script-2294",
+			"id":"script-2326",
 			"name":"appletalk",
 			"display name":"AppleTalk",
 			"library":"script",
@@ -82769,7 +83639,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2295",
+			"id":"script-2327",
 			"name":"application_browser",
 			"display name":"Application Browser",
 			"library":"script",
@@ -82783,7 +83653,7 @@
 				"glossary":["stack","object","development environment"]
 			}
 		},{
-			"id":"script-2296",
+			"id":"script-2328",
 			"name":"application_menu",
 			"display name":"Application menu",
 			"library":"script",
@@ -82798,7 +83668,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2297",
+			"id":"script-2329",
 			"name":"aqua",
 			"display name":"Aqua",
 			"library":"script",
@@ -82814,7 +83684,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2298",
+			"id":"script-2330",
 			"name":"absolute_coordinates",
 			"display name":"absolute coordinates",
 			"library":"script",
@@ -82826,7 +83696,7 @@
 			"description":"Measurement of a position by its distance from the top and left edges of\nthe screen.",
 			"tags":["ui"]
 		},{
-			"id":"script-2299",
+			"id":"script-2331",
 			"name":"absolute_file_path",
 			"display name":"absolute file path",
 			"library":"script",
@@ -82841,7 +83711,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2300",
+			"id":"script-2332",
 			"name":"active_control",
 			"display name":"active control",
 			"library":"script",
@@ -82856,7 +83726,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2301",
+			"id":"script-2333",
 			"name":"active_window",
 			"display name":"active window",
 			"library":"script",
@@ -82868,7 +83738,7 @@
 			"description":"The window that is frontmost on the screen. The active window receives\nclicks and typed characters, and its appearance may be different from\nthe appearance of inactive windows.",
 			"tags":["windowing"]
 		},{
-			"id":"script-2302",
+			"id":"script-2334",
 			"name":"alias",
 			"display name":"alias",
 			"library":"script",
@@ -82883,7 +83753,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2303",
+			"id":"script-2335",
 			"name":"alpha_channel",
 			"display name":"alpha channel",
 			"library":"script",
@@ -82898,7 +83768,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2304",
+			"id":"script-2336",
 			"name":"alphanumeric_character",
 			"display name":"alphanumeric character",
 			"library":"script",
@@ -82913,7 +83783,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2305",
+			"id":"script-2337",
 			"name":"animated_gif",
 			"display name":"animated GIF",
 			"library":"script",
@@ -82928,7 +83798,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2306",
+			"id":"script-2338",
 			"name":"anomaly",
 			"display name":"anomaly",
 			"library":"script",
@@ -82942,7 +83812,7 @@
 				"glossary":["script"]
 			}
 		},{
-			"id":"script-2307",
+			"id":"script-2339",
 			"name":"antialiasing",
 			"display name":"antialiasing",
 			"library":"script",
@@ -82954,7 +83824,7 @@
 			"description":"Blurring a sharp edge in an image, by using intermediate colors on the\nedge between the image and its background. This fools the eye into\nseeing a smooth edge instead of the \"jaggies\" that result from a\ndiagonal or curved edge when seen on screen.",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2308",
+			"id":"script-2340",
 			"name":"appearance",
 			"display name":"appearance",
 			"library":"script",
@@ -82969,7 +83839,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2309",
+			"id":"script-2341",
 			"name":"append",
 			"display name":"append",
 			"library":"script",
@@ -82984,7 +83854,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2310",
+			"id":"script-2342",
 			"name":"application_bundle",
 			"display name":"application bundle",
 			"library":"script",
@@ -82999,7 +83869,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2311",
+			"id":"script-2343",
 			"name":"application",
 			"display name":"application",
 			"library":"script",
@@ -83013,7 +83883,7 @@
 				"glossary":["development environment","standalone application"]
 			}
 		},{
-			"id":"script-2312",
+			"id":"script-2344",
 			"name":"argument",
 			"display name":"argument",
 			"library":"script",
@@ -83027,7 +83897,7 @@
 				"glossary":["pass","operator","command","function","value"]
 			}
 		},{
-			"id":"script-2313",
+			"id":"script-2345",
 			"name":"arm",
 			"display name":"arm",
 			"library":"script",
@@ -83042,7 +83912,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2314",
+			"id":"script-2346",
 			"name":"array_dimension",
 			"display name":"array dimension",
 			"library":"script",
@@ -83057,7 +83927,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2315",
+			"id":"script-2347",
 			"name":"array",
 			"display name":"array",
 			"library":"script",
@@ -83072,7 +83942,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2316",
+			"id":"script-2348",
 			"name":"associative_array",
 			"display name":"associative array",
 			"library":"script",
@@ -83087,7 +83957,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2317",
+			"id":"script-2349",
 			"name":"attribute",
 			"display name":"attribute",
 			"library":"script",
@@ -83102,7 +83972,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2318",
+			"id":"script-2350",
 			"name":"audio_clip",
 			"display name":"audio clip",
 			"library":"script",
@@ -83117,7 +83987,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2319",
+			"id":"script-2351",
 			"name":"blob",
 			"display name":"BLOB",
 			"library":"script",
@@ -83132,7 +84002,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2320",
+			"id":"script-2352",
 			"name":"bmp",
 			"display name":"BMP",
 			"library":"script",
@@ -83147,7 +84017,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2321",
+			"id":"script-2353",
 			"name":"binhex",
 			"display name":"BinHex",
 			"library":"script",
@@ -83162,7 +84032,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2322",
+			"id":"script-2354",
 			"name":"browse_tool",
 			"display name":"Browse tool",
 			"library":"script",
@@ -83177,7 +84047,7 @@
 				"glossary":["property","cursor","tool","development environment","stack","field","button"]
 			}
 		},{
-			"id":"script-2323",
+			"id":"script-2355",
 			"name":"backscript",
 			"display name":"backScript",
 			"library":"script",
@@ -83192,7 +84062,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2324",
+			"id":"script-2356",
 			"name":"background",
 			"display name":"background",
 			"library":"script",
@@ -83207,7 +84077,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2325",
+			"id":"script-2357",
 			"name":"behavior",
 			"display name":"behavior",
 			"library":"script",
@@ -83222,7 +84092,7 @@
 			},
 			"tags":["ui","messages"]
 		},{
-			"id":"script-2326",
+			"id":"script-2358",
 			"name":"binary_data",
 			"display name":"binary data",
 			"library":"script",
@@ -83237,7 +84107,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2327",
+			"id":"script-2359",
 			"name":"binary_file",
 			"display name":"binary file",
 			"library":"script",
@@ -83252,7 +84122,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2328",
+			"id":"script-2360",
 			"name":"binary",
 			"display name":"binary",
 			"library":"script",
@@ -83267,7 +84137,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2329",
+			"id":"script-2361",
 			"name":"bit_depth",
 			"display name":"bit depth",
 			"library":"script",
@@ -83282,7 +84152,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2330",
+			"id":"script-2362",
 			"name":"bit",
 			"display name":"bit",
 			"library":"script",
@@ -83297,7 +84167,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2331",
+			"id":"script-2363",
 			"name":"bitmap",
 			"display name":"bitmap",
 			"library":"script",
@@ -83312,7 +84182,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2332",
+			"id":"script-2364",
 			"name":"bitwise",
 			"display name":"bitwise",
 			"library":"script",
@@ -83327,7 +84197,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2333",
+			"id":"script-2365",
 			"name":"black-and-white",
 			"display name":"black-and-white",
 			"library":"script",
@@ -83339,7 +84209,7 @@
 			"description":"A picture consisting only of black and white with no other colors, or a\nscreen that can show only black and white and cannot show any other\ncolors. ",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2334",
+			"id":"script-2366",
 			"name":"block_comment",
 			"display name":"block comment",
 			"library":"script",
@@ -83353,7 +84223,7 @@
 				"glossary":["comment"]
 			}
 		},{
-			"id":"script-2335",
+			"id":"script-2367",
 			"name":"blocking",
 			"display name":"blocking",
 			"library":"script",
@@ -83368,7 +84238,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2336",
+			"id":"script-2368",
 			"name":"boolean",
 			"display name":"boolean",
 			"library":"script",
@@ -83380,7 +84250,7 @@
 			"description":"A value that can be either true or false.",
 			"tags":["math"]
 		},{
-			"id":"script-2337",
+			"id":"script-2369",
 			"name":"breakpoint",
 			"display name":"breakpoint",
 			"library":"script",
@@ -83394,7 +84264,7 @@
 				"glossary":["execute","handler","debugger"]
 			}
 		},{
-			"id":"script-2338",
+			"id":"script-2370",
 			"name":"browse",
 			"display name":"browse",
 			"library":"script",
@@ -83406,7 +84276,7 @@
 			"description":"To interact as a user with a program or web page: to use the program,\nrather than change or reprogram it.",
 			"tags":["networking"]
 		},{
-			"id":"script-2339",
+			"id":"script-2371",
 			"name":"browser",
 			"display name":"browser",
 			"library":"script",
@@ -83418,7 +84288,7 @@
 			"description":"An application used to get, display, and use web pages and other\nInternet resources.",
 			"tags":["networking"]
 		},{
-			"id":"script-2340",
+			"id":"script-2372",
 			"name":"buffer",
 			"display name":"buffer",
 			"library":"script",
@@ -83429,7 +84299,7 @@
 			"synonyms":["buffered","buffering","buffer"],
 			"description":"An area of memory where data is stored for quick retrieval. Data may be\npre-processed while in the buffer so it can be used quickly when needed.\n"
 		},{
-			"id":"script-2341",
+			"id":"script-2373",
 			"name":"build",
 			"display name":"build",
 			"library":"script",
@@ -83443,7 +84313,7 @@
 				"glossary":["standalone application"]
 			}
 		},{
-			"id":"script-2342",
+			"id":"script-2374",
 			"name":"built-in_command",
 			"display name":"built-in command",
 			"library":"script",
@@ -83457,7 +84327,7 @@
 				"glossary":["command","OpenXTalk"]
 			}
 		},{
-			"id":"script-2343",
+			"id":"script-2375",
 			"name":"built-in_function",
 			"display name":"built-in function",
 			"library":"script",
@@ -83471,7 +84341,7 @@
 				"glossary":["OpenXTalk","function"]
 			}
 		},{
-			"id":"script-2344",
+			"id":"script-2376",
 			"name":"built-in_message",
 			"display name":"built-in message",
 			"library":"script",
@@ -83486,7 +84356,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2345",
+			"id":"script-2377",
 			"name":"built-in_property",
 			"display name":"built-in property",
 			"library":"script",
@@ -83501,7 +84371,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2346",
+			"id":"script-2378",
 			"name":"button_menu",
 			"display name":"button menu",
 			"library":"script",
@@ -83516,7 +84386,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2347",
+			"id":"script-2379",
 			"name":"button",
 			"display name":"button",
 			"library":"script",
@@ -83531,7 +84401,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2348",
+			"id":"script-2380",
 			"name":"byte_order",
 			"display name":"byte order",
 			"library":"script",
@@ -83546,7 +84416,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2349",
+			"id":"script-2381",
 			"name":"byte",
 			"display name":"byte",
 			"library":"script",
@@ -83561,7 +84431,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2350",
+			"id":"script-2382",
 			"name":"cgi",
 			"display name":"CGI",
 			"library":"script",
@@ -83576,7 +84446,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2351",
+			"id":"script-2383",
 			"name":"carbon",
 			"display name":"Carbon",
 			"library":"script",
@@ -83590,7 +84460,7 @@
 				"glossary":["development environment","OS X"]
 			}
 		},{
-			"id":"script-2352",
+			"id":"script-2384",
 			"name":"command_key",
 			"display name":"Command key",
 			"library":"script",
@@ -83605,7 +84475,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2353",
+			"id":"script-2385",
 			"name":"common_library",
 			"display name":"Common library",
 			"library":"script",
@@ -83619,7 +84489,7 @@
 				"glossary":["OpenXTalk custom library","command","function"]
 			}
 		},{
-			"id":"script-2354",
+			"id":"script-2386",
 			"name":"cache",
 			"display name":"cache",
 			"library":"script",
@@ -83630,7 +84500,7 @@
 			"synonyms":["cache","cached","caching"],
 			"description":"A temporary storage area on disk or in memory. \n\nAlso, to place information in a cache for later use.\n"
 		},{
-			"id":"script-2355",
+			"id":"script-2387",
 			"name":"call",
 			"display name":"call",
 			"library":"script",
@@ -83645,7 +84515,7 @@
 				"control structure":["getProp"]
 			}
 		},{
-			"id":"script-2356",
+			"id":"script-2388",
 			"name":"callback",
 			"display name":"callback",
 			"library":"script",
@@ -83661,7 +84531,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2357",
+			"id":"script-2389",
 			"name":"caller",
 			"display name":"caller",
 			"library":"script",
@@ -83675,7 +84545,7 @@
 				"glossary":["handler","custom command"]
 			}
 		},{
-			"id":"script-2358",
+			"id":"script-2390",
 			"name":"card_control",
 			"display name":"card control",
 			"library":"script",
@@ -83690,7 +84560,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2359",
+			"id":"script-2391",
 			"name":"card",
 			"display name":"card",
 			"library":"script",
@@ -83705,7 +84575,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2360",
+			"id":"script-2392",
 			"name":"cascading_menu",
 			"display name":"cascading menu",
 			"library":"script",
@@ -83720,7 +84590,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2361",
+			"id":"script-2393",
 			"name":"case-insensitive",
 			"display name":"case-insensitive",
 			"library":"script",
@@ -83732,7 +84602,7 @@
 			"description":"Without regard to whether letters are uppercase (capitalized) or\nlowercase (not capitalized).",
 			"tags":["text processing"]
 		},{
-			"id":"script-2362",
+			"id":"script-2394",
 			"name":"case-sensitive",
 			"display name":"case-sensitive",
 			"library":"script",
@@ -83747,7 +84617,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2363",
+			"id":"script-2395",
 			"name":"cell",
 			"display name":"cell",
 			"library":"script",
@@ -83762,7 +84632,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2364",
+			"id":"script-2396",
 			"name":"channel",
 			"display name":"channel",
 			"library":"script",
@@ -83777,7 +84647,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2365",
+			"id":"script-2397",
 			"name":"character_set",
 			"display name":"character set",
 			"library":"script",
@@ -83792,7 +84662,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2366",
+			"id":"script-2398",
 			"name":"character",
 			"display name":"character",
 			"library":"script",
@@ -83807,7 +84677,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2367",
+			"id":"script-2399",
 			"name":"checkbox",
 			"display name":"checkbox",
 			"library":"script",
@@ -83822,7 +84692,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2368",
+			"id":"script-2400",
 			"name":"checksum",
 			"display name":"checksum",
 			"library":"script",
@@ -83837,7 +84707,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2369",
+			"id":"script-2401",
 			"name":"child_node",
 			"display name":"child node",
 			"library":"script",
@@ -83852,7 +84722,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2370",
+			"id":"script-2402",
 			"name":"chunk_expression",
 			"display name":"chunk expression",
 			"library":"script",
@@ -83867,7 +84737,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2371",
+			"id":"script-2403",
 			"name":"chunk",
 			"display name":"chunk",
 			"library":"script",
@@ -83882,7 +84752,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2372",
+			"id":"script-2404",
 			"name":"clipboard",
 			"display name":"clipboard",
 			"library":"script",
@@ -83894,7 +84764,7 @@
 			"description":"The area where cut or copied data is stored.",
 			"tags":["ui"]
 		},{
-			"id":"script-2373",
+			"id":"script-2405",
 			"name":"close_box",
 			"display name":"close box",
 			"library":"script",
@@ -83909,7 +84779,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2374",
+			"id":"script-2406",
 			"name":"codec",
 			"display name":"codec",
 			"library":"script",
@@ -83924,7 +84794,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2375",
+			"id":"script-2407",
 			"name":"collapse_box",
 			"display name":"collapse box",
 			"library":"script",
@@ -83939,7 +84809,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2376",
+			"id":"script-2408",
 			"name":"collapse",
 			"display name":"collapse",
 			"library":"script",
@@ -83954,7 +84824,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2377",
+			"id":"script-2409",
 			"name":"color_palette",
 			"display name":"color palette",
 			"library":"script",
@@ -83969,7 +84839,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2378",
+			"id":"script-2410",
 			"name":"color_reference",
 			"display name":"color reference",
 			"library":"script",
@@ -83984,7 +84854,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2379",
+			"id":"script-2411",
 			"name":"color_table",
 			"display name":"color table",
 			"library":"script",
@@ -83995,7 +84865,7 @@
 			"synonyms":["color table"],
 			"description":"The set of all available colors that can be displayed on the screen.\n"
 		},{
-			"id":"script-2380",
+			"id":"script-2412",
 			"name":"column",
 			"display name":"column",
 			"library":"script",
@@ -84010,7 +84880,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2381",
+			"id":"script-2413",
 			"name":"combo_box",
 			"display name":"combo box",
 			"library":"script",
@@ -84025,7 +84895,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2382",
+			"id":"script-2414",
 			"name":"command_line",
 			"display name":"command line",
 			"library":"script",
@@ -84040,7 +84910,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2383",
+			"id":"script-2415",
 			"name":"command",
 			"display name":"command",
 			"library":"script",
@@ -84054,7 +84924,7 @@
 				"glossary":["field","built-in command","custom command"]
 			}
 		},{
-			"id":"script-2384",
+			"id":"script-2416",
 			"name":"comment",
 			"display name":"comment",
 			"library":"script",
@@ -84068,7 +84938,7 @@
 				"glossary":["execute","handler","script"]
 			}
 		},{
-			"id":"script-2385",
+			"id":"script-2417",
 			"name":"compile_error",
 			"display name":"compile error",
 			"library":"script",
@@ -84085,7 +84955,7 @@
 				"control structure":["repeat"]
 			}
 		},{
-			"id":"script-2386",
+			"id":"script-2418",
 			"name":"compile",
 			"display name":"compile",
 			"library":"script",
@@ -84100,7 +84970,7 @@
 				"glossary":["script","statement","command","script editor"]
 			}
 		},{
-			"id":"script-2387",
+			"id":"script-2419",
 			"name":"compress",
 			"display name":"compress",
 			"library":"script",
@@ -84112,7 +84982,7 @@
 			"description":"To remove redundancies in data, making the data smaller.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2388",
+			"id":"script-2420",
 			"name":"concatenate",
 			"display name":"concatenate",
 			"library":"script",
@@ -84124,7 +84994,7 @@
 			"description":"To attach two pieces of data together.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2389",
+			"id":"script-2421",
 			"name":"conditional",
 			"display name":"conditional",
 			"library":"script",
@@ -84135,7 +85005,7 @@
 			"synonyms":["conditional statement","if/then","if/then/else","if-then","if-then-else","conditional"],
 			"description":"A programming structure that checks a condition, and then takes\nappropriate action depending on whether the condition is true or false.\n"
 		},{
-			"id":"script-2390",
+			"id":"script-2422",
 			"name":"console",
 			"display name":"console",
 			"library":"script",
@@ -84149,7 +85019,7 @@
 				"glossary":["Windows"]
 			}
 		},{
-			"id":"script-2391",
+			"id":"script-2423",
 			"name":"constant",
 			"display name":"constant",
 			"library":"script",
@@ -84164,7 +85034,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2392",
+			"id":"script-2424",
 			"name":"constrain",
 			"display name":"constrain",
 			"library":"script",
@@ -84176,7 +85046,7 @@
 			"description":"To limit an action. \n\nFor example, holding down the Shift key while drawing a rectangle\nconstrains its height to be the same as its width.",
 			"tags":["ui"]
 		},{
-			"id":"script-2393",
+			"id":"script-2425",
 			"name":"container",
 			"display name":"container",
 			"library":"script",
@@ -84190,7 +85060,7 @@
 				"glossary":["URL","variable","field","image","button"]
 			}
 		},{
-			"id":"script-2394",
+			"id":"script-2426",
 			"name":"contextual_menu",
 			"display name":"contextual menu",
 			"library":"script",
@@ -84205,7 +85075,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2395",
+			"id":"script-2427",
 			"name":"contiguous",
 			"display name":"contiguous",
 			"library":"script",
@@ -84217,7 +85087,7 @@
 			"description":"Next to each other; adjacent to each other.",
 			"tags":["ui"]
 		},{
-			"id":"script-2396",
+			"id":"script-2428",
 			"name":"control_structure",
 			"display name":"control structure",
 			"library":"script",
@@ -84231,7 +85101,7 @@
 				"glossary":["statement","execute"]
 			}
 		},{
-			"id":"script-2397",
+			"id":"script-2429",
 			"name":"control",
 			"display name":"control",
 			"library":"script",
@@ -84247,7 +85117,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2398",
+			"id":"script-2430",
 			"name":"controller_bar",
 			"display name":"controller bar",
 			"library":"script",
@@ -84262,7 +85132,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2399",
+			"id":"script-2431",
 			"name":"creator_signature",
 			"display name":"creator signature",
 			"library":"script",
@@ -84277,7 +85147,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2400",
+			"id":"script-2432",
 			"name":"cross-platform",
 			"display name":"cross-platform",
 			"library":"script",
@@ -84288,7 +85158,7 @@
 			"synonyms":["crossplatform","cross-platform"],
 			"description":"Able to be used on more than one type of operating system and computer.\n"
 		},{
-			"id":"script-2401",
+			"id":"script-2433",
 			"name":"current_card",
 			"display name":"current card",
 			"library":"script",
@@ -84303,7 +85173,7 @@
 			},
 			"tags":["navigation"]
 		},{
-			"id":"script-2402",
+			"id":"script-2434",
 			"name":"current_folder",
 			"display name":"current folder",
 			"library":"script",
@@ -84319,7 +85189,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2403",
+			"id":"script-2435",
 			"name":"current_stack",
 			"display name":"current stack",
 			"library":"script",
@@ -84335,7 +85205,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2404",
+			"id":"script-2436",
 			"name":"cursor",
 			"display name":"cursor",
 			"library":"script",
@@ -84350,7 +85220,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2405",
+			"id":"script-2437",
 			"name":"custom_command",
 			"display name":"custom command",
 			"library":"script",
@@ -84364,7 +85234,7 @@
 				"glossary":["command","message handler"]
 			}
 		},{
-			"id":"script-2406",
+			"id":"script-2438",
 			"name":"custom_function",
 			"display name":"custom function",
 			"library":"script",
@@ -84378,7 +85248,7 @@
 				"glossary":["function handler","function"]
 			}
 		},{
-			"id":"script-2407",
+			"id":"script-2439",
 			"name":"custom_property_set",
 			"display name":"custom property set",
 			"library":"script",
@@ -84393,7 +85263,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2408",
+			"id":"script-2440",
 			"name":"custom_property",
 			"display name":"custom property",
 			"library":"script",
@@ -84408,7 +85278,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2409",
+			"id":"script-2441",
 			"name":"dll",
 			"display name":"DLL",
 			"library":"script",
@@ -84422,7 +85292,7 @@
 				"glossary":["Windows"]
 			}
 		},{
-			"id":"script-2410",
+			"id":"script-2442",
 			"name":"dns",
 			"display name":"DNS",
 			"library":"script",
@@ -84437,7 +85307,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2411",
+			"id":"script-2443",
 			"name":"dsn",
 			"display name":"DSN",
 			"library":"script",
@@ -84452,7 +85322,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2412",
+			"id":"script-2444",
 			"name":"dtd",
 			"display name":"DTD",
 			"library":"script",
@@ -84467,7 +85337,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2413",
+			"id":"script-2445",
 			"name":"darwin",
 			"display name":"Darwin",
 			"library":"script",
@@ -84481,7 +85351,7 @@
 				"glossary":["Unix","OS X","Aqua","engine","command line"]
 			}
 		},{
-			"id":"script-2414",
+			"id":"script-2446",
 			"name":"database_library",
 			"display name":"Database library",
 			"library":"script",
@@ -84496,7 +85366,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2415",
+			"id":"script-2447",
 			"name":"display_postscript",
 			"display name":"Display PostScript",
 			"library":"script",
@@ -84511,7 +85381,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2416",
+			"id":"script-2448",
 			"name":"data_fork",
 			"display name":"data fork",
 			"library":"script",
@@ -84526,7 +85396,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2417",
+			"id":"script-2449",
 			"name":"database_driver",
 			"display name":"database driver",
 			"library":"script",
@@ -84541,7 +85411,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2418",
+			"id":"script-2450",
 			"name":"database_field",
 			"display name":"database field",
 			"library":"script",
@@ -84556,7 +85426,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2419",
+			"id":"script-2451",
 			"name":"database",
 			"display name":"database",
 			"library":"script",
@@ -84571,7 +85441,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2420",
+			"id":"script-2452",
 			"name":"datagram",
 			"display name":"datagram",
 			"library":"script",
@@ -84583,7 +85453,7 @@
 			"description":"A self-contained clump of data that contains information about the route\nit should take to the system intended to receive it.",
 			"tags":["networking"]
 		},{
-			"id":"script-2421",
+			"id":"script-2453",
 			"name":"debug",
 			"display name":"debug",
 			"library":"script",
@@ -84597,7 +85467,7 @@
 				"glossary":["handler","error","execute","anomaly"]
 			}
 		},{
-			"id":"script-2422",
+			"id":"script-2454",
 			"name":"debugger",
 			"display name":"debugger",
 			"library":"script",
@@ -84611,7 +85481,7 @@
 				"glossary":["error","script"]
 			}
 		},{
-			"id":"script-2423",
+			"id":"script-2455",
 			"name":"decimal_point",
 			"display name":"decimal point",
 			"library":"script",
@@ -84626,7 +85496,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2424",
+			"id":"script-2456",
 			"name":"declare",
 			"display name":"declare",
 			"library":"script",
@@ -84641,7 +85511,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2425",
+			"id":"script-2457",
 			"name":"decode",
 			"display name":"decode",
 			"library":"script",
@@ -84656,7 +85526,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2426",
+			"id":"script-2458",
 			"name":"decrypt",
 			"display name":"decrypt",
 			"library":"script",
@@ -84671,7 +85541,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2427",
+			"id":"script-2459",
 			"name":"default_button",
 			"display name":"default button",
 			"library":"script",
@@ -84686,7 +85556,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2428",
+			"id":"script-2460",
 			"name":"default",
 			"display name":"default",
 			"library":"script",
@@ -84698,7 +85568,7 @@
 			"description":"The setting that is used if you don't specify any other setting.",
 			"tags":["properties"]
 		},{
-			"id":"script-2429",
+			"id":"script-2461",
 			"name":"degree",
 			"display name":"degree",
 			"library":"script",
@@ -84710,7 +85580,7 @@
 			"description":"Measurement unit for angles, also shown by the symbol &#176;. There are\n360 degrees in a circle.",
 			"tags":["math"]
 		},{
-			"id":"script-2430",
+			"id":"script-2462",
 			"name":"delimit",
 			"display name":"delimit",
 			"library":"script",
@@ -84725,7 +85595,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2431",
+			"id":"script-2463",
 			"name":"delimiter",
 			"display name":"delimiter",
 			"library":"script",
@@ -84740,7 +85610,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2432",
+			"id":"script-2464",
 			"name":"dereference",
 			"display name":"dereference",
 			"library":"script",
@@ -84755,7 +85625,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2433",
+			"id":"script-2465",
 			"name":"desktop",
 			"display name":"desktop",
 			"library":"script",
@@ -84766,7 +85636,7 @@
 			"synonyms":["desktop","desktop background","background window"],
 			"description":"The whole area of the screen, underneath any windows; the part of the\nscreen where there are no windows, menus, icons, or other elements.\n"
 		},{
-			"id":"script-2434",
+			"id":"script-2466",
 			"name":"development_environment",
 			"display name":"development environment",
 			"library":"script",
@@ -84780,7 +85650,7 @@
 				"glossary":["message box","palette","debugger"]
 			}
 		},{
-			"id":"script-2435",
+			"id":"script-2467",
 			"name":"device_driver",
 			"display name":"device driver",
 			"library":"script",
@@ -84794,7 +85664,7 @@
 				"glossary":["peripheral device"]
 			}
 		},{
-			"id":"script-2436",
+			"id":"script-2468",
 			"name":"dialog_box",
 			"display name":"dialog box",
 			"library":"script",
@@ -84806,7 +85676,7 @@
 			"description":"A window that communicates information or requests information.",
 			"tags":["windowing"]
 		},{
-			"id":"script-2437",
+			"id":"script-2469",
 			"name":"dimmed",
 			"display name":"dimmed",
 			"library":"script",
@@ -84818,7 +85688,7 @@
 			"description":"Displayed in a special way that indicates that the dimmed item is\ndisabled. Usually, dimmed objects are grayed out: gray is substituted\nfor black when drawing the button, menu item, or other disabled portion\nof the screen.",
 			"tags":["ui"]
 		},{
-			"id":"script-2438",
+			"id":"script-2470",
 			"name":"disabled",
 			"display name":"disabled",
 			"library":"script",
@@ -84830,7 +85700,7 @@
 			"description":"Unable to be chosen or used, usually temporarily. For example, the\n\"Next\" button might be disabled if the user is already looking at the\nlast entry.\n\nA disabled part of the screen is usually dimmed to the user that the\nobject is unavailable for use.",
 			"tags":["ui"]
 		},{
-			"id":"script-2439",
+			"id":"script-2471",
 			"name":"disclosure_triangle",
 			"display name":"disclosure triangle",
 			"library":"script",
@@ -84845,7 +85715,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2440",
+			"id":"script-2472",
 			"name":"dither",
 			"display name":"dither",
 			"library":"script",
@@ -84857,7 +85727,7 @@
 			"description":"To create the illusion of additional colors in an image, by using dot\npatterns made of the available colors.\n\nFor example, if orange is not available on the screen, a pattern of\nalternating red and yellow dots can be used instead, creating an\napproximation of orange.",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2441",
+			"id":"script-2473",
 			"name":"dock",
 			"display name":"dock",
 			"library":"script",
@@ -84871,7 +85741,7 @@
 				"glossary":["minimize","OS X"]
 			}
 		},{
-			"id":"script-2442",
+			"id":"script-2474",
 			"name":"document",
 			"display name":"document",
 			"library":"script",
@@ -84886,7 +85756,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2443",
+			"id":"script-2475",
 			"name":"domain_name",
 			"display name":"domain name",
 			"library":"script",
@@ -84901,7 +85771,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2444",
+			"id":"script-2476",
 			"name":"domain",
 			"display name":"domain",
 			"library":"script",
@@ -84916,7 +85786,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2445",
+			"id":"script-2477",
 			"name":"double-byte_character",
 			"display name":"double-byte character",
 			"library":"script",
@@ -84931,7 +85801,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2446",
+			"id":"script-2478",
 			"name":"double-byte_font",
 			"display name":"double-byte font",
 			"library":"script",
@@ -84943,7 +85813,7 @@
 			"description":"A font in which each character is represented by 2 bytes. Languages such\nas Japanese, Chinese, and Korean, which contain more symbols than can be\nrepresented by 256 code points, require double-byte character sets.\n\nDouble-byte fonts usually also contain a full complement of alphabetic\ncharacters occupying the first 256 positions in the font, so you can\ndisplay Roman-alphabet text and Unicode text using the same font.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2447",
+			"id":"script-2479",
 			"name":"double-click",
 			"display name":"double-click",
 			"library":"script",
@@ -84955,7 +85825,7 @@
 			"description":"To click twice on a mouse button in rapid succession.",
 			"tags":["ui"]
 		},{
-			"id":"script-2448",
+			"id":"script-2480",
 			"name":"double_quote",
 			"display name":"double quote",
 			"library":"script",
@@ -84970,7 +85840,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2449",
+			"id":"script-2481",
 			"name":"download",
 			"display name":"download",
 			"library":"script",
@@ -84985,7 +85855,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2450",
+			"id":"script-2482",
 			"name":"drag_and_drop",
 			"display name":"drag and drop",
 			"library":"script",
@@ -85000,7 +85870,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2451",
+			"id":"script-2483",
 			"name":"drawer",
 			"display name":"drawer",
 			"library":"script",
@@ -85015,7 +85885,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2452",
+			"id":"script-2484",
 			"name":"eof",
 			"display name":"EOF",
 			"library":"script",
@@ -85030,7 +85900,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2453",
+			"id":"script-2485",
 			"name":"eps",
 			"display name":"EPS",
 			"library":"script",
@@ -85045,7 +85915,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2454",
+			"id":"script-2486",
 			"name":"emacs",
 			"display name":"Emacs",
 			"library":"script",
@@ -85059,7 +85929,7 @@
 				"glossary":["Unix"]
 			}
 		},{
-			"id":"script-2455",
+			"id":"script-2487",
 			"name":"escape_key",
 			"display name":"Escape key",
 			"library":"script",
@@ -85071,7 +85941,7 @@
 			"description":"A key commonly used to stop a program's operation. On most keyboards,\nthe Escape key is near the upper left corner.",
 			"tags":["ui"]
 		},{
-			"id":"script-2456",
+			"id":"script-2488",
 			"name":"editable_window",
 			"display name":"editable window",
 			"library":"script",
@@ -85086,7 +85956,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2457",
+			"id":"script-2489",
 			"name":"element",
 			"display name":"element",
 			"library":"script",
@@ -85101,7 +85971,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2458",
+			"id":"script-2490",
 			"name":"encode",
 			"display name":"encode",
 			"library":"script",
@@ -85116,7 +85986,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2459",
+			"id":"script-2491",
 			"name":"encrypt",
 			"display name":"encrypt",
 			"library":"script",
@@ -85131,7 +86001,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2460",
+			"id":"script-2492",
 			"name":"end-of-line_marker",
 			"display name":"end-of-line marker",
 			"library":"script",
@@ -85146,7 +86016,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2461",
+			"id":"script-2493",
 			"name":"engine",
 			"display name":"engine",
 			"library":"script",
@@ -85160,7 +86030,7 @@
 				"glossary":["object hierarchy","OpenXTalk","standalone application","compile","development environment","object"]
 			}
 		},{
-			"id":"script-2462",
+			"id":"script-2494",
 			"name":"environment_variable",
 			"display name":"environment variable",
 			"library":"script",
@@ -85175,7 +86045,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2463",
+			"id":"script-2495",
 			"name":"eon",
 			"display name":"eon",
 			"library":"script",
@@ -85187,7 +86057,7 @@
 			"description":"The period of time used as the baseline for a computer system or\nprogram. Since only finite numbers can be represented in a computer,\noperating systems and programs that deal with dates must use a starting\nand ending date; dates outside that range require special handling.\n\nOpenXTalk uses midnight, January 1, 1970 as the start of the eon. Date\nand time functions are computed from that date.",
 			"tags":["math"]
 		},{
-			"id":"script-2464",
+			"id":"script-2496",
 			"name":"error_message",
 			"display name":"error message",
 			"library":"script",
@@ -85201,7 +86071,7 @@
 				"glossary":["error","handler","caller"]
 			}
 		},{
-			"id":"script-2465",
+			"id":"script-2497",
 			"name":"error",
 			"display name":"error",
 			"library":"script",
@@ -85215,7 +86085,7 @@
 				"glossary":["handler","compile error","compile","execution error"]
 			}
 		},{
-			"id":"script-2466",
+			"id":"script-2498",
 			"name":"evaluate",
 			"display name":"evaluate",
 			"library":"script",
@@ -85229,7 +86099,7 @@
 				"glossary":["expression","value"]
 			}
 		},{
-			"id":"script-2467",
+			"id":"script-2499",
 			"name":"event",
 			"display name":"event",
 			"library":"script",
@@ -85241,7 +86111,7 @@
 			"description":"An occurrence that causes a program to do something. An event can be a\nuser action (like a mouse click) or a program action (like the\ncompletion of a download).",
 			"tags":["objects"]
 		},{
-			"id":"script-2468",
+			"id":"script-2500",
 			"name":"exception_handling",
 			"display name":"exception handling",
 			"library":"script",
@@ -85255,7 +86125,7 @@
 				"glossary":["statement","execution error"]
 			}
 		},{
-			"id":"script-2469",
+			"id":"script-2501",
 			"name":"execute",
 			"display name":"execute",
 			"library":"script",
@@ -85269,7 +86139,7 @@
 				"glossary":["command","handler"]
 			}
 		},{
-			"id":"script-2470",
+			"id":"script-2502",
 			"name":"execution_error",
 			"display name":"execution error",
 			"library":"script",
@@ -85283,7 +86153,7 @@
 				"glossary":["execute","handler"]
 			}
 		},{
-			"id":"script-2471",
+			"id":"script-2503",
 			"name":"exit",
 			"display name":"exit",
 			"library":"script",
@@ -85297,7 +86167,7 @@
 				"glossary":["execute","handler"]
 			}
 		},{
-			"id":"script-2472",
+			"id":"script-2504",
 			"name":"explicit_focus",
 			"display name":"explicit focus",
 			"library":"script",
@@ -85312,7 +86182,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2473",
+			"id":"script-2505",
 			"name":"export",
 			"display name":"export",
 			"library":"script",
@@ -85327,7 +86197,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2474",
+			"id":"script-2506",
 			"name":"expression",
 			"display name":"expression",
 			"library":"script",
@@ -85341,7 +86211,7 @@
 				"glossary":["operator","value"]
 			}
 		},{
-			"id":"script-2475",
+			"id":"script-2507",
 			"name":"extension",
 			"display name":"extension",
 			"library":"script",
@@ -85356,7 +86226,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2476",
+			"id":"script-2508",
 			"name":"external",
 			"display name":"external",
 			"library":"script",
@@ -85370,7 +86240,7 @@
 				"glossary":["command","OpenXTalk","function"]
 			}
 		},{
-			"id":"script-2477",
+			"id":"script-2509",
 			"name":"ftp",
 			"display name":"FTP",
 			"library":"script",
@@ -85385,7 +86255,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2478",
+			"id":"script-2510",
 			"name":"factor",
 			"display name":"factor",
 			"library":"script",
@@ -85399,7 +86269,7 @@
 				"glossary":["operator","value","binary","expression"]
 			}
 		},{
-			"id":"script-2479",
+			"id":"script-2511",
 			"name":"fat_application",
 			"display name":"fat application",
 			"library":"script",
@@ -85413,7 +86283,7 @@
 				"glossary":["Mac OS"]
 			}
 		},{
-			"id":"script-2480",
+			"id":"script-2512",
 			"name":"field",
 			"display name":"field",
 			"library":"script",
@@ -85428,7 +86298,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2481",
+			"id":"script-2513",
 			"name":"file_dialog_box",
 			"display name":"file dialog box",
 			"library":"script",
@@ -85443,7 +86313,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2482",
+			"id":"script-2514",
 			"name":"file_path",
 			"display name":"file path",
 			"library":"script",
@@ -85458,7 +86328,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2483",
+			"id":"script-2515",
 			"name":"file",
 			"display name":"file",
 			"library":"script",
@@ -85473,7 +86343,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2484",
+			"id":"script-2516",
 			"name":"firewall",
 			"display name":"firewall",
 			"library":"script",
@@ -85485,7 +86355,7 @@
 			"description":"A system with special security features, which intercepts all traffic\nbetween a local network (such as a corporate network) and the rest of\nthe Internet.\n\nFirewalls are used to prevent crackers from gaining access to computers\non the local network.",
 			"tags":["networking"]
 		},{
-			"id":"script-2485",
+			"id":"script-2517",
 			"name":"flag",
 			"display name":"flag",
 			"library":"script",
@@ -85500,7 +86370,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2486",
+			"id":"script-2518",
 			"name":"focus",
 			"display name":"focus",
 			"library":"script",
@@ -85515,7 +86385,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2487",
+			"id":"script-2519",
 			"name":"folder",
 			"display name":"folder",
 			"library":"script",
@@ -85530,7 +86400,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2488",
+			"id":"script-2520",
 			"name":"font",
 			"display name":"font",
 			"library":"script",
@@ -85545,7 +86415,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2489",
+			"id":"script-2521",
 			"name":"format",
 			"display name":"format",
 			"library":"script",
@@ -85560,7 +86430,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2490",
+			"id":"script-2522",
 			"name":"frame",
 			"display name":"frame",
 			"library":"script",
@@ -85572,7 +86442,7 @@
 			"description":"One of the images in the sequence of images that makes up an animation\nor video.",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2491",
+			"id":"script-2523",
 			"name":"frontscript",
 			"display name":"frontScript",
 			"library":"script",
@@ -85587,7 +86457,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2492",
+			"id":"script-2524",
 			"name":"function_call",
 			"display name":"function call",
 			"library":"script",
@@ -85601,7 +86471,7 @@
 				"glossary":["parameter","statement","value","function"]
 			}
 		},{
-			"id":"script-2493",
+			"id":"script-2525",
 			"name":"function_handler",
 			"display name":"function handler",
 			"library":"script",
@@ -85615,7 +86485,7 @@
 				"glossary":["handler","OpenXTalk","custom function","function","control structure"]
 			}
 		},{
-			"id":"script-2494",
+			"id":"script-2526",
 			"name":"function",
 			"display name":"function",
 			"library":"script",
@@ -85629,7 +86499,7 @@
 				"glossary":["value","handler","return"]
 			}
 		},{
-			"id":"script-2495",
+			"id":"script-2527",
 			"name":"gif",
 			"display name":"GIF",
 			"library":"script",
@@ -85644,7 +86514,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2496",
+			"id":"script-2528",
 			"name":"geometry_library",
 			"display name":"Geometry library",
 			"library":"script",
@@ -85661,7 +86531,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2497",
+			"id":"script-2529",
 			"name":"gamma",
 			"display name":"gamma",
 			"library":"script",
@@ -85673,7 +86543,7 @@
 			"description":"The relationship between intensity and luminance of color. \n\nGamma varies between monitors and between operating systems, so color\nimages may look different--brighter or more washed out--on different\nsystems. ",
 			"tags":["ui"]
 		},{
-			"id":"script-2498",
+			"id":"script-2530",
 			"name":"geometry_management",
 			"display name":"geometry management",
 			"library":"script",
@@ -85689,7 +86559,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2499",
+			"id":"script-2531",
 			"name":"getprop_call",
 			"display name":"getProp call",
 			"library":"script",
@@ -85705,7 +86575,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2500",
+			"id":"script-2532",
 			"name":"getprop_handler",
 			"display name":"getProp handler",
 			"library":"script",
@@ -85721,7 +86591,7 @@
 				"control structure":["getProp"]
 			}
 		},{
-			"id":"script-2501",
+			"id":"script-2533",
 			"name":"global",
 			"display name":"global",
 			"library":"script",
@@ -85736,7 +86606,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2502",
+			"id":"script-2534",
 			"name":"graphic",
 			"display name":"graphic",
 			"library":"script",
@@ -85751,7 +86621,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2503",
+			"id":"script-2535",
 			"name":"greedy",
 			"display name":"greedy",
 			"library":"script",
@@ -85763,7 +86633,7 @@
 			"description":"A form of regular expression that tries to include as long a string of\ntext as possible while still matching the pattern.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2504",
+			"id":"script-2536",
 			"name":"group-editing_mode",
 			"display name":"group-editing mode",
 			"library":"script",
@@ -85778,7 +86648,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2505",
+			"id":"script-2537",
 			"name":"group",
 			"display name":"group",
 			"library":"script",
@@ -85793,7 +86663,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2506",
+			"id":"script-2538",
 			"name":"grouped_control",
 			"display name":"grouped control",
 			"library":"script",
@@ -85808,7 +86678,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2507",
+			"id":"script-2539",
 			"name":"grouped_text",
 			"display name":"grouped text",
 			"library":"script",
@@ -85823,7 +86693,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2508",
+			"id":"script-2540",
 			"name":"html",
 			"display name":"HTML",
 			"library":"script",
@@ -85835,7 +86705,7 @@
 			"description":"HyperText Markup Language. The language used for creating web pages.",
 			"tags":["networking"]
 		},{
-			"id":"script-2509",
+			"id":"script-2541",
 			"name":"http",
 			"display name":"HTTP",
 			"library":"script",
@@ -85850,7 +86720,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2510",
+			"id":"script-2542",
 			"name":"hypercard",
 			"display name":"HyperCard",
 			"library":"script",
@@ -85861,7 +86731,7 @@
 			"synonyms":["hypertalk","hc","hypercard","xtalk"],
 			"description":"The defunct authoring environment from Apple Computer (1987 - 2004) that was the\nmain progenitor of all xTalk scripting environments. Its scripting language was\ncalled HyperTalk, and third party clones of that scripting language, such as\nSuperTalk, MediaTalk, MetaTalk, etc., collectively became known to the public as\nxTalk.\n"
 		},{
-			"id":"script-2511",
+			"id":"script-2543",
 			"name":"handle",
 			"display name":"handle",
 			"library":"script",
@@ -85876,7 +86746,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2512",
+			"id":"script-2544",
 			"name":"handler",
 			"display name":"handler",
 			"library":"script",
@@ -85893,7 +86763,7 @@
 			},
 			"tags":["messages"]
 		},{
-			"id":"script-2513",
+			"id":"script-2545",
 			"name":"hexadecimal",
 			"display name":"hexadecimal",
 			"library":"script",
@@ -85908,7 +86778,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2514",
+			"id":"script-2546",
 			"name":"highlight",
 			"display name":"highlight",
 			"library":"script",
@@ -85923,7 +86793,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2515",
+			"id":"script-2547",
 			"name":"home_directory",
 			"display name":"home directory",
 			"library":"script",
@@ -85938,7 +86808,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2516",
+			"id":"script-2548",
 			"name":"host_byte_order",
 			"display name":"host byte order",
 			"library":"script",
@@ -85953,7 +86823,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2517",
+			"id":"script-2549",
 			"name":"host",
 			"display name":"host",
 			"library":"script",
@@ -85965,7 +86835,7 @@
 			"description":"A computer system connected to another system.",
 			"tags":["networking"]
 		},{
-			"id":"script-2518",
+			"id":"script-2550",
 			"name":"hypertext",
 			"display name":"hypertext",
 			"library":"script",
@@ -85977,7 +86847,7 @@
 			"description":"Text containing links that can be clicked in order to display further\ninformation. ",
 			"tags":["ui"]
 		},{
-			"id":"script-2519",
+			"id":"script-2551",
 			"name":"ide",
 			"display name":"IDE",
 			"library":"script",
@@ -85988,7 +86858,7 @@
 			"synonyms":["ide"],
 			"description":"An acronym for Integrated (or Interactive) Development Environment. An\nall-in-one environment for developing applications.\n"
 		},{
-			"id":"script-2520",
+			"id":"script-2552",
 			"name":"ip_address",
 			"display name":"IP address",
 			"library":"script",
@@ -86000,7 +86870,7 @@
 			"description":"The numeric address of a computer system, expressed in the form X.X.X.X\nwhere each X is a number with between 1 and 3 digits.",
 			"tags":["networking"]
 		},{
-			"id":"script-2521",
+			"id":"script-2553",
 			"name":"iso_8859",
 			"display name":"ISO 8859",
 			"library":"script",
@@ -86015,7 +86885,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2522",
+			"id":"script-2554",
 			"name":"internet_library",
 			"display name":"Internet library",
 			"library":"script",
@@ -86030,7 +86900,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2523",
+			"id":"script-2555",
 			"name":"iconify",
 			"display name":"iconify",
 			"library":"script",
@@ -86045,7 +86915,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2524",
+			"id":"script-2556",
 			"name":"idle",
 			"display name":"idle",
 			"library":"script",
@@ -86059,7 +86929,7 @@
 				"glossary":["statement","execute"]
 			}
 		},{
-			"id":"script-2525",
+			"id":"script-2557",
 			"name":"image",
 			"display name":"image",
 			"library":"script",
@@ -86074,7 +86944,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2526",
+			"id":"script-2558",
 			"name":"implicit_focus",
 			"display name":"implicit focus",
 			"library":"script",
@@ -86089,7 +86959,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2527",
+			"id":"script-2559",
 			"name":"import",
 			"display name":"import",
 			"library":"script",
@@ -86104,7 +86974,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2528",
+			"id":"script-2560",
 			"name":"inheritance",
 			"display name":"inheritance",
 			"library":"script",
@@ -86119,7 +86989,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2529",
+			"id":"script-2561",
 			"name":"insertion_point",
 			"display name":"insertion point",
 			"library":"script",
@@ -86131,7 +87001,7 @@
 			"description":"The location in a field or text box where text you type will appear.\nAlso, the blinking vertical bar that marks that location.",
 			"tags":["ui"]
 		},{
-			"id":"script-2530",
+			"id":"script-2562",
 			"name":"integer",
 			"display name":"integer",
 			"library":"script",
@@ -86143,7 +87013,7 @@
 			"description":"A number that is a multiple of 1. Examples of integers include 6, 2200,\n-145, and 3 x 10^8.\n\nNumbers which are fractions or contain a fractional part (such as 1/2 or\n22.87) are not integers.",
 			"tags":["math"]
 		},{
-			"id":"script-2531",
+			"id":"script-2563",
 			"name":"inverse",
 			"display name":"inverse",
 			"library":"script",
@@ -86158,7 +87028,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2532",
+			"id":"script-2564",
 			"name":"item",
 			"display name":"item",
 			"library":"script",
@@ -86174,7 +87044,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2533",
+			"id":"script-2565",
 			"name":"iteration",
 			"display name":"iteration",
 			"library":"script",
@@ -86188,7 +87058,7 @@
 				"glossary":["loop","value"]
 			}
 		},{
-			"id":"script-2534",
+			"id":"script-2566",
 			"name":"jpeg",
 			"display name":"JPEG",
 			"library":"script",
@@ -86203,7 +87073,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2535",
+			"id":"script-2567",
 			"name":"key_binding",
 			"display name":"key binding",
 			"library":"script",
@@ -86218,7 +87088,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2536",
+			"id":"script-2568",
 			"name":"key_combination",
 			"display name":"key combination",
 			"library":"script",
@@ -86233,7 +87103,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2537",
+			"id":"script-2569",
 			"name":"key_frame",
 			"display name":"key frame",
 			"library":"script",
@@ -86248,7 +87118,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2538",
+			"id":"script-2570",
 			"name":"key",
 			"display name":"key",
 			"library":"script",
@@ -86263,7 +87133,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2539",
+			"id":"script-2571",
 			"name":"keyboard_equivalent",
 			"display name":"keyboard equivalent",
 			"library":"script",
@@ -86278,7 +87148,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2540",
+			"id":"script-2572",
 			"name":"keycode",
 			"display name":"keycode",
 			"library":"script",
@@ -86290,7 +87160,7 @@
 			"description":"The internal numeric identifier for a key on the keyboard. Each physical\nkey on the keyboard can be identified by its keycode.",
 			"tags":["ui"]
 		},{
-			"id":"script-2541",
+			"id":"script-2573",
 			"name":"keyword",
 			"display name":"keyword",
 			"library":"script",
@@ -86304,7 +87174,7 @@
 				"glossary":["property","OpenXTalk","operator","message","control structure","function","command","object"]
 			}
 		},{
-			"id":"script-2542",
+			"id":"script-2574",
 			"name":"custom_library",
 			"display name":"custom library",
 			"library":"script",
@@ -86319,7 +87189,7 @@
 				"library":["library"]
 			}
 		},{
-			"id":"script-2543",
+			"id":"script-2575",
 			"name":"livecode",
 			"display name":"LiveCode",
 			"library":"script",
@@ -86333,7 +87203,7 @@
 				"glossary":["script"]
 			}
 		},{
-			"id":"script-2544",
+			"id":"script-2576",
 			"name":"landscape",
 			"display name":"landscape",
 			"library":"script",
@@ -86345,7 +87215,7 @@
 			"description":"The orientation of a printed page that is wider than it is tall.",
 			"tags":["printing"]
 		},{
-			"id":"script-2545",
+			"id":"script-2577",
 			"name":"launch",
 			"display name":"launch",
 			"library":"script",
@@ -86356,7 +87226,7 @@
 			"synonyms":["launches","launched","launching","launch"],
 			"description":"To start up a program.\n"
 		},{
-			"id":"script-2546",
+			"id":"script-2578",
 			"name":"layer",
 			"display name":"layer",
 			"library":"script",
@@ -86371,7 +87241,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2547",
+			"id":"script-2579",
 			"name":"library_extension",
 			"display name":"library extension",
 			"library":"script",
@@ -86386,7 +87256,7 @@
 				"library":["library"]
 			}
 		},{
-			"id":"script-2548",
+			"id":"script-2580",
 			"name":"library",
 			"display name":"library",
 			"library":"script",
@@ -86401,7 +87271,7 @@
 				"glossary":["command","OpenXTalk custom library","script","stack","object"]
 			}
 		},{
-			"id":"script-2549",
+			"id":"script-2581",
 			"name":"line",
 			"display name":"line",
 			"library":"script",
@@ -86417,7 +87287,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2550",
+			"id":"script-2582",
 			"name":"list_field",
 			"display name":"list field",
 			"library":"script",
@@ -86429,7 +87299,7 @@
 			"description":"A clickable list, where clicking anywhere in a line selects the entire\nline. ",
 			"tags":["ui"]
 		},{
-			"id":"script-2551",
+			"id":"script-2583",
 			"name":"literal_string",
 			"display name":"literal string",
 			"library":"script",
@@ -86444,7 +87314,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2552",
+			"id":"script-2584",
 			"name":"load",
 			"display name":"load",
 			"library":"script",
@@ -86459,7 +87329,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2553",
+			"id":"script-2585",
 			"name":"loaded_into_memory",
 			"display name":"loaded into memory",
 			"library":"script",
@@ -86474,7 +87344,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2554",
+			"id":"script-2586",
 			"name":"local_file",
 			"display name":"local file",
 			"library":"script",
@@ -86488,7 +87358,7 @@
 				"glossary":["application"]
 			}
 		},{
-			"id":"script-2555",
+			"id":"script-2587",
 			"name":"local_property",
 			"display name":"local property",
 			"library":"script",
@@ -86503,7 +87373,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2556",
+			"id":"script-2588",
 			"name":"local_variable",
 			"display name":"local variable",
 			"library":"script",
@@ -86518,7 +87388,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2557",
+			"id":"script-2589",
 			"name":"lock",
 			"display name":"lock",
 			"library":"script",
@@ -86533,7 +87403,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2558",
+			"id":"script-2590",
 			"name":"logical",
 			"display name":"logical",
 			"library":"script",
@@ -86548,7 +87418,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2559",
+			"id":"script-2591",
 			"name":"look_and_feel",
 			"display name":"look and feel",
 			"library":"script",
@@ -86563,7 +87433,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2560",
+			"id":"script-2592",
 			"name":"loop",
 			"display name":"loop",
 			"library":"script",
@@ -86577,7 +87447,7 @@
 				"glossary":["statement","control structure"]
 			}
 		},{
-			"id":"script-2561",
+			"id":"script-2593",
 			"name":"lossless_compression",
 			"display name":"lossless compression",
 			"library":"script",
@@ -86592,7 +87462,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2562",
+			"id":"script-2594",
 			"name":"lossy_compression",
 			"display name":"lossy compression",
 			"library":"script",
@@ -86607,7 +87477,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2563",
+			"id":"script-2595",
 			"name":"extension_builder_extension",
 			"display name":"Extension Builder extension",
 			"library":"script",
@@ -86622,7 +87492,7 @@
 				"glossary":["widget","OpenXTalk Builder language","library extension","control","stack","message path"]
 			}
 		},{
-			"id":"script-2564",
+			"id":"script-2596",
 			"name":"extension_builder_language",
 			"display name":"Extension Builder language",
 			"library":"script",
@@ -86637,7 +87507,7 @@
 				"object":["widget"]
 			}
 		},{
-			"id":"script-2565",
+			"id":"script-2597",
 			"name":"mime",
 			"display name":"MIME",
 			"library":"script",
@@ -86649,7 +87519,7 @@
 			"description":"Multipurpose Internet Mail Extensions. A standard for including data\nother than plain text in an email message.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2566",
+			"id":"script-2598",
 			"name":"mpeg",
 			"display name":"MPEG",
 			"library":"script",
@@ -86664,7 +87534,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2567",
+			"id":"script-2599",
 			"name":"macbinary",
 			"display name":"MacBinary",
 			"library":"script",
@@ -86679,7 +87549,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2568",
+			"id":"script-2600",
 			"name":"menu_builder",
 			"display name":"Menu Builder",
 			"library":"script",
@@ -86694,7 +87564,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2569",
+			"id":"script-2601",
 			"name":"meta_key",
 			"display name":"Meta key",
 			"library":"script",
@@ -86709,7 +87579,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2570",
+			"id":"script-2602",
 			"name":"metacard",
 			"display name":"MetaCard",
 			"library":"script",
@@ -86720,7 +87590,7 @@
 			"synonyms":["metatalk","mt","mc","metacard"],
 			"description":"A graphical authoring environment from MetaCard Corporation. Its\nscripting language is called MetaTalk.\n"
 		},{
-			"id":"script-2571",
+			"id":"script-2603",
 			"name":"motif",
 			"display name":"Motif",
 			"library":"script",
@@ -86735,7 +87605,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2572",
+			"id":"script-2604",
 			"name":"main_stack",
 			"display name":"main stack",
 			"library":"script",
@@ -86750,7 +87620,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2573",
+			"id":"script-2605",
 			"name":"mask",
 			"display name":"mask",
 			"library":"script",
@@ -86765,7 +87635,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2574",
+			"id":"script-2606",
 			"name":"master_profile",
 			"display name":"master profile",
 			"library":"script",
@@ -86781,7 +87651,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2575",
+			"id":"script-2607",
 			"name":"matched",
 			"display name":"matched",
 			"library":"script",
@@ -86795,7 +87665,7 @@
 				"glossary":["expression"]
 			}
 		},{
-			"id":"script-2576",
+			"id":"script-2608",
 			"name":"math_operation",
 			"display name":"math operation",
 			"library":"script",
@@ -86805,7 +87675,7 @@
 			],
 			"description":"Any of the math operations in command, function or infix form, including\narithmetic, exponential, logarithmic, trigonometric and statistical\nfunctions.\n\nA math operation can cause one of three different execution errors to be\nthrown:\n- \"numeric: domain error\"\n- \"numeric: range error (overflow)\"\n- \"numeric: divide by zero\"\n\nA domain error occurs when a math operation, given finite inputs, results\nin not-a-number (NaN) - this is the case when the function is not defined\nfor the given inputs, for example `acos(2)`; or the output does not exist\nin the extended real line (`ℝ ∪ {−∞, +∞}`), for example, `sqrt(-1)`.\n\nA range error occurs when a math operation's output overflows given finite\ninputs, i.e. when the result is greater than the maximum value of a 64-bit\nfloating point, for example `10^308 * 2`.\n\nA divide by zero error occurs when a math operation causes division by zero\neither directly, for example `1/0` or `0^-1` or as part of its computation,\nfor example `10 wrap 0`.\n\nMath operations do not throw execution errors when any of the inputs are\nnon-finite, for example neither of `(1^(-inf) + inf) / 2 = inf` or\n`sqrt(-inf) = NaN` causes an execution error.\n"
 		},{
-			"id":"script-2577",
+			"id":"script-2609",
 			"name":"maximize_button",
 			"display name":"maximize button",
 			"library":"script",
@@ -86820,7 +87690,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2578",
+			"id":"script-2610",
 			"name":"maximize",
 			"display name":"maximize",
 			"library":"script",
@@ -86835,7 +87705,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2579",
+			"id":"script-2611",
 			"name":"menu_bar",
 			"display name":"menu bar",
 			"library":"script",
@@ -86850,7 +87720,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2580",
+			"id":"script-2612",
 			"name":"menu_item",
 			"display name":"menu item",
 			"library":"script",
@@ -86865,7 +87735,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2581",
+			"id":"script-2613",
 			"name":"menu",
 			"display name":"menu",
 			"library":"script",
@@ -86877,7 +87747,7 @@
 			"description":"A list of actions or options that the user can choose from.",
 			"tags":["menus"]
 		},{
-			"id":"script-2582",
+			"id":"script-2614",
 			"name":"message_box",
 			"display name":"message box",
 			"library":"script",
@@ -86892,7 +87762,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2583",
+			"id":"script-2615",
 			"name":"message_handler",
 			"display name":"message handler",
 			"library":"script",
@@ -86908,7 +87778,7 @@
 				"control structure":["on"]
 			}
 		},{
-			"id":"script-2584",
+			"id":"script-2616",
 			"name":"message_order",
 			"display name":"message order",
 			"library":"script",
@@ -86923,7 +87793,7 @@
 			},
 			"tags":["objects","messages"]
 		},{
-			"id":"script-2585",
+			"id":"script-2617",
 			"name":"message_path",
 			"display name":"message path",
 			"library":"script",
@@ -86938,7 +87808,7 @@
 			},
 			"tags":["objects","messages"]
 		},{
-			"id":"script-2586",
+			"id":"script-2618",
 			"name":"message_watcher",
 			"display name":"message watcher",
 			"library":"script",
@@ -86953,7 +87823,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2587",
+			"id":"script-2619",
 			"name":"message",
 			"display name":"message",
 			"library":"script",
@@ -86968,7 +87838,7 @@
 			},
 			"tags":["objects","messages"]
 		},{
-			"id":"script-2588",
+			"id":"script-2620",
 			"name":"metal_window",
 			"display name":"metal window",
 			"library":"script",
@@ -86983,7 +87853,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2589",
+			"id":"script-2621",
 			"name":"millisecond",
 			"display name":"millisecond",
 			"library":"script",
@@ -86995,7 +87865,7 @@
 			"description":"One thousandth of a second.",
 			"tags":["math"]
 		},{
-			"id":"script-2590",
+			"id":"script-2622",
 			"name":"minimize_button",
 			"display name":"minimize button",
 			"library":"script",
@@ -87010,7 +87880,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2591",
+			"id":"script-2623",
 			"name":"minimize",
 			"display name":"minimize",
 			"library":"script",
@@ -87025,7 +87895,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2592",
+			"id":"script-2624",
 			"name":"modal_dialog_box",
 			"display name":"modal dialog box",
 			"library":"script",
@@ -87040,7 +87910,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2593",
+			"id":"script-2625",
 			"name":"modeless_dialog_box",
 			"display name":"modeless dialog box",
 			"library":"script",
@@ -87055,7 +87925,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2594",
+			"id":"script-2626",
 			"name":"modifier_key",
 			"display name":"modifier key",
 			"library":"script",
@@ -87070,7 +87940,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2595",
+			"id":"script-2627",
 			"name":"mouse_button",
 			"display name":"mouse button",
 			"library":"script",
@@ -87085,7 +87955,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2596",
+			"id":"script-2628",
 			"name":"mouse_pointer",
 			"display name":"mouse pointer",
 			"library":"script",
@@ -87097,7 +87967,7 @@
 			"description":"The point on the screen whose position is controlled by moving the\nmouse. ",
 			"tags":["ui"]
 		},{
-			"id":"script-2597",
+			"id":"script-2629",
 			"name":"movie",
 			"display name":"movie",
 			"library":"script",
@@ -87112,7 +87982,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2598",
+			"id":"script-2630",
 			"name":"midi",
 			"display name":"MIDI",
 			"library":"script",
@@ -87124,7 +87994,7 @@
 			"description":"MIDI (Musical Instrument Digital Interface) is a set of standards for interaction\nbetween musical hardware and software such as drum machines, synthesizer\nkeyboards, or sample players",
 			"tags":["midi","musical notation","piano","playsentence","playpmd"]
 		},{
-			"id":"script-2599",
+			"id":"script-2631",
 			"name":"mac_os",
 			"display name":"Mac OS",
 			"library":"script",
@@ -87138,7 +88008,7 @@
 				"glossary":["OS X"]
 			}
 		},{
-			"id":"script-2600",
+			"id":"script-2632",
 			"name":"nntp",
 			"display name":"NNTP",
 			"library":"script",
@@ -87153,7 +88023,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2601",
+			"id":"script-2633",
 			"name":"navigation_message",
 			"display name":"navigation message",
 			"library":"script",
@@ -87169,7 +88039,7 @@
 			},
 			"tags":["navigation"]
 		},{
-			"id":"script-2602",
+			"id":"script-2634",
 			"name":"negative",
 			"display name":"negative",
 			"library":"script",
@@ -87181,7 +88051,7 @@
 			"description":"Less than zero. Negative numbers are written with a leading minus sign.",
 			"tags":["math"]
 		},{
-			"id":"script-2603",
+			"id":"script-2635",
 			"name":"nest",
 			"display name":"nest",
 			"library":"script",
@@ -87196,7 +88066,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2604",
+			"id":"script-2636",
 			"name":"network_byte_order",
 			"display name":"network byte order",
 			"library":"script",
@@ -87211,7 +88081,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2605",
+			"id":"script-2637",
 			"name":"node",
 			"display name":"node",
 			"library":"script",
@@ -87226,7 +88096,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2606",
+			"id":"script-2638",
 			"name":"non-blocking",
 			"display name":"non-blocking",
 			"library":"script",
@@ -87241,7 +88111,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2607",
+			"id":"script-2639",
 			"name":"non-greedy",
 			"display name":"non-greedy",
 			"library":"script",
@@ -87253,7 +88123,7 @@
 			"description":"A form of regular expression that matches only the minimum length of\ntext needed.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2608",
+			"id":"script-2640",
 			"name":"non-negative",
 			"display name":"non-negative",
 			"library":"script",
@@ -87265,7 +88135,7 @@
 			"description":"Greater than or equal to zero.",
 			"tags":["math"]
 		},{
-			"id":"script-2609",
+			"id":"script-2641",
 			"name":"non-printable_character",
 			"display name":"non-printable character",
 			"library":"script",
@@ -87280,7 +88150,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2610",
+			"id":"script-2642",
 			"name":"null",
 			"display name":"null",
 			"library":"script",
@@ -87295,7 +88165,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2611",
+			"id":"script-2643",
 			"name":"numeric",
 			"display name":"numeric",
 			"library":"script",
@@ -87310,7 +88180,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2612",
+			"id":"script-2644",
 			"name":"odbc_manager",
 			"display name":"ODBC manager",
 			"library":"script",
@@ -87326,7 +88196,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2613",
+			"id":"script-2645",
 			"name":"os_x",
 			"display name":"OS X",
 			"library":"script",
@@ -87340,7 +88210,7 @@
 				"glossary":["Mac OS"]
 			}
 		},{
-			"id":"script-2614",
+			"id":"script-2646",
 			"name":"open_database_connectivity",
 			"display name":"Open Database Connectivity",
 			"library":"script",
@@ -87356,7 +88226,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2615",
+			"id":"script-2647",
 			"name":"open_scripting_architecture",
 			"display name":"Open Scripting Architecture",
 			"library":"script",
@@ -87368,7 +88238,7 @@
 			"deprecated":"OSA",
 			"description":"System for creating and integrating system-wide scripting languages,\ndeveloped by Apple Computer.\n"
 		},{
-			"id":"script-2616",
+			"id":"script-2648",
 			"name":"option_key",
 			"display name":"Option key",
 			"library":"script",
@@ -87383,7 +88253,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2617",
+			"id":"script-2649",
 			"name":"oracle_media_objects",
 			"display name":"Oracle Media Objects",
 			"library":"script",
@@ -87394,7 +88264,7 @@
 			"synonyms":["omo","oracle media objects"],
 			"description":"A graphical authoring environment from Oracle Corporation. Its scripting\nlanguage is called MediaTalk.\n"
 		},{
-			"id":"script-2618",
+			"id":"script-2650",
 			"name":"object_hierarchy",
 			"display name":"object hierarchy",
 			"library":"script",
@@ -87409,7 +88279,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2619",
+			"id":"script-2651",
 			"name":"object_reference",
 			"display name":"object reference",
 			"library":"script",
@@ -87426,7 +88296,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2620",
+			"id":"script-2652",
 			"name":"object_type",
 			"display name":"object type",
 			"library":"script",
@@ -87441,7 +88311,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2621",
+			"id":"script-2653",
 			"name":"object",
 			"display name":"object",
 			"library":"script",
@@ -87457,7 +88327,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2622",
+			"id":"script-2654",
 			"name":"octal",
 			"display name":"octal",
 			"library":"script",
@@ -87469,7 +88339,7 @@
 			"description":"The base-8 number system, or a number represented in base 8. Octal\nnumbers are combinations of the digits 0 through 7.",
 			"tags":["math"]
 		},{
-			"id":"script-2623",
+			"id":"script-2655",
 			"name":"offset",
 			"display name":"offset",
 			"library":"script",
@@ -87481,7 +88351,7 @@
 			"description":"A distance from some base point.",
 			"tags":["ui"]
 		},{
-			"id":"script-2624",
+			"id":"script-2656",
 			"name":"operand",
 			"display name":"operand",
 			"library":"script",
@@ -87496,7 +88366,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2625",
+			"id":"script-2657",
 			"name":"operation",
 			"display name":"operation",
 			"library":"script",
@@ -87510,7 +88380,7 @@
 				"glossary":["value"]
 			}
 		},{
-			"id":"script-2626",
+			"id":"script-2658",
 			"name":"operator",
 			"display name":"operator",
 			"library":"script",
@@ -87524,7 +88394,7 @@
 				"glossary":["value"]
 			}
 		},{
-			"id":"script-2627",
+			"id":"script-2659",
 			"name":"ordinal",
 			"display name":"ordinal",
 			"library":"script",
@@ -87536,7 +88406,7 @@
 			"description":"A number that describes a position in a list (for example, \"third\").",
 			"tags":["math"]
 		},{
-			"id":"script-2628",
+			"id":"script-2660",
 			"name":"owner",
 			"display name":"owner",
 			"library":"script",
@@ -87551,7 +88421,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2629",
+			"id":"script-2661",
 			"name":"openxtalk",
 			"display name":"OpenXTalk",
 			"library":"script",
@@ -87565,7 +88435,7 @@
 				"glossary":["script"]
 			}
 		},{
-			"id":"script-2630",
+			"id":"script-2662",
 			"name":"openxion",
 			"display name":"OpenXION",
 			"library":"script",
@@ -87576,7 +88446,7 @@
 			"synonyms":["openxion","xion","xtalk"],
 			"description":"OpenXION is a xTalk interpreter from Rebecca G. Bettencourt which runs on JVMs\n(JAVA virtual machines). OpenXION seeks to be a reference platform for xTalk\nscripting language implementation, and as such it uses text-console interaction\nby default and does not include a graphical user interface construction toolkit.\nIt does include syntax for media and sound functionality.\nIts xTalk is highly compatible with HyperTalk script, and includes additional\nsyntax for object-oriented part (aka widget or control) construction, as well as\nsome syntax found in later xTalk implementations. Additionally OpenXION\nincludes 'do [code] as [alternativeLanguage]' syntax so it can call out to other\nscripting languages such as AppleScript, Python, VBScript, JavaScript.\n"
 		},{
-			"id":"script-2631",
+			"id":"script-2663",
 			"name":"pbm",
 			"display name":"PBM",
 			"library":"script",
@@ -87591,7 +88461,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2632",
+			"id":"script-2664",
 			"name":"pgm",
 			"display name":"PGM",
 			"library":"script",
@@ -87606,7 +88476,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2633",
+			"id":"script-2665",
 			"name":"pict",
 			"display name":"PICT",
 			"library":"script",
@@ -87621,7 +88491,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2634",
+			"id":"script-2666",
 			"name":"png",
 			"display name":"PNG",
 			"library":"script",
@@ -87636,7 +88506,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2635",
+			"id":"script-2667",
 			"name":"pop",
 			"display name":"POP",
 			"library":"script",
@@ -87651,7 +88521,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2636",
+			"id":"script-2668",
 			"name":"ppm",
 			"display name":"PPM",
 			"library":"script",
@@ -87666,7 +88536,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2637",
+			"id":"script-2669",
 			"name":"platinum",
 			"display name":"Platinum",
 			"library":"script",
@@ -87681,7 +88551,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2638",
+			"id":"script-2670",
 			"name":"pointer_tool",
 			"display name":"Pointer tool",
 			"library":"script",
@@ -87695,7 +88565,7 @@
 				"glossary":["development environment","tool","cursor","control"]
 			}
 		},{
-			"id":"script-2639",
+			"id":"script-2671",
 			"name":"postscript",
 			"display name":"PostScript",
 			"library":"script",
@@ -87710,7 +88580,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2640",
+			"id":"script-2672",
 			"name":"printing_library",
 			"display name":"Printing library",
 			"library":"script",
@@ -87726,7 +88596,7 @@
 			},
 			"tags":["printing"]
 		},{
-			"id":"script-2641",
+			"id":"script-2673",
 			"name":"profile_library",
 			"display name":"Profile library",
 			"library":"script",
@@ -87741,7 +88611,7 @@
 				"glossary":["property","property profile","OpenXTalk custom library"]
 			}
 		},{
-			"id":"script-2642",
+			"id":"script-2674",
 			"name":"pad",
 			"display name":"pad",
 			"library":"script",
@@ -87756,7 +88626,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2643",
+			"id":"script-2675",
 			"name":"paint_tool",
 			"display name":"paint tool",
 			"library":"script",
@@ -87770,7 +88640,7 @@
 				"glossary":["image","object","tool"]
 			}
 		},{
-			"id":"script-2644",
+			"id":"script-2676",
 			"name":"palette",
 			"display name":"palette",
 			"library":"script",
@@ -87782,7 +88652,7 @@
 			"description":"A small floating window usually used to display tools or information\nabout a main window. Also referred to as a windoid or utility window.",
 			"tags":["windowing"]
 		},{
-			"id":"script-2645",
+			"id":"script-2677",
 			"name":"pane",
 			"display name":"pane",
 			"library":"script",
@@ -87797,7 +88667,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2646",
+			"id":"script-2678",
 			"name":"panel",
 			"display name":"panel",
 			"library":"script",
@@ -87809,7 +88679,7 @@
 			"description":"A section of a window. A panel in a window may be scrolling or not, and\nis usually separated by a line or divider from other panels in the same\nwindow. ",
 			"tags":["windowing"]
 		},{
-			"id":"script-2647",
+			"id":"script-2679",
 			"name":"parameter_variable",
 			"display name":"parameter variable",
 			"library":"script",
@@ -87824,7 +88694,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2648",
+			"id":"script-2680",
 			"name":"parameter",
 			"display name":"parameter",
 			"library":"script",
@@ -87838,7 +88708,7 @@
 				"glossary":["handler","message handler","function handler","value"]
 			}
 		},{
-			"id":"script-2649",
+			"id":"script-2681",
 			"name":"parent_folder",
 			"display name":"parent folder",
 			"library":"script",
@@ -87853,7 +88723,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2650",
+			"id":"script-2682",
 			"name":"parent_node",
 			"display name":"parent node",
 			"library":"script",
@@ -87868,7 +88738,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2651",
+			"id":"script-2683",
 			"name":"pass_by_reference",
 			"display name":"pass by reference",
 			"library":"script",
@@ -87884,7 +88754,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2652",
+			"id":"script-2684",
 			"name":"pass_by_value",
 			"display name":"pass by value",
 			"library":"script",
@@ -87899,7 +88769,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2653",
+			"id":"script-2685",
 			"name":"pass",
 			"display name":"pass",
 			"library":"script",
@@ -87914,7 +88784,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2654",
+			"id":"script-2686",
 			"name":"password",
 			"display name":"password",
 			"library":"script",
@@ -87925,7 +88795,7 @@
 			"synonyms":["password","pass phrase","passphrase"],
 			"description":"A word or phrase used to lock information against unauthorized access,\nor to unlock it again.\n"
 		},{
-			"id":"script-2655",
+			"id":"script-2687",
 			"name":"peripheral_device",
 			"display name":"peripheral device",
 			"library":"script",
@@ -87939,7 +88809,7 @@
 				"glossary":["device driver"]
 			}
 		},{
-			"id":"script-2656",
+			"id":"script-2688",
 			"name":"pixel",
 			"display name":"pixel",
 			"library":"script",
@@ -87951,7 +88821,7 @@
 			"description":"PIcture ELement. One dot on the screen or in a printed image. Screens\nusually display between 60 and 120 pixels per inch.",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2657",
+			"id":"script-2689",
 			"name":"pixmap",
 			"display name":"pixmap",
 			"library":"script",
@@ -87966,7 +88836,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2658",
+			"id":"script-2690",
 			"name":"platform",
 			"display name":"platform",
 			"library":"script",
@@ -87977,7 +88847,7 @@
 			"synonyms":["platform"],
 			"description":"A combination of computer hardware and software that defines a standard.\n"
 		},{
-			"id":"script-2659",
+			"id":"script-2691",
 			"name":"player",
 			"display name":"player",
 			"library":"script",
@@ -87992,7 +88862,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2660",
+			"id":"script-2692",
 			"name":"plist",
 			"display name":"plist",
 			"library":"script",
@@ -88007,7 +88877,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2661",
+			"id":"script-2693",
 			"name":"plugin",
 			"display name":"plugin",
 			"library":"script",
@@ -88021,7 +88891,7 @@
 				"glossary":["stack","cascading menu"]
 			}
 		},{
-			"id":"script-2662",
+			"id":"script-2694",
 			"name":"point",
 			"display name":"point",
 			"library":"script",
@@ -88036,7 +88906,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2663",
+			"id":"script-2695",
 			"name":"poll",
 			"display name":"poll",
 			"library":"script",
@@ -88050,7 +88920,7 @@
 				"glossary":["mouse button","message"]
 			}
 		},{
-			"id":"script-2664",
+			"id":"script-2696",
 			"name":"polygon",
 			"display name":"polygon",
 			"library":"script",
@@ -88065,7 +88935,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2665",
+			"id":"script-2697",
 			"name":"popup_menu",
 			"display name":"popup menu",
 			"library":"script",
@@ -88077,7 +88947,7 @@
 			"description":"A list of choices that appears where the mouse is clicked.",
 			"tags":["menus"]
 		},{
-			"id":"script-2666",
+			"id":"script-2698",
 			"name":"port",
 			"display name":"port",
 			"library":"script",
@@ -88092,7 +88962,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2667",
+			"id":"script-2699",
 			"name":"portrait",
 			"display name":"portrait",
 			"library":"script",
@@ -88104,7 +88974,7 @@
 			"description":"The orientation of a printed page that is taller than it is wide.",
 			"tags":["printing"]
 		},{
-			"id":"script-2668",
+			"id":"script-2700",
 			"name":"precedence",
 			"display name":"precedence",
 			"library":"script",
@@ -88119,7 +88989,7 @@
 				"glossary":["evaluate","operator","expression"]
 			}
 		},{
-			"id":"script-2669",
+			"id":"script-2701",
 			"name":"precision",
 			"display name":"precision",
 			"library":"script",
@@ -88131,7 +89001,7 @@
 			"description":"The number of decimal places to which a number can be computed.",
 			"tags":["math"]
 		},{
-			"id":"script-2670",
+			"id":"script-2702",
 			"name":"prepend",
 			"display name":"prepend",
 			"library":"script",
@@ -88146,7 +89016,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2671",
+			"id":"script-2703",
 			"name":"pretty_printing",
 			"display name":"pretty printing",
 			"library":"script",
@@ -88157,7 +89027,7 @@
 			"synonyms":["pretty printing","pretty print","pretty printed","pretty-printing","pretty-print","pretty-printed"],
 			"description":"Formatting a script by indenting lines to clarify the control structures\nin the code.\n\nPretty printing does not change the way the code works, but it makes it\neasier to read.\n"
 		},{
-			"id":"script-2672",
+			"id":"script-2704",
 			"name":"primary_key",
 			"display name":"primary key",
 			"library":"script",
@@ -88172,7 +89042,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2673",
+			"id":"script-2705",
 			"name":"print_job",
 			"display name":"print job",
 			"library":"script",
@@ -88187,7 +89057,7 @@
 			},
 			"tags":["printing"]
 		},{
-			"id":"script-2674",
+			"id":"script-2706",
 			"name":"printable_character",
 			"display name":"printable character",
 			"library":"script",
@@ -88202,7 +89072,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2675",
+			"id":"script-2707",
 			"name":"process",
 			"display name":"process",
 			"library":"script",
@@ -88213,7 +89083,7 @@
 			"synonyms":["process"],
 			"description":"Any program that is currently running. \n\nA process can be an application that interacts with the user, or a\nsystem service that operates \"behind the scenes\" and is normally\ninvisible to the user.\n"
 		},{
-			"id":"script-2676",
+			"id":"script-2708",
 			"name":"prompt",
 			"display name":"prompt",
 			"library":"script",
@@ -88225,7 +89095,7 @@
 			"description":"Text that requests information from the user.",
 			"tags":["ui"]
 		},{
-			"id":"script-2677",
+			"id":"script-2709",
 			"name":"property_inspector",
 			"display name":"property inspector",
 			"library":"script",
@@ -88239,7 +89109,7 @@
 				"glossary":["property","select","palette","development environment","object"]
 			}
 		},{
-			"id":"script-2678",
+			"id":"script-2710",
 			"name":"property_profile",
 			"display name":"property profile",
 			"library":"script",
@@ -88255,7 +89125,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2679",
+			"id":"script-2711",
 			"name":"property",
 			"display name":"property",
 			"library":"script",
@@ -88270,7 +89140,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2680",
+			"id":"script-2712",
 			"name":"protocol",
 			"display name":"protocol",
 			"library":"script",
@@ -88285,7 +89155,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2681",
+			"id":"script-2713",
 			"name":"proxy_server",
 			"display name":"proxy server",
 			"library":"script",
@@ -88300,7 +89170,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2682",
+			"id":"script-2714",
 			"name":"playsentence",
 			"display name":"playSentence",
 			"library":"script",
@@ -88312,7 +89182,7 @@
 			"description":"An xTalk playSentence is a text-based musical notation that translates to\nMIDI (glossary) data for musical performance playback using hardware or software\ninstruments such as drum machines, synthesizer keyboards, or sample players",
 			"tags":["midi","musical notation","piano","playsentence","playpmd"]
 		},{
-			"id":"script-2683",
+			"id":"script-2715",
 			"name":"quicktime_vr",
 			"display name":"QuickTime VR",
 			"library":"script",
@@ -88328,7 +89198,7 @@
 			"tags":["multimedia"],
 			"changes":"The use of <QuickTime> was deprecated in version 8.1 of OpenXTalk with\nnew defaults for <dontUseQT> and <dontUseQTEffects> as true on all\nsystems apart from pre OS X 10.8. The Windows build of OpenXTalk no\nlonger supports any <QuickTime> features and setting the <dontUseQT> and\n<dontUseQTEffects> will have no effect. Additionally <QuickTime> does \nnot include 64 bit support and therefore can not be supported on OS X 64\nbit builds of OpenXTalk."
 		},{
-			"id":"script-2684",
+			"id":"script-2716",
 			"name":"quicktime",
 			"display name":"QuickTime",
 			"library":"script",
@@ -88345,7 +89215,7 @@
 			"tags":["multimedia"],
 			"changes":"From OpenXTalk version 8.1 for Mac, the use of <QuickTime> is deprecated with\nnew defaults for <dontUseQT> and <dontUseQTEffects> being set to true on all\nsystems from macOS 10.8. Additionally <QuickTime> does not include 64 bit \nsupport and therefore can not be supported on macOS 64-bit builds of OpenXTalk.\nAlso, the Windows build of OpenXTalk version 8.1 deprecates all <QuickTime> \nfeatures, so setting <dontUseQT> and <dontUseQTEffects> will have no effect. "
 		},{
-			"id":"script-2685",
+			"id":"script-2717",
 			"name":"quoted",
 			"display name":"quoted",
 			"library":"script",
@@ -88360,7 +89230,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2686",
+			"id":"script-2718",
 			"name":"realbasic",
 			"display name":"REALbasic",
 			"library":"script",
@@ -88371,7 +89241,7 @@
 			"synonyms":["realbasic"],
 			"description":"An authoring environment from REAL Software, Inc. Its language is also\ncalled REALbasic.\n"
 		},{
-			"id":"script-2687",
+			"id":"script-2719",
 			"name":"rtf",
 			"display name":"RTF",
 			"library":"script",
@@ -88386,7 +89256,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2688",
+			"id":"script-2720",
 			"name":"resedit",
 			"display name":"ResEdit",
 			"library":"script",
@@ -88401,7 +89271,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2689",
+			"id":"script-2721",
 			"name":"radian",
 			"display name":"radian",
 			"library":"script",
@@ -88413,7 +89283,7 @@
 			"description":"Measurement unit for angles. 2*pi radians is one circle, or 360&#176;.\nOne radian is approximately 57&#176;.",
 			"tags":["math"]
 		},{
-			"id":"script-2690",
+			"id":"script-2722",
 			"name":"radio_button",
 			"display name":"radio button",
 			"library":"script",
@@ -88428,7 +89298,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2691",
+			"id":"script-2723",
 			"name":"random",
 			"display name":"random",
 			"library":"script",
@@ -88440,7 +89310,7 @@
 			"description":"Selected by chance from a set. \n\nAlso, a set that is in no particular order; scrambled.",
 			"tags":["math"]
 		},{
-			"id":"script-2692",
+			"id":"script-2724",
 			"name":"range",
 			"display name":"range",
 			"library":"script",
@@ -88455,7 +89325,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2693",
+			"id":"script-2725",
 			"name":"read-only",
 			"display name":"read-only",
 			"library":"script",
@@ -88467,7 +89337,7 @@
 			"description":"Information that can be looked at, but not changed or deleted.",
 			"tags":["ui"]
 		},{
-			"id":"script-2694",
+			"id":"script-2726",
 			"name":"real_number",
 			"display name":"real number",
 			"library":"script",
@@ -88482,7 +89352,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2695",
+			"id":"script-2727",
 			"name":"recent_cards",
 			"display name":"recent cards",
 			"library":"script",
@@ -88497,7 +89367,7 @@
 			},
 			"tags":["navigation"]
 		},{
-			"id":"script-2696",
+			"id":"script-2728",
 			"name":"record_set",
 			"display name":"record set",
 			"library":"script",
@@ -88514,7 +89384,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2697",
+			"id":"script-2729",
 			"name":"record",
 			"display name":"record",
 			"library":"script",
@@ -88529,7 +89399,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2698",
+			"id":"script-2730",
 			"name":"rectangle",
 			"display name":"rectangle",
 			"library":"script",
@@ -88544,7 +89414,7 @@
 			},
 			"tags":["printing"]
 		},{
-			"id":"script-2699",
+			"id":"script-2731",
 			"name":"recursion",
 			"display name":"recursion",
 			"library":"script",
@@ -88558,7 +89428,7 @@
 				"glossary":["error","handler"]
 			}
 		},{
-			"id":"script-2700",
+			"id":"script-2732",
 			"name":"redraw",
 			"display name":"redraw",
 			"library":"script",
@@ -88570,7 +89440,7 @@
 			"description":"To update a window, or the screen, to display new information.",
 			"tags":["ui"]
 		},{
-			"id":"script-2701",
+			"id":"script-2733",
 			"name":"referenced_control",
 			"display name":"referenced control",
 			"library":"script",
@@ -88586,7 +89456,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2702",
+			"id":"script-2734",
 			"name":"registry",
 			"display name":"registry",
 			"library":"script",
@@ -88600,7 +89470,7 @@
 				"glossary":["Windows"]
 			}
 		},{
-			"id":"script-2703",
+			"id":"script-2735",
 			"name":"regular_expression",
 			"display name":"regular expression",
 			"library":"script",
@@ -88612,7 +89482,7 @@
 			"description":"A way of describing a pattern that matches text you are looking for.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2704",
+			"id":"script-2736",
 			"name":"regular_polygon",
 			"display name":"regular polygon",
 			"library":"script",
@@ -88627,7 +89497,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2705",
+			"id":"script-2737",
 			"name":"relative_coordinates",
 			"display name":"relative coordinates",
 			"library":"script",
@@ -88639,7 +89509,7 @@
 			"description":"Measurement of a position by its distance from the top and left edges of\na window.",
 			"tags":["ui"]
 		},{
-			"id":"script-2706",
+			"id":"script-2738",
 			"name":"relative_file_path",
 			"display name":"relative file path",
 			"library":"script",
@@ -88655,7 +89525,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2707",
+			"id":"script-2739",
 			"name":"remainder",
 			"display name":"remainder",
 			"library":"script",
@@ -88667,7 +89537,7 @@
 			"description":"What's left after dividing one number evenly into another. \n\nFor example, if you divide 5 by 2, the remainder is 1.",
 			"tags":["math"]
 		},{
-			"id":"script-2708",
+			"id":"script-2740",
 			"name":"reserved_word",
 			"display name":"reserved word",
 			"library":"script",
@@ -88681,7 +89551,7 @@
 				"glossary":["OpenXTalk","custom function","variable","custom property","custom command","keyword","function","command"]
 			}
 		},{
-			"id":"script-2709",
+			"id":"script-2741",
 			"name":"reset",
 			"display name":"reset",
 			"library":"script",
@@ -88696,7 +89566,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2710",
+			"id":"script-2742",
 			"name":"resource_fork",
 			"display name":"resource fork",
 			"library":"script",
@@ -88711,7 +89581,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2711",
+			"id":"script-2743",
 			"name":"resource",
 			"display name":"resource",
 			"library":"script",
@@ -88726,7 +89596,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2712",
+			"id":"script-2744",
 			"name":"resume",
 			"display name":"resume",
 			"library":"script",
@@ -88741,7 +89611,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2713",
+			"id":"script-2745",
 			"name":"return_value",
 			"display name":"return value",
 			"library":"script",
@@ -88755,7 +89625,7 @@
 				"glossary":["handler","value","return","call","function"]
 			}
 		},{
-			"id":"script-2714",
+			"id":"script-2746",
 			"name":"return",
 			"display name":"return",
 			"library":"script",
@@ -88769,7 +89639,7 @@
 				"glossary":["handler","function","value","call"]
 			}
 		},{
-			"id":"script-2715",
+			"id":"script-2747",
 			"name":"root_node",
 			"display name":"root node",
 			"library":"script",
@@ -88784,7 +89654,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2716",
+			"id":"script-2748",
 			"name":"run_time",
 			"display name":"run time",
 			"library":"script",
@@ -88795,7 +89665,7 @@
 			"synonyms":["run time","runtime","run-time"],
 			"description":"The time of program execution. \n\nWhen your application does something \"at run time\", that something is\ndone when the application is being used by the user, as opposed to ahead\nof time before you build the application.\n"
 		},{
-			"id":"script-2717",
+			"id":"script-2749",
 			"name":"smtp",
 			"display name":"SMTP",
 			"library":"script",
@@ -88807,7 +89677,7 @@
 			"description":"Simple Mail Transfer Protocol. Used to send email messages from one\nInternet-connected computer to another.",
 			"tags":["networking"]
 		},{
-			"id":"script-2718",
+			"id":"script-2750",
 			"name":"soap",
 			"display name":"SOAP",
 			"library":"script",
@@ -88822,7 +89692,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2719",
+			"id":"script-2751",
 			"name":"sql_query",
 			"display name":"SQL query",
 			"library":"script",
@@ -88837,7 +89707,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2720",
+			"id":"script-2752",
 			"name":"sql",
 			"display name":"SQL",
 			"library":"script",
@@ -88853,7 +89723,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2721",
+			"id":"script-2753",
 			"name":"ssl_%26_encryption_library",
 			"display name":"SSL & Encryption library",
 			"library":"script",
@@ -88867,7 +89737,7 @@
 				"glossary":["command","OpenXTalk custom library"]
 			}
 		},{
-			"id":"script-2722",
+			"id":"script-2754",
 			"name":"speech_library",
 			"display name":"Speech library",
 			"library":"script",
@@ -88882,7 +89752,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2723",
+			"id":"script-2755",
 			"name":"standalone_application_settings",
 			"display name":"Standalone Application Settings",
 			"library":"script",
@@ -88896,7 +89766,7 @@
 				"glossary":["development environment","standalone application"]
 			}
 		},{
-			"id":"script-2724",
+			"id":"script-2756",
 			"name":"supercard",
 			"display name":"SuperCard",
 			"library":"script",
@@ -88907,7 +89777,7 @@
 			"synonyms":["supertalk","st","sc","supercard"],
 			"description":"A graphical xTalk authoring environment from Solutions Etcetera (formerly\npublished by Incwell Ltd.). It was the first third party xTalk IDE released\nafter HyperCard, and included additional features such as full color support.\nIts scripting language is called SuperTalk. Some version of SuperCards xTalk\nengine can run on macOS System 7 through 10.14 (32bit-only as of Sept. 2022).\n"
 		},{
-			"id":"script-2725",
+			"id":"script-2757",
 			"name":"scientific_notation",
 			"display name":"scientific notation",
 			"library":"script",
@@ -88922,7 +89792,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2726",
+			"id":"script-2758",
 			"name":"scope",
 			"display name":"scope",
 			"library":"script",
@@ -88937,7 +89807,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2727",
+			"id":"script-2759",
 			"name":"script_debug_mode",
 			"display name":"script debug mode",
 			"library":"script",
@@ -88951,7 +89821,7 @@
 				"glossary":["breakpoint","handler","command","execute","development environment"]
 			}
 		},{
-			"id":"script-2728",
+			"id":"script-2760",
 			"name":"script_editor",
 			"display name":"script editor",
 			"library":"script",
@@ -88965,7 +89835,7 @@
 				"glossary":["script","object"]
 			}
 		},{
-			"id":"script-2729",
+			"id":"script-2761",
 			"name":"script_local_variable",
 			"display name":"script local variable",
 			"library":"script",
@@ -88980,7 +89850,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2730",
+			"id":"script-2762",
 			"name":"script_only_stack",
 			"display name":"script only stack",
 			"library":"script",
@@ -88995,7 +89865,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2731",
+			"id":"script-2763",
 			"name":"script",
 			"display name":"script",
 			"library":"script",
@@ -89009,7 +89879,7 @@
 				"glossary":["OpenXTalk","object"]
 			}
 		},{
-			"id":"script-2732",
+			"id":"script-2764",
 			"name":"scrollbar_thumb",
 			"display name":"scrollbar thumb",
 			"library":"script",
@@ -89024,7 +89894,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2733",
+			"id":"script-2765",
 			"name":"scrollbar",
 			"display name":"scrollbar",
 			"library":"script",
@@ -89039,7 +89909,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2734",
+			"id":"script-2766",
 			"name":"select",
 			"display name":"select",
 			"library":"script",
@@ -89054,7 +89924,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2735",
+			"id":"script-2767",
 			"name":"selection",
 			"display name":"selection",
 			"library":"script",
@@ -89069,7 +89939,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2736",
+			"id":"script-2768",
 			"name":"server",
 			"display name":"server",
 			"library":"script",
@@ -89084,7 +89954,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2737",
+			"id":"script-2769",
 			"name":"setprop_handler",
 			"display name":"setProp handler",
 			"library":"script",
@@ -89100,7 +89970,7 @@
 				"control structure":["setProp"]
 			}
 		},{
-			"id":"script-2738",
+			"id":"script-2770",
 			"name":"setprop_trigger",
 			"display name":"setProp trigger",
 			"library":"script",
@@ -89116,7 +89986,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2739",
+			"id":"script-2771",
 			"name":"shared_group",
 			"display name":"shared group",
 			"library":"script",
@@ -89131,7 +90001,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2740",
+			"id":"script-2772",
 			"name":"sheet",
 			"display name":"sheet",
 			"library":"script",
@@ -89146,7 +90016,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2741",
+			"id":"script-2773",
 			"name":"shell",
 			"display name":"shell",
 			"library":"script",
@@ -89157,7 +90027,7 @@
 			"synonyms":["shell out","shelled","shell","shelling"],
 			"description":"Program that accepts operating-system commands. The program a user uses\nto interact with the operating system, move files around, lauch\napplications, and so on.\n"
 		},{
-			"id":"script-2742",
+			"id":"script-2774",
 			"name":"shortcut",
 			"display name":"shortcut",
 			"library":"script",
@@ -89172,7 +90042,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2743",
+			"id":"script-2775",
 			"name":"sibling_node",
 			"display name":"sibling node",
 			"library":"script",
@@ -89187,7 +90057,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2744",
+			"id":"script-2776",
 			"name":"sign",
 			"display name":"sign",
 			"library":"script",
@@ -89202,7 +90072,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2745",
+			"id":"script-2777",
 			"name":"single-byte_character",
 			"display name":"single-byte character",
 			"library":"script",
@@ -89217,7 +90087,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2746",
+			"id":"script-2778",
 			"name":"socket",
 			"display name":"socket",
 			"library":"script",
@@ -89232,7 +90102,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2747",
+			"id":"script-2779",
 			"name":"sort_key",
 			"display name":"sort key",
 			"library":"script",
@@ -89247,7 +90117,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2748",
+			"id":"script-2780",
 			"name":"sort",
 			"display name":"sort",
 			"library":"script",
@@ -89259,7 +90129,7 @@
 			"description":"To shuffle units into a new order.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2749",
+			"id":"script-2781",
 			"name":"special_folder",
 			"display name":"special folder",
 			"library":"script",
@@ -89271,7 +90141,7 @@
 			"description":"A folder that is a standard part of the operating system, such as the\nPreferences folder. Special folders may be located in different places\nand have varying names, depending on the operating system version.",
 			"tags":["file system"]
 		},{
-			"id":"script-2750",
+			"id":"script-2782",
 			"name":"stack_file",
 			"display name":"stack file",
 			"library":"script",
@@ -89286,7 +90156,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2751",
+			"id":"script-2783",
 			"name":"stack_menu",
 			"display name":"stack menu",
 			"library":"script",
@@ -89301,7 +90171,7 @@
 			},
 			"tags":["menus"]
 		},{
-			"id":"script-2752",
+			"id":"script-2784",
 			"name":"stack_version",
 			"display name":"stack version",
 			"library":"script",
@@ -89319,7 +90189,7 @@
 				"object":["widget"]
 			}
 		},{
-			"id":"script-2753",
+			"id":"script-2785",
 			"name":"stack_window",
 			"display name":"stack window",
 			"library":"script",
@@ -89334,7 +90204,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2754",
+			"id":"script-2786",
 			"name":"stack",
 			"display name":"stack",
 			"library":"script",
@@ -89349,7 +90219,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2755",
+			"id":"script-2787",
 			"name":"standalone_application",
 			"display name":"standalone application",
 			"library":"script",
@@ -89363,7 +90233,7 @@
 				"glossary":["development environment","build"]
 			}
 		},{
-			"id":"script-2756",
+			"id":"script-2788",
 			"name":"standard_error",
 			"display name":"standard error",
 			"library":"script",
@@ -89377,7 +90247,7 @@
 				"glossary":["Unix","command line"]
 			}
 		},{
-			"id":"script-2757",
+			"id":"script-2789",
 			"name":"standard_input",
 			"display name":"standard input",
 			"library":"script",
@@ -89391,7 +90261,7 @@
 				"glossary":["Unix","file"]
 			}
 		},{
-			"id":"script-2758",
+			"id":"script-2790",
 			"name":"standard_output",
 			"display name":"standard output",
 			"library":"script",
@@ -89405,7 +90275,7 @@
 				"glossary":["file","Unix","OS X","command line"]
 			}
 		},{
-			"id":"script-2759",
+			"id":"script-2791",
 			"name":"statement",
 			"display name":"statement",
 			"library":"script",
@@ -89419,7 +90289,7 @@
 				"glossary":["command","OpenXTalk"]
 			}
 		},{
-			"id":"script-2760",
+			"id":"script-2792",
 			"name":"streaming",
 			"display name":"streaming",
 			"library":"script",
@@ -89434,7 +90304,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2761",
+			"id":"script-2793",
 			"name":"string",
 			"display name":"string",
 			"library":"script",
@@ -89449,7 +90319,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2762",
+			"id":"script-2794",
 			"name":"subfolder",
 			"display name":"subfolder",
 			"library":"script",
@@ -89464,7 +90334,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2763",
+			"id":"script-2795",
 			"name":"subroutine",
 			"display name":"subroutine",
 			"library":"script",
@@ -89478,7 +90348,7 @@
 				"glossary":["statement","OpenXTalk","handler"]
 			}
 		},{
-			"id":"script-2764",
+			"id":"script-2796",
 			"name":"subsidiary_window",
 			"display name":"subsidiary window",
 			"library":"script",
@@ -89493,7 +90363,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2765",
+			"id":"script-2797",
 			"name":"substack",
 			"display name":"substack",
 			"library":"script",
@@ -89508,7 +90378,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2766",
+			"id":"script-2798",
 			"name":"suspend",
 			"display name":"suspend",
 			"library":"script",
@@ -89520,7 +90390,7 @@
 			"description":"To put aside; to put an action on hold.",
 			"tags":["objects"]
 		},{
-			"id":"script-2767",
+			"id":"script-2799",
 			"name":"symbolic_link",
 			"display name":"symbolic link",
 			"library":"script",
@@ -89535,7 +90405,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2768",
+			"id":"script-2800",
 			"name":"synchronize",
 			"display name":"synchronize",
 			"library":"script",
@@ -89547,7 +90417,7 @@
 			"description":"To cause to happen at the same time; to coordinate two or more actions\nso they start and end at the same time.",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2769",
+			"id":"script-2801",
 			"name":"syntax",
 			"display name":"syntax",
 			"library":"script",
@@ -89561,7 +90431,7 @@
 				"glossary":["statement"]
 			}
 		},{
-			"id":"script-2770",
+			"id":"script-2802",
 			"name":"system_window",
 			"display name":"system window",
 			"library":"script",
@@ -89576,7 +90446,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2771",
+			"id":"script-2803",
 			"name":"soundfont",
 			"display name":"soundFont",
 			"library":"script",
@@ -89591,7 +90461,7 @@
 			},
 			"tags":["sound","music","midi","playsentence","soundfont","soundbank","dls","sf2"]
 		},{
-			"id":"script-2772",
+			"id":"script-2804",
 			"name":"soundbank",
 			"display name":"soundbank",
 			"library":"script",
@@ -89606,7 +90476,7 @@
 			},
 			"tags":["sound","music","midi","playsentence","soundfont","soundbank","dls","sf2"]
 		},{
-			"id":"script-2773",
+			"id":"script-2805",
 			"name":"syntactic-sugar",
 			"display name":"syntactic-sugar",
 			"library":"script",
@@ -89620,7 +90490,7 @@
 				"glossary":["statement"]
 			}
 		},{
-			"id":"script-2774",
+			"id":"script-2806",
 			"name":"tcp",
 			"display name":"TCP",
 			"library":"script",
@@ -89632,7 +90502,7 @@
 			"description":"Transmission Control Protocol. Used to establish a connection between\ntwo systems that are both connected to the Internet.",
 			"tags":["networking"]
 		},{
-			"id":"script-2775",
+			"id":"script-2807",
 			"name":"tab_stop",
 			"display name":"tab stop",
 			"library":"script",
@@ -89647,7 +90517,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2776",
+			"id":"script-2808",
 			"name":"tabbed_button",
 			"display name":"tabbed button",
 			"library":"script",
@@ -89662,7 +90532,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2777",
+			"id":"script-2809",
 			"name":"table_field",
 			"display name":"table field",
 			"library":"script",
@@ -89674,7 +90544,7 @@
 			"description":"A spreadsheet-style grid of entries arranged in rows and columns.",
 			"tags":["ui"]
 		},{
-			"id":"script-2778",
+			"id":"script-2810",
 			"name":"table",
 			"display name":"table",
 			"library":"script",
@@ -89689,7 +90559,7 @@
 			},
 			"tags":["database"]
 		},{
-			"id":"script-2779",
+			"id":"script-2811",
 			"name":"tag",
 			"display name":"tag",
 			"library":"script",
@@ -89704,7 +90574,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2780",
+			"id":"script-2812",
 			"name":"task_bar",
 			"display name":"task bar",
 			"library":"script",
@@ -89718,7 +90588,7 @@
 				"glossary":["Windows"]
 			}
 		},{
-			"id":"script-2781",
+			"id":"script-2813",
 			"name":"template",
 			"display name":"template",
 			"library":"script",
@@ -89733,7 +90603,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2782",
+			"id":"script-2814",
 			"name":"temporary_memory",
 			"display name":"temporary memory",
 			"library":"script",
@@ -89744,7 +90614,7 @@
 			"synonyms":["temporary memory","system memory","multifinder memory"],
 			"description":"Memory that is temporarily allocated by Mac OS to applications on\nrequest. \n\nOn Mac OS systems, each application has a fixed amount of memory, which\nis set in the application's \"Get Info\" window. Temporary memory is in\naddition to this allocation, and is responsible for applications taking\nmore memory than their allocation.\n"
 		},{
-			"id":"script-2783",
+			"id":"script-2815",
 			"name":"text_file",
 			"display name":"text file",
 			"library":"script",
@@ -89759,7 +90629,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2784",
+			"id":"script-2816",
 			"name":"text_to_speech",
 			"display name":"text to speech",
 			"library":"script",
@@ -89774,7 +90644,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2785",
+			"id":"script-2817",
 			"name":"tick",
 			"display name":"tick",
 			"library":"script",
@@ -89786,7 +90656,7 @@
 			"description":"One sixtieth of a second.",
 			"tags":["math"]
 		},{
-			"id":"script-2786",
+			"id":"script-2818",
 			"name":"timeout",
 			"display name":"timeout",
 			"library":"script",
@@ -89798,7 +90668,7 @@
 			"description":"A period of time to wait for an event (such as a connection or the\nlaunch of a process) before giving up.",
 			"tags":["networking"]
 		},{
-			"id":"script-2787",
+			"id":"script-2819",
 			"name":"timestamp",
 			"display name":"timestamp",
 			"library":"script",
@@ -89813,7 +90683,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2788",
+			"id":"script-2820",
 			"name":"title_bar",
 			"display name":"title bar",
 			"library":"script",
@@ -89825,7 +90695,7 @@
 			"description":"The top border area of a window, which contains the window's name.",
 			"tags":["windowing"]
 		},{
-			"id":"script-2789",
+			"id":"script-2821",
 			"name":"token",
 			"display name":"token",
 			"library":"script",
@@ -89840,7 +90710,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2790",
+			"id":"script-2822",
 			"name":"tool_tip",
 			"display name":"tool tip",
 			"library":"script",
@@ -89855,7 +90725,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2791",
+			"id":"script-2823",
 			"name":"tool",
 			"display name":"tool",
 			"library":"script",
@@ -89869,7 +90739,7 @@
 				"glossary":["select","stack window","object"]
 			}
 		},{
-			"id":"script-2792",
+			"id":"script-2824",
 			"name":"trap",
 			"display name":"trap",
 			"library":"script",
@@ -89884,7 +90754,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2793",
+			"id":"script-2825",
 			"name":"trigger",
 			"display name":"trigger",
 			"library":"script",
@@ -89901,7 +90771,7 @@
 			},
 			"tags":["objects"]
 		},{
-			"id":"script-2794",
+			"id":"script-2826",
 			"name":"tweening",
 			"display name":"tweening",
 			"library":"script",
@@ -89916,7 +90786,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2795",
+			"id":"script-2827",
 			"name":"type_signature",
 			"display name":"type signature",
 			"library":"script",
@@ -89931,7 +90801,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2796",
+			"id":"script-2828",
 			"name":"udp",
 			"display name":"UDP",
 			"library":"script",
@@ -89946,7 +90816,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2797",
+			"id":"script-2829",
 			"name":"url_scheme",
 			"display name":"URL scheme",
 			"library":"script",
@@ -89962,7 +90832,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2798",
+			"id":"script-2830",
 			"name":"url",
 			"display name":"URL",
 			"library":"script",
@@ -89977,7 +90847,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2799",
+			"id":"script-2831",
 			"name":"unicode",
 			"display name":"Unicode",
 			"library":"script",
@@ -89992,7 +90862,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2800",
+			"id":"script-2832",
 			"name":"unix",
 			"display name":"Unix",
 			"library":"script",
@@ -90003,7 +90873,7 @@
 			"synonyms":["unices","unixes","linux","linuxes","unix","unix system"],
 			"description":"An operating system originally created at AT&T. Unix runs on a variety\nof hardware and exists in many versions and varieties.\n\n(For purposes of the OpenXTalk documentation, Linux is considered a\nvariety of Unix. Your geekage may vary.)\n"
 		},{
-			"id":"script-2801",
+			"id":"script-2833",
 			"name":"unary",
 			"display name":"unary",
 			"library":"script",
@@ -90018,7 +90888,7 @@
 			},
 			"tags":["math"]
 		},{
-			"id":"script-2802",
+			"id":"script-2834",
 			"name":"uncompress",
 			"display name":"uncompress",
 			"library":"script",
@@ -90033,7 +90903,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2803",
+			"id":"script-2835",
 			"name":"undo",
 			"display name":"undo",
 			"library":"script",
@@ -90045,7 +90915,7 @@
 			"description":"To reverse the last action taken; to back up a step.",
 			"tags":["ui"]
 		},{
-			"id":"script-2804",
+			"id":"script-2836",
 			"name":"unlock",
 			"display name":"unlock",
 			"library":"script",
@@ -90060,7 +90930,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2805",
+			"id":"script-2837",
 			"name":"upload",
 			"display name":"upload",
 			"library":"script",
@@ -90072,7 +90942,7 @@
 			"description":"To put a file on another system.",
 			"tags":["networking"]
 		},{
-			"id":"script-2806",
+			"id":"script-2838",
 			"name":"user_interface_error",
 			"display name":"user interface error",
 			"library":"script",
@@ -90086,7 +90956,7 @@
 				"glossary":["error","anomaly","script"]
 			}
 		},{
-			"id":"script-2807",
+			"id":"script-2839",
 			"name":"user_interface",
 			"display name":"user interface",
 			"library":"script",
@@ -90098,7 +90968,7 @@
 			"description":"The way the user controls a computer or computer program, and the way\nthe computer or program reports results to the user.",
 			"tags":["ui"]
 		},{
-			"id":"script-2808",
+			"id":"script-2840",
 			"name":"vfw",
 			"display name":"VFW",
 			"library":"script",
@@ -90113,7 +90983,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2809",
+			"id":"script-2841",
 			"name":"video_library",
 			"display name":"Video library",
 			"library":"script",
@@ -90128,7 +90998,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2810",
+			"id":"script-2842",
 			"name":"validate",
 			"display name":"validate",
 			"library":"script",
@@ -90140,7 +91010,7 @@
 			"description":"To check whether data is of the correct type, or in the correct format.",
 			"tags":["text processing"]
 		},{
-			"id":"script-2811",
+			"id":"script-2843",
 			"name":"value",
 			"display name":"value",
 			"library":"script",
@@ -90155,7 +91025,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2812",
+			"id":"script-2844",
 			"name":"variable_watcher",
 			"display name":"variable watcher",
 			"library":"script",
@@ -90170,7 +91040,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2813",
+			"id":"script-2845",
 			"name":"variable",
 			"display name":"variable",
 			"library":"script",
@@ -90185,7 +91055,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2814",
+			"id":"script-2846",
 			"name":"vertex",
 			"display name":"vertex",
 			"library":"script",
@@ -90200,7 +91070,7 @@
 			},
 			"tags":["ui"]
 		},{
-			"id":"script-2815",
+			"id":"script-2847",
 			"name":"video_capture",
 			"display name":"video capture",
 			"library":"script",
@@ -90215,7 +91085,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2816",
+			"id":"script-2848",
 			"name":"video_clip",
 			"display name":"video clip",
 			"library":"script",
@@ -90230,7 +91100,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2817",
+			"id":"script-2849",
 			"name":"video_grabber",
 			"display name":"video grabber",
 			"library":"script",
@@ -90242,7 +91112,7 @@
 			"description":"The window that video from an external source (such as a video camera)\nis shown in.",
 			"tags":["multimedia"]
 		},{
-			"id":"script-2818",
+			"id":"script-2850",
 			"name":"virtual_property",
 			"display name":"virtual property",
 			"library":"script",
@@ -90258,7 +91128,7 @@
 			},
 			"tags":["properties"]
 		},{
-			"id":"script-2819",
+			"id":"script-2851",
 			"name":"wav",
 			"display name":"WAV",
 			"library":"script",
@@ -90273,7 +91143,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2820",
+			"id":"script-2852",
 			"name":"wdef",
 			"display name":"WDEF",
 			"library":"script",
@@ -90289,7 +91159,7 @@
 			},
 			"tags":["file system"]
 		},{
-			"id":"script-2821",
+			"id":"script-2853",
 			"name":"windows",
 			"display name":"Windows",
 			"library":"script",
@@ -90300,7 +91170,7 @@
 			"synonyms":["windows 95","windows 98","windows 2000","windows","windows system"],
 			"description":"An operating system from Microsoft Corporation that typically runs on\nIntel-based computer systems.\n"
 		},{
-			"id":"script-2822",
+			"id":"script-2854",
 			"name":"web_server",
 			"display name":"web server",
 			"library":"script",
@@ -90312,7 +91182,7 @@
 			"description":"A system that sends web pages to other systems in response to their\nrequests. ",
 			"tags":["networking"]
 		},{
-			"id":"script-2823",
+			"id":"script-2855",
 			"name":"whitespace",
 			"display name":"whitespace",
 			"library":"script",
@@ -90327,7 +91197,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2824",
+			"id":"script-2856",
 			"name":"wildcard",
 			"display name":"wildcard",
 			"library":"script",
@@ -90342,7 +91212,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2825",
+			"id":"script-2857",
 			"name":"word",
 			"display name":"word",
 			"library":"script",
@@ -90357,7 +91227,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2826",
+			"id":"script-2858",
 			"name":"xbm",
 			"display name":"XBM",
 			"library":"script",
@@ -90372,7 +91242,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2827",
+			"id":"script-2859",
 			"name":"xcmd",
 			"display name":"XCMD",
 			"library":"script",
@@ -90386,7 +91256,7 @@
 				"glossary":["external","resource","Mac OS","custom command","OS X","extension"]
 			}
 		},{
-			"id":"script-2828",
+			"id":"script-2860",
 			"name":"xfcn",
 			"display name":"XFCN",
 			"library":"script",
@@ -90400,7 +91270,7 @@
 				"glossary":["external","resource","Mac OS","custom function","OS X"]
 			}
 		},{
-			"id":"script-2829",
+			"id":"script-2861",
 			"name":"xml-rpc_document",
 			"display name":"XML-RPC document",
 			"library":"script",
@@ -90417,7 +91287,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2830",
+			"id":"script-2862",
 			"name":"xml-rpc_library",
 			"display name":"XML-RPC library",
 			"library":"script",
@@ -90434,7 +91304,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2831",
+			"id":"script-2863",
 			"name":"xml-rpc",
 			"display name":"XML-RPC",
 			"library":"script",
@@ -90451,7 +91321,7 @@
 			},
 			"tags":["networking"]
 		},{
-			"id":"script-2832",
+			"id":"script-2864",
 			"name":"xml_document",
 			"display name":"XML document",
 			"library":"script",
@@ -90466,7 +91336,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2833",
+			"id":"script-2865",
 			"name":"xml_library",
 			"display name":"XML library",
 			"library":"script",
@@ -90481,7 +91351,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2834",
+			"id":"script-2866",
 			"name":"xml_tree",
 			"display name":"XML tree",
 			"library":"script",
@@ -90496,7 +91366,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2835",
+			"id":"script-2867",
 			"name":"xml",
 			"display name":"XML",
 			"library":"script",
@@ -90511,7 +91381,7 @@
 			},
 			"tags":["text processing"]
 		},{
-			"id":"script-2836",
+			"id":"script-2868",
 			"name":"xpm",
 			"display name":"XPM",
 			"library":"script",
@@ -90526,7 +91396,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2837",
+			"id":"script-2869",
 			"name":"xwd",
 			"display name":"XWD",
 			"library":"script",
@@ -90541,7 +91411,7 @@
 			},
 			"tags":["multimedia"]
 		},{
-			"id":"script-2838",
+			"id":"script-2870",
 			"name":"xtalk",
 			"display name":"xTalk",
 			"library":"script",
@@ -90555,7 +91425,7 @@
 				"glossary":["HyperCard","OpenXTalk","SuperCard","OpenXION","LiveCode"]
 			}
 		},{
-			"id":"script-2839",
+			"id":"script-2871",
 			"name":"zoom_box",
 			"display name":"zoom box",
 			"library":"script",
@@ -90570,7 +91440,7 @@
 			},
 			"tags":["windowing"]
 		},{
-			"id":"script-2840",
+			"id":"script-2872",
 			"name":"zoom",
 			"display name":"zoom",
 			"library":"script",

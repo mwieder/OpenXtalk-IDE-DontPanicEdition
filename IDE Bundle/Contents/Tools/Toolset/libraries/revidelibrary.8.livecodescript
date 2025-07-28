@@ -413,7 +413,7 @@ private on __objectPropertiesRead
    local tObjectType
 
    repeat for each line tFile in the files
-      if not (tFile begins with "com.livecode.interface") then next repeat
+      if not (tFile begins with "com.livecode.interface") and not (tFile begins with "org.openxtalk.interface") then next repeat
       if char 1 of tFile is "." then next repeat
 
       put tFile into tObjectType
@@ -740,7 +740,7 @@ function ideObjectTypeFromObject pObjectID
          break
       case "button"
          if the menumode of pObjectID is "combobox" then return "com.livecode.interface.classic.ComboBox"
-
+         -- if the opaque of pObjectID is false then set the opaque of pObjectID to true
          switch the style of pObjectID
             case "radiobutton"
                return "com.livecode.interface.classic.RadioButton"
@@ -771,6 +771,9 @@ function ideObjectTypeFromObject pObjectID
             case "rectangle"
                return "com.livecode.interface.classic.RectangleButton"
                break
+            case "oval"
+                return "com.livecode.interface.classic.OvalButton"
+                break
             default
                if the default of pObjectID is true then
                   return "com.livecode.interface.classic.DefaultButton"
@@ -779,6 +782,7 @@ function ideObjectTypeFromObject pObjectID
                end if
                break
          end switch
+         break
       case "scrollbar"
          switch the style of pObjectID
             case "scale"
@@ -806,7 +810,8 @@ function ideObjectTypeFromObject pObjectID
          break
       case "graphic"
          switch the style of pObjectID
-            case "text"
+            case "text" --- interesting! What WAS this for?
+               -- setting the style to text makes a graphic object with text label showing abut otherwise transparent
             case "rectangle"
                return "com.livecode.interface.classic.RectangleGraphic"
                break
@@ -828,6 +833,9 @@ function ideObjectTypeFromObject pObjectID
                break
             case "regular"
                return "com.livecode.interface.classic.RegularGraphic"
+               break
+            case "star"
+               return "com.livecode.interface.classic.StarGraphic"
                break
          end switch
          break
@@ -1535,8 +1543,9 @@ function revIDEMessages
          "ideAnswerDialogClosed,ideControlDeleted,ideCardDeleted,ideEditScript,ideExtensionLog,ideExtensionsChanged,ideExtensionStatusChanged,ideFindMoreWidgets," \
          & "ideInspectedObjectsChanged,ideLibraryStack,ideNewCard,ideNewStack,ideNewControl,revIDENameChanged,ideObjectSelectionStarted,ideOpenStack," \
          & "idePluginsChanged,idePreferenceChanged,idePropertyChanged,ideReleaseStack,ideResumeStack,ideSelectedObjectChanged,ideStackDeleted,ideToolChanged," \
-         & "ideTutorialProgressChanged,ideWindowsChanged,ideMouseMove,ideDesktopChanged" \
+         & "ideTutorialProgressChanged,ideWindowsChanged,ideMouseDown,ideMouseMove,ideDesktopChanged" \
          )
+         -- ideMouseDown,ideMouseUp ??? Why are these not in this list?
 end revIDEMessages
 
 private function revIDEMessageIsValid pMessage
@@ -1777,6 +1786,11 @@ function revIDEPaintTools
    put "com.livecode.tool.SprayCan" into tName
    put "Spray Can Tool - Draw airbrush strokes on an image" into tTooltip
    updatePaintToolArray tName, "spray tool", tTooltip, tCount, tDataA
+
+   add 1 to tCount
+   put "com.livecode.tool.Line" into tName
+   put "Line Tool - Draw a straigt line on an image" into tTooltip
+   updatePaintToolArray tName, "line tool", tTooltip, tCount, tDataA
 
    add 1 to tCount
    put "com.livecode.tool.Polygon" into tName
@@ -3184,6 +3198,7 @@ private command  __setSizeToPreference pObjectID, pObjectType
       case "com.livecode.interface.classic.Button"
       case "com.livecode.interface.classic.DefaultButton"
       case "com.livecode.interface.classic.RectangleButton"
+      case "com.livecode.interface.classic.OvalButton"
          put "cButtonWidth" into tWidthPref
          put "cButtonHeight" into tHeightPref
          break
@@ -3273,8 +3288,10 @@ private function __objectTypeIsControl pObjectTypeID
       case "com.livecode.interface.classic.Substack"
       case "com.livecode.interface.classic.Card"
          return false
+         break
       default
          return true
+         break
    end switch
 end __objectTypeIsControl
 
@@ -3284,7 +3301,7 @@ on revIDECreateObject pObjectTypeID, pTarget, pLoc
    end if
 
    if not exists(pTarget) then return __revIDEError("Cannot create object. Target does not exist: " && pTarget)
-   if not pObjectTypeID begins with "com.livecode" then return __revIDEError("No such object type ID: " && pTarget)
+   if not pObjectTypeID begins with "com.livecode" and not pObjectTypeID begins with "org.openxtalk" then return __revIDEError("No such object type ID: " && pTarget)
 
    if sClassicObjectProperties is empty then __objectPropertiesRead
    # Set the default stack to the target we're creating the object on
@@ -3300,7 +3317,7 @@ on revIDECreateObject pObjectTypeID, pTarget, pLoc
 
    local tPropInfoA, tObjPropsA
    # Get the engine control type
-   if pObjectTypeID begins with "com.livecode.interface.classic" then
+   if pObjectTypeID begins with "com.livecode.interface.classic" or pObjectTypeID begins with "org.openxtalk.interface.classic" then
       local tCreatedControlID
       # Create data grid
       if pObjectTypeID begins with "com.livecode.interface.classic.DataGrid" then
@@ -3335,7 +3352,6 @@ on revIDECreateObject pObjectTypeID, pTarget, pLoc
          do "create" && tObjectType
          put the long ID of the last control into tCreatedControlID
       end if
-
       put sClassicObjectProperties[pObjectTypeID]["properties"] into tObjPropsA
    else
       # Not a classic control
@@ -3346,7 +3362,6 @@ on revIDECreateObject pObjectTypeID, pTarget, pLoc
                   "Due to this, general use of the Map widget only supports OS X 10.11 onwards. " & CR & CR & \
                   "However, you can still create a standalone with the Map widget on OSX 10.9 or 10.10 (of course you will see an empty grid rather than the actual map), " & \
                   " BUT this standalone will run as expected on OSX 10.11 and above." into tMessage
-
             answer warning revIDELocalise(tMessage) with "Cancel" and "Continue"
             if it is "Cancel" then exit revIDECreateObject
          end if
@@ -3584,9 +3599,7 @@ end revIDESetPropertyOfObject
 
 command revIDEInspectObjects pObjects
    lock screen
-
    revIDEOpenPalette "inspector"
-
    ideMessageSend "ideInspectObjects", pObjects
    unlock screen
 end revIDEInspectObjects
@@ -4369,7 +4382,7 @@ Returns a list of all the display names of stacks recognised by the IDE as a pal
 */
 function revIDEAvailablePalettes
    return "Menubar,Tools,Inspector,Message Box,Project Browser,Extension Manager,Extension Builder,Start Center,Welcome,Menu Builder,Message Watcher,Plugin Preferences," \
-   & "Standalone Settings,About,Dictionary,Guide,Resource Center,Preferences,Search,Snippet Viewer"
+   & "Standalone Settings,About,Dictionary,Guide,Resource Center,Preferences,Search,Snippet Viewer,Color Swatches"
 end revIDEAvailablePalettes
 
 function revIDEPaletteToStackName pPalette
@@ -4379,7 +4392,6 @@ function revIDEPaletteToStackName pPalette
    if pPalette is not among the items of revIDEAvailablePalettes() then
       return __revIDEError("No available palette with name" && pPalette)
    end if
-
    switch pPalette
       case "menubar"
          return "revMenuBar"
@@ -4419,6 +4431,8 @@ function revIDEPaletteToStackName pPalette
       case "resource center"
          return "revResourceCenter"
       case "snippet viewer"
+         return "revIDESnippetViewer"
+      case "color swatches"
          return "revIDESnippetViewer"
    end switch
 end revIDEPaletteToStackName
@@ -4605,7 +4619,21 @@ private function revIDEPaletteBarHeight pStackID
 end revIDEPaletteBarHeight
 
 function revIDEBrowserWidgetUnavailable
-   return (the platform is "Linux") and ($LIVECODE_USE_CEF is 0)
+   get the cOpenDictionaryInBrowser of stack "revPreferences"
+   if it is true then
+      if the shiftKey is down then
+         return false
+      else
+         return true
+      end if
+   else
+      if the shiftKey is down then
+         return true
+      else
+         return false
+      end if
+   end if
+   return the cOpenDictionaryInBrowser of stack "revPreferences"
 end revIDEBrowserWidgetUnavailable
 
 /**
@@ -4670,7 +4698,6 @@ command revIDEOpenPalette pPaletteName
             else
                put "guide" into tWhich
             end if
-
             revIDEGenerateDictionaryHTML tWhich
             launch url ("file:" & revIDEGetDictionaryUrl(tWhich))
          else
@@ -6141,7 +6168,7 @@ function revIDEGetTableProperty pObject, pProperty
 end revIDEGetTableProperty
 
 
-constant kGradientSetOrder = "type,ramp,quality,repeat,mirror,wrap"
+constant kGradientSetOrder = "type,ramp,quality,repeat,mirror,wrap,to,from,via"
 on revIDESetGradientProperty pObject, pProperty, pValue
    local tOldValue
    put the pProperty of pObject into tOldValue
@@ -6509,7 +6536,7 @@ on revIDEOpenStack pFilePath
 end revIDEOpenStack
 
 on revIDEHelpKeyPressed
-   --send "menuPick" && quote & "Help Contents" & quote to btn "Help" of stack "revMenuBar"
+   send "menuPick" && quote & "Start Center" & quote to btn "Help" of stack "revMenuBar"
 end revIDEHelpKeyPressed
 
 on revIDETogglePaletteView
@@ -8395,7 +8422,10 @@ on revIDEActionDuplicate
 end revIDEActionDuplicate
 
 on revIDEDuplicateCard
-   clone this card
+   clone this card -- as "Cloned Card" && (the millisecs)
+   -- put the long name of this card into tCard
+   -- dispatch "clone this card" to tCard
+   ---send "clone this card" to tCard in 0 secs
 end revIDEDuplicateCard
 
 on revIDESelectAll
@@ -8970,10 +9000,10 @@ end revIDEDocumentationLoad
 on revIDELaunchResource pName
    switch pName
       case "Buy"
-         launch url "https://livecode.com/products/livecode-platform/pricing/"
+         -- launch url "https://livecode.com/products/livecode-platform/pricing/"
          break
       case "Support"
-         launch url "https://livecode.com/resources/support/"
+         launch url "https://forums.openxtalk.org/"
          break
       case "License Agreement"
          launch document (revEnvironmentToolsPath() & slash & "License Agreement.txt")
@@ -8992,7 +9022,7 @@ on revIDELaunchResource pName
          launch url "http://lessons.runrev.com/m/2592"
          break
       case "Beginners Guide"
-         launch url "https://livecode.com/resources/guides/beginners-guide/"
+         launch url "" --  "https://livecode.com/resources/guides/beginners-guide/"
          break
       case "Tutorials"
          launch url "http://livecode.com/links/livecode/tutorials"
@@ -9007,10 +9037,10 @@ on revIDELaunchResource pName
          launch url "https://stackoverflow.com/questions/tagged/livecode+or+hypercard+or+hypertalk"
          break
       case "Discussion List"
-         launch url "http://livecode.com/links/lists"
+         launch url "" -- "http://livecode.com/links/lists"
          break
       case "Newsletters"
-         launch url "http://livecode.com/links/livecode/newsletters"
+         launch url "" --  "http://livecode.com/links/livecode/newsletters"
          break
       case "Resources"
          launch document revEnvironmentToolsPath() & slash & "Resources"
@@ -9370,10 +9400,9 @@ on revIDEToggleReshapeGraphic
    if "revReshapeLibrary" is not among the lines of revInternal__ListLoadedLibraries() then
       choose pointer tool
       revInternal__LoadLibrary "revReshapeLibrary"
-      revSetMarkers
+      revSetMarkers -- Should this have the parameter "true"?
    else
       revSetMarkers "true"
-
       revInternal__UnloadLibrary "revReshapeLibrary"
    end if
 end revIDEToggleReshapeGraphic
@@ -10716,7 +10745,6 @@ function revIDETutorialCourseInfo
       divide tPercentage by the number of elements in tCourseDataA[tCount]["tutorials"]
       put tPercentage into tCourseDataA[tCount]["progress"]
    end repeat
-
    return tCourseDataA
 end revIDETutorialCourseInfo
 
@@ -11059,10 +11087,8 @@ on revIDERegenerateBuiltAPIs
       -- if item 2 of tAPI is "ide" and revEnvironmentIsInstalled() then
          --next repeat
       -- end if
-
       put revIDEGetDocsAPIData(item 2 of tAPI) into tAPIData
-      dispatch function "revDocsCreateAPIJSON" to stack "revDocsParser" \
-            with item 1 of tAPI, item 2 of tAPI, "", tAPIData
+      dispatch function "revDocsCreateAPIJSON" to stack "revDocsParser" with item 1 of tAPI, item 2 of tAPI, "", tAPIData
       if tData is empty then
          put the result into tData
       else
@@ -11072,10 +11098,8 @@ on revIDERegenerateBuiltAPIs
 
    local tDictionaryData
    put "var dictionary_data =" & return & "{" & return & \
-         tab & quote & "docs" & quote & ":[" & \
-         tData & return & tab & "]" & return & "}" \
-         into tDictionaryData
-
+         tab & quote & "docs" & quote & ":[" & tData & return & tab & "]" & return & \
+           "}" into tDictionaryData
    local tDocsCache
    put revIDESpecialFolderPath("documentation cache") into tDocsCache
    revIDESetUTF8FileContents tDocsCache & slash & "built_api.js", tDictionaryData
@@ -11395,7 +11419,6 @@ local sNamesToColorsA, sColorsToNamesA
 
 private on __fetchNamesToColors
    local tColorRGB
-
    repeat for each line tColorName in the colorNames
    	  set the colorOverlay["color"] of the templateGraphic to tColorName
    	  put the colorOverlay["color"] of the templateGraphic into tColorRGB
@@ -11416,7 +11439,6 @@ function revIDENamedColorToRGB pName
    if sNamesToColorsA is empty then
       __fetchNamesToColors
    end if
-
    return sNamesToColorsA[pName]
 end revIDENamedColorToRGB
 
@@ -11424,13 +11446,11 @@ function revIDERGBToNamedColor pColor
    if sColorsToNamesA is empty then
       __fetchColorsToNames
    end if
-
    return sColorsToNamesA[pColor]
 end revIDERGBToNamedColor
 
 on revOXTIDEGraphicPointsToSVGPath pObjs
-     Answer "Copy as SVG Paths" & cr & pObjs
-
+   -- Answer "Copy as SVG Paths" & cr & pObjs
    put the selectedObjects into tTargetObjList
    filter lines of tTargetObjList with "graphic id*"
    repeat with x = 1 to the number of lines in tTargetObjList
@@ -11446,8 +11466,23 @@ on revOXTIDEGraphicPointsToSVGPath pObjs
       put graphicsToSVGPathString( (line x of tTargetObjList), tTop, tLeft)  & cr after tSVGStrings
    end repeat
    filter lines of tSVGStrings without empty
-   put tSVGStrings
+   try
+      lock clipboard
+      set the rawClipboardData to empty
+      set the clipboardData["text"] to tSVGStrings
+      put "<svg version="&quote&"1.1"&quote&" xmlns="&quote&"http://www.w3.org/2000/svg"&quote&" xmlns:xlink="&quote& \
+      "http://www.w3.org/1999/xlink" &quote& " xml:space="&quote&"preserve"&quote&"><path d="&quote& tSVGStrings &quote&"/></svg>" into tSVGWrapped
+      set the rawClipboardData["public.utf8-plain-text"] to textEncode(tSVGWrapped,"UTF-8")
+      set the rawClipboardData["com.adobe.illustrator.svg"] to textEncode(tSVGWrapped,"UTF-8")
+      set the rawClipboardData["com.adobe.illustrator.svgm"] to textEncode(tSVGWrapped,"UTF-8")
+      set the rawClipboardData["com.adobe.svg"] to textEncode(tSVGWrapped,"UTF-8")
+   catch tError
+      Answer Warning tError
+   end try
+
+   -- put tSVGStrings
 end revOXTIDEGraphicPointsToSVGPath
+
 function graphicsToSVGPathString pTargetObj pTopOrigin pLeftpTopOrigin
    try
       if pTopOrigin is empty then
@@ -11543,6 +11578,9 @@ private command __TryToAutocompleteScript pObject, pScript, @rNewScript
    local tHandlerList
    if the environment is "development" then
       put the effective revAvailableHandlers of pObject into tHandlerList
+      -- put tHandlerList
+      put __publicScriptHandlers(pObject) after tHandlerList
+      -- put tHandlerList
    else
       -- implementation for testing purposes
       put __publicScriptHandlers(pObject) into tHandlerList
@@ -12387,8 +12425,7 @@ end revIDEObjectsAreSelectable
 on revIDEFindMoreWidgets
    lock screen
    revIDEOpenPalette "extension manager"
-   send "showExtensionStore" to \
-         stack revIDEPaletteToStackName("extension manager")
+   send "showExtensionStore" to stack revIDEPaletteToStackName("extension manager")
    unlock screen
 end revIDEFindMoreWidgets
 
@@ -12414,8 +12451,7 @@ function ideCanShowUpgradeOptions
 end ideCanShowUpgradeOptions
 
 function ideShouldShowUpgradeOptions
-   return \
-         revEnvironmentEditionProperty("upgrade_mini_url") is not empty \
+   return revEnvironmentEditionProperty("upgrade_mini_url") is not empty \
          and revEnvironmentEditionProperty("upgrade_edition") is not empty
 end ideShouldShowUpgradeOptions
 

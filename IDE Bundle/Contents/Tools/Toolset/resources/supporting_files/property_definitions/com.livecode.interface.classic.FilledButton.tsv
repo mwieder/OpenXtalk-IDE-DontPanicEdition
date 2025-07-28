@@ -6,7 +6,7 @@ title	Filled Style Button
 name							Button
 label
 tooltip
-style							roundRect	"standard,transparent,opaque,rectangle,roundRect,shadow,checkbox,radioButton"
+style							roundRect	standard,transparent,opaque,rectangle,roundRect,oval,shadow,checkbox,radioButton
 visible							TRUE
 opaque							TRUE
 showName							TRUE

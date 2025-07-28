@@ -842,6 +842,13 @@ command revInternal__ResetPreferences
    else
       put "true" into tPropsArray["cDarkMode"]
    end if
+   if "Linux" is in the platform then  -- default to opening dictionary in external web browser on Linux - Paul McClernan June 19th 2024
+      put "true" into tPropsArray["cOpenDictionaryInBrowser"]
+      -- put 0 into $LIVECODE_USE_CEF -- I don't see any need for this 'branded' environmental global
+   else
+      put "false" into tPropsArray["cOpenDictionaryInBrowser"]
+      -- put 1 into $LIVECODE_USE_CEF  -- I don't see any need for this 'branded' environmental global
+   end if
    put "true" into tPropsArray["cLayoutGuides"]
    put "true" into tPropsArray["cREVExtension"]
    put "102" into tPropsArray["cMenuWidth"]
@@ -899,6 +906,7 @@ command revInternal__ResetPreferences
    put format("blue\nbrown\ndarkorange\nred") into tPropsArray["cBuiltInColors"]
    put "don't remove" into tPropsArray["cASKDestroy"]
    put "Gray50" into tPropsArray["cSelectionHandle"]
+   put "Purple1" into tPropsArray["cToolSelectorColor"]
    put "128,103" into tPropsArray["cREVMaximizedScriptEditorTopLeft"]
    put "true" into tPropsArray["suppressIDE"]
    put "Property Inspector" into tPropsArray["cABOptionDoubleClick"]
@@ -1594,80 +1602,83 @@ command scriptTextSize pVal
 end scriptTextSize
 
 command revInternal__InitialiseOptions
-      revInternal__Log "Enter", "Options Initialisation"
-         if the cDarkMode of stack "revPreferences" is true then
-            IDEToDarkMode
-         else
-            IDEToLightMode
-         end if
+   revInternal__Log "Enter", "Options Initialisation"
+   if the cDarkMode of stack "revPreferences" is true then
+      IDEToDarkMode
+   else
+      IDEToLightMode
+   end if
+   set the selectGroupedControls to the cSelectGrouped of stack "revPreferences"
+   set the tooltipDelay to the cREVToolTipDelay of stack "revPreferences"
+   set the grid to the cGrid of stack "revPreferences"
 
-      set the selectGroupedControls to the cSelectGrouped of stack "revPreferences"
-      set the tooltipDelay to the cREVToolTipDelay of stack "revPreferences"
-      set the grid to the cGrid of stack "revPreferences"
+   set the scriptTextFont to the cREVScriptFont of stack "revPreferences"
+   set the scriptTextSize to the cREVScriptSize of stack "revPreferences"
 
-      set the scriptTextFont to the cREVScriptFont of stack "revPreferences"
-      set the scriptTextSize to the cREVScriptSize of stack "revPreferences"
+   if the cHttpProxy of stack "revPreferences" is not empty then
+      set the httpProxy to the cHttpProxy of stack "revPreferences"
+   end if
 
-      if the cHttpProxy of stack "revPreferences" is not empty then
-         set the httpProxy to the cHttpProxy of stack "revPreferences"
-      end if
+   set the gridSize to the cGridSize of stack "revPreferences"
 
-      set the gridSize to the cGridSize of stack "revPreferences"
+   if the cSelectionHandleColor of stack "revPreferences" is empty then
+      set the selectionHandleColor to "Gray50"
+   else
+      set the selectionHandleColor to the cSelectionHandleColor of stack "revPreferences"
+   end if
 
-      if the cSelectionHandleColor of stack "revPreferences" is empty then
-         set the selectionHandleColor to "Gray50"
-      else
-         set the selectionHandleColor to the cSelectionHandleColor of stack "revPreferences"
-      end if
+   if the cToolSelectorColor of stack "revPreferences" is empty then
+      set the cToolSelectorColor of stack "revPreferences" to "Purple1"
+   end if
 
-      set the navigationArrows to the cNavigationArrows of stack "revPreferences"
+   set the navigationArrows to the cNavigationArrows of stack "revPreferences"
 
-      global gREVShowStacks, gREVDevelopment
-      if gREVDevelopment then
-         put true into gREVShowStacks
-      else if the cShowRevolutionStacks of stack "revPreferences" is empty then
-         put false into gREVShowStacks
-      else
-         put the cShowRevolutionStacks of stack "revPreferences" into gREVShowStacks
-      end if
+   global gREVShowStacks, gREVDevelopment
+   if gREVDevelopment then
+      put true into gREVShowStacks
+   else if the cShowRevolutionStacks of stack "revPreferences" is empty then
+      put false into gREVShowStacks
+   else
+      put the cShowRevolutionStacks of stack "revPreferences" into gREVShowStacks
+   end if
 
-      global gREVLanguageNames
-      put the cLanguageNames of card 1 of stack "revPreferences" into gREVLanguageNames
+   global gREVLanguageNames
+   put the cLanguageNames of card 1 of stack "revPreferences" into gREVLanguageNames
 
-      revInternal__Log "Message", "Obtained preference languageNames = " & gREVLanguageNames
+   revInternal__Log "Message", "Obtained preference languageNames = " & gREVLanguageNames
 
-      global gREVPopups
-      put the cRevPopups of stack "revPreferences" into gREVPopups
+   global gREVPopups
+   put the cRevPopups of stack "revPreferences" into gREVPopups
 
-      global gREVAutoFormat
-      put the cAutoFormat of stack "revPreferences" into gREVAutoFormat
+   global gREVAutoFormat
+   put the cAutoFormat of stack "revPreferences" into gREVAutoFormat
 
-      global gREVUIScriptShortcut
-      put the cREVUIScriptShortcut of stack "revPreferences" into gREVUIScriptShortcut
+   global gREVUIScriptShortcut
+   put the cREVUIScriptShortcut of stack "revPreferences" into gREVUIScriptShortcut
 
-      global gREVScriptShortcut
-      put the cREVScriptShortcut of stack "revPreferences" into gREVScriptShortcut
+   global gREVScriptShortcut
+   put the cREVScriptShortcut of stack "revPreferences" into gREVScriptShortcut
 
-      global gREVCommentCharacter
-      if the cCommentCharacter of stack "revPreferences" is not empty then
-         put the cCommentCharacter of stack "revPreferences" into gREVCommentCharacter
-      else
-         put "--" into gREVCommentCharacter
-      end if
+   global gREVCommentCharacter
+   if the cCommentCharacter of stack "revPreferences" is not empty then
+      put the cCommentCharacter of stack "revPreferences" into gREVCommentCharacter
+   else
+      put "--" into gREVCommentCharacter
+   end if
 
-      global gREVTemplateMasterName
-      put the cREVTemplateMasterName of stack "revPreferences" into gREVTemplateMasterName
+   global gREVTemplateMasterName
+   put the cREVTemplateMasterName of stack "revPreferences" into gREVTemplateMasterName
 
-      global gREVAutoCreateProfiles
-      put the cREVAutoCreateProfiles of stack "revPreferences" into gREVAutoCreateProfiles
+   global gREVAutoCreateProfiles
+   put the cREVAutoCreateProfiles of stack "revPreferences" into gREVAutoCreateProfiles
 
-      global gREVProfileReadOnly
-      put the cREVProfileReadOnly of stack "revPreferences" into gREVProfileReadOnly
+   global gREVProfileReadOnly
+   put the cREVProfileReadOnly of stack "revPreferences" into gREVProfileReadOnly
 
-      revInternal__Log "Leave", "Options Initialisation"
+   revInternal__Log "Leave", "Options Initialisation"
 
-      return true
-   end revInternal__InitialiseOptions
+   return true
+end revInternal__InitialiseOptions
 
    command revInternal__InitialiseUserLibraries
       local tEnvironmentIcons, tUserIcons, tList
@@ -2050,8 +2061,13 @@ function revEnvironmentEditionProperty pProp, pEdition
          switch pProp
             case "name"
                return "Community"
-            case "color" -- the following colos seem to be for highlighting and drag & drop operations in the IDE, make user customizeable later - Paul McClernan 9/23/21
-               return 117,97,192
+            case "color" -- the following color seem to be for highlighting and drag & drop operations in the IDE, make user customizeable later - Paul McClernan 9/23/21
+               if the cToolSelectorColor of stack revPreferences is not empty then
+                  return the cToolSelectorColor of stack revPreferences
+               else
+                  return "Purple1"
+                  -- return 117,97,192
+               end if
             case "pb_line_selected_color"
                return 208,82,165
             case "revonline_hilite_color"
@@ -2398,26 +2414,25 @@ end revEnvironmentEditionProperty
    -- Global Environment Functions - General Support
    --
 
-   function revEnvironmentPlatform
-      local tPlatform
+function revEnvironmentPlatform
+   local tPlatform
 
-      switch the platform
-         case "Linux"
-            put "Linux" into tPlatform
-            break
-         case "MacOS"
-            put "MacOS X" into tPlatform
-            break
-         case "Win32"
-            put "Windows" into tPlatform
-            break
-         default
-            put "Unsupported" into tPlatform
-            break
-      end switch
-
-      return tPlatform
-   end revEnvironmentPlatform
+   switch the platform
+      case "Linux"
+         put "Linux" into tPlatform
+         break
+      case "MacOS"
+         put "MacOS X" into tPlatform
+         break
+      case "Win32"
+         put "Windows" into tPlatform
+         break
+      default
+         put "Unsupported" into tPlatform
+         break
+   end switch
+   return tPlatform
+end revEnvironmentPlatform
 
 on updateMenuToolBar
    if the cREVLaunching of me is true then exit updateMenuToolBar -- cREVLaunching is true while starting up
@@ -2431,19 +2446,20 @@ on IDEToLightMode
    --- for macOS --- NOTE: This uses the OpenXTalk.org macOS Native Library if available - Paul McClernan - 1/16/22
 
    -- put false into isMac -- for testing other OS styling on macOS IDE
-   try
-      --- Tools Palette ---
-      -- set the opaque of group "background" of stack "revTools" to true
-      -- set the backgroundColor of group "background" of stack "revTools" to 59,63,63
-      -- set the opaque of group "contents" of stack "revTools" to true
-      -- set the backgroundColor of group "contents" of stack "revTools" to "Gray25"
-      -- set the foreGroundColor of group "contents" of stack "revTools" to "White"
-      -- set the opaque of group "runedit" of stack "revTools" to false
-      -- set the backgroundColor of group "runedit" of stack "revTools" to "Gray25"
-      -- set the foreGroundColor of group "runedit" of stack "revTools" to empty -- "White"
-      -- set the backgroundColor of graphic "tool_hilite" of stack "revTools" to 120,63,170
-      -- set the backgroundColor of graphic "tool_hover" of stack "revTools" to 80,23,150
-      if isMac is true then
+   -- try
+   --- Tools Palette ---
+   -- set the opaque of group "background" of stack "revTools" to true
+   -- set the backgroundColor of group "background" of stack "revTools" to 59,63,63
+   -- set the opaque of group "contents" of stack "revTools" to true
+   -- set the backgroundColor of group "contents" of stack "revTools" to "Gray25"
+   -- set the foreGroundColor of group "contents" of stack "revTools" to "White"
+   -- set the opaque of group "runedit" of stack "revTools" to false
+   -- set the backgroundColor of group "runedit" of stack "revTools" to "Gray25"
+   -- set the foreGroundColor of group "runedit" of stack "revTools" to empty -- "White"
+   -- set the backgroundColor of graphic "tool_hilite" of stack "revTools" to 120,63,170
+   -- set the backgroundColor of graphic "tool_hover" of stack "revTools" to 80,23,150
+   if isMac is true then
+      try
          --- for macOS ---
          setAppToLightMode
          -- setWindowToLightMode
@@ -2473,15 +2489,18 @@ on IDEToLightMode
          -- set the opaque of stack "revPreferencesGUI" to false
          set the backgroundColor of stack "revPreferencesGUI" to "White"
          set the foreGroundColor of stack "revPreferencesGUI" to "Black"
-      else
+      end try
+   else
+      try
          set the foreGroundColor of stack "revTools" to "Black"
          set the backGroundColor of stack "revTools" to "White"
          set the foreGroundColor of group "widget" of stack "revTools" to "Black"
          set the backgroundColor of group "widget" of stack "revTools" to "White"
          set the foreGroundColor of group "background" of stack "revTools" to "Black"
          set the backgroundColor of group "classic" of stack "revTools" to "White"
-
-         if the systemVersion is "NT 10.0" then set the textColor of group "revMenuBar" of stack "revMenuBar" to "Black"
+      end try
+      if the systemVersion is "NT 10.0" then set the textColor of group "revMenuBar" of stack "revMenuBar" to "Black"
+      try
          -- set the opaque of stack "revMenuBar" to false
          set the foreGroundColor of stack "revMenuBar" to "Black" -- empty
          set the backGroundColor of stack "revMenuBar" to "White"-- "Gray25"
@@ -2512,7 +2531,9 @@ on IDEToLightMode
 
          set the foreColor of stack "revDictionary" to "Black"
          set the backColor of stack "revDictionary" to "White"
-      end if
+      end try
+   end if
+   try
       set the foreColor of widget "header_background" of stack "revTools" to black
 
       set the backColor of field "contents" of card "Global Variables" of stack "message" to Black
@@ -2539,16 +2560,17 @@ on IDEToDarkMode
    --- for macOS --- NOTE: This uses the OpenXTalk.org macOS Native Library if available - Paul McClernan - 1/16/22
 
    -- put false into isMac -- for testing other OS styling on macOS IDE
-   try
-      --- Tools Palette ---
-      -- set the backgroundColor of group "contents" of stack "revTools" to "Gray25"
-      -- set the foreGroundColor of group "contents" of stack "revTools" to "White"
-      -- set the opaque of group "runedit" of stack "revTools" to false
-      -- set the backgroundColor of group "runedit" of stack "revTools" to "Gray25"
-      -- set the foreGroundColor of group "runedit" of stack "revTools" to empty -- "White"
-      -- set the backgroundColor of graphic "tool_hilite" of stack "revTools" to 120,63,170
-      -- set the backgroundColor of graphic "tool_hover" of stack "revTools" to 80,23,150
-      if isMac is true then
+   -- try
+   --- Tools Palette ---
+   -- set the backgroundColor of group "contents" of stack "revTools" to "Gray25"
+   -- set the foreGroundColor of group "contents" of stack "revTools" to "White"
+   -- set the opaque of group "runedit" of stack "revTools" to false
+   -- set the backgroundColor of group "runedit" of stack "revTools" to "Gray25"
+   -- set the foreGroundColor of group "runedit" of stack "revTools" to empty -- "White"
+   -- set the backgroundColor of graphic "tool_hilite" of stack "revTools" to 120,63,170
+   -- set the backgroundColor of graphic "tool_hover" of stack "revTools" to 80,23,150
+   if isMac is true then
+      try
          setAppToDarkMode
          -- setWindowToDarkMode
          set the backGroundColor of stack "revTools" to empty -- "Gray30"
@@ -2577,8 +2599,9 @@ on IDEToDarkMode
          -- set the opaque of stack "revPreferencesGUI" to false
          set the backgroundColor of stack "revPreferencesGUI" to "Gray20"
          set the foreGroundColor of stack "revPreferencesGUI" to "White"
-
-      else
+      end try
+   else
+      try
          set the foreGroundColor of stack "revTools" to "White"
          set the backGroundColor of stack "revTools" to "Gray20"
          set the foreGroundColor of group "widget" of stack "revTools" to  "White"
@@ -2618,8 +2641,9 @@ on IDEToDarkMode
 
          set the foreColor of stack "revDictionary" to "White"
          set the backColor of stack "revDictionary" to "Gray30"
-
-      end if
+      end try
+   end if
+   try
       set the foreColor of widget "header_background" of stack "revTools" to white
 
       set the backColor of field "contents" of card "Global Variables" of stack "message" to White

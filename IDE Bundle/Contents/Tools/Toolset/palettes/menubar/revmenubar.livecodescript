@@ -1,6 +1,7 @@
 ﻿script "revMenuBar"
 local sMenuTarget
 on preOpenStack
+   -- if the cREVLaunching of stack "Home" is true then set the blendlevel of this stack to 99 -- tperry 1/5/24
    -- set the backGroundColor of me to 248,255,204 - Richmond
    global gREVDontLoadMenus
    if gREVDontLoadMenus then
@@ -109,7 +110,7 @@ private on setupTextMenu
    put "Size" & return after tText
 
    local tFontSizes
-   put format("Use Owner's Size\n-\n8\n9\n10\n12\n14\n18\n24\n36\n48\n-\nOther...") into tFontSizes
+   put format("Use Owner's Size\n-\n8\n9\n10\n12\n14\n18\n24\n36\n48\n-\nSmaller&/-\nBigger&/=\n-\nOther...") into tFontSizes -- added smaller and bigger option (tperry 30-12-23)
    repeat for each line l in tFontSizes
       if l is "-" then put tab & l & cr after tText
       else put "!u" & tab & l & cr after tText
@@ -125,7 +126,8 @@ private on setupTextMenu
          put "!u" & tab & tColor & return after tText
       end if
    end repeat
-   put  "-" & return & "&Align" & return & "!u"  & tab & "Left" & return & "!u" & tab & "Center" & return & "!u" & tab & "Right" after tText
+   -- shortcuts on align left, right (tperry 30-11-24)
+   put  "-" & return & "&Align" & return & "!u"  & tab & "Left&/^@L" & return & "!u" & tab & "Center&/^@C" & return & "!u" & tab & "Right&/^@R" after tText
 
    # Cache the text menu text in non-disabled state
    put tText into sTextMenuText
@@ -1210,8 +1212,15 @@ on revMenubarMenuButtonClicked pWhich
          revIDEOpenPalette "Resource Center"
          break
       case "Dictionary"
-         revIDEDocumentationLoad "API", "Script"
-         break
+            if the shiftkey is down then
+               -- tNewDictionaryDisplay
+               else
+                  revIDEDocumentationLoad "API", "Script"
+                  -- revIDEOpenPalette "Dictionary"
+                  send "showAPIs" to stack "revDictionary"
+                  set the selectedNavItem of widget "header_background" to "show_apis"
+            end if
+   break
       case "Test"
          revIDEDeployAction
          break
@@ -1379,6 +1388,7 @@ function buildMenuContext
          end if
          break
          case "image"
+            if pIsThisAGif(tSelectedObject) then put false into tEnableFlipandRotate -- if it's a gif, we disable the flip and rotate (tperry 7/4/24)
             put false into tAllGraphics
             break
          default
@@ -1402,6 +1412,19 @@ function buildMenuContext
 end buildMenuContext
 
 ################################################################################
+-- replace with my image 'text' GIF Header check
+private function pIsThisAGif tSelectedObject
+   put tSelectedObject
+   -- this is a really hacky way of doing things!
+   put "set the tSelectedObject of stack " & QUOTE & "revMenubar" & QUOTE & " to the short name of " & tSelectedObject  into tDoCmd
+   do tDoCmd -- yeah, I don't like this (tperry 7-4-24)
+   put the tSelectedObject of stack"revMenubar" into tImgName
+   if tImgName contains ".gif" then
+      return true
+   else
+      return false
+   end if
+end pIsThisAGif
 
 private function revMenubarFileMenu pContext
    local tIsUserTarget, tIsScriptOnly
@@ -1417,6 +1440,8 @@ private function revMenubarFileMenu pContext
    local tFile
    put "&New Stack" & return after tFile
    put tab & "Default Size/cmd shift n" & return after tFile
+   -- get the cShowPresetSizes of stack "revPreferences"
+   -- if it is not false and it is not empty then
    put tab & "-" & return after tFile
    put tab & "HVGA (320x480)" & return after tFile
    put tab & "iPhone 5 viewport (320x568)" & return after tFile
@@ -1434,6 +1459,7 @@ private function revMenubarFileMenu pContext
    put tab & "WXGA HDTV 16:9 (1280x720)" & return after tFile
    put tab & "SXGA 5:4 (1280x1024)" & return after tFile
    put tab & "WXGA HD 16:9 (1366x768)" & return after tFile
+   -- end if
    put tab & "-" & return after tFile
    put tab & "Script only Stack" & return after tFile
 
@@ -1592,8 +1618,7 @@ private function revMenubarToolsMenu pContext
    put toggleMenuItem("&Tools Palette/T", revIDEPaletteIsVisible("tools")) & return after tTools
    put toggleMenuItem("&Paint and Draw Tools", "paint" is among the items of revIDEGetPreference("revTools_show")) & return after tTools
    put "-" & return after tTools
-
-   put toggleMenuItem("Project Browser", revIDEPaletteIsVisible("project browser")) & return after tTools
+   put toggleMenuItem("Project Browser/^@P", revIDEPaletteIsVisible("project browser")) & return after tTools -- tperry, 21-12-23 added shortcut for project browser
    put toggleMenuItem("&Message Box/M", revIDEPaletteIsVisible("message box")) & return after tTools
    put toggleMenuItem("Extension Manager", revIDEPaletteIsVisible("extension manager")) & return after tTools
    put toggleMenuItem("Extension Builder", revIDEPaletteIsVisible("extension builder")) & return after tTools
@@ -1749,11 +1774,46 @@ private function revMenubarObjectMenu pContext
    ### New Card and Delete Card
    put enableMenuItem("&New Card/N", tIsUserTarget) & return after tObject
    put enableMenuItem("Delete Card", tIsUserTarget) & return after tObject
+   put enableMenuItem("Clone Card/D", tIsUserTarget) & return after tObject
+   put "-" & return after tObject
    put enableMenuItem("New Control", the mode of the topStack is 1) & return after tObject
    put revMenubarNewControlSubmenu() & return after tObject
-   put "-" & return after tObject
+   -- don't recreate the submenu for classic controls on each menubar click, as this was inefficient (13-4-24 tperry)
+   -- put revMenubarNewControlSubmenu() & return after tObject
+/*
+   put the tStoredControlSubmenu of this stack into tControlSubmenuH
+   if tControlSubmenuH is "" then
+      put revMenubarNewControlSubmenu() into tControlSubmenuH
+      set the tStoredControlSubmenu of this stack to tControlSubmenuH
+   end if
+   -- need to ensure 'Data grid' is conditional
+   if tControlSubmenuH contains "classic.DataGrid" then
+      if the cDisableDataGrid of stack "revPreferences" is true then -- filter out datagrid tool
+         put the number of lines in tControlSubmenuH into tRptCount
+         put 0 into tMatchedLine
+         repeat tRptCount
+            add 1 to tMatchedLine
+            if line tMatchedLine of tControlSubmenuH contains "classic.DataGrid" then exit repeat
+         end repeat
+         delete line tMatchedLine of tControlSubmenuH
+         replace (tab & "-" & return & tab & "-") with tab & "-" in tControlSubmenuH -- get rid of any double - entries
+      end if
+   end if
+   put tControlSubmenuH & return after tObject
+   */
    put enableMenuItem("New Widget", the mode of the topStack is 1) & return after tObject
    put revMenubarNewWidgetSubmenu() & return after tObject
+
+   -- don't recreate the submenu for widgets on each menubar click, as this was inefficient (13-4-24 tperry)
+   /* -- disabled because problem that Extensions are dynamic, can add new objects on the fly
+   put the tStoredWidgetsSubmenu of this stack into tWidgetsSubmenuH
+   if tWidgetsSubmenuH is "" then
+      put revMenubarNewWidgetSubmenu() into tWidgetsSubmenuH
+      set the tStoredWidgetsSubmenu of this stack to tWidgetsSubmenuH
+   end if
+   put tWidgetsSubmenuH & return after tObject
+   */
+   --
    put "-" & return after tObject
 
    local tFlipText, tRotateText, tReshapeText
@@ -1875,6 +1935,12 @@ private function revMenubarNewControlSubmenu
          put return & tItem after tControlMenu
       end if
    end repeat
+   /*
+   -- sanity checking of modular-loaded tControlMenu (tperry 13-4-24)
+   filter lines of tControlMenu without "*Control Properties*"
+   replace (tab & "-" & return & tab & "-") with tab & "-" in tControlMenu -- get rid of any double - entries
+   -- end sanity checking
+   */
    return tControlMenu
 end revMenubarNewControlSubmenu
 
@@ -1971,7 +2037,7 @@ private function revMenubarHelpMenu pContext
    put "Sample Scripts" & return after tHelp
    put "-" & return after tHelp
    put "Beginners Guide" & return after t
-   put "All Guides" & return after tHelp
+   put "API Guides" & return after tHelp
    put "Tutorials" & return after tHelp
    put "-" & return after tHelp
    put "Forums" & return after tHelp
@@ -2016,11 +2082,17 @@ private function revMenubarViewMenu pContext
    put toggleMenuItem("Layout Guides",the cLayoutGuides of stack "revPreferences") & return after tView
    -- put toggleMenuItem("Layout Guides",the cLayoutGuides of stack "revPreferences.rev") & return after tView
    put toggleMenuItem("Grid", the grid) & return after tView
-   put toggleMenuItem("Backdrop", the backdrop is not "none") & return after tView
+   put toggleMenuItem("Backdrop/^@B", the backdrop is not "none") & return after tView
    put toggleMenuItem("Show IDE Stacks In Lists", gREVShowStacks) & return after tView
    put "-" & return after tView
    put toggleMenuItem("Show &Invisible Objects" , the showInvisibles) & return after tView
-
+   put "-" & return after tView
+   put "Look and Feel" & return after tView
+   put tab &"Default" & return after tView
+   put tab & "Motif" & return after tView
+   put tab & "macOS Classic" & return after tView
+   put tab & "Windows 95" & return after tView
+   -- tApplyGridSetting -- tperry (make sure grid checkbox is correct in menu 21-1-24)
    return modifyMenu("View", tView)
 end revMenubarViewMenu
 
@@ -2105,10 +2177,19 @@ private function revMenubarWindowMenu pContext
    setupWindowMenu
 
    local tWindow
-   if sWindowMenuWindows is empty then
+   --added a few checks to return the visibility of the following 3 stacks in the window menu (tperry 26-4-24)
+   put sWindowMenuWindows into tWdListToShow
+   if revIDEPaletteIsVisible("Message Box") is true then put tWdListToShow & return & "!nMessage Box/|stack " & QUOTE & "Message Box" & QUOTE into tWdListToShow
+   if revIDEPaletteIsVisible("Tools") is true then put tWdListToShow & return & "!nTools/|stack " & QUOTE & "revTools" & QUOTE into tWdListToShow
+   if revIDEPaletteIsVisible("Project Browser") is true then put tWdListToShow & return & "!nProject Browser/|stack " & QUOTE & "revIDEProjectBrowser" & QUOTE into tWdListToShow
+   if revIDEPaletteIsVisible("EXtension Builder") is true then put tWdListToShow & return & "!nExtension Builder/|stack " & QUOTE & "revExtensionBuilder" & QUOTE into tWdListToShow
+   filter lines of tWdListToShow without empty
+   --
+   -- if there is a fld "debug" of stack "untitled 1" then put tWdListToShow into fld "debug" of stack "untitled 1" --debug
+   if tWdListToShow is empty then
       put "(No Windows Open" into tWindow
    else
-      put sWindowMenuWindows & return & "-" & return & "Send Window to Back/`" into tWindow
+      put tWdListToShow & return & "-" & return & "Send Window to Back/`" into tWindow
    end if
 
    return modifyMenu("Window", tWindow)
@@ -2175,6 +2256,7 @@ function revMenubarStackContextMenu pStack, pIndent
    put tIndent & "-" & return after tText
    put tIndent & "New Card" & return after tText
    put tIndent & "Delete Card" & return after tText
+   put tIndent & "Clone Card" & return after tText
    put tIndent & "-" & return after tText
    put tIndent & "New Substack" & return after tText
    put tIndent & enableMenuItem("Delete Substack", the mainstack of pStack is not the short name of pStack) & return after tText
@@ -2219,6 +2301,7 @@ function revMenuBarCardContextMenu pCard, pIndent
    put tIndent & "-" & return after tText
    put tIndent & "New Card" & return after tText
    put tIndent & "Delete Card" & return after tText
+   put tIndent & "Clone Card" & return after tText
    put tIndent & "-" & return after tText
    put revMenubarSendContextMenu(pCard, pIndent) after tText
    put revMenubarAdditionalContextMenu(pIndent) after tText
@@ -2651,7 +2734,7 @@ on revMenubarContextMenuPickTarget pWhich, pTarget
       case "Reshape Graphic"
       case "Reshape Polygon"
          if the editMode of pTarget is "polygon" then
-            set the editMode of pTarget to "none" -- or empty?
+            set the editMode of pTarget to "none" -- must have quotes because 'none' is constant that = 0
          else
             set the editMode of pTarget to "polygon"
          end if
@@ -2705,12 +2788,11 @@ on revMenubarContextMenuPickTarget pWhich, pTarget
       case "Pause"
          revIDETogglePauseOfPlayer
          break
-
          ######## MENU SPECIFIC #########
       case "TopLevel Panel Stack"
          toplevel the menuname of pTarget
          break
-         ######## STACK SCPECIFIC ########
+         ######## STACK SPECIFIC ########
       case "New Card"
          revIDEActionNewCard
          break
@@ -2720,6 +2802,10 @@ on revMenubarContextMenuPickTarget pWhich, pTarget
          else
             revIDEDeleteCard pTarget
          end if
+         break
+      case "Clone Card"
+         clone this card
+         -- revIDEDuplicateCard
          break
       case "Save"
          revIDESaveStack tTargetStack
@@ -2939,12 +3025,17 @@ on revMenubarEditMenuPick pWhich
       case "Invert Selection"
          revIDEInvertObjectSelection
          break
+      case "Clone Card"
+      case "Duplicate Card"
+         --    clone this card as "Cloned Card" && (the millisecs)
+         -- put the long name of this card into tCard
+         -- dispatch "clone this card" to tCard
+         send "clone this card" to the topStack in 0 secs
+         -- revIDEDuplicateCard
+         break
       case "Duplicate"
       case "Duplicate Objects"
          revIDEActionDuplicate
-         break
-      case "Duplicate Card"
-         revIDEDuplicateCard
          break
       case "Select Grouped Controls"
       case "Intersected Selections"
@@ -2997,6 +3088,10 @@ on revMenubarObjectMenuPick pWhich
          break
       case "Delete Card"
          revIDEActionDeleteCard
+         break
+      case "Clone Card"
+         clone this card
+         -- revIDEDuplicateCard
          break
       case "Object Inspector"
          revIDEActionInspectObjects
@@ -3247,6 +3342,24 @@ on revMenubarViewMenuPick pWhich
       case "Palettes"
          revIDETogglePaletteView
          break
+      case "Look and Feel|Default"
+         set the lookAndFeel to "Appearance Manager"
+         break
+      case "Look and Feel|Motif"
+         set the lookAndFeel to motif
+         break
+      case "Look and Feel|macOS Classic"
+         -- send "setLookNFeel Macintosh" to me in 1 millisec
+         set the lookAndFeel to "Macintosh"
+         break
+      case "Look and Feel|Windows Classic"
+         set the lookAndFeel to "Windows 95"
+         break
+      default
+         -- remember to check tApplyTheme_nullify in the home stack
+         -- tOpenThemePrefs
+         -- put pWhich -- debug
+         break
    end switch
 end revMenubarViewMenuPick
 
@@ -3264,7 +3377,10 @@ on revMenubarHelpMenuPick pWhich
    put item 1 of pWhich into tPick
    switch tPick
       case "Dictionary"
+
          revIDEDocumentationLoad "API", "Script"
+         -- revIDEOpenPalette "Dictionary"
+         send "showAPIs" to stack "revDictionary"; set the selectedNavItem of widget "header_background" to "show_apis"
          break
       case "Start Center"
       case "Welcome"
@@ -3285,11 +3401,564 @@ on revMenubarHelpMenuPick pWhich
       case "Newsletters"
          revIDELaunchResource tPick
          break
-      case "All Guides"
+      case "API Guides"
+         --revIDEOpenPalette "guide" -- doesn't work, only opens dictionary stack, doesn't go to guides
          revIDEOpenPalette "guide"
+         send "showGuides" to stack "revDictionary"
+         set the selectedNavItem of widget "header_background" of stack "revDictionary" to "show_guides"
          break
       case "Update"
          revIDECheckForUpdates
          break
    end switch
 end revMenubarHelpMenuPick
+
+
+---- tperry 3-2-24 ------
+-- If there's anything wrong with this revMenubar stack, it'll be somewhere past this point --
+
+on tCheckBuntuWdBug
+   -- bug fix for weird 'window juggling' behaviour under Ubuntu (and 'buntu-based) distros
+   -- tperry 02-09-2023
+
+
+   exit tCheckBuntuWdBug -- doing this differently now (tperry 8-1-24)
+
+   if the platform contains "linux" then
+      if $desktop_session contains "ubuntu" then
+         lock screen
+         set lockmessages to true
+         if there is a wd "RevTools" then
+            if not (the platform contains "linux") then
+               set the style of wd "RevTools" to modeless
+            end if
+            set the systemwindow of wd "RevTools" to false
+         end if
+         if there is a wd "Message Box" then
+            if not (the platform contains "linux") then
+               set the style of wd "Message Box" to modeless -- tperry 20-12-23 (make conditional for anything except linux)
+            end if
+            set the systemwindow of wd "Message Box" to false
+         end if
+         if there is a wd "RevInspector" then
+            if not (the platform contains "linux") then
+               set the style of wd "RevInspector" to modeless
+            end if
+            set the systemwindow of wd "RevInspector" to false
+         end if
+         if there is a wd "revSETemplate" then
+            set the style of wd "revSETemplate" to toplevel
+            set the systemwindow of wd "revSETemplate" to false
+         end if
+         if there is a wd "App Browser" then
+            set the style of wd "App Browser" to toplevel
+            set the systemwindow of wd "App Browser" to false
+         end if
+         set lockmessages to false
+         unlock screen
+      end if
+   end if
+end tCheckBuntuWdBug
+
+
+on tNewDictionaryDisplay
+   if the cDictionaryDisplayMethod of stack "revPreferences" is false then
+      -- old method using a browser
+      revIDEDocumentationLoad "API", "Script"
+   else
+      -- new method for displaying the dictionary
+      put specialFolderPath("engine") into tnopeFolder
+      if the platform contains "mac" then
+         -- make some allowances for the path if we are on the mac
+         set the itemdelimiter to "/"
+         delete last item of tnopeFolder
+         put tnopeFolder & "/Tools" into tnopeFolder
+      end if
+      if the cQuickDictionary of stack "revPreferences" is true then
+         -- quick dictionary instead (tperry 17-4-24)
+         put (tnopeFolder & "/Plugins/Quick Dictionary.livecode") into tQuickDict
+         open stack (tQuickDict) as modeless
+      else
+         put (tnopeFolder & "/Documentation/html_viewer/resources/data/api/oxt_dictionary.oxtstack") into tNewDict
+         -- put tNewDict -- debug
+         tFullyCloseStack("Quick Dictionary") -- close this off if it's open (tperry 16-4-24)
+         open stack (tNewDict) as modeless
+      end if
+   end if
+end tNewDictionaryDisplay
+
+on tFullyCloseStack tStackName tdelay
+   -- tStackName is the short form ("Quick Dictionary" for example) -- tperry 16-4-24
+   -- if the Quick dictionary is open, then close it
+   put tStackName into tStackToClose
+   if there is a stack (tStackToClose) then
+      set the destroystack of stack (tStackToClose) to true
+      close stack (tStackToClose)
+      if isNumber(tdelay) then
+         wait tdelay seconds
+      end if
+   end if
+end tFullyCloseStack
+
+on tMenuBar_MakeDragHandle -- (tperry) makes a draggable area (topleft) of the revMenubar. As discussed on the OpenXTalk forum.
+   set the left of group "toolbar" of stack "revMenubar" to the left of stack "revMenubar" +12 -- position toolbar group 12 px from the left edge
+   set the cantmodify of stack "revMenubar" to false
+   if there is no graphic "draghandle" of card 1 of this stack then
+      create graphic "draghandle" in card 1 of this stack
+   end if
+   set the linesize of graphic "draghandle" to 0
+   set the width of graphic "draghandle" to 13 -- how wide you want the handle (13px) 26-4-24
+   set the opaque of graphic "draghandle" to true
+   if the platform contains "mac" then
+      set the height of graphic "draghandle" to 47 -- yeah, fixed height as mac won't behave itself
+      set the bottom of graphic "draghandle" of stack "revMenubar" to 47
+   else
+      set the height of graphic "draghandle" of stack "revMenubar" to the height of stack "revMenubar"
+      set the topleft of graphic "draghandle" of stack "revMenubar" to 0, the bottom of group "revMenuBar" of stack "revMenubar" stack "revMenubar" -1 -- tperry 26-4-24
+   end if
+   set the backgroundPattern of graphic "draghandle" of stack "revMenubar" to the id of image "dragbar" of cd "Appearance" of wd "revPreferencesGUI"
+   set the blendlevel of graphic "draghandle" of stack "revMenubar" to 0
+   --
+   -- why won't the mac behave? -- I have to specify this here, probably because of various other bits LC have done further up the message path (tperry 10-12-23)
+   if the platform contains "mac" then
+      -- mac specific because it won't behave
+      set the left of graphic "draghandle" of stack "revMenubar" to -1
+      set the top of graphic "draghandle" of stack "revMenubar" to 0
+   end if
+   --
+   set the ink of graphic "draghandle" of stack "revMenubar" to srcCopy
+   -------------------------------------------------------------------
+   put "local sgDragging, sgLeftOffset, sgTopOffset" & return &¬
+   "on mouseDown" & return &¬
+   "	put item 1 of the mouseLoc into sgLeftOffset" & return &¬
+   "	put item 2 of the mouseLoc into sgTopOffset" & return &¬
+   "	put true into sgDragging" & return &¬
+   "end mouseDown" & return &¬
+   "on mouseMove" & return &¬
+   "	lock screen" & return &¬
+   "	if sgDragging is true then" & return &¬
+   "		set the left of this stack to item 1 of globalloc(the mouseLoc) - sgLeftOffset -1" & return &¬
+   "		set the top of this stack to item 2 of globalloc(the mouseLoc) - sgTopOffset" & return &¬
+   "           send tVisOffsets to me" & return &¬
+   "	end if" & return &¬
+   "   	if the mouse is up then" & return &¬
+   "      send mouseLeave to me" & return &¬
+   "      put false into sgDragging" & return &¬
+   "   end if" & return &¬
+   "	unlock screen" & return &¬
+   "end mouseMove" & return &¬
+   "on mouseRelease" & return &¬
+   "   	put false into sgDragging" & return &¬
+   "   send tVisOffsets to stack " & QUOTE & "revMenuBar" & QUOTE & return &¬
+   "end mouseRelease" & return &¬
+   "on mouseLeave" & return &¬
+   "   	put false into sgDragging" & return &¬
+   "   send tVisOffsets to stack " & QUOTE & "revMenuBar" & QUOTE & return &¬
+   "   send tSetOffsets to stack " & QUOTE & "revMenuBar" & QUOTE & return &¬
+   "end mouseLeave"  into tNewDragScript
+   set the script of graphic "draghandle" to tNewDragScript
+   -------------------------------------------------------------------
+   set the cantmodify of stack "revMenubar" to true
+end tMenuBar_MakeDragHandle
+
+on tMenuBar_AdjustWDSize
+   -- clean up the MenuBar (tperry)
+   -- should this be draggable?
+   if the cMakeRevMenuBarDraggable of stack "revPreferences" is false then
+      set the left of  group "toolbar" of wd "revMenubar" to 0 -- make sure group moves over if we don't have a drag handle (tperry 10-11-2023)
+      if there is a graphic "draghandle" of card 1 of this stack then
+         hide graphic "draghandle" of cd 1 of this stack
+      end if
+   else
+      if there is no graphic "draghandle" of card 1 of this stack then tMenuBar_MakeDragHandle
+      set the left of  group "toolbar" of wd "revMenubar" to 12
+      if there is a graphic "draghandle" of card 1 of this stack then
+         show graphic "draghandle" of cd 1 of this stack
+         if the platform contains "mac" then
+            -- because the mac won't behave 11-12-23 (tperry)
+            set the top of graphic "draghandle" of stack "revMenubar" to 0
+         end if
+      end if
+   end if
+   -- remove stuff that is broken as of 26-10-2023
+   if there is a cd btn "Resources" of card 1 of wd "revMenuBar" then -- needs cleanup
+      hide cd btn "Resources" of cd 1 of wd "revMenuBar"
+      if there is a cd btn "Tutorials" of card 1 of wd "revMenuBar" then hide cd btn "Tutorials" of card 1 of wd "revMenuBar"
+      if there is a cd btn "Test" of card 1 of wd "revMenuBar" then hide cd btn "Test" of card 1 of wd "revMenuBar"
+   end if
+   -- change layout slightly 5-12-23
+   if there is a cd btn "Sample Stacks" of card 1 of wd "revMenuBar" then
+      show cd btn "Sample Stacks" of card 1 of wd "revMenuBar"
+      set the left of cd btn "Sample Stacks" of cd 1 of wd "revMenuBar" to the right of cd btn "Dictionary" of cd 1 of wd "revMenubar" +10
+   end if
+   -- shorten the size of the revMenubar stack (tperry)
+   -- now assuming the "Sample Stacks" button is going to be the last on the right (5-12-23)
+   set the rect of wd "revMenuBar" to the left of wd "revMenubar", the top of wd "revMenuBar", the right of cd btn "Sample Stacks" of cd 1 of wd "revMenuBar" +10 +(the left of wd "revMenuBar"), the bottom of wd "revMenubar"
+end tMenuBar_AdjustWDSize
+
+on tApplyGridSetting
+   -- tperry, 2-12-23 (moved this after the gridSize is set first, before potentially turning it on)
+   if the cGrid of stack "revPreferences" is true then
+      set the grid to true
+      put the cGridSize of stack "revPreferences" into tGridSzTest
+      if isNumber(tGridSzTest) then
+         set the gridSize to tGridSzTest
+      end if
+   else
+      set the grid to false
+   end if
+end tApplyGridSetting
+
+on tTidyUpStacks
+   -- close off stacks that are no longer needed
+   put "revOnlineLibrary,revExtensionBuilder,revExtensionBuilderBehavior,revGeneralPatterns" into tCloseTheseStacks
+   --put "RevSplash,RevSplashStackBehavior,revOnlineLibrary,revExtensionBuilder,revExtensionBuilderBehavior,revGeneralPatterns" into tCloseTheseStacks
+   put the itemDelimiter into tOldDelim
+   set the itemDelimiter to ","
+   put 0 into tCloseCount
+   repeat the number of items in tCloseTheseStacks
+      add 1 to tCloseCount
+      put item tCloseCount of tCloseTheseStacks into tStackToClose
+      if there is a stack (tStackToClose) then
+         -- close this as it's in our list
+         set the destroystack of stack (tStackToClose) to true -- remove from memory
+         close stack (tStackToClose)
+      end if
+   end repeat
+   set the itemDelimiter to tOldDelim
+end tTidyUpStacks
+
+on hConditionalDataGrid
+   if the pendingMessages contains "hConditionalDataGrid" then exit hConditionalDataGrid
+   -- close off datagrid stacks
+   put "revDataGridLibrary" & return &¬
+   "revDataGridLibraryBehaviorsActionControlHolderBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsColumnGroupButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsDataGridButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsDefaultColumnButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsDefaultHeaderButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsDgListMessageCatcherButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsDropIndicatorButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsFieldEditorButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsHeaderButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsHeaderMaskButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsHorizontalScrollbarButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsRowChainedBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsSwipeControlHolderBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsTrackDragDropButtonBehavior"  & return &¬
+   "revDataGridLibraryBehaviorsVerticalScrollbarButtonBehavior" into tCloseTheseStacks
+   replace return with "," in tCloseTheseStacks
+   put the itemDelimiter into tOldDelim
+   set the itemDelimiter to ","
+   repeat 2 -- double tap!
+      put 0 into tCloseCount
+      repeat the number of items in tCloseTheseStacks
+         add 1 to tCloseCount
+         put item tCloseCount of tCloseTheseStacks into tStackToClose
+         if there is a stack (tStackToClose) then
+            set the destroystack of stack (tStackToClose) to true
+            close stack (tStackToClose)
+         end if
+      end repeat
+   end repeat
+   set the itemDelimiter to tOldDelim
+end hConditionalDataGrid
+
+on tOpenNewGuides
+   -- this should open the user submitted guides
+   set the itemdelimiter to slash
+   put item 1 to -3 of the filename of stack "revMenubar" & "/userguides/userguides.oxtstack" into tFilePath
+   open stack tFilePath
+end tOpenNewGuides
+
+on tOpenAllGuides
+   -- this should open the new 'All Guides' stack
+   set the itemdelimiter to slash
+   put item 1 to -3 of the filename of stack "revMenubar" & "/userguides/allguides.oxtstack" into tFilePath
+   open stack tFilePath
+end tOpenAllGuides
+
+on tOpenAbout
+   -- this should open the 'about' stack (tperry 20-1-24)
+   set the itemdelimiter to slash
+   put item 1 to -3 of the filename of stack "revMenubar" & slash & "about.oxtstack" into tFilePath
+   open stack tFilePath
+end tOpenAbout
+
+on tTackOnColours
+   if there is a wd "tinyDictionary_0_8_3" then
+      set the linkColor of stack "tinyDictionary_0_8_3" to "0,125,255"
+      set the linkVisitedColor of stack "tinyDictionary_0_8_3" to "0,125,255"
+   end if
+end tTackOnColours
+
+on tMenuBar_WDdecorations
+   -- handler to see if the revMenubar should be shown as a standard window
+   -- tperry 04-01-2024
+   -- Requested by TerryL
+
+   lock screen
+   if the cMakeRevMenuBarStandard of stack "revPreferences" is true then
+      set the decorations of stack "revMenubar" to "title,menu,minimize,close"
+   else
+      if not (the decorations of stack "revMenubar" is "") then set the decorations of stack "revMenubar" to ""
+   end if
+   -- now check position
+   if the cTweakMenuBarOffset of stack "revPreferences" is true then
+      -- we have offsets specified
+      set the top of wd "revMenuBar" to the cTweakMenuBarT of stack "revPreferences"
+      set the left of wd "revMenuBar" to the cTweakMenuBarL of stack "revPreferences"
+   else
+      if the platform contains "mac" then
+         -- we make some special allowances for MacOS here
+         set the top of stack "revMenubar" to 23
+         set the left of stack "revMenubar" to 0 -- moves revMenubar back to left of screen
+         if the cMakeRevMenuBarStandard of stack "revPreferences" is true & the platform contains "mac" then
+            -- more allowances for macOS here
+            set the top of stack "revMenubar" to 45
+         end if
+      else
+         -- linux
+         if not (the top of stack "revMenubar" is "0") then
+            set the top of stack "revMenubar" to 0 -- moves revMenubar back to top of screen
+            set the left of stack "revMenubar" to 0 -- moves revMenubar back to left of screen
+         end if
+         -- win
+         -- make some allowances for Windows here -- 12-01-2024 (tperry)
+         if the platform contains "win" then
+            if the cMakeRevMenuBarStandard of stack "revPreferences" is true & the platform contains "win" then
+               set the top of stack "revMenubar" to 30 -- moves revMenubar back to top of screen
+               set the left of stack "revMenubar" to 0 -- moves revMenubar back to left of screen
+            else
+               set the top of stack "revMenubar" to 0 -- moves revMenubar back to top of screen
+               set the left of stack "revMenubar" to 0 -- moves revMenubar back to left of screen
+            end if
+         end if
+      end if
+   end if
+   unlock screen
+end tMenuBar_WDdecorations
+
+on tOpenThemePrefs
+   -- when choosing the appearance theme preferences from the viewMenu
+   open stack "revPreferencesGUI"
+   go card "Extras" of stack "revPreferencesGUI"
+   set the hilitedLine of fld "menu" of stack "revPreferencesGUI" to 4
+   send tchkblendlvl to graphic "redborder" of card "Extras" of stack "revPreferencesGUI"
+end tOpenThemePrefs
+
+on tVisOffsets
+   if there is a stack "revPreferencesGUI" then
+      -- visually update the offsets
+      set the hilite of btn "cMenuBarOffset" of cd "compatibility" of stack "revPreferencesGUI" to true
+      put the top of  this stack into fld "tweakR" of cd "compatibility" of stack "revPreferencesGUI"
+      put the left of  this stack into fld "tweakL" of cd "compatibility" of stack "revPreferencesGUI"
+   end if
+end tVisOffsets
+
+on tSetOffsets
+   -- we just set an offset, so save it...
+   set the cTweakMenuBarOffset of stack "revPreferences" to true
+   set the cTweakMenuBarL of stack "revPreferences"  to fld "tweakL" of cd "compatibility" of stack "revPreferencesGUI"
+   set the cTweakMenuBarT of stack "revPreferences"  to fld "tweakR" of cd "compatibility"of stack "revPreferencesGUI"
+end tSetOffsets
+
+
+-- everything confirmed working up until this point 4-2-24 by OverClockedMind
+-- trying to track down what causes crashing, (tperry)
+-- line 144 -- I add bigger / smaller options in font sizes
+-- see line 160 -- I add shortcuts for Left, centre, right text align
+-- see line 1631 -- I add shortcuts for the App Browser and Project browser
+
+-- confirmed working up until this point 5-2-24 by OverClockedMind
+-- see line 1994 -- adding help and view menu changes
+
+-- debug past this point
+
+on tMBSetThemeDefault
+   -- set theme to default through menubar
+   -- set prefs
+   set the cUseThemeDefault of stack "revPreferences" to true
+   set the cUseThemeDark of stack "revPreferences" to false
+   set the cUseThemelight of stack "revPreferences" to false
+   -- change the button hilites if the prefs window is loaded
+   if there is a stack "revPreferencesGUI" then
+      set the hilite of btn "themeDefault" of card "Extras" of stack "revPreferencesGUI" to true
+      set the hilite of btn "themeDark" of card "Extras" of stack "revPreferencesGUI" to false
+      set the hilite of btn "themeLight" of card "Extras" of stack "revPreferencesGUI" to false
+   end if
+   -- switch theme
+   send tApplyTheme_nullify to stack "home"
+end tMBSetThemeDefault
+
+on tMBSetThemeDark
+   -- set theme to dark through menubar
+   -- set prefs
+   set the cUseThemeDefault of stack "revPreferences" to false
+   set the cUseThemeDark of stack "revPreferences" to true
+   set the cUseThemelight of stack "revPreferences" to false
+   -- change the button hilites if the prefs window is loaded
+   if there is a stack "revPreferencesGUI" then
+      set the hilite of btn "themeDefault" of card "Extras" of stack "revPreferencesGUI" to false
+      set the hilite of btn "themeDark" of card "Extras" of stack "revPreferencesGUI" to true
+      set the hilite of btn "themeLight" of card "Extras" of stack "revPreferencesGUI" to false
+   end if
+   -- switch theme
+   send IDEToDarkMode to stack "home"
+end tMBSetThemeDark
+
+on tMBSetThemeLight
+   -- set theme to light through menubar
+   -- set prefs
+   set the cUseThemeDefault of stack "revPreferences" to false
+   set the cUseThemeDark of stack "revPreferences" to false
+   set the cUseThemelight of stack "revPreferences" to true
+   -- change the button hilites if the prefs window is loaded
+   if there is a stack "revPreferencesGUI" then
+      set the hilite of btn "themeDefault" of card "Extras" of stack "revPreferencesGUI" to false
+      set the hilite of btn "themeDark" of card "Extras" of stack "revPreferencesGUI" to false
+      set the hilite of btn "themeLight" of card "Extras" of stack "revPreferencesGUI" to true
+   end if
+   -- switch theme
+   send IDEToLightMode to stack "home"
+end tMBSetThemeLight
+
+on tIDEGetBuildVersion
+   -- dynamically change title as needed (tperry 26-11-23)
+   -- just means it's reading from the same place as the about stack, so one place to change everything when it comes to modifying version
+   set the itemDelimiter to "/"
+   put item 1 to -3 of the filename of stack "home" & "/.version" into tFilePath
+   put textDecode(url ("binfile:" & tFilePath), "utf-8") into tVersionNumber
+   put line 1 of tVersionNumber into tVersionNumber
+   if not isNumber(last char of tVersionNumber) then delete last char of tVersionNumber -- strip CR line endings if present
+   put item 1 to -3 of the filename of stack "home" & "/about.dat" into tFilePath
+   put textDecode(url ("binfile:" & tFilePath), "utf-8") into tForkName
+   put line 1 of tForkName into tForkName
+   -- now try and get rid of the junk that textDecode has put in!
+   -- edit, couldn't reliably read the file with binfile as it won't strip returns properly, so compensating :(
+   replace "%" with return in tForkName
+   put line 1 of tForkName into tForkName
+   repeat 20
+      if isNumber(char 1 of tVersionNumber) then
+         exit repeat
+      else
+         delete char 1 of tVersionNumber
+      end if
+   end repeat
+   put tForkName & " " & tVersionNumber  into tTitle
+   set the title of me to tTitle
+   ----------------------- this section is for the automatic updates, tperry 24-11-23 ----------------------------------------
+   -------------------------------------------------------------------------------------------------------------------------------
+   put tTitle into fld "tPrefFootnote" of cd "Automatic Updates" of stack "revPreferencesGUI" -- make a note of the version in prefs wd  (tperry 24-11-23)
+   -- always update the buildnumber from this file
+   -- from this point in time onward (24-11-23) we will always have a build number to track automatic updates
+   -- we also make sure we write the build number to file, in case the user decides to reset their preferences, thereby erasing the build number
+   put item 1 to -3 of the filename of stack "home" & "/.buildnumber" into tBuildNumberfile -- was just checking windows supports this, but it does.
+   open file tBuildNumberfile
+   read from file tBuildNumberfile until EOF
+   put it into tBuildNumber
+   close file tBuildNumberfile
+   -- do a sanity check, just in case of permissions
+   if tBuildNumber is "" then put "202311240000" into tBuildNumber -- in case we couldn't read it, assume lowest build number.
+   set the cBuildNumber of stack "revPreferences" to tBuildNumber -- store it back into prefs so from this point on, we have a build number
+   put tBuildNumber into line 2 of fld "tPrefFootnote" of cd "Automatic Updates" of stack "revPreferencesGUI" -- record this in the updates window
+   -- while we are dealing with updates, lets initiate the check
+   if not (the pendingmessages contains "tAutoUpdatesHook") then
+      send tAutoUpdatesHook to cd "Automatic Updates" of stack "revPreferencesGUI" in 10 seconds -- start checks for auto updates, but give time for everything else to load
+   end if
+end tIDEGetBuildVersion
+
+
+----------------------- this is a fix (mainly for Linux, but also MacOS) ----------------
+---------- hides the tools and message box if the desktop / finder is clicked -----------
+-- tperry 24-4-24 -- this was spotted by overclockedmind, but I may have misunderstood --
+-----------------------------------------------------------------------------------------
+
+on suspendstack
+   send hSwitchedAway to me in 10 ticks
+   pass suspendstack
+end suspendstack
+on resumestack
+   fIDEWindows(show)
+   pass resumestack
+end resumestack
+
+on hSwitchedAway
+   if the cDesktopClickToHide of stack "revPreferences" is false then exit hSwitchedAway
+   set the tLastTop of  stack "revTools" to the top of stack "revTools"  -- save tools wd vert pos (tperry 11,5,24)
+   put "" into tSwitchedTo
+   if the platform contains "mac" then
+      put "tell application " & QUOTE & "System Events" & QUOTE & return & ¬
+      "set activeApp to name of first application process whose frontmost is true" & return & ¬
+      "return activeApp" & return & ¬
+      "end tell" into tAppleScript
+      do tApplescript as "AppleScript"
+      put the result into tSwitchedTo
+   end if
+   if the platform contains "linux" then
+      put "xprop -root|grep '^_NET_ACTI'" into tShellCmd
+      set the hideConsoleWindows to true
+      put shell(tShellCmd) into tResult
+      --
+      replace "#" with return in tResult
+      put line 2 of tResult into tResult
+      replace " " with "" in tResult
+      replace "," with return in tResult
+      put word 1 of line 1 of tResult into tWindowID
+      --
+      put "xwininfo -id " & tWindowID into tShellCmd
+      put shell(tShellCmd) into tResult
+      filter lines of tResult without empty
+      put line 1 of tResult into tResult
+      replace tWindowID with return in tResult
+      put line 2 of tResult into tSwitchedTo
+   end if
+   if tSwitchedTo contains "Finder" or tSwitchedTo contains "Desktop" then
+      fIDEWindows(hide)
+   end if
+end hSwitchedAway
+
+on hSwitchedBack
+   if the cDesktopClickToHide of stack "revPreferences" is false then exit hSwitchedBack
+   if the cSwitchedBack of stack "revMenuBar" is true then exit hSwitchedBack
+   fIDEWindows(show)
+end hSwitchedBack
+
+on fIDEWindows tWhat
+   set the itemdelimiter to ","
+   if tWhat is "hide" then
+      -- we hide the IDEs windows
+      if revIDEPaletteIsVisible("tools") is true then
+         if not (tPaletteList contains "revTools") then put "revTools," into line (the number of lines of tPaletteList +1) of tPaletteList
+      end if
+      if revIDEPaletteIsVisible("message box") is true then
+         if not (tPaletteList contains "message box") then put "message box" into line (the number of lines of tPaletteList +1) of tPaletteList
+      end if
+      replace "," with return in tPaletteList
+      filter lines of tPaletteList without empty
+      put 0 into tHideCount
+      repeat the number of lines in tPaletteList
+         add 1 to tHideCount
+         put QUOTE & line tHideCount of tPaletteList & QUOTE into tWdName
+         put "hide stack " & tWdName into tDoThis
+         do tDoThis
+      end repeat
+      set the cSwitchedBack of stack "revMenuBar" to false
+   else
+      -- we show the IDEs windows
+      set the cSwitchedBack of stack "revMenuBar" to true
+      put 0 into tShowCount
+      repeat the number of lines in tPaletteList
+         add 1 to tShowCount
+         put QUOTE & line tShowCount of tPaletteList & QUOTE into tWdName
+         put "show stack " & tWdName into tDoThis
+         -- restore tools wd vert pos (tperry 11,5,24)
+         if tWdName contains "tools" then
+            if isNumber(the tLastTop of  stack "revTools") then
+               set the top of stack "revTools" to the tLastTop of  stack "revTools"
+            end if
+         end if
+         do tDoThis
+      end repeat
+   end if
+end fIDEWindows

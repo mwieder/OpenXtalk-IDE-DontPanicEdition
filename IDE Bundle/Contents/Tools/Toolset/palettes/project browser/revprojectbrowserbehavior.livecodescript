@@ -380,40 +380,40 @@ command setUpProjectView
    local theStylesA, tBehaviorsFolder, tStackID, tTemplatesFolder
    put revIDEPaletteResourcePath("behaviors") into tBehaviorsFolder
    put revIDEPaletteResourcePath("templates") into tTemplatesFolder
-   
+
    set the behavior of group "objectList" of me to revIDEDataViewBehavior()
    send "ResetView" to group "objectList" of me
-   
+
    put the long id of group "containerRow" of card 1 of stack (tTemplatesFolder & slash & "revideprojectbrowsercontainerrowtemplate.livecode") into theStylesA["container"]
    put the long id of stack (tBehaviorsFolder & slash & "revideprojectbrowsercontainerrowbehavior.livecodescript") into tStackID
    set the behavior of theStylesA["container"] to tStackID
-   
+
    put the long id of group "controlRow" of card 1 of stack (tTemplatesFolder & slash & "revideprojectbrowsercontrolrowtemplate.livecode") into theStylesA["control"]
    put the long id of stack (tBehaviorsFolder & slash & "revideprojectbrowsercontrolrowbehavior.livecodescript") into tStackID
    set the behavior of theStylesA["control"] to tStackID
-   
+
    put the long id of group "libraryRow" of card 1 of stack (tTemplatesFolder & slash & "revideprojectbrowserlibraryrowtemplate.livecode") into theStylesA["library"]
    put the long id of stack (tBehaviorsFolder & slash & "revideprojectbrowserlibraryrowbehavior.livecodescript") into tStackID
    set the behavior of theStylesA["library"] to tStackID
-   
+
    put the long id of group "sectionRow" of card 1 of stack (tTemplatesFolder & slash & "revideprojectbrowsersectionrowtemplate.livecode") into theStylesA["section"]
    put the long id of stack (tBehaviorsFolder & slash & "revideprojectbrowsersectionrowbehavior.livecodescript") into tStackID
    set the behavior of theStylesA["section"] to tStackID
-   
+
    put the long id of group "groupRow" of card 1 of stack (tTemplatesFolder & slash & "revideprojectbrowsergrouprowtemplate.livecode") into theStylesA["group"]
    put the long id of stack (tBehaviorsFolder & slash & "revideprojectbrowsergrouprowbehavior.livecodescript") into tStackID
    set the behavior of theStylesA["group"] to tStackID
-   
+
    set the viewProp["row style templates"] of group "objectList" of me to theStylesA
    set the viewProp["hilite color"] of group "objectList" of me to revIDEColor("dataView_HiliteColor")
    -- set the viewProp["hilite color"] of group "objectList" of me to "gray33"
-   
+
    set the viewProp["row color"] of group "objectList" of me to revIDEColor("dataView_rowColor")
    -- set the viewProp["row color"] of group "objectList" of me to "Gray80"
-   
+
    set the viewProp["alternate row color"] of group "objectList" of me to revIDEColor("dataView_rowAlternateColor")
    -- set the viewProp["alternate row color"] of group "objectList" of me to "Gray70"
-   
+
    set the viewProp["fixed row height"] of group "objectList" of me to "true"
    set the viewProp["row height"] of group "objectList" of me to the effective textSize of me + 14
    set the viewProp["cache"] of group "objectList" of me to "none"

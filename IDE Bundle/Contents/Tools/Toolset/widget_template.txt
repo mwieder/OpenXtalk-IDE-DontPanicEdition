@@ -1,0 +1,472 @@
+/*
+Parts of this file are copyright (C) 2018 LiveCode Ltd,
+Modified 2022 OpenXTalk.org
+
+This file is part of OpenXTalk
+
+OpenXTalk is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License v3 as published by the Free
+Software Foundation.
+
+OpenXTalk derived from LiveCode Community Edition which, as of v.9.6.3 / Sept. 1st 2021,
+is no longer supported by LiveCode Ltd.
+
+The original source code for LiveCode Community Edition v6.0.x through v.9.6.3 is available (archived) on GitHub.com
+
+OpenXTalk is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License
+along with OpenXTalk.  If not see <http://www.gnu.org/licenses/>.  */
+
+/**
+A widget with icon and label
+
+Name: mouseUp
+
+Summary: Sent when the widget is clicked
+
+Syntax: mouseUp
+
+Type: message
+
+Name: mouseEnter
+
+Summary: Sent when the mouse enters the widget
+
+Syntax: mouseEnter
+
+Type: message
+
+Name: mouseLeave
+
+Summary: Sent when the mouse leaves the widget
+
+Syntax: mouseLeave
+
+Type: message
+*/
+widget org.openxtalk.widget.templatewidget
+
+use com.livecode.canvas
+use com.livecode.widget
+use com.livecode.engine
+use com.livecode.library.iconsvg
+use com.livecode.library.widgetutils
+
+metadata title is "Template Widget"
+metadata author is "OpemXTalk.org"
+metadata version is "1.0.0"
+metadata preferredSize is "200,200"
+metadata userVisible is "true"
+metadata _ide is "false"
+
+metadata sourceColor.editor is "com.livecode.pi.color"
+metadata sourceColor.default is "blue"
+
+metadata tileLabel.editor is "com.livecode.pi.string"
+metadata tileLabel.default is "Label"
+
+metadata colorStep.editor is "com.livecode.pi.string"
+metadata colorStep.default is "0"
+
+// Properties
+/**
+The label to display
+
+Syntax:
+set the titleLabel of <widget> to <pLabel>
+get the titleLabel of <widget>
+
+Value:
+The label string
+*/
+property tileLabel get mTileLabel set setTileLabel
+
+/**
+The name of the icon to display
+
+Syntax:
+set the iconName of <widget> to <pName>
+get the iconName of <widget>
+
+Value:
+The icon name
+*/
+property iconName get mIconName set setIconName
+
+/**
+The name of the icon to display when hovering over the tile
+
+Syntax:
+set the hoverIconName of <widget> to <pName>
+get the hoverIconName of <widget>
+
+Value:
+The icon name
+*/
+property hoverIconName get mHoverIconName set setHoverIconName
+
+/**
+The hover state of the widget
+
+Syntax:
+set the hoverState of <widget> to { true | false }
+get the hoverState of <widget>
+*/
+property hoverState get mHover set setHover
+
+/**
+The foreground color of the widget
+
+Syntax:
+set the fgColor of <widget> to <pColor>
+get the fgColor of <widget>
+
+Value:
+A color in RGB form - comma separated values from 0 - 255
+*/
+property fgColor get mForegroundColor set setForegroundColor
+
+/**
+The foreground hover color of the widget
+
+Syntax:
+set the fgHoverColor of <widget> to <pColor>
+get the fgHoverColor of <widget>
+
+Value:
+A color in RGB form - comma separated values from 0 - 255
+*/
+property fgHoverColor get mForegroundHoverColor set setForegroundHoverColor
+
+/**
+The background color of the widget
+
+Syntax:
+set the bgColor of <widget> to <pColor>
+get the bgColor of <widget>
+
+Value:
+A color in RGB form - comma separated values from 0 - 255
+*/
+property bgColor get mBackgroundColor set setBackgroundColor
+
+/**
+The background hover color of the widget
+
+Syntax:
+set the bgHoverColor of <widget> to <pColor>
+get the bgHoverColor of <widget>
+
+Value:
+A color in RGB form - comma separated values from 0 - 255
+*/
+property bgHoverColor get mBackgroundHoverColor set setBackgroundHoverColor
+
+
+
+private variable mOuterShadowAngle as Number
+property outerShadowAngle get mOuterShadowAngle  set setOuterShadowAngle
+metadata outerShadowAngle.editor is "com.livecode.pi.number"
+metadata outerShadowAngle.label is "Outer Shadow angle"
+metadata outerShadowAngle.step is "1"
+metadata outerShadowAngle.default is "105"
+metadata outerShadowAngle.min is "0"
+metadata outerShadowAngle.max is "359"
+metadata outerShadowAngle.section is "Effects"
+private handler setOuterShadowAngle(in pNumber as Number)
+   put pNumber into mOuterShadowAngle
+   redraw all
+end handler
+
+--private variable mShadowBlendMode
+--property shadowBlendMode	 get mShadowBlendMode	  set mShadowBlendMode
+--metadata shadowBlendMode.section is "Effects"
+
+private variable mOuterShadowDistance	as Number
+property outerShadowDistance	 get mOuterShadowDistance	  set setOuterShadowDistance
+metadata outerShadowDistance.editor is "com.livecode.pi.number"
+metadata outerShadowDistance.label is "Outer Shadow distance"
+metadata outerShadowDistance.step is "1"
+metadata outerShadowDistance.default is "7"
+metadata outerShadowDistance.min is "0"
+metadata outerShadowDistance.max is "255"
+metadata outerShadowDistance.section is "Effects"
+private handler setOuterShadowDistance(in pNumber as Number) returns nothing
+   put pNumber into mOuterShadowDistance
+   redraw all
+end handler
+
+private variable mOuterShadowColor	as Color
+property outerShadowColor get getOuterShadowColor  set setOuterShadowColor
+metadata outerShadowColor.editor is "com.livecode.pi.color"
+metadata outerShadowColor.label is "Outer Shadow color"
+metadata outerShadowColor.section is "Effects"
+private handler setOuterShadowColor(in pColor as String) returns nothing
+   put stringToColor(pColor) into mOuterShadowColor
+   redraw all
+end handler
+private handler getOuterShadowColor() returns String
+   return colorToString(mOuterShadowColor,false)
+end handler
+--private variable mShadowFilter
+--property shadowFilter	 get mShadowFilter	  set mShadowFilter
+--metadata shadowFilter.section is "Effects"
+
+private variable mOuterShadowSize	as Number
+property outerShadowSize	 get mOuterShadowSize	  set setOuterShadowSize
+metadata outerShadowSize.editor is "com.livecode.pi.number"
+metadata outerShadowSize.section is "Effects"
+metadata outerShadowSize.label is "Outer Shadow size"
+metadata outerShadowSize.step is "1"
+metadata outerShadowSize.default is "15"
+metadata outerShadowSize.min is "0"
+metadata outerShadowSize.max is "255"
+metadata outerShadowSize.section is "Effects"
+private handler setOuterShadowSize(in pNumber as Number) returns nothing
+   put pNumber into mOuterShadowSize
+   redraw all
+end handler
+
+-- property textFont get mFont set setTextFont
+-- metadata textFont.editor is "com.livecode.pi.font"
+-- metadata textFont.default     is "Helvetica"
+metadata textFont.user_visible is "false"
+-- private variable mFont as String
+metadata textSize.user_visible is "false"
+
+property labelTextFont get mFont set setTextFont
+metadata labelTextFont.editor is "com.livecode.pi.font"
+metadata labelTextFont.default     is "Helvetica"
+metadata labelTextFont.section is "Text"
+metadata labelTextFont.label is "Label Text Font"
+private variable mFont as String
+
+property labelTextSize get mFontSize set setTextFontSize
+metadata labelTextSize.editor is "com.livecode.pi.number"
+metadata labelTextSize.default     is "12"
+metadata labelTextSize.section is "Text"
+metadata labelTextSize.label is "Label Text Size"
+private variable mFontSize as Number
+
+--property textAlign get mAlign	 set setAlign
+--metadata textAlign.editor is "com.livecode.pi.enum"
+--metadata textAlign.options is "top left,top center,top right,center left,center center,center right,bottom left,bottom center,bottom right,"
+--metadata textAlign.default is "center center"
+--metadata textAlign.section is "Text"
+--private variable mAlign as String
+
+private handler setTextFont(in pText as String)
+	put pText into mFont
+	redraw all
+end handler
+
+private handler setTextFontSize(in pNum as Number)
+	put pNum into mFontSize
+	redraw all
+end handler
+
+//Local variables
+private variable mTileLabel as String
+private variable mIconName as String
+private variable mIconPath as String
+private variable mHoverIconName as String
+private variable mHoverIconPath as String
+private variable mHover as Boolean
+private variable mForegroundColor as Color
+private variable mForegroundHoverColor as Color
+private variable mBackgroundColor as Color
+private variable mBackgroundHoverColor as Color
+
+----NEEDED handler, saves the properties of the sidget when stack is saved
+public handler OnSave(out rProperties as Array)
+	put the empty array into rProperties
+	-- put mText into rProperties["someText"]
+	-- put mBorder into rProperties["boxBorder"]
+	put mFontSize into rProperties["textSize"]
+	-- put mAlign into rProperties["textAlign"]
+	put mFont into rProperties["textFont"]
+end handler
+
+----NEEDED handler, loads the saved properties
+public handler OnLoad(in pProperties as Array)
+	-- put pProperties["someText"] into mText
+	--put pProperties["boxBorder"] into mBorder
+	--put pProperties["textAlign"] into mAlign
+	put pProperties["textSize"] into mFontSize
+	put pProperties["textFont"] into mFont
+end handler
+
+public handler onCreate()
+    put "Label" into mTileLabel
+    put false into mHover
+    put "star" into mIconName
+    put "sun" into mHoverIconName
+    put iconSVGPathFromName(mIconName) into mIconPath
+    put iconSVGPathFromName(mHoverIconName) into mHoverIconPath
+
+    put color [0.9,0.9,0.9] into mForegroundColor
+    put color [0,0,0] into mForegroundHoverColor -- Black
+    put color [0.1,0.1,0.1] into mBackgroundColor -- Blue
+    put color [1,1,1] into mBackgroundHoverColor -- White
+    put 45 into  mOuterShadowAngle
+    put color [1,1,1] into mOuterShadowColor
+    put 3 into mOuterShadowDistance
+    put 50 into mOuterShadowSize
+end handler
+
+public handler OnPaint()
+   set the antialias of this canvas to true
+	variable tProps as Array
+--------------------------
+  variable tHeight as Real
+  variable tWidth as Real
+  put my width into tWidth
+  put my height into tHeight
+
+  // Tile
+
+  variable tEffect as Effect
+  variable tSquarePath as Path
+  variable tBounds as Rectangle
+
+  put the empty array into tProps
+  put 15 into tProps["size"]
+  put 180 - mOuterShadowAngle into tProps["angle"]
+  put mOuterShadowDistance into tProps["distance"]
+  -- put colorToString(mOuterShadowColor,false) into tProps["color"]
+
+  put mOuterShadowColor into tProps["color"]
+
+  -- put "source over" into tProps["blend mode"]
+  put 0 into tProps["spread"]
+  put mOuterShadowSize into tProps["size"]
+
+  put rectangle path of rectangle [0, 0, tWidth, tHeight] into tSquarePath
+
+  put inner shadow effect with properties tProps into tEffect
+
+  begin layer with tEffect on this canvas
+
+     if mHover is true then
+        set the paint of this canvas to solid paint with mOuterShadowColor  --  mBackgroundHoverColor
+     else
+        set the paint of this canvas to solid paint with mBackgroundColor
+     end if
+     fill tSquarePath on this canvas
+ end layer on this canvas
+
+     //Label
+     if mHover is true then
+        set the paint of this canvas to solid paint with mForegroundHoverColor
+     else
+        set the paint of this canvas to solid paint with mForegroundColor
+     end if
+     set the font of this canvas to font mFont at size mFontSize
+
+     fill text mTileLabel at center of rectangle [0, (tHeight*0.7)-5, tWidth, tHeight-5] on this canvas
+
+
+  variable tTextBounds as Rectangle
+  variable tTextHeight
+  variable tTextTop
+  variable tTextGap
+
+  measure mTileLabel on this canvas
+  put the result into tTextBounds
+  put the height of tTextBounds into tTextHeight
+  put ((tHeight*0.3) - (tTextHeight))/2 into tTextGap
+  put (tHeight*0.7) + (tTextGap) into tTextTop
+
+  //Icon
+  variable tIconPath as Path
+
+  if mHover is true then
+     set the paint of this canvas to solid paint with mForegroundHoverColor
+     put path mHoverIconPath into tIconPath
+  else
+     set the paint of this canvas to solid paint with mForegroundColor
+     put path mIconPath into tIconPath
+  end if
+
+  variable tIconBounds as Rectangle
+  variable tIconSpace
+  put the minimum of (tHeight*0.4) and (tWidth*0.4) into tIconSpace
+  put rectangle [0, 0, tIconSpace, tIconSpace] into tIconBounds
+  constrainPathToRect(tIconBounds, tIconPath)
+
+  variable tIconWidth
+  variable tIconHeight
+  variable tIconX
+  variable tIconY
+  put the bounding box of tIconPath into tBounds
+  put the width of tBounds into tIconWidth
+  put the height of tBounds into tIconHeight
+  put the left of tBounds into tIconX
+  put the top of tBounds into tIconY
+  translate tIconPath by [(tWidth - tIconWidth)/2 - tIconx, ((tTextTop)-tIconHeight)/2 - tIconY]
+  fill tIconPath on this canvas
+end handler
+
+public handler setTileLabel(in pLabel as String) returns nothing
+    put pLabel into mTileLabel
+    redraw all
+end handler
+
+public handler OnMouseUp()
+   post "mouseUp"
+end handler
+
+public handler OnMouseEnter()
+   put true into mHover
+   post "mouseEnter"
+   redraw all
+end handler
+
+public handler OnMouseLeave()
+   put false into mHover
+   post "mouseLeave"
+   redraw all
+end handler
+
+public handler setIconName(in pName as String) returns nothing
+   put iconSVGPathFromName(pName) into mIconPath
+   put pName into mIconName
+   redraw all
+end handler
+
+public handler setHoverIconName(in pName as String) returns nothing
+   put iconSVGPathFromName(pName) into mHoverIconPath
+   put pName into mHoverIconName
+   redraw all
+end handler
+
+public handler setForegroundColor(in pColor as String) returns nothing
+   put stringToColor(pColor) into mForegroundColor
+	redraw all
+end handler
+
+public handler setForegroundHoverColor(in pColor as String) returns nothing
+   put stringToColor(pColor) into mForegroundHoverColor
+	redraw all
+end handler
+
+public handler setBackgroundColor(in pColor as String) returns nothing
+   put stringToColor(pColor) into mBackgroundColor
+	redraw all
+end handler
+
+public handler setBackgroundHoverColor(in pColor as String) returns nothing
+   put stringToColor(pColor) into mBackgroundHoverColor
+	redraw all
+end handler
+
+public handler setHover(in pValue as Boolean) returns nothing
+   put pValue into mHover
+	redraw all
+end handler
+
+end widget

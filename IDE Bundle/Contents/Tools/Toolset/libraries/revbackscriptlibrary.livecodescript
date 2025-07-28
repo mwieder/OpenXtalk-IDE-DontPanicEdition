@@ -621,8 +621,9 @@ end newGroup
 
 on newButton
    revNewButton the long id of the target
-   revUpdateAOControls
+   revUpdateAOControls   
    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then pass newButton
+   
 end newButton
 
 on revNewButton pTarget
@@ -642,7 +643,6 @@ on revNewButton pTarget
       end if
    end if
    set the defaultStack to revTargetStack(pTarget)
-
    local tName
    if the cREVGeneral["viewerobject"] of pTarget is true then
       put the short name of pTarget into tName
@@ -3081,7 +3081,6 @@ end revIDEHandleCloseStackRequest
 command revIDEHandleMouseDown pWhich, pTarget
    local tTarget
    put the long id of pTarget into tTarget
-
    global gREVPopups, gREVScriptShortcut, gREVUIScriptShortcut, gREVPaintImage
    if the commandKey is down and the shiftKey is down and pWhich is 3 and (not revOKTarget(tTarget) or (revOKTarget(tTarget) and gREVPopups)) then
       put true into sPopupMenuUp
@@ -3121,6 +3120,7 @@ command revIDEHandleMouseDown pWhich, pTarget
 
       return "exit to top"
    end if
+   -- put the tool
 end revIDEHandleMouseDown
 
 # OK-2008-03-27 : Bug 6229. When a stack is opened with messages suppressed, this message
@@ -3291,8 +3291,10 @@ resize cursor when the mouse is over a selection handle.
 constant kHandleSize = 5
 
 on ideMouseMove pX, pY, pTarget
-   if the tool is not "pointer tool" then exit ideMouseMove
-
+   if the tool is not "pointer tool" then
+      -- put the tool & cr & the name of the mouseControl
+      exit ideMouseMove
+   end if
    if pTarget is among the lines of the selectedObjects then
       local tRect
       put the rect of pTarget into tRect

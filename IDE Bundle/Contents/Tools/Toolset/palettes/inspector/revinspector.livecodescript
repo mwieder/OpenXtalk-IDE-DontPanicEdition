@@ -22,7 +22,7 @@ on inspectorMessagesDeRegister
    revIDEUnsubscribe "ideCloseStack"
    revIDEUnsubscribe "ideNameChanged"
    revIDEUnsubscribe "ideMainstackChanged"
-end inspectorMessagesDeRegister 
+end inspectorMessagesDeRegister
 
 on inspectorCloseAll
    ## Unsubscribe from all messges
@@ -63,14 +63,14 @@ on ideInspectObjects pObjects
    else
       put revIDESelectedObjects() into tSelectedObjects
    end if
-   
+
    local tStackName, tIndex, tTargetInspector, tKeys
    put the keys of inspectorList() into tKeys
    sort tKeys ascending numeric
    repeat for each line tKey in tKeys
       put kPropertyInspectorPrefix && tKey into tStackName
       if the cLocked of stack tStackName is true then next repeat
-      
+
       if tTargetInspector is empty then
          put tStackName into tTargetInspector
          put tKey into tIndex
@@ -79,8 +79,8 @@ on ideInspectObjects pObjects
          deleteInspector tKey
       end if
    end repeat
-   
-   lock screen 
+
+   lock screen
    lock messages
    # If all the inspectors are locked, or there aren't any, create a new one.
    if tTargetInspector is empty then
@@ -98,7 +98,7 @@ on ideInspectObjects pObjects
    palette stack tTargetInspector
    unlock messages
    set the cSelectedObjects of stack tTargetInspector to tSelectedObjects
-  
+
    unlock screen
 end ideInspectObjects
 
@@ -113,21 +113,21 @@ function inspectorStackName pIndex
    return kPropertyInspectorPrefix && pIndex
 end inspectorStackName
 
-constant kNewInspectorOffset = 20
+constant kNewInspectorOffset = 15
 on inspectorPositionPalette pIndex, pSelObj
    local tStackName
    put inspectorStackName(pIndex) into tStackName
    local tRect
    put revIDEGetPreference("palette_rect_" & tStackName) into tRect
-   
+
    if __isRect(tRect) then
       set the topleft of stack tStackName to item 1 to 2 of tRect
       exit inspectorPositionPalette
    end if
-   
+
    local tPrevInspector
    put inspectorStackName(pIndex - 1) into tPrevInspector
-   -- if we have an open inspector, just offset the new one by 10 pixels
+   -- if we have an open inspector, just offset the new one by kNewInspectorOffset pixels
    if there is a stack tPrevInspector and the mode of stack tPrevInspector is not 0 then
       set the topleft of stack tStackName to \
             the left of stack tPrevInspector + kNewInspectorOffset, the top of stack tPrevInspector + kNewInspectorOffset
@@ -135,7 +135,7 @@ on inspectorPositionPalette pIndex, pSelObj
       local tScreenWidth, tScreenRect
       put revIDEStackScreenRect(tStackName, true) into tScreenRect
       put item 3 of tScreenRect - item 1 of tScreenRect into tScreenWidth
-      set the top of stack tStackName to the top of the topstack            
+      set the top of stack tStackName to the top of the topstack
       # AL-2015-09-09: [[ Bug 15745 ]] Try and place PI to left of stack if it doesn't fit on the right
       if the right of the topstack + kNewInspectorOffset + the width of stack tStackName < tScreenWidth then
          set the left of stack tStackName to the right of the topstack + kNewInspectorOffset
@@ -144,7 +144,7 @@ on inspectorPositionPalette pIndex, pSelObj
       else
          set the left of stack tStackName to the right of the topstack + kNewInspectorOffset
       end if
-      
+
       if intersect(the long id of stack tStackName, revIDEStackOfObject(line 1 of pSelObj)) then
          revIDEPositionPaletteDefault tStackName
       end if
@@ -189,7 +189,7 @@ on ideNameChanged pOldName, pNewName, pNewLongID
    if word 1 of pNewLongID is "stack" then
       stackNameChanged pOldName, pNewLongID
    end if
-   
+
    ideSelectedObjectChanged
 end ideNameChanged
 
@@ -201,10 +201,10 @@ end ideMainstackChanged
 on ideSelectedObjectChanged
    local tObjects
    put revIDESelectedObjects() into tObjects
-   
+
    local tStack
    put revIDEStackOfObject(line 1 of tObjects) into tStack
-   
+
    if exists(tStack) then
       # If the object is on an inspector stack, lock it
       if the short name of tStack begins with kPropertyInspectorPrefix then
@@ -215,13 +215,13 @@ on ideSelectedObjectChanged
    else
       put empty into tObjects
    end if
-   
+
    repeat with x = the number of lines in tObjects down to 1
       if there is not a (line x of tObjects) then
          delete line x of tObjects
       end if
    end repeat
-   
+
    local tStackName
    repeat for each key tKey in inspectorList()
       put kPropertyInspectorPrefix && tKey into tStackName
@@ -236,7 +236,7 @@ function inspectorForObject pObject
    local tStackName
    repeat for each key tKey in inspectorList()
       put kPropertyInspectorPrefix && tKey into tStackName
-      if the mode of stack tStackName is not 0 \ 
+      if the mode of stack tStackName is not 0 \
             and pObject is among the lines of the cSelectedObjects of stack tStackName then
          return tStackName
       end if
@@ -252,7 +252,7 @@ function absoluteRectOfObject pObjectData
 
    # Make sure left of group is left of stack
    put 0 into item 1 of tRect
-   
+
    return revIDERelativeRectToAbsolute(tRect, the long id of stack tInspector)
 end absoluteRectOfObject
 

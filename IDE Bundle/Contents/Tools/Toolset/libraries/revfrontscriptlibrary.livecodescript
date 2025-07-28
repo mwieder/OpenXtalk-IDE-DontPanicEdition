@@ -491,6 +491,21 @@ end revCloseUpdate
 -- **Bookmark Entry** Editing Handlers
 
 on mouseDown pWhich
+   if pWhich is 1 then
+      -- hook for stack inspector (tperry 10-5-24) -- not detected properly otherwise
+      put "Properties" into tNewInspector
+      if there is a stack tNewInspector then
+         if the visible of stack tNewInspector is true then
+            -- properties inspector exists, and is visible
+            if the current tool contains "pointer" then -- and if pointer tool is chosen
+               set the isStackInspecting of stack tNewInspector to true
+               send ideNewSelectedObj to stack tNewInspector
+            end if
+         end if
+      end if
+   end if
+   -- end inspector mod
+
   local tResult
   revIDEHandleMouseDown pWhich, the long id of the target
   put the result into tResult
@@ -512,7 +527,7 @@ end mouseDown
 on mouseUp pWhich
   local tTarget
   put the long id of the target into tTarget
-
+   -- put tTarget
   local tResult
   revIDEHandleMouseUp pWhich, tTarget
   put the result into tResult
