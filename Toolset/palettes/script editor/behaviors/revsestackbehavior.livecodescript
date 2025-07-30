@@ -345,25 +345,25 @@ end revSEGoExecutionPoint
 # Description
 #   Returns the last selected string in the editor group
 command revSEGetLastSelection
-   send "getLastSelection" to group "Editor" of me
+   dispatch "getLastSelection" to group "Editor" of me
    return the result
 end revSEGetlastSelection
 
 command revSEGetLastSelectedWord
-   send "getLastSelectedWord" to group "Editor" of me
+   dispatch "getLastSelectedWord" to group "Editor" of me
    return the result
 end revSEGetLastSelectedWord
 
 # Description
 #   Initializes the script editor's find system. Should be called before beginning a search.
 command revSEFindInitialize
-   send "findInitialize" to group "Editor" of me
+   dispatch "findInitialize" to group "Editor" of me
 end revSEFindInitialize
 
 # Description
 #   Finalizes the script editor's find system. Should be called when a search is finished
 command revSEFindFinalize
-   send "findFinalize" to group "Editor" of me
+   dispatch "findFinalize" to group "Editor" of me
 end revSEFindFinalize
 
 # Parameters
@@ -429,7 +429,7 @@ end revSEReplaceAll
 # Description
 #   Marks the chunk of text specified by pStart and pEnd. Unmarks any previously marked text
 command revSEMarkText pStart, pEnd
-   send "findClearResults" to group "Editor" of me
+   dispatch "findClearResults" to group "Editor" of me
    send "findMarkResult pStart, pEnd, false" to group "Editor" of me
 end revSEMarkText
 
@@ -437,7 +437,7 @@ end revSEMarkText
 #   Called when the name of one or more of the target objects has changed
 #   Updates the script editor to display the object's new names.
 command revSERefreshObjectNames
-   send "refreshTabStates" to group "Script Tabs" of me
+   dispatch "refreshTabStates" to group "Script Tabs" of me
 end revSERefreshObjectNames
 
 # Parameters
@@ -453,7 +453,7 @@ command revSEObjectIdChanged pObject, pOldId, pNewId
 
    local tObject
    put seGetRuggedId(pObject) into tObject
-   send "setObjectRaw tObject" to group "Editor" of me
+   dispatch "setObjectRaw" to group "Editor" of me with tObject
 end revSEObjectIdChanged
 
 # OK-2008-08-19 : Bug 6947 - Store script checksums to detect whether the user has modified the script externally.
@@ -491,11 +491,11 @@ command revSEObjectRuggedIdChanged pObject, pOldRuggedId
 
          # Update the editor group if appropriate
          local tCurrentObject
-         send "getObject" to group "Editor" of me
+         dispatch "getObject" to group "Editor" of me
          put the result into tCurrentObject
 
          if tCurrentObject is pOldRuggedId or (seRuggedObjectContainsObject(pOldRuggedId, tCurrentObject)) then
-            send "setObjectRaw tNewId" to group "Editor" of me
+            dispatch "setObjectRaw" to group "Editor" of me with tNewId
          end if
       end if
    end repeat
@@ -504,14 +504,14 @@ command revSEObjectRuggedIdChanged pObject, pOldRuggedId
    put sScriptChecksums[pOldRuggedId] into sScriptChecksums[tObject]
    delete variable sScriptChecksums[pOldRuggedId]
 
-   send "refreshTabStates" to group "Script Tabs" of me
+   dispatch "refreshTabStates" to group "Script Tabs" of me
 end revSEObjectRuggedIdChanged
 
 # Description
 #   Returns the handler list for the current object, in the same format as the revAvailableHandlers.
 command revSEGetHandlerList
    local tHandlers
-   send "getHandlerList" to group "Editor" of me
+   dispatch "getHandlerList" to group "Editor" of me
    put the result into tHandlers
    return tHandlers
 end revSEGetHandlerList
@@ -532,7 +532,7 @@ end revSEGetSelectedHandler
 #   Returns the number of lines of the current script being edited
 command revSEGetLineCount
    local tLineCount
-   send "scriptGetLineCount" to group "Editor" of me
+   dispatch "scriptGetLineCount" to group "Editor" of me
    put the result into tLineCount
    return tLineCount
 end revSEGetLineCount
@@ -561,7 +561,7 @@ command revSEWarnBeforeClosing pObjectList
 
    if tChoice is "no" then
       repeat for each line tObject in pObjectList
-         send "clearCache tObject" to group "Editor"
+         dispatch "clearCache" to group "Editor" with tObject
       end repeat
       return empty
    end if
@@ -604,10 +604,10 @@ command revSEDisplayExecutionError pError, pObject
       exit revSEDisplayExecutionError
    end if
 
-   send "clearErrors" to group "Errors" of me
+   dispatch "clearErrors" to group "Errors" of me
    send "addError execution, pError, tObject" to group "Errors" of me
-   send "setCurrentTab errors" to group "Pane Tabs" of me
-   send "expandCurrentPane" to group "Panes" of me
+   dispatch "setCurrentTab" to group "Pane Tabs" of me with "errors"
+   dispatch "expandCurrentPane" to group "Panes" of me
 end revSEDisplayExecutionError
 
 # Parameters
@@ -655,7 +655,7 @@ command revSERestore
 end revSERestore
 
 command revSEFormatSnippet pScript
-   send "scriptFormatSnippet pScript" to group "Editor" of me
+   dispatch "scriptFormatSnippet" to group "Editor" of me with pScript
    return the result
 end revSEFormatSnippet
 
@@ -745,7 +745,7 @@ end seGetDebugContext
 on seSetDebugContext pContext
    lock screen
    put pContext into sDebugContext
-   send "refreshCurrentPane" to group "Panes" of this card
+   dispatch "refreshCurrentPane" to group "Panes" of this card
    unlock screen
 end seSetDebugContext
 
@@ -768,7 +768,7 @@ command revSEGetModifiedObjects
       if tState is "edited" or (tState is "error" and revIDEObjectIsOnIDEStack(tObject)) then
          # OK-2009-01-17 : Bug 7169
          local tDirty
-         send "getDirty tObject" to group "Editor" of me
+         dispatch "getDirty" to group "Editor" of me with tObject
          put the result into tDirty
          if tDirty then
             put tObject & return after tEditedObjects
@@ -820,8 +820,8 @@ command seSetObjectState pObject, pState
    end if
 
    put pState into sObjectStates[seGetRuggedId(pObject)]
-   send "refreshTabStates" to group "Script Tabs" of me
-   send "update" to group "Toolbar" of me
+   dispatch "refreshTabStates" to group "Script Tabs" of me
+   dispatch "update" to group "Toolbar" of me
    if pState is not "error" then
       local tId
       put seGetRuggedId(pObject) into tId
@@ -862,7 +862,7 @@ command sePanesUpdate
    # For the documentation, get the last caret token from the editor group, and instruct the documentation
    # pane to search for a matching entry for this.
    local tToken
-   send "getCaretToken" to group "Editor" of me
+   dispatch "getCaretToken" to group "Editor" of me
    put the result into tToken
 
    # OK-2008-09-11 : Refactored to prevent direct interaction with the Documentation pane. This needs further work
@@ -897,7 +897,7 @@ command sePaneShow pPane
    # so update the prefs to reflect this.
    if pPane is not among the items of seVisiblePanes() then
       sePrefSet "panes,visiblelist", seVisiblePanes() & comma & pPane
-      send "update" to group "Pane Tabs" of me
+      dispatch "update" to group "Pane Tabs" of me
    end if
 
    send "setCurrentTab pPane" to group "Pane Tabs" of me
@@ -989,7 +989,7 @@ function seBreakpointDisplayInformation pObject, pLine
 
    local tScript
    if tObjectIsBeingEdited then
-      send "scriptGet tObject" to group "Editor" of me
+      dispatch "scriptGet" to group "Editor" of me with tObject
       put the result into tScript
    else
       put the script of tObject into tScript

@@ -253,7 +253,7 @@ function revIDEDeployIOSGetSimulatorVersions
 end revIDEDeployIOSGetSimulatorVersions
 
 function revIDEDeployIOSGetSDKVersions
-  dispatch function "deployGetSDKVersions" to stack "revDeployLibraryiOS"
+  dispatch function "deploy.GetSDKVersions" to stack "revDeployLibraryiOS"
   return the result
 end revIDEDeployIOSGetSDKVersions
 
@@ -313,10 +313,10 @@ end revIDEDeployIOSGetLatestSDKInstalled
 //  calls provide this in a sane manner.
 //
 
-function revIDEDeployAndroidRequiredSDK
-   dispatch function "deployRequiredSDK" to stack "revDeployLibraryAndroid"
+function Deploy.Android.RequiredSDK
+   dispatch function "deploy.RequiredSDK" to stack "revDeployLibraryAndroid"
    return the result
-end revIDEDeployAndroidRequiredSDK
+end Deploy.Android.RequiredSDK
 
 function Deploy.Android.IsValidSDK? pPath
    dispatch function "deploy.IsValidSDK?" to stack "revDeployLibraryAndroid" with pPath
@@ -342,7 +342,7 @@ end deploy.Android.Initialize
 //  something changeable from a script-only stack
 function deploy.Android.GetVersionsList
    local tMap
-   dispatch function "deployGetVersionsMap" to stack "revDeployLibraryAndroid"
+   dispatch function "deploy.GetVersionsMap" to stack "revDeployLibraryAndroid"
    put the result into tMap
    combine tMap with cr
    return tMap
@@ -355,7 +355,7 @@ end revIDEDeployAndroidApiFromVersion
 
 function deploy.Android.GetAPIsList
    local tMap,tAPIs
-   dispatch function "deployGetVersionsMap" to stack "revDeployLibraryAndroid"
+   dispatch function "deploy.GetVersionsMap" to stack "revDeployLibraryAndroid"
    put the result into tMap
    put the keys of tMap into tAPIs
    replace cr with comma in tAPIs
