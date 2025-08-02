@@ -59,12 +59,13 @@ end initialize
 
 on updateSettings
    local tSettings
+   lock screen
    put getSettings() into tSettings
-
+   
    --put computeDefault(tSettings["android,label"], tSettings["name"]) into field "Label"
-
+   
    set the text of field "Label" to computeDefault(tSettings["android,label"], tSettings["name"])
-
+   
    put computeDefault(tSettings["android,identifier"], "com.yourcompany.yourapp") into field "Identifier"
    put computeDefault(tSettings["android,version name"], "1.0.0") into field "Version Name"
    put computeDefault(tSettings["android,version code"], "1") into field "Version Code"
@@ -74,7 +75,7 @@ on updateSettings
    put computeDefault(tSettings["android,customUrlScheme"], empty) into field "Custom URL Scheme"
    put computeDefault(tSettings["android,statusBarIcon"], empty) into field "Status Bar Icon"
    put computeDefault(tSettings["android,pushSenderID"], empty) into field "Push Sender ID"
-
+   
    // IM-2012-03-05: initialize min version menu
    // SN-2015-05-13: [[ AndroidVersions ]] Make the Android versions changeable from
    //  a script-only stack
@@ -83,36 +84,36 @@ on updateSettings
    put the result into tMinimumVersion
    --dispatch "updateSettings" to button "Minimum Android Version" with computeDefault(tSettings["android,minimum version"], item 1 of revIDEDeployAndroidGetAPIsList())
    dispatch "updateSettings" to button "Minimum Android Version" with computeDefault(tSettings["android,minimum version"], item 1 of tMinimumVersion)
-
+   
    local tSigning
    put computeDefault(tSettings["android,signing"], "Sign with my key") into tSigning
    set the label of button "Signing" to tSigning
    set the enabled of group "key group" to (tSigning is "Sign with my key")
-
+   
    local tInstallLocation
    put computeDefault(tSettings["android,installLocation"], "Internal Storage Only") into tInstallLocation
    set the label of button "Install Location" to tInstallLocation
-
+   
    local tInitialOrientation
    put computeDefault(tSettings["android,initial orientation"], "Portrait") into tInitialOrientation
    set the label of button "Initial Orientation" to tInitialOrientation
-
+   
    local tStatusbarHidden
    put computeDefault(tSettings["android,status bar hidden"], "false") into tStatusbarHidden
    set the hilitedButtonName of group "status bar" to tStatusbarHidden
-
+   
    local tHardwareAccelerated
    put computeDefault(tSettings["android,hardware accelerated"], false) into tHardwareAccelerated
    set the hilited of button "Hardware Accelerated" to tHardwareAccelerated
-
+   
    local tNFC
    put computeDefault(tSettings["android,nfc"], false) into tNFC
    set the hilited of button "NFC Tag Reading" to tNFC
-
+   
    local tAllowHttpConnections
    put computeDefault(tSettings["android,allow http"], false) into tAllowHttpConnections
    set the hilited of button "Allow Http Connections" to tAllowHttpConnections
-
+   
    repeat with i = 1 to the number of groups of group "device capabilities"
       get tSettings["android,device capabilities"][the short name of group i of group "Device Capabilities"]
       if it is "true" then
@@ -124,15 +125,16 @@ on updateSettings
       end if
       set the hilite of button it of group i of group "Device Capabilities" to true
    end repeat
-
+   
    repeat with i = 1 to the number of buttons of group "permissions"
       #get tSettings["android,application permissions"][the short name of button i of group "permissions"]
       #set the hilite of button i of group "permissions" to (it is true)
       get the short name of button i of group "permissions"
       set the hilite of button i of group "permissions" to computeDefault(tSettings["android,application permissions"][it], false)
    end repeat
-
+   
    updateInAppPurchaseSettings
+   unlock screen
 end updateSettings
 
 on updateAndroidSettingState

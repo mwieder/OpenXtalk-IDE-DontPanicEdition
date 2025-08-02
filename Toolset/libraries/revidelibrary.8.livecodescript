@@ -1335,11 +1335,11 @@ end ideExtensionsChanged
 */
 local sSubscriptions
 
-private on __ideAddSubscription pMessage, pCallingObject
+private command __ideAddSubscription pMessage, pCallingObject
    if sSubscriptions[pMessage]["callback targets"] is empty then
       put pCallingObject into sSubscriptions[pMessage]["callback targets"]
    else if pCallingObject is not among the lines of sSubscriptions[pMessage]["callback targets"] then
-      put return & pCallingObject after sSubscriptions[pMessage]["callback targets"]
+      put cr & pCallingObject after sSubscriptions[pMessage]["callback targets"]
    else
       return "Already subscribed"
    end if
@@ -1374,9 +1374,6 @@ Example:
 **/
 on ideSubscribe pMessage, pObjectList
    # Validate input
-#   if not revIDEMessageIsValid?(pMessage) then
-#      return __revIDEError("The message ("&pMessage&") that you are trying to subscribe to is not valid. Please check the documentation for which messages you can subscribe to.")
-#   end if
 
    # Get the log ID of the calling object
    local tCallingObjectID
@@ -1488,11 +1485,6 @@ end revIDESubscriptions
    returns (string): Return delimited list of object ID's, 1 per line.
 **/
 function revIDESubscribedObjects pMessage
-      # Validate input
-#      if not revIDEMessageIsValid?(pMessage) then
-#         return __revIDEError("The message ("&pMessage&") you are enquiring about is not valid. Please check the documentation for which messages you can subscribe to.")
-#      end if
-
       return sSubscriptions[pMessage]["callback targets"]
 end revIDESubscribedObjects
 
@@ -1511,10 +1503,6 @@ function revIDEMessages
       & "ideTutorialProgressChanged,ideWindowsChanged,ideMouseMove,ideDesktopChanged" \
    )
 end revIDEMessages
-
-#private function revIDEMessageIsValid? pMessage
-#      return true
-#end revIDEMessageIsValid?
 
 /**
    Sends the given message to all subscribed objects.
@@ -1538,11 +1526,6 @@ end revIDEMessages
 **/
 on ideMessageSendWithParameters pMessage, pTriggeringObjects, pParamsArray
       lock screen
-
-      # Validate input
-#      if not revIDEMessageIsValid?(pMessage) then
-#         return __revIDEError("The message ("&pMessage&") you have requested to be sent is not a valid IDE message. Please check the documentation for which messages you can subscribe to.")
-#      end if
 
       # If in run mode don't send any updates
       //if the tool is not "pointer tool" then exit ideMessageSendWithParameters
@@ -1600,14 +1583,14 @@ on ideMessageSendWithParameters pMessage, pTriggeringObjects, pParamsArray
             if tErrors is empty then
                put tError into tErrors
             else
-               put return & tError after tErrors
+               put cr & tError after tErrors
             end if
          end try
       end repeat
       unlock screen
 
       if tErrors is not empty then
-         return __revIDEError("Error when sending message" && pMessage & ":" & return & tErrors)
+         return __revIDEError("Error when sending message" && pMessage & ":" & cr & tErrors)
       end if
 
       return empty
@@ -1964,7 +1947,7 @@ end revIDEGraphicTools
          set the itemdel to tab
 
          repeat for each line tLine in tRangeArray
-            replace comma with return in item 2 of tLine
+            replace comma with cr in item 2 of tLine
             put item 2 of tLine into sRangeArray[item 1 of tLine]
          end repeat
       end if
@@ -1979,7 +1962,7 @@ end revIDEGraphicTools
          set the itemdel to tab
 
          repeat for each line tLine in tContinuousArray
-            replace comma with return in item 2 of tLine
+            replace comma with cr in item 2 of tLine
             put item 2 of tLine into sContinuousRangeArray[item 1 of tLine]
          end repeat
       end if
@@ -2063,7 +2046,7 @@ end revIDEGraphicTools
          if tFiltered is empty then
             put tID into tFiltered
          else
-            put return & tID after tFiltered
+            put cr & tID after tFiltered
          end if
       end repeat
       return tFiltered
@@ -2279,37 +2262,37 @@ end revIDEGraphicTools
       end if
    end revIDEDeletePreferenceSet
 
-   /*
-   Gets a preference.
+/*
+Gets a preference.
 
-   pPreferenceName (String): The name of the preference
-   tags: preferences
-   Example: set the textsize of field 1 to revIDEGetPreference("text size")
-   Returns (Any): The value of the preference
-   */
-   function revIDEGetPreference pPreferenceName
-      local tValue
+pPreferenceName (String): The name of the preference
+tags: preferences
+Example: set the textsize of field 1 to revIDEGetPreference("text size")
+Returns (Any): The value of the preference
+*/
+function revIDEGetPreference pPreferenceName
+   local tValue
+   
+   __DevPreference pPreferenceName, tValue
+   
+   if tValue is empty and there is a stack "revPreferences" then
+      put the pPreferenceName of stack "revPreferences" into tValue
+   end if
+   
+   if pPreferenceName is "cScriptEditor,editor,font" and \
+         tValue is empty and \
+         "Source Code Pro" is among the lines of the fontNames then
+      return "Source Code Pro"
+   end if
+   
+   return tValue
+end revIDEGetPreference
 
-      __DevPreference pPreferenceName, tValue
-
-      if tValue is empty and there is a stack "revPreferences" then
-         put the pPreferenceName of stack "revPreferences" into tValue
-      end if
-
-      if pPreferenceName is "cScriptEditor,editor,font" and \
-            tValue is empty and \
-            "Source Code Pro" is among the lines of the fontNames then
-         return "Source Code Pro"
-      end if
-
-      return tValue
-   end revIDEGetPreference
-
-   function revIDEGetPreferenceOfSet pSetName, pPreferenceName
-      local tProps
-      put the customproperties[pSetName] of stack "revpreferences" into tProps
-      return tProps[pPreferenceName]
-   end revIDEGetPreferenceOfSet
+function revIDEGetPreferenceOfSet pSetName, pPreferenceName
+   local tProps
+   put the customproperties[pSetName] of stack "revpreferences" into tProps
+   return tProps[pPreferenceName]
+end revIDEGetPreferenceOfSet
 
    command __DevPreference pPreferenceName, @rValue
       if not revEnvironmentIsInstalled() then
@@ -5435,7 +5418,7 @@ function revIDELastModifiedTimeOfFilesInFolder pFolder, pRecursive?
    if pRecursive? then
       repeat for each line tFolder in the folders
          if tFolder is ".." then next repeat
-         put max(revIDELastModifiedTimeOfFilesInFolder(pFolder & slash & tFolder, pRecursive), tMax) into tMax
+         put max(revIDELastModifiedTimeOfFilesInFolder(pFolder & slash & tFolder, pRecursive?), tMax) into tMax
       end repeat
    end if
    revIDEPopDefaultFolder
@@ -6781,13 +6764,13 @@ Summary: Get the screenLoc for a stack based on the screen the stack is on
 
 Parameters:
 pStackName (string): The name of a stack
-pWorking (boolean): If true return the loc relative to OS screen furniture rather than the full screen
+pWorking? (boolean): If true return the loc relative to OS screen furniture rather than the full screen
 
 Returns: The screenLoc of the screen the stack is on
 */
-function revIDEStackScreenLoc pStackName, pWorking
+function revIDEStackScreenLoc pStackName, pWorking?
    local tScreenRect
-   put revIDEStackScreenRect(pStackName, pWorking) into tScreenRect
+   put revIDEStackScreenRect(pStackName, pWorking?) into tScreenRect
 
    local tScreenWidth
    put item 3 of tScreenRect - item 1 of tScreenRect into tScreenWidth
@@ -6803,13 +6786,13 @@ Summary: Get the screenRect for a stack based on the screen the stack is on
 
 Parameters:
 pStackName (string): The name of a stack
-pWorking (boolean): If true return the loc relative to OS screen furniture rather than the full screen
+pWorking? (boolean): If true return the loc relative to OS screen furniture rather than the full screen
 
 Returns: The screenRect of the screen the stack is on
 */
-function revIDEStackScreenRect pStackName, pWorking
+function revIDEStackScreenRect pStackName, pWorking?
    local tRect
-   if pWorking then
+   if pWorking? then
       put line (the screen of stack pStackName) of the working screenRects into tRect
    else
       put line (the screen of stack pStackName) of the screenRects into tRect

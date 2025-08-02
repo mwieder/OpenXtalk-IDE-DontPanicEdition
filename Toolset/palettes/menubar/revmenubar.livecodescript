@@ -862,18 +862,18 @@ on tApplyGridSetting
    end if
 end tApplyGridSetting
 
-constant kCLOSETHESESTACKS = "revOnlineLibrary,revExtensionBuilder,revExtensionBuilderBehavior,revGeneralPatterns"
-on tTidyUpStacks
-   -- close off stacks that are no longer needed
-   set the itemDelimiter to ","
+--constant kCLOSETHESESTACKS = "revOnlineLibrary,revExtensionBuilder,revExtensionBuilderBehavior,revGeneralPatterns"
+--on tTidyUpStacks
+--   -- close off stacks that are no longer needed
+--   set the itemDelimiter to ","
 
-   repeat for each item tClose in kCLOSETHESESTACKS
-      if there is a stack tClose then
-         set the destroyStack of stack tClose to true # remove from memory
-         close stack tClose
-      end if
-   end repeat
-end tTidyUpStacks
+--   repeat for each item tClose in kCLOSETHESESTACKS
+--      if there is a stack tClose then
+--         set the destroyStack of stack tClose to true # remove from memory
+--         close stack tClose
+--      end if
+--   end repeat
+--end tTidyUpStacks
 
 on hConditionalDataGrid
    local tCloseTheseStacks
@@ -1012,7 +1012,8 @@ on tMenuBar_WDdecorations
    set the top of this stack to tOldTop
    set the left of this stack to tOldLeft
    try
-      dispatch "tApplyMBCardScript" to this stack
+#      dispatch "tApplyMBCardScript" to this stack
+      tApplyMBCardScript
       send "hSetMBOffsets" to card 1 of this stack in 1 milliseconds
    catch e
    end try
@@ -1180,8 +1181,8 @@ private command updateButtonHilite pTargetName, pValue
    unlock screen
 end updateButtonHilite
 
-private command setToolbarButtonState pName, pValue
-   set the enabled of button pName of group "toolbar" of me to pValue
+private command setToolbarButtonState pName, pIsEnabled?
+   set the enabled of button pName of group "toolbar" of me to pIsEnabled?
 end setToolbarButtonState
 
 local sToolbarHighlight
@@ -1283,7 +1284,7 @@ private function menubar.ButtonNameToIconPath pName, pStyle
 end menubar.ButtonNameToIconPath
 
 private function menubar.ButtonText pName, pHilited
-   if pHIlited is false then
+   if pHilited is false then
       return pName
    end if
 
@@ -2264,7 +2265,7 @@ private function menubar.HelpMenu pContext
    put "-" & cr after tHelp
    put "Check For Updates/|Update" & cr after tHelp
    put "-" & cr after tHelp
-   put "About LiveCode/|About" after tHelp
+   put "About" after tHelp
 
    return modifyMenu("Help", tHelp)
 end menubar.HelpMenu
@@ -2273,7 +2274,7 @@ end menubar.HelpMenu
 
 private function menubar.ViewMenu pContext
    global gREVPalettes, gREVShowStacks
-   
+
    local tView
    put enableMenuItem("Go &First/1", the mode of the topStack is 1) & cr after tView
    put enableMenuItem("Go Pre&v/2", the mode of the topStack is 1) & cr after tView
@@ -2292,7 +2293,7 @@ private function menubar.ViewMenu pContext
    put toggleMenuItem("Show IDE Stacks In Lists", gREVShowStacks) & cr after tView
    put "-" & cr after tView
    put toggleMenuItem("Show &Invisible Objects" , the showInvisibles) & cr after tView
-   
+
    put "-" & cr after tView
    local tDis
    if the platform contains "linux" then
@@ -2309,7 +2310,7 @@ private function menubar.ViewMenu pContext
    put tab & "-" & cr after tView
    put tab & "Ignore default IDE theme in this stack" & cr after tView
    tApplyGridSetting -- tperry (make sure grid checkbox is correct in menu 21-1-24)
-   
+
    return modifyMenu("View", tView)
 end menubar.ViewMenu
 
@@ -2333,8 +2334,8 @@ end tApplyGridSetting
 private function menubar.DevelopmentMenu pContext
    global gREVSuppressErrors, gREVSuppressMessages
 
-   local tIsUserTarget
-   put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
+   local tIsUserTarget?
+   put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget?
 
    local tDevelopment
    put "Object Library" & cr after tDevelopment
@@ -2353,9 +2354,9 @@ private function menubar.DevelopmentMenu pContext
       local tProfiler
       put the long id of stack "com.livecode.library.scriptprofiler" into tProfiler
       if tProfiler is among the lines of the backScripts then
-         put enableMenuItem("Start Profiling Scripts", tIsUserTarget) & cr after tDevelopment
+         put enableMenuItem("Start Profiling Scripts", tIsUserTarget?) & cr after tDevelopment
       else
-         put enableMenuItem("Stop Profiling Scripts...", tIsUserTarget) & cr after tDevelopment
+         put enableMenuItem("Stop Profiling Scripts...", tIsUserTarget?) & cr after tDevelopment
       end if
       put "-" & cr after tDevelopment
    end if
@@ -3589,25 +3590,32 @@ private command menubar.HelpMenu.Pick pWhich
          revIDEDocumentationLoad "API", "LiveCode Script"
          break
       case "Start Center"
-      case "Welcome"
+      case "User Guide"
+--
+#      case "Welcome"
       case "About"
          revIDEOpenPalette tPick
          break
       case "Buy"
-      case "Support"
-      case "User Guide"
-      case "License Agreement"
+--
       case "Release Notes"
+      case "License Agreement"
+--
+      case "Support"
+--
       case "Sample Stacks"
       case "Sample Scripts"
+--
       case "Beginners Guide"
       case "Tutorials"
+--
       case "Forums"
       case "Technical Questions"
       case "Discussion List"
       case "Newsletters"
          revIDELaunchResource tPick
          break
+--
       case "All Guides"
          revIDEOpenPalette "guide"
          break
@@ -3847,7 +3855,7 @@ on tIgnoreThemingInThisStack
    end if
 end tIgnoreThemingInThisStack
 
-on tApplyMBCardScript
+private command tApplyMBCardScript
    local tNewCardScript
    -- set the script on the card because livecodescript files don't store card scripts on save
    put "on movestack" & cr &¬
