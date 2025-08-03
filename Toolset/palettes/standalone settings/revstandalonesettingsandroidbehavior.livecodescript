@@ -66,6 +66,9 @@ on updateSettings
    
    set the text of field "Label" to computeDefault(tSettings["android,label"], tSettings["name"])
    
+   local tIdentifier
+   #put standAloneSetting("android,identifier", tSettings) into tIdentifier
+   
    put computeDefault(tSettings["android,identifier"], "com.yourcompany.yourapp") into field "Identifier"
    put computeDefault(tSettings["android,version name"], "1.0.0") into field "Version Name"
    put computeDefault(tSettings["android,version code"], "1") into field "Version Code"

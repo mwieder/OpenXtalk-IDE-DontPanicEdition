@@ -22,6 +22,7 @@ on preOpenStack
 end preOpenStack
 
 on closeStackRequest
+   cleanPalettes
    revIDEQuit
 end closeStackRequest
 

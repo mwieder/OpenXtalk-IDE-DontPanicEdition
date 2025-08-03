@@ -3530,6 +3530,19 @@ private command themeWindowTitles.Mac.Light
    end if
 end themeWindowTitles.Mac.Light
 
+command cleanPalettes
+   # clean up the palette_rect_/tmp* properties of the Preferences stack
+   local tPrefList, tKeys
+   put the customProperties of stack "revPreferences" into tPrefList
+   put the keys of tPrefList into tKeys
+   filter tKeys with "palette_rect_/tmp*"
+   repeat for each line tPref in tKeys
+      delete variable tPreflist[tPref]
+   end repeat
+   set the customProperties of stack "revPreferences" to tPrefList
+   save stack "revPreferences"
+end cleanPalettes
+
 function q pText
    return quote & pText & quote
 end q

@@ -1,4 +1,41 @@
 ﻿script "revStandaloneSettingsBehavior"
+
+------------------------------
+# all standalone settings get vectored through these handlers
+------------------------------
+
+/**
+* getSettings
+*
+* Return the entire standalonesettings custompropertyset
+*/
+function getSettings
+   return the customProperties["cRevStandaloneSettings"] of getTargetStack()
+end getSettings
+
+/**
+* setSettings
+*
+* Set the entire standalonesettings custompropertyset
+*/
+command setSettings pSettings
+   set the customProperties["cRevStandaloneSettings"] of getTargetStack() to pSettings
+   revSetEdit
+end setSettings
+
+function getSetting pKey
+   local tSettingsArray
+   put getSettings() into tSettingsArray
+   return tSettingsArray[pKey]
+end getSetting
+
+command setSetting pKey, pValue
+   set the cRevStandaloneSettings[pKey] of getTargetStack() to pValue
+   revSetEdit
+end setSetting
+
+------------------------------
+
 on preOpenStack
    --local tLicenseType
 
@@ -15,15 +52,13 @@ on preOpenStack
    --updateCardSize
 
    navigateToCard "General"
-   repeat with X=1 to the number of btns of group "cards"
+   repeat with X=1 to the number of buttons of group "cards"
       set the style of button X of group "cards" to "rectangle"
       set the showBorder of button X of group "cards" to false
    end repeat
    helpButtons
 
-   if not isMacEngineFat?() then
-      hide button "MacOSX arm64" of card "OS X"
-   else
+   if isMacEngineFat?() then
       show button "MacOSX arm64" of card "OS X"
 
       /* Building for arm64 is not supported on macOS < 10.13 as codesign does
@@ -33,6 +68,8 @@ on preOpenStack
          set the disabled of button "MacOSX arm64" of card "OS X" to true
       end if
       set the itemDelimiter to comma
+   else
+      hide button "MacOSX arm64" of card "OS X"
    end if
 end preOpenStack
 
@@ -40,6 +77,8 @@ constant kButtonList = "General,Stacks,Copy Files,Inclusions,OS X,Windows,Unix,i
 private command updateTabButtons pSettings
    local tEnableMacTick
    put false into tEnableMacTick
+
+   lock screen
    repeat for each item tItem in "MacOSX,MacOSX PowerPC-32,MacOSX x86-32,MacOSX x86-64"
       put tEnableMacTick or pSettings[tItem] into tEnableMacTick
    end repeat
@@ -98,6 +137,7 @@ private command updateTabButtons pSettings
    set the enabled of button "iOS" of group "cards" of me to true
    set the enabled of button "Android" of group "cards" of me to true
    set the enabled of button "Emscripten" of group "cards" of me to true
+   unlock screen
 end updateTabButtons
 
 on buildForEnabled pPlatform
@@ -108,6 +148,8 @@ end buildForEnabled
 
 on helpButtons
   local tShowBorder,tIcon,tHiliteIcon,tShowName
+
+  lock screen
   if the platform is "MacOS" then
     put true into tShowBorder
     put 0 into tIcon
@@ -134,6 +176,7 @@ on helpButtons
       end if
     end repeat
   end repeat
+  unlock screen
 end helpButtons
 
 on revStandaloneSettings pStack
@@ -341,25 +384,6 @@ function getTargetStackName
    return the cRevTargetStack of me
 end getTargetStackName
 
-function getSettings
-   return the customProperties["cRevStandaloneSettings"] of getTargetStack()
-end getSettings
-
-function getSetting pKey
-   get getSettings()
-   return it[pKey]
-end getSetting
-
-command setSettings pSettings
-   set the customProperties["cRevStandaloneSettings"] of getTargetStack() to pSettings
-   revSetEdit
-end setSettings
-
-command setSetting pKey, pValue
-   set the cRevStandaloneSettings[pKey] of getTargetStack() to pValue
-   revSetEdit
-end setSetting
-
 function updateIncludeStackFilesList pIncludeList, pPrev
    local tInclude, tMainStack, tChars, tPath
    put line 1 of pPrev into tMainStack
@@ -546,7 +570,7 @@ command setStandaloneName pName
       put item 1 to -2 of pName into pName
    end if
 
-   if revFolderNameIsIllegal(pName) then
+   if folderNameIsIllegal?(pName) then
       put revFolderNameMakeLegal(pName) into pName
    end if
 
