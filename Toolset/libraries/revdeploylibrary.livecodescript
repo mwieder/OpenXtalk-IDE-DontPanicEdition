@@ -166,34 +166,6 @@ function revIDEDeployGetTarget
    return empty
 end revIDEDeployGetTarget
 
--- This method returns true if deployment is possible with the given platform to the
--- current top stack
---function IDEDeployIsPossible? pPlatform
---   if the mode of the topStack is not 1 then
---      return false
---   end if
-
---   local tStack
---   put the mainStack of the topStack into tStack
-
---   if the cRevStandaloneSettings[pPlatform] of stack tStack then
---      return true
---   end if
-
---   if there is a stack ("revDeployLibrary" & pPlatform) then
---      dispatch function "deployListTargets" to stack ("revDeployLibrary" & pPlatform) 
---      if it is not "unhandled" and the result is not empty then
---         repeat for each line tTarget in the result
---            if the cRevStandaloneSettings[tTarget] of stack tStack then
---               return true
---            end if
---         end repeat
---      end if
---   end if
-
---   return false
---end IDEDeployIsPossible?
-
 -- This method is called on startup to initialize the deployment library. This includes
 -- attempting to auto-configure any SDKs and such if necessary.
 command revIDEDeployInitialize

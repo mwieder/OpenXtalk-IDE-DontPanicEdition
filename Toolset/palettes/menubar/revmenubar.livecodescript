@@ -3459,7 +3459,7 @@ private command menubar.DevelopmentMenu.Pick pWhich
    local tWhich
    set the itemDelimiter to "|"
    put item 1 of pWhich into tWhich
-
+   
    switch tWhich
       case "Message Watcher"
          revIDEOpenPalette "message watcher"
@@ -3475,6 +3475,7 @@ private command menubar.DevelopmentMenu.Pick pWhich
       case "Suspend Development Tools"
          revIDESuspendDevelopmentTools
          break
+      case "Test"
       case "Simulate"
          revIDEDeployAction
          break

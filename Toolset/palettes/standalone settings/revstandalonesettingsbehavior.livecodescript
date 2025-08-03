@@ -37,30 +37,27 @@ end setSetting
 ------------------------------
 
 on preOpenStack
-   --local tLicenseType
-
+   lock screen
    start using stack "revSaveAsStandalone"
-
+   
    if getTargetStackName() is not among the lines of the mainStacks then
       revStandaloneSettings the mainStack of the topStack
    end if
-
+   
    repeat with X=1 to the number of buttons of group "flavors" of card "Unix"
       set the enabled of button X of group "flavors" of card "Unix" to true
    end repeat
-
-   --updateCardSize
-
+   
    navigateToCard "General"
    repeat with X=1 to the number of buttons of group "cards"
       set the style of button X of group "cards" to "rectangle"
       set the showBorder of button X of group "cards" to false
    end repeat
    helpButtons
-
-   if isMacEngineFat?() then
+   
+   if MacEngineIsFat?() then
       show button "MacOSX arm64" of card "OS X"
-
+      
       /* Building for arm64 is not supported on macOS < 10.13 as codesign does
       * not have the required support for the arm64 slice. */
       set the itemDelimiter to "."
@@ -71,49 +68,60 @@ on preOpenStack
    else
       hide button "MacOSX arm64" of card "OS X"
    end if
+   unlock screen
 end preOpenStack
 
 constant kButtonList = "General,Stacks,Copy Files,Inclusions,OS X,Windows,Unix,iOS,Android,Emscripten,Bug Reports"
+constant kMacPlatforms = "MacOSX,MacOSX PowerPC-32,MacOSX x86-32,MacOSX x86-64,MacOSX arm64"
+constant kWindowsPlatforms = "Windows,Windows x86-64"
+constant kLinuxPlatforms = "Linux,Linux x64,Linux ARMv6-hf,Linux ARM64"
+constant kWebPlatforms = "EmscriptenJS,EmscriptenWASM"
 private command updateTabButtons pSettings
-   local tEnableMacTick
-   put false into tEnableMacTick
-
+   local tEnableTick?
+   
    lock screen
-   repeat for each item tItem in "MacOSX,MacOSX PowerPC-32,MacOSX x86-32,MacOSX x86-64"
-      put tEnableMacTick or pSettings[tItem] into tEnableMacTick
-   end repeat
-   set the visible of button "OSXchecked" of group "checks" of me to tEnableMacTick
-
-   set the visible of button "Windowschecked" of group "checks" of me to pSettings["Windows"] = true or \
-         pSettings["Windows x86-64"] = true
-   // SN-2015-01-13: [[ Bug 14373 ]] Check also if Linux 64 or Linux ARM are checked
-   set the visible of button "UnixChecked" of group "checks" of me to pSettings["Linux"] = true \
-         or pSettings["Linux x64"] = true \
-         or pSettings["Linux ARMv6-HF"] = true
-   set the visible of button "IosChecked" of group "checks" of me to pSettings["ios"] = true
-   set the visible of button "AndroidChecked" of group "checks" of me to pSettings["android"] = true
-   set the visible of button "BugsChecked" of group "checks" of me to pSettings["errorDialog"] = true
-   set the visible of button "EmscriptenChecked" of group "checks" of me to \
-         pSettings["EmscriptenJS"] = true or pSettings["EmscriptenWASM"] = true
-
-   repeat for each item tItem in "SolIntel,SolSparc,Iris,Odt,rs6000,Linux,Bsd,Hp9k700,SPARC"
+   put false into tEnableTick?
+   repeat for each item tItem in kMacPlatforms
       if pSettings[tItem] then
-         set the visible of button "Unixchecked" of group "checks" of me to true
+         put true into tEnableTick?
          exit repeat
       end if
    end repeat
-
-   show button "Windows" of group "cards" of me
-   show button "OS X" of group "cards" of me
-   show button "Bug Reports" of group "cards" of me
-   show button "Copy Files" of group "cards" of me
-   show button "Unix" of group "cards" of me
-   show button "iOS" of group "cards" of me
-   show button "Emscripten" of group "cards" of me
-
+   set the visible of button "OSXchecked" of group "checks" of me to tEnableTick?
+   
+   put false into tEnableTick?
+   repeat for each item tItem in kWindowsPlatforms
+      if pSettings[tItem] then
+         put true into tEnableTick?
+         exit repeat
+      end if
+   end repeat
+   set the visible of button "Windowschecked" of group "checks" of me to tEnableTick?
+   
+   put false into tEnableTick?
+   repeat for each item tItem in kLinuxPlatforms
+      if pSettings[tItem] then
+         put true into tEnableTick?
+         exit repeat
+      end if
+   end repeat
+   set the visible of button "UnixChecked" of group "checks" of me to tEnableTick?
+   
+   set the visible of button "IosChecked" of group "checks" of me to pSettings["ios"] = true
+   set the visible of button "AndroidChecked" of group "checks" of me to pSettings["android"] = true
+   set the visible of button "BugsChecked" of group "checks" of me to pSettings["errorDialog"] = true
+   put false into tEnableTick?
+   repeat for each item tItem in kWebPlatforms
+      if pSettings[tItem] then
+         put true into tEnableTick?
+         exit repeat
+      end if
+   end repeat
+   set the visible of button "EmscriptenChecked" of group "checks" of me to tEnableTick?
+   
    local tLeft
    put 0 into tLeft
-
+   
    local tV
    put item 2 of the loc of button "OS X" of group "cards" of me -10 into tV
    repeat for each item tItem in kButtonList
@@ -121,7 +129,7 @@ private command updateTabButtons pSettings
          set the left of button tItem of group "cards" of me to tLeft
          put the right of button tItem of group "cards" of me into tLeft
       end if
-
+      
       local tCheck
       put replaceText(tItem," ","")&"checked" into tCheck
       if there is a button tCheck of group "checks" of me then
@@ -129,16 +137,16 @@ private command updateTabButtons pSettings
          put (item 1 of the loc of button tItem of group "cards" of me),tV into tTopLeft
          set the topLeft of button tCheck of group "checks" of me to tTopLeft
       end if
+      enableButton tItem
    end repeat
-
-   set the enabled of button "OS X" of group "cards" of me to true
-   set the enabled of button "Windows" of group "cards" of me to true
-   set the enabled of button "Unix" of group "cards" of me to true
-   set the enabled of button "iOS" of group "cards" of me to true
-   set the enabled of button "Android" of group "cards" of me to true
-   set the enabled of button "Emscripten" of group "cards" of me to true
+   
    unlock screen
 end updateTabButtons
+
+private command enableButton pWhichButton
+   set the enabled of button pWhichButton of group "cards" of me to true
+   set the visible of button pWhichButton of group "cards" of me to true
+end enableButton
 
 on buildForEnabled pPlatform
    local tSettings
@@ -146,37 +154,38 @@ on buildForEnabled pPlatform
    updateTabButtons tSettings
 end buildForEnabled
 
-on helpButtons
-  local tShowBorder,tIcon,tHiliteIcon,tShowName
-
-  lock screen
-  if the platform is "MacOS" then
-    put true into tShowBorder
-    put 0 into tIcon
-    put 0 into tHiliteIcon
-    put true into tShowName
-  else
-    put false into tShowBorder
-    put 202009 into tIcon
-    put 202010 into tHiliteIcon
-    put false into tShowName
-  end if
-  repeat with tCard =1 to the number of cards
-    repeat with tBtn = 1 to the number of buttons of card tCard
-      if the short name of button tBtn of card tCard = "help" then
-        set the margins of button tBtn of card tCard to 4
-        set the hiliteBorder of button tBtn of card tCard to false
-        set the showBorder of button tBtn of card tCard to tShowBorder
-        set the icon of button tBtn of card tCard to tIcon
-        set the hilitedIcon of button tBtn of card tCard to tHiliteIcon
-        set the showName of button tBtn of card tCard to tShowName
-        set the textFont of button tBtn of card tCard to ""
-        set the textSize of button tBtn of card tCard to 14
-        set the textStyle of button tBtn of card tCard to "bold"
-      end if
-    end repeat
-  end repeat
-  unlock screen
+private command helpButtons
+   local tShowBorder,tIcon,tHiliteIcon,tShowName
+   
+   lock screen
+   if the platform is "MacOS" then
+      put true into tShowBorder
+      put 0 into tIcon
+      put 0 into tHiliteIcon
+      put true into tShowName
+   else
+      put false into tShowBorder
+      put 202009 into tIcon
+      put 202010 into tHiliteIcon
+      put false into tShowName
+   end if
+   repeat for each line tCardID in the cardIDs of this stack
+      --repeat with tCard =1 to the number of cards
+      repeat with tBtn = 1 to the number of buttons of card id tCardID
+         if the short name of button tBtn of card id tCardID = "help" then
+            set the margins of button tBtn of card id tCardID to 4
+            set the hiliteBorder of button tBtn of card id tCardID to false
+            set the showBorder of button tBtn of card id tCardID to tShowBorder
+            set the icon of button tBtn of card id tCardID to tIcon
+            set the hilitedIcon of button tBtn of card id tCardID to tHiliteIcon
+            set the showName of button tBtn of card id tCardID to tShowName
+            set the textFont of button tBtn of card id tCardID to ""
+            set the textSize of button tBtn of card id tCardID to 14
+            set the textStyle of button tBtn of card id tCardID to "bold"
+         end if
+      end repeat
+   end repeat
+   unlock screen
 end helpButtons
 
 on revStandaloneSettings pStack
@@ -195,7 +204,7 @@ on revStandaloneSettings pStack
       end if
    end if
    set the cRevTargetStack of stack "revStandaloneSettings" to pStack
-
+   
    local tSettings
    put getSettings() into tSettings
    dispatch "SBDefaultStandaloneSettings" to stack "revStandaloneSettings" with pStack, tSettings
@@ -252,14 +261,14 @@ end resumeStack
 # Description
 #   Returns the folder containing the current target stack
 function utilityTargetStackPath
-  set the itemDelimiter to slash
-  return item 1 to -2 of the filename of stack (the cRevTargetStack of me) & slash
+   set the itemDelimiter to slash
+   return item 1 to -2 of the filename of stack (the cRevTargetStack of me) & slash
 end utilityTargetStackPath
 
 command layoutCardsGroup
    local tX
    put 2 into tX
-
+   
    local tNumButtons
    put the number of buttons of group "cards" into tNumButtons
    repeat with i = 1 to tNumButtons
@@ -287,25 +296,27 @@ function validateIdentifier pIdentifier
    return matchText(pIdentifier, "(?i)^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$")
 end validateIdentifier
 
-on revUpdateStandaloneProgress pMessage
-   lock screen
-   put pMessage into field 1 of stack "revStandaloneProgress"
-   if the mode of stack "revStandaloneProgress" is 0 then
-      lock messages
-      modeless "revStandaloneProgress"
-      set the loc of stack "revStandaloneProgress" to the screenLoc
-      unlock messages
-   end if
-   unlock screen
-   wait 0 ticks with messages -- allow for progress update
-end revUpdateStandaloneProgress
+# ??? not used? mdw 2025.08.03
+--on revUpdateStandaloneProgress pMessage
+--   lock screen
+--   put pMessage into field 1 of stack "revStandaloneProgress"
+--   if the mode of stack "revStandaloneProgress" is 0 then
+--      lock messages
+--      modeless "revStandaloneProgress"
+--      set the loc of stack "revStandaloneProgress" to the screenLoc
+--      unlock messages
+--   end if
+--   unlock screen
+--   wait 0 ticks with messages -- allow for progress update
+--end revUpdateStandaloneProgress
 
-command revConfirmInclusion pName, @rInclude, @rSilenceWarning
-   set the cInclusion of stack "revStandaloneInclusionWarning" to pName
-   modal stack "revStandaloneInclusionWarning"
-   put the cInclude of stack "revStandaloneInclusionWarning" into rInclude
-   put the cSilenceWarning of stack "revStandaloneInclusionWarning" into rSilenceWarning
-end revConfirmInclusion
+# ??? not used? mdw 2025.08.03
+--command revConfirmInclusion pName, @rInclude, @rSilenceWarning
+--   set the cInclusion of stack "revStandaloneInclusionWarning" to pName
+--   modal stack "revStandaloneInclusionWarning"
+--   put the cInclude of stack "revStandaloneInclusionWarning" into rInclude
+--   put the cSilenceWarning of stack "revStandaloneInclusionWarning" into rSilenceWarning
+--end revConfirmInclusion
 
 function selectImageFile pDimensions
    local tFile
@@ -314,14 +325,14 @@ function selectImageFile pDimensions
    if tFile is empty then
       return empty
    end if
-
+   
    if pDimensions is not empty then
       if getImageDimensions(tFile) is not pDimensions then
          answer warning "Image is not of the required dimensions (" & pDimensions & ")"
          --exit chooseImageFileWithDimension
       end if
    end if
-
+   
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectImageFile
 
@@ -333,7 +344,7 @@ function selectAdaptiveIconsResFolder
    if tResourcesFolder is empty then
       return empty
    end if
-
+   
    return utilityMakePathRelative(tResourcesFolder, utilityTargetStackPath())
 end selectAdaptiveIconsResFolder
 
@@ -344,7 +355,7 @@ function selectFontMapFile
    if tFile is empty then
       return empty
    end if
-
+   
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectFontMapFile
 
@@ -355,7 +366,7 @@ function selectKeyStoreFile
    if tFile is empty then
       return empty
    end if
-
+   
    return utilityMakePathRelative(tFile, utilityTargetStackPath())
 end selectKeyStoreFile
 
@@ -408,55 +419,58 @@ function updateIncludeStackFilesList pIncludeList, pPrev
          answer error "File "&tInclude&" is not a stack!"
       end if
    end repeat
-
+   
    local tStackFiles
    revSBRelativeStackFilesList getTargetStackName(), tStackFiles
    return tStackFiles
 end updateIncludeStackFilesList
 
-on revRecursiveRemoveStackFiles pStack,pRemoveList, @xStackFileList
-  local tNewStackFiles,tRef,tStack,tOldStackFiles
-
-  put the stackFiles of stack pStack into tOldStackFiles
-  repeat for each line tRef in the stackFiles of stack pStack
-    if there is a stack item 1 of tRef then
-      if the effective fileName of stack item 1 of tRef is not among the lines of pRemoveList then
-        put tRef&cr after tNewStackFiles
-        if the effective fileName of stack item 1 of tRef is not among the lines of xStackFileList then
-          put the effective fileName of stack item 1 of tRef & cr after xStackFileList
-          revRecursiveRemoveStackFiles the effective fileName of stack item 1 of tRef,pRemoveList,xStackFileList
-        end if
-      end if
-    end if
-  end repeat
-  delete char -1 of tNewStackFiles
-  if tNewStackFiles <> tOldStackFiles then
-    set the stackFiles of stack pStack to tNewStackFiles
-    revSetEdit the short name of stack pStack
-  end if
-
-  put empty into tNewStackFiles
-  repeat for each line tStack in the substacks of stack pStack
-    put the stackFiles of stack pStack into tOldStackFiles
-    repeat for each line tRef in the stackFiles of stack tStack of stack pStack
+on recursiveRemoveStackFiles pStack, pRemoveList, @xStackFileList
+   local tNewStackFiles, tRef, tStack, tOldStackFiles
+   local tFileName
+   
+   put the stackFiles of stack pStack into tOldStackFiles
+   repeat for each line tRef in the stackFiles of stack pStack
       if there is a stack item 1 of tRef then
-        if the effective fileName of stack item 1 of tRef is not among the lines of pRemoveList then
-          put tRef&cr after tNewStackFiles
-          if the effective fileName of stack item 1 of tRef is not among the lines of xStackFileList then
-            put the effective fileName of stack item 1 of tRef & cr after xStackFileList
-            revRecursiveRemoveStackFiles the effective fileName of stack item 1 of tRef,pRemoveList,xStackFileList
-          end if
-        end if
+         put the effective fileName of stack item 1 of tRef into tFileName
+         if tFileName is not among the lines of pRemoveList then
+            put tRef&cr after tNewStackFiles
+            if tFileName is not among the lines of xStackFileList then
+               put tFileName & cr after xStackFileList
+               recursiveRemoveStackFiles tFileName, pRemoveList, xStackFileList
+            end if
+         end if
       end if
-    end repeat # for each line tRef
-    delete char -1 of tNewStackFiles
-    if tNewStackFiles <> tOldStackFiles then
-      set the stackFiles of stack tStack of stack pStack to tNewStackFiles
-      revSetEdit the mainstack of stack tStack
-    end if
-    put empty into tNewStackFiles
-  end repeat # for each line tStack
-end revRecursiveRemoveStackFiles
+   end repeat
+   delete char -1 of tNewStackFiles
+   if tNewStackFiles <> tOldStackFiles then
+      set the stackFiles of stack pStack to tNewStackFiles
+      revSetEdit the short name of stack pStack
+   end if
+   
+   put empty into tNewStackFiles
+   repeat for each line tStack in the substacks of stack pStack
+      put the stackFiles of stack pStack into tOldStackFiles
+      repeat for each line tRef in the stackFiles of stack tStack of stack pStack
+         if there is a stack item 1 of tRef then
+            put the effective fileName of stack item 1 of tRef into tFileName
+            if tFileName is not among the lines of pRemoveList then
+               put tRef&cr after tNewStackFiles
+               if tFileName is not among the lines of xStackFileList then
+                  put tFileName & cr after xStackFileList
+                  recursiveRemoveStackFiles tFileName, pRemoveList, xStackFileList
+               end if
+            end if
+         end if
+      end repeat # for each line tRef
+      delete char -1 of tNewStackFiles
+      if tNewStackFiles <> tOldStackFiles then
+         set the stackFiles of stack tStack of stack pStack to tNewStackFiles
+         revSetEdit the mainstack of stack tStack
+      end if
+      put empty into tNewStackFiles
+   end repeat # for each line tStack
+end recursiveRemoveStackFiles
 
 on navigateToCard pCardName
    if the short name of this card is "Android" then
@@ -464,10 +478,10 @@ on navigateToCard pCardName
          exit navigateToCard
       end if
    end if
-
+   
    lock screen
    go cd pCardName
-
+   
    repeat with X=1 to the number of btns of group "cards" of me
       if the short name of btn X of group "cards" of me <> pCardName then
          set the textStyle of btn X of group "cards" of me to "plain"
@@ -493,8 +507,9 @@ end updateLabel
 function androidIdentifierValid
    // Check identifier
    local tIdentifier
+   lock screen
    put field "identifier" of card "Android" into tIdentifier
-
+   unlock screen
    if not validateIdentifier(tIdentifier) then
       local tError
       put "Invalid Android identifier. The identifier can contain any number" & \
@@ -506,7 +521,7 @@ function androidIdentifierValid
       send "selectIdentifier" to card "Android" in 0 milliseconds
       return false
    end if
-
+   
    return true
 end androidIdentifierValid
 
@@ -521,12 +536,12 @@ private command addProfilesToList pTarget, @xList
    addToListIfNotEmpty the cREVGeneral["masterName"] of pTarget, xList
 end addProfilesToList
 
-function revGetPropertyProfilesList
-   local tLine,tStackNames,tStack,tCard,tControl,tFinalList,tProfilesList
-
-    local tStackFiles
+function SBPropertyProfilesList
+   local tLine,tStackNames,tStack,tControl,tFinalList,tProfilesList
+   
+   local tStackFiles
    revSBStackFilesList getTargetStackName(), tStackFiles
-
+   
    repeat for each line tLine in tStackFiles
       put the mainStack of stack tLine into tStackNames
       put cr & the subStacks of stack tStackNames after tStackNames
@@ -534,24 +549,26 @@ function revGetPropertyProfilesList
       repeat for each line tStack in tStackNames
          --stack properties here
          addProfilesToList the long id of stack tStack, tProfilesList
-         repeat with tCard = 1 to the number of cds in stack tStack
+         repeat for each line tCardID in the cardIDs of stack tStack
+            --repeat with tCard = 1 to the number of cds in stack tStack
             --card properties here
-            addProfilesToList the long id of card tCard of stack tStack
-            repeat with tControl = 1 to the number of controls on cd tCard of stack tStack
-               addProfilesToList the long id of control tControl of cd tCard of stack tStack
+            addProfilesToList the long id of card id tCardID of stack tStack
+            repeat with tControl = 1 to the number of controls on card id tCardID of stack tStack
+               addProfilesToList the long id of control tControl of card id tCardID of stack tStack
             end repeat
          end repeat
       end repeat
    end repeat
    unlock messages
+   filter tProfilesList without empty
    repeat for each line tLine in tProfilesList
-      if tLine is empty then next repeat
+      --if tLine is empty then next repeat
       if tLine is not among the lines of tFinalList then
          put tLine into line (the number of lines in tFinalList)+1 of tFinalList
       end if
    end repeat
    return tFinalList
-end revGetPropertyProfilesList
+end SBPropertyProfilesList
 
 function selectStandaloneBuildFolder
    local tFolder
@@ -569,15 +586,15 @@ command setStandaloneName pName
    if item -1 of pName is among the items of "exe.app" then
       put item 1 to -2 of pName into pName
    end if
-
+   
    if folderNameIsIllegal?(pName) then
       put revFolderNameMakeLegal(pName) into pName
    end if
-
+   
    setSetting "name", pName
 end setStandaloneName
 
-function revRelativePath pPath
+function relativePathOf pPath
    local tMainstackPath,tChars
    set the itemDel to "/"
    put item 1 to -2 of the effective filename of getTargetStack() & "/" into tMainStackPath
@@ -586,7 +603,7 @@ function revRelativePath pPath
       delete char 1 to tChars of pPath
    end if
    return pPath
-end revRelativePath
+end relativePathOf
 
 function canIncludeStackFiles
    local tCan
@@ -599,9 +616,9 @@ function canIncludeStackFiles
    return tCan
 end canIncludeStackFiles
 
-local sIsMacEngineFat?
-private function isMacEngineFat?
-   if sIsMacEngineFat? is not empty then
+local sMacEngineIsFat?
+private function MacEngineIsFat?
+   if sMacEngineIsFat? is not empty then
 
       /* Get the path to the engine used to build for macOS */
       local tPath
@@ -623,13 +640,13 @@ private function isMacEngineFat?
       switch tHeaderHex
          case "bebafeca"
          case "cafebabe"
-            put true into sIsMacEngineFat?
+            put true into sMacEngineIsFat?
             break
          default
-            put false into sIsMacEngineFat?
+            put false into sMacEngineIsFat?
             break
       end switch
    end if
 
-   return sIsMacEngineFat?
-end isMacEngineFat?
+   return sMacEngineIsFat?
+end MacEngineIsFat?

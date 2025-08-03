@@ -1,17 +1,19 @@
 ﻿script "revStandaloneSettingsStacksBehavior"
 on preOpenCard
    lock messages
-
+   
    local tEnabled?, tPlatform
    put canIncludeStackFiles() into tEnabled?
    set the enabled of group "Basic Options" to tEnabled?
    set the enabled of group "Advanced Options" to tEnabled?
-
+   
    -- Disable the stack encryption options in Community edition
-   put (tEnabled? and revEnvironmentEditionProperty("password_protection")) into tEnabled?
-   set the enabled of button "encrypt" to tEnabled?
-   set the enabled of field "encrypt" to tEnabled?
-
+   --   put (tEnabled? and revEnvironmentEditionProperty("password_protection")) into tEnabled?
+   --   set the enabled of button "encrypt" to tEnabled?
+   --   set the enabled of field "encrypt" to tEnabled?
+   set the enabled of button "encrypt" to true
+   set the enabled of field "encrypt" to true
+   
    local tStackFiles
    revSBRelativeStackFilesList the cRevTargetStack of this stack, tStackFiles
    put tStackFiles["relative"] into field "stackfiles"
@@ -32,16 +34,6 @@ on revIncludeStackFiles pIncludeList
    dispatch "mouseUp" to field "stackfiles"
    revSetEdit
 end revIncludeStackFiles
-
-local sStackFileList
-
-on revRemoveStackFiles pRemoveList
-   put empty into sStackFileList
-   repeat for each line tStackFile in the cStackPaths of field "stackFiles"
-      revRecursiveRemoveStackFiles tStackFile,pRemoveList,sStackFileList
-   end repeat
-   preOpenCard
-end revRemoveStackFiles
 
 -- Updates the controls on this card to reflect the values set on the target stack.
 command updateCard
