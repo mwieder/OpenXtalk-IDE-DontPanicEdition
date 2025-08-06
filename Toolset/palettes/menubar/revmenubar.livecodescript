@@ -43,6 +43,14 @@ private command subscribeMessages
    revIDESubscribe "ideActiveStacksChanged"
 end subscribeMessages
 
+private command setPreference pPref, pValue
+   set the pPref of stack "revPreferences" to pValue
+end setPreference
+
+private function preferenceOf pPref
+   return the pPref of stack "revPreferences"
+end preferenceOf
+
 local sTextMenuDisabledText, sTextMenuText, sPluginMenuText
 command setDefaultText
    setupTextMenu
@@ -709,8 +717,9 @@ end tCheckBuntuWdBug
 on tNewDictionaryDisplay
    local tnopeFolder
    local tQuickDict
-
-   if the cDictionaryDisplayMethod of stack "revPreferences" is false then
+   
+   if preferenceOf("cDictionaryDisplayMethod") is false then
+      --if the cDictionaryDisplayMethod of stack "revPreferences" is false then
       -- old method using a browser
       revIDEDocumentationLoad "API", "Script"
    else
@@ -722,7 +731,8 @@ on tNewDictionaryDisplay
          delete last item of tnopeFolder
          put tnopeFolder & "/Tools" into tnopeFolder
       end if
-      if the cQuickDictionary of stack "revPreferences" is true then
+      if preferenceOf("cQuickDictionary") is true then
+         --if the cQuickDictionary of stack "revPreferences" is true then
          -- quick dictionary instead (tperry 17-4-24)
          put (tnopeFolder & "/Plugins/Quick Dictionary.livecode") into tQuickDict
          open stack (tQuickDict) as modeless
@@ -813,7 +823,8 @@ end tMenuBar_MakeDragHandle
 on tMenuBar_AdjustWDSize
    -- clean up the MenuBar (tperry)
    -- should this be draggable?
-   if the cMakeRevMenuBarDraggable of stack "revPreferences" is false then
+   if preferenceOf("cMakeRevMenuBarDraggable") is false then
+      --if the cMakeRevMenuBarDraggable of stack "revPreferences" is false then
       set the left of  group "toolbar" of stack "revMenubar" to 0 -- make sure group moves over if we don't have a drag handle (tperry 10-11-2023)
       if there is a graphic "draghandle" of card 1 of this stack then
          hide graphic "draghandle" of card 1 of this stack
@@ -852,9 +863,11 @@ end tMenuBar_AdjustWDSize
 on tApplyGridSetting
    local tGridSzTest
    -- tperry, 2-12-23 (moved this after the gridSize is set first, before potentially turning it on)
-   if the cGrid of stack "revPreferences" is true then
+   if preferenceOf("cGrid") is true then
+      --if the cGrid of stack "revPreferences" is true then
       set the grid to true
-      put the cGridSize of stack "revPreferences" into tGridSzTest
+      put preferenceOf("cGridSize") into tGridSzTest
+      --put the cGridSize of stack "revPreferences" into tGridSzTest
       if isNumber(tGridSzTest) then
          set the gridSize to tGridSzTest
       end if
@@ -967,7 +980,8 @@ on tMenuBar_WDdecorations
    put the left of this stack into tOldLeft
    lock screen
    lock messages
-   if the cMakeRevMenuBarStandard of stack "revPreferences" is true then
+   if preferenceOf("cMakeRevMenuBarStandard") is true then
+      --if the cMakeRevMenuBarStandard of stack "revPreferences" is true then
       --------------------------
       -- become a floating stack
       --------------------------
@@ -1013,7 +1027,7 @@ on tMenuBar_WDdecorations
    set the top of this stack to tOldTop
    set the left of this stack to tOldLeft
    try
-#      dispatch "tApplyMBCardScript" to this stack
+      #      dispatch "tApplyMBCardScript" to this stack
       tApplyMBCardScript
       send "hSetMBOffsets" to card 1 of this stack in 1 milliseconds
    catch e
@@ -2608,16 +2622,16 @@ private function buildContextSensitiveMenu pExtraText, pTarget, pType, pSelectab
 end buildContextSensitiveMenu
 
 function menubar.ContextMenu pType, pTarget
-   local tSelectable
-   put revIDEObjectsAreSelectable(sMenuTarget) into tSelectable
+   local tSelectable?
+   put revIDEObjectsAreSelectable?(sMenuTarget) into tSelectable?
 
    local tText
    switch pType
       case "group"
-         put enableMenuItem("Paste into Group", tSelectable and the clipboard is "objects") & cr after tText
+         put enableMenuItem("Paste into Group", tSelectable? and the clipboard is "objects") & cr after tText
          put "-" & cr after tText
-         put enableMenuItem("Edit Group", tSelectable) & cr after tText
-         put enableMenuItem("Ungroup", tSelectable) & cr after tText
+         put enableMenuItem("Edit Group", tSelectable?) & cr after tText
+         put enableMenuItem("Ungroup", tSelectable?) & cr after tText
          put "-" & cr after tText
          put toggleMenuItem("Lock Location", the lockLoc of pTarget) & cr after tText
          break
@@ -2644,10 +2658,10 @@ function menubar.ContextMenu pType, pTarget
          put tab & "-" & cr after tText
          put tab & "Make Widths Equal/|Width" & cr after tText
          put tab & "Make Heights Equal/|Height" & cr after tText
-         put enableMenuItem("Group", tSelectable) & cr after tText
+         put enableMenuItem("Group", tSelectable?) & cr after tText
          break
       case "field"
-         put enableMenuItem("Paste Text", tSelectable and the clipboard is "text") & cr after tText
+         put enableMenuItem("Paste Text", tSelectable? and the clipboard is "text") & cr after tText
          put "-" & cr after tText
          put toggleMenuItem("Lock Text", the lockText of pTarget) & cr after tText
          put toggleMenuItem("Can Receive Keyboard Focus", the traversalOn of pTarget) & cr after tText
@@ -2667,7 +2681,7 @@ function menubar.ContextMenu pType, pTarget
          break
    end switch
 
-   put buildContextSensitiveMenu(tText, pTarget, , tSelectable) into tText
+   put buildContextSensitiveMenu(tText, pTarget, , tSelectable?) into tText
 
    return modifyMenu(pType, tText)
 end menubar.ContextMenu
@@ -2735,8 +2749,8 @@ end revMenubarPopupContextualMenu
 ################################################################################
 
 private function modifyMenu pMenuName, pMenu
-   if the last char of pMenu is not return then
-      put return after pMenu
+   if the last char of pMenu is not cr then
+      put cr after pMenu
    end if
 
    return pMenu
@@ -3634,16 +3648,22 @@ end menubar.HelpMenu.Pick
 -- trying to keep all the window focussing and restore things in one chunk here
 -- just so it's easier to find for other people. See frontscriptlibrary #buntuBug
 
-constant sIDEWindows = "revTools,message box,revPropertyInspector 1,revScriptEditor 1,revNewScriptEditor 1"
+--constant sIDEWindows = "revTools,message box,revPropertyInspector 1,revScriptEditor 1,revNewScriptEditor 1"
 local tPaletteList
 
 -- mwieder fixed these two send parameters 2025.06.29
 on suspendstack
-   if not (the pendingmessages contains "hSwitchedAway") then send "hSwitchedAway" to me in 1 millisecond
-   pass suspendstack
-end suspendstack
+   if preferenceOf("cBackgroundIDEStacks") is true then
+      --if the cBackgroundIDEStacks of stack "revPreferences"  then
+         if not (the pendingmessages contains "hSwitchedAway") then send "hSwitchedAway" to me in 1 millisecond
+      end if
+      pass suspendstack
+   end suspendstack
 on resumestack
-   if not (the pendingmessages contains "fIDEWindows") then send "fIDEWindows show" to me in 1 millisecond
+   if preferenceOf("cBackgroundIDEStacks") is true then
+      --if the cBackgroundIDEStacks of stack "revPreferences"  then
+      if not (the pendingmessages contains "fIDEWindows") then send "fIDEWindows show" to me in 1 millisecond
+   end if
    pass resumestack
 end resumestack
 
@@ -3664,27 +3684,28 @@ end linuxWindowID
 
 on hSwitchedAway
    local tSwitchedTo
-
-   if the cDesktopClickToHide of stack "revPreferences" is not true then exit hSwitchedAway
+   
+   if preferenceOf("cDesktopClickToHide") is not true then exit hSwitchedAway
+   --if the cDesktopClickToHide of stack "revPreferences" is not true then exit hSwitchedAway
    set the tLastTop of stack "revTools" to the top of stack "revTools"  -- save tools wd vert pos (tperry 11,5,24)
    put "" into tSwitchedTo
    if the platform contains "mac" then
       local tAppleScript
       put "tell application " & q("System Events") & cr & ¬
       "set activeApp to name of first application process whose frontmost is true" & cr & ¬
-      "return activeApp" & return & ¬
+      "return activeApp" & cr & ¬
       "end tell" into tAppleScript
       do tApplescript as "AppleScript"
       put the result into tSwitchedTo
    else if the platform contains "linux" then
       local tShellCmd
       local tresult
-      local tWindowID, tWindowList
-
+      local tWindowID--, tWindowList
+      
       put linuxWindowID() into tWindowID
       put "xwininfo -id " & tWindowID into tShellCmd
       put shell(tShellCmd) into tResult
-
+      
       filter lines of tResult without empty
       put line 1 of tResult into tResult
       replace tWindowID with cr in tResult
@@ -3694,18 +3715,19 @@ on hSwitchedAway
       -- I am compensating for the engine in Linux here
       put word 1 of tSwitchedTo into tSwitchedTo
       revIDEUpdateWindowList
-      put the cWindowList of stack "revmenubar" into tWindowList
-
-      local tByWDOne
-      put empty into tByWDOne
-      repeat for each line wdIter in tWindowList
-         put word 1 of wdIter & cr after tByWDone
-      end repeat
-      replace cr with comma in tByWDOne
+      --put the cWindowList of stack "revmenubar" into tWindowList
+      
+      --local tByWDOne
+      --put empty into tByWDOne
+      --repeat for each line wdIter in tWindowList
+      --put word 1 of wdIter & cr after tByWDone
+      --end repeat
+      --replace cr with comma in tByWDOne
       -- this should also gather all names of active IDE windows
       local tAdditList
       put revLoadedStacks("all") into tAdditList
-
+      --put the stacks into tAdditList
+      
       local tByWDTwo
       put empty into tByWDTwo
       repeat for each line wdIter in tAdditList
@@ -3713,20 +3735,23 @@ on hSwitchedAway
             put word 1 of the title of stack wdIter & cr after tByWDTwo
          end if
       end repeat
+      # just the stacks, maam
       filter lines of tByWDTwo without empty
       replace cr with comma in tByWDTwo
-
+      
       -- this is a list of the windows to ignore for window hiding/showing (things in tExitWdCases are considered part of the IDE) -- tperry 15-11-24
       local tExitWdCases
-      put tByWDOne & "," & tByWDTwo into tExitWdCases
+      --put tByWDOne & "," & tByWDTwo into tExitWdCases
+      put tByWDTwo into tExitWdCases
+      --put the stacks into tExitWdCases
+      
+      --put tSwitchedTo into msg
+      
       if not (tSwitchedTo is among the items of tExitWdCases) then
-         put empty into tPaletteList -- clear palettelist
-         -- mwieder fixed the syntax 2025.06.29
          fIDEWindows "hide" -- oops! missed this 15-11-24 (tperry)
       end if
    end if
    if tSwitchedTo contains "Finder" or tSwitchedTo contains "Desktop" then
-      -- mwieder fixed the syntax 2025.06.29
       fIDEWindows "hide"
    end if
 end hSwitchedAway
@@ -3734,7 +3759,6 @@ end hSwitchedAway
 on hSwitchedBack
    if the cDesktopClickToHide of stack "revPreferences" is true \
    and the cSwitchedBack of stack "revMenuBar" is not true then
-      -- mwieder fixed the syntax 2025.06.29
       fIDEWindows "show"
    end if
 end hSwitchedBack
@@ -3756,49 +3780,28 @@ command MBMakeStackVisibleDelayed pstack
 end MBMakeStackVisibleDelayed
 
 command fIDEWindows pWhat # pWhat is "show" or "hide"
-   local tWDsToConsider
    local tStacks
-
+   
    lock screen
    lock messages
-   put sIDEWindows into tWDsToConsider
    put the stacks into tStacks
    filter tStacks without "*revmenubar*"
    filter tStacks without empty
-   repeat for each line tLine in tStacks
-      if the visible of stack tLine is true then
-         --		 put comma & tLine after tWDsToConsider
-      end if
-   end repeat
-
+   
    switch pWhat
       case "hide"
-         -- we hide the IDEs windows
-         repeat for each item tItem in tWDsToConsider
-            if there is a stack tItem then
-               if the effective visible of stack tItem is true then
-                  if not(tPaletteList contains tItem) then
-                     put tItem & cr after tPaletteList
-                  end if
-               end if
-            end if
-         end repeat
-
-         replace comma with cr in tPaletteList
-         filter lines of tPaletteList without empty
-
-         repeat for each item tLine in tWDsToConsider
-            if there is a stack tLine then
+         repeat for each line tLine in tStacks
+            if there is a stack tLine and the mode of stack tLine is in "234" then
                hide stack tLine
             end if
          end repeat
-
+         
          set the cSwitchedBack of stack "revMenuBar" to false
          break
       case "show"
          -- we show the IDEs windows
-         repeat for each item tLine in tWDsToConsider
-            if there is a stack tLine then
+         repeat for each line tLine in tStacks
+            if there is a stack tLine and the mode of stack tLine is in "0234" then
                show stack tLine
             end if
          end repeat

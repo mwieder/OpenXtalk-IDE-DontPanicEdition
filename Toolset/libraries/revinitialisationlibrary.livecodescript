@@ -33,7 +33,7 @@ command revInternal__LoadLibrary pLibrary, pFullPath
    try
       // TODO: Remove legacy message name	   
       dispatch "revLoadLibrary" to stack tStackName  
-      if it is not "handled" then
+      if it is "unhandled" then
       	throw "No revLoadLibrary handler found"
       end if
    catch tLegacyError 
@@ -48,8 +48,8 @@ command revInternal__LoadLibrary pLibrary, pFullPath
    
    if tError is not empty then
       write ("Error" && tError && "while loading stack:" && pLibrary) \
-            & return to stderr
-      return "Error loading" && pLibrary & return & tError
+            & cr to stderr
+      return "Error loading" && pLibrary & cr & tError
    end if
    
    put tStackName into sLoadedLibraries[pLibrary]

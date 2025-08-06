@@ -1496,7 +1496,7 @@ on revIDEExtensionUpdateAPI pFolder, pExtensionSource
    # Check timestamps to see if API  is out of date.
    local tNeedUpdate?, tError, tSource
    put pFolder & slash & pExtensionSource into tSource
-   put revIDEIsFilesetStale(tSource, \
+   put revIDEIsFilesetStale?(tSource, \
          pFolder & slash & "api.lcdoc", false, tError) into tNeedUpdate?
    if tNeedUpdate? is empty then put true into tNeedUpdate?
 
@@ -1667,14 +1667,9 @@ end revIDEExtensionShowSnippet
 local sSampleFileName
 local sOpenedStacksA
 on ideOpenStack pCard
-   if there is not a stack sSampleFileName then
-      revIDEUnsubscribe "ideOpenStack"
-      exit ideOpenStack
-   end if
-
    local tStack
    put the long id of the owner of pCard into tStack
-   if tStack is the long id of stack sSampleFileName then
+   if sSampleFileName is not empty and tStack is the long id of stack sSampleFileName then
       ## Clear the filename to force the user to choose save location if saving the stack
       put the short name of tStack into sOpenedStacksA[sSampleFileName]
       set the filename of tStack to empty
@@ -1682,6 +1677,7 @@ on ideOpenStack pCard
       revIDEUnsubscribe "ideOpenStack"
    end if
 end ideOpenStack
+
 
 command revIDEExtensionLaunchSampleStack pSampleStack
     // Check if the sample stack has already been opened,

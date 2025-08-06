@@ -740,15 +740,15 @@ on revCopyFile pSrcFile, pDestFile
          set the itemDel to comma
          put "/" & tDestFileName after pDestFile
       end if
-      get shell ("copy" && revWindowsFromUnixPath(quote&pSrcFile&quote) && revWindowsFromUnixPath(quote&pDestFile&quote))
+      get shell ("copy" && revWindowsFromUnixPath(q(pSrcFile)) && revWindowsFromUnixPath(q(pDestFile)))
    else
-      get shell ("cp -f" && quote&pSrcFile&quote && quote&pDestFile&quote)
+      get shell ("cp -f" && q(pSrcFile) && q(pDestFile))
    end if
    return the result
 end revCopyFile
 
 private command log pMessage
-  put pMessage & return after msg
+  put pMessage & cr after msg
 end log
 
 on mouseDoubleUp pButtonNo, pTarget
@@ -771,7 +771,9 @@ on mouseDoubleUp pButtonNo, pTarget
 end mouseDoubleUp
 
 on revCopyFolder pSrcFolder, pDestFolder
-   if the last char of pSrcFolder is "/" then delete the last char of pSrcFolder
+   if the last char of pSrcFolder is "/" then
+      delete the last char of pSrcFolder
+   end if
    if the platform is "MacOS" then
       if "applescript" is in the alternateLanguages then
          if there is not a folder pDestFolder then
@@ -800,13 +802,13 @@ on revCopyFolder pSrcFolder, pDestFolder
       # TH-2008-03-11 : Fix for 5465, should remedy problem with copy sometimes crashing on vista
       # now use robocopy instead of xcopy if operating under vista.
       if the systemVersion is "NT 6.0" then
-         get shell ("robocopy" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote) && "/E /NFL /NDL /NS /NC /NJH /NJS")
+         get shell ("robocopy" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)) && "/E /NFL /NDL /NS /NC /NJH /NJS")
       else
-         get shell ("xcopy /I /E /Y /R" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote))
+         get shell ("xcopy /I /E /Y /R" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)))
       end if
       
    else
-      get shell ("cp -rf" && quote&pSrcFolder&quote && quote&pDestFolder&quote)
+      get shell ("cp -rf" && q(pSrcFolder) && q(pDestFolder))
    end if
    return the result
 end revCopyFolder
@@ -841,13 +843,13 @@ on revCopyFolder__Standalone pSrcFolder, pDestFolder
       # TH-2008-03-11 : Fix for 5465, should remedy problem with copy sometimes crashing on vista
       # now use robocopy instead of xcopy if operating under vista.
       if the systemVersion is "NT 6.0" then
-         get shell ("robocopy" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote) && "/E /NFL /NDL /NS /NC /NJH /NJS")
+         get shell ("robocopy" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)) && "/E /NFL /NDL /NS /NC /NJH /NJS")
       else
-         get shell ("xcopy /I /E /Y /R" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote))
+         get shell ("xcopy /I /E /Y /R" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)))
       end if
       
    else
-      get shell ("cp -rf" && quote&pSrcFolder&quote && quote&pDestFolder&quote)
+      get shell ("cp -rf" && q(pSrcFolder) && quote&pDestFolder&quote)
    end if
    return the result
 end revCopyFolder__Standalone
@@ -877,14 +879,14 @@ on revCopyPackage pSrcFolder, pDestFolder
       # TH-2008-03-11 : Fix for 5465, should remedy problem with copy sometimes crashing on vista
       # now use robocopy instead of xcopy if operating under vista.
       if the systemVersion is "NT 6.0" then
-         get shell ("robocopy" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote) && "/E /NFL /NDL /NS /NC /NJH /NJS")
+         get shell ("robocopy" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)) && "/E /NFL /NDL /NS /NC /NJH /NJS")
       else
-         get shell ("xcopy /I /E /Y /R" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote))
+         get shell ("xcopy /I /E /Y /R" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)))
       end if
       
       
    else
-      get shell ("cp -rf" && quote&pSrcFolder&quote && quote&pDestFolder&quote)
+      get shell ("cp -rf" && q(pSrcFolder) && q(pDestFolder))
    end if
    return the result
 end revCopyPackage
@@ -896,9 +898,9 @@ on revDeleteFolder pSrcFolder
       revSetWindowsShellCommand
       -- check for Win 2000, XP, Vista
       if item 1 of (word 2 of the systemVersion) >= "5" then
-         get shell ("rmdir /s /q" && revWindowsFromUnixPath(quote&pSrcFolder&quote))
+         get shell ("rmdir /s /q" && revWindowsFromUnixPath(q(pSrcFolder)))
       else
-         get shell ("deltree /Y" && revWindowsFromUnixPath(quote&pSrcFolder&quote))
+         get shell ("deltree /Y" && revWindowsFromUnixPath(q(pSrcFolder)))
       end if
    else
       get shell ("rm -rf" && quote&pSrcFolder&quote)
@@ -916,9 +918,9 @@ end revDeleteFile
 on revMoveFolder pSrcFolder, pDestFolder
    if the platform is "Win32" then
       revSetWindowsShellCommand
-      get shell ("move /Y" && revWindowsFromUnixPath(quote&pSrcFolder&quote) && revWindowsFromUnixPath(quote&pDestFolder&quote))
+      get shell ("move /Y" && revWindowsFromUnixPath(q(pSrcFolder)) && revWindowsFromUnixPath(q(pDestFolder)))
    else
-      get shell ("mv -f" && quote&pSrcFolder&quote && quote&pDestFolder&quote)
+      get shell ("mv -f" && q(pSrcFolder) && q(pDestFolder))
    end if
    return the result
 end revMoveFolder
@@ -986,13 +988,13 @@ function revApplescriptFull pFunction, pSrc, pDest
          put buildCopyFileApplescript(pSrc, pDest, false) into tScript
          break
       case "copyPackage"
-         put "tell application" && quote & "Finder" & quote & cr & tab & "copy package" && revPathtoApplescript(pSrc) && "to folder" && revPathtoApplescript(pDest) && cr & "end tell" into tScript
+         put "tell application" && q("Finder") & cr & tab & "copy package" && revPathtoApplescript(pSrc) && "to folder" && revPathtoApplescript(pDest) && cr & "end tell" into tScript
          break
       case "copyFolder"
-         put "tell application" && quote & "Finder" & quote & cr & tab & "copy folder" && revPathtoApplescript(pSrc) && "to folder" && revPathtoApplescript(pDest) && cr & "end tell" into tScript
+         put "tell application" && q("Finder") & cr & tab & "copy folder" && revPathtoApplescript(pSrc) && "to folder" && revPathtoApplescript(pDest) && cr & "end tell" into tScript
          break
       case "moveFolder"
-         put "tell application" && quote & "Finder" & quote & cr & tab & "move folder" && revPathtoApplescript(pSrc) && "to folder" && revPathtoApplescript(pDest) && cr & "end tell" into tScript
+         put "tell application" && q("Finder") & cr & tab & "move folder" && revPathtoApplescript(pSrc) && "to folder" && revPathtoApplescript(pDest) && cr & "end tell" into tScript
          break
    end switch
    return tScript

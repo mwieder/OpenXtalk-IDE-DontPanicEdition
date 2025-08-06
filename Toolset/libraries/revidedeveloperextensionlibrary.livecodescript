@@ -40,7 +40,7 @@ private function __revIDEDeveloperExtensionShouldRecompile? pFolder, pFile, pTyp
    if pType is "lcb" then
       put pFolder & slash & revIDEExtensionBytecodeFilename(true) into tCompileOutputs[2]
    end if
-   put revIDEIsFilesetStale(tCompileInputs, tCompileOutputs, false, tError) \
+   put revIDEIsFilesetStale?(tCompileInputs, tCompileOutputs, false, tError) \
          into tNeedUpdate?
 
    if pType is "lcb" and tNeedUpdate? is false then
@@ -77,7 +77,7 @@ private command __revIDEDeveloperExtensionAddFolder pFolder
       put tRootFolder into tDeveloperExtensionsFolders
    else
       if tRootFolder is not among the lines of tDeveloperExtensionsFolders then
-         put return & tRootFolder after tDeveloperExtensionsFolders
+         put cr & tRootFolder after tDeveloperExtensionsFolders
       end if
    end if
 
@@ -330,19 +330,20 @@ command revIDEDeveloperExtensionTest pPath
 end revIDEDeveloperExtensionTest
 
 local sRectsA
+constant kTESTWINDOW = "LiveCode Extension Test Window"
 private function __testStackRects
    local tDataA
-   if there is a stack "LiveCode Extension Test Window" then
-      put the rect of stack "LiveCode Extension Test Window" into tDataA["rect"]
-      if there is a widget 1 of stack "LiveCode Extension Test Window" then
-         put the rect of widget 1 of stack "LiveCode Extension Test Window" into tDataA["wrect"]
+   if there is a stack kTESTWINDOW then
+      put the rect of stack kTESTWINDOW into tDataA["rect"]
+      if there is a widget 1 of stack kTESTWINDOW then
+         put the rect of widget 1 of stack kTESTWINDOW into tDataA["wrect"]
       end if
       return tDataA
    end if
-
+   
    local tScreenRect
    put the working screenrect into tScreenRect
-
+   
    local tX, tY
    if the left of this stack + 200 < (item 3 of tScreenRect) / 2 then
       put the right of this stack + 200 into tX
@@ -380,13 +381,13 @@ on __revIDEDeveloperExtensionDoCreateTestStack pPath, tRectsA, pDetailsA
    else
       lock screen
       lock messages
-      create stack "LiveCode Extension Test Window"
+      create stack kTESTWINDOW
       if tRectsA["rect"] is not empty then
-         set the rect of stack "LiveCode Extension Test Window" to tRectsA["rect"]
+         set the rect of stack kTESTWINDOW to tRectsA["rect"]
       else if tRectsA["loc"] is not empty then
-         set the loc of stack "LiveCode Extension Test Window" to tRectsA["loc"]
+         set the loc of stack kTESTWINDOW to tRectsA["loc"]
       end if
-      set the destroyStack of stack "LiveCode Extension Test Window" to true
+      set the destroyStack of stack kTESTWINDOW to true
       set the title of it to pDetailsA["title"]
       set the script of it to __testStackScript()
       go stack "LiveCode Extension Test Window"
@@ -394,17 +395,17 @@ on __revIDEDeveloperExtensionDoCreateTestStack pPath, tRectsA, pDetailsA
             (the width of the defaultStack / 2) & comma & (the height of the defaultStack / 2)
       unlock messages
    end if
-
-   if there is not a widget 1 of stack "LiveCode Extension Test Window" then
+   
+   if there is not a widget 1 of stack kTESTWINDOW then
       __revIDEDeveloperExtensionSendError "failed to create widget" && pDetailsA["name"]
       __revIDEDeveloperExtensionDoClearTestStack
       exit __revIDEDeveloperExtensionDoCreateTestStack
    end if
-
+   
    if tRectsA["wrect"] is not empty then
-      set the rect of widget 1 of stack "LiveCode Extension Test Window" to tRectsA["wrect"]
+      set the rect of widget 1 of stack kTESTWINDOW to tRectsA["wrect"]
    end if
-
+   
    unlock screen
 end __revIDEDeveloperExtensionDoCreateTestStack
 
@@ -420,7 +421,7 @@ private command __LaunchTestExtension pPath, pDetailsA
 end __LaunchTestExtension
 
 private command __ClearTestExtension
-   if there is a stack "LiveCode Extension Test Window" then
+   if there is a stack kTESTWINDOW then
       put __testStackRects() into sRectsA
       __revIDEDeveloperExtensionDoClearTestStack
    else
@@ -438,10 +439,10 @@ private command __UnloadTestExtension
 end __UnloadTestExtension
 
 on __revIDEDeveloperExtensionDoClearTestStack
-   repeat while there is a widget 1 of stack "LiveCode Extension Test Window"
-      delete widget 1 of stack "LiveCode Extension Test Window"
+   repeat while there is a widget 1 of stack kTESTWINDOW
+      delete widget 1 of stack kTESTWINDOW
    end repeat
-   delete stack "LiveCode Extension Test Window"
+   delete stack kTESTWINDOW
    __UnloadTestExtension
 end __revIDEDeveloperExtensionDoClearTestStack
 

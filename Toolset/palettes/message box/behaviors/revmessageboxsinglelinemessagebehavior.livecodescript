@@ -13,7 +13,7 @@ on returnInField
    # It's possible to close the message box or change the card while
    # the above is executing, so ensure the field is still open before
    # selecting its text
-   if revIDEObjectIsOpen(the long id of me) then
+   if revIDEObjectIsOpen?(the long id of me) then
       select the text of me
    end if
 end returnInField
@@ -119,6 +119,7 @@ on __ColorizeAutocomplete
 end __ColorizeAutocomplete
 
 command revNextLine
+   lock screen
    lock messages
    if field "auto complete" is empty then
       add 1 to lHistoryIndex
@@ -134,11 +135,13 @@ command revNextLine
       put field "message" & char (the number of chars of field "message" + 1) to (the number of chars of line lMatchingIndex of lMatchingHistory) of line lMatchingIndex of lMatchingHistory into field "auto complete"
    end if
    select after field "message"
-    _internal script colorize char 1 to (the number of chars of me) of me
+   _internal script colorize char 1 to (the number of chars of me) of me
    unlock messages
+   unlock screen
 end revNextLine
 
 command revPrevLine
+   lock screen
    lock messages
    if field "auto complete" is empty then
       add -1 to lHistoryIndex
@@ -154,8 +157,9 @@ command revPrevLine
       put field "message" & char (the number of chars of field "message" + 1) to (the number of chars of line lMatchingIndex of lMatchingHistory) of line lMatchingIndex of lMatchingHistory into field "auto complete"
    end if
    select after field "message"
-    _internal script colorize char 1 to (the number of chars of me) of me
+   _internal script colorize char 1 to (the number of chars of me) of me
    unlock messages
+   unlock screen
 end revPrevLine
 
 on closeField

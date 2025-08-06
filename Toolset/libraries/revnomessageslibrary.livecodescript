@@ -44,24 +44,24 @@ on mouseLeave
 end mouseLeave
 
 on mouseDown pButtonNumber
-  # OK-2008-03-13 : Bug 6009, Mousedown is sent by the engine directly to menus if their associated keyboard shortcut is pressed.
-  # In this situation, revOKTarget must be explictly passed the target of the message as it won't always be correct.
-  local tTarget
-  put the long id of the target into tTarget
-  if revOKTarget(tTarget) then pass mouseDown
-  try
-    # OK-2008-03-27 : the mouseDown handler in revFrontscript needs to know the target of the message
-    revIDEHandleMouseDown pButtonNumber, tTarget
-    #if "mouseDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "mouseDown" to stack "revFrontScriptLibrary"
-    if "mouseDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "mouseDown" to stack "revBackScriptLibrary"
-  catch tError
-    if gREVDevelopment then
-      writeError (tError)
-    end if
-  end try
-
-  # OK-2008-03-06 : Bug 6007 and 6009, Exit here to allow engine to handle the mouseDown as normal
-  pass mouseDown to metacard
+   # OK-2008-03-13 : Bug 6009, Mousedown is sent by the engine directly to menus if their associated keyboard shortcut is pressed.
+   # In this situation, revOKTarget must be explictly passed the target of the message as it won't always be correct.
+   local tTarget
+   put the long id of the target into tTarget
+   if revOKTarget(tTarget) then pass mouseDown
+   try
+      # OK-2008-03-27 : the mouseDown handler in revFrontscript needs to know the target of the message
+      revIDEHandleMouseDown pButtonNumber, tTarget
+      #if "mouseDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "mouseDown" to stack "revFrontScriptLibrary"
+      if "mouseDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "mouseDown" to stack "revBackScriptLibrary"
+   catch tError
+      if gREVDevelopment then
+         writeError (tError)
+      end if
+   end try
+   
+   # OK-2008-03-06 : Bug 6007 and 6009, Exit here to allow engine to handle the mouseDown as normal
+   pass mouseDown to metacard
 end mouseDown
 
 on mouseUp pButtonNo
@@ -130,29 +130,37 @@ on mouseRelease pButtonNo
 end mouseRelease
 
 on mouseDoubleDown pButtonNo
-  if revOKTarget() then pass mouseDoubleDown
-  try
-    if "mouseDoubleDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "mouseDoubleDown pButtonNo" to stack "revFrontScriptLibrary"
-    if "mouseDoubleDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "mouseDoubleDown pButtonNo" to stack "revBackScriptLibrary"
-  catch tError
-    if gREVDevelopment then
-      writeError (tError)
-    end if
-  end try
+   if revOKTarget() then pass mouseDoubleDown
+   try
+      if "mouseDoubleDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then
+         dispatch "mouseDoubleDown" to stack "revFrontScriptLibrary" with pButtonNo
+      end if
+      if "mouseDoubleDown" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then
+         dispatch "mouseDoubleDown" to stack "revBackScriptLibrary" with pButtonNo
+      end if
+   catch tError
+      if gREVDevelopment then
+         writeError (tError)
+      end if
+   end try
 end mouseDoubleDown
 
 on mouseDoubleUp pButtonNo
-  if revOKTarget() then pass mouseDoubleUp
-  try
-    local tTarget
-    put the long id of the target into tTarget
-    if "mouseDoubleUp" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then send "mouseDoubleUp pButtonNo, tTarget" to stack "revFrontScriptLibrary"
-    if "mouseDoubleUp" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then send "mouseDoubleUp pButtonNo, tTarget" to stack "revBackScriptLibrary"
-  catch tError
-    if gREVDevelopment then
-      writeError (tError)
-    end if
-  end try
+   if revOKTarget() then pass mouseDoubleUp
+   try
+      local tTarget
+      put the long id of the target into tTarget
+      if "mouseDoubleUp" is among the lines of the cREVGeneral["handlerlist"] of stack "revFrontScriptLibrary" then
+         dispatch "mouseDoubleUp" to stack "revFrontScriptLibrary" with  pButtonNo, tTarget
+      end if
+      if "mouseDoubleUp" is among the lines of the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" then
+         dispatch "mouseDoubleUp" to stack "revBackScriptLibrary" with  pButtonNo, tTarget
+      end if
+   catch tError
+      if gREVDevelopment then
+         writeError (tError)
+      end if
+   end try
 end mouseDoubleUp
 
 on openField

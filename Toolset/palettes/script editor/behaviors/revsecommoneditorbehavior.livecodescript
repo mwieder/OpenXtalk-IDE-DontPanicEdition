@@ -1,4 +1,4 @@
-script "com.livecode.scripteditor.behavior.editorcommon"
+﻿script "com.livecode.scripteditor.behavior.editorcommon"
 local sObjectId
 
 # The following variables store information used for the undo / redo system.
@@ -1287,7 +1287,7 @@ end paneUpdate
 
 -- This is sent by the engine
 on selectionChanged
-   if not handleEvent("selectionChanged", the long id of the target) then
+   if not handleEvent?("selectionChanged", the long id of the target) then
       pass selectionChanged
    end if
    if not (sArrowKeyPressed) then
@@ -1613,7 +1613,7 @@ on returnInField
       pass returnInField
    end if
    
-   if not handleEvent("returnInField", the long id of the target) then
+   if not handleEvent?("returnInField", the long id of the target) then
       pass returnInField
    end if
    
@@ -2350,17 +2350,17 @@ function getClickText
    return tText
 end getClickText
 
-private function handleEvent pEvent, pTarget
+private function handleEvent? pEvent, pTarget
    if the long id of pTarget is the long id of field "Script" of me then
       return true
    else
       return false
    end if
-end handleEvent
+end handleEvent?
 
 # OK-2009-03-02 : Bug 7773
 on optionKeyDown pKey
-   if not handleEvent("optionKey", the long id of the target) then
+   if not handleEvent?("optionKey", the long id of the target) then
       pass optionKeyDown
    end if
    
@@ -2392,7 +2392,7 @@ on scrollBarDrag
 end scrollBarDrag
 
 on keyDown pChar
-   if not handleEvent("keydown", the long id of the target) then
+   if not handleEvent?("keydown", the long id of the target) then
       pass keyDown
    end if
    
@@ -2422,7 +2422,7 @@ private command __DoKeyDown pChar
 end __DoKeyDown
 
 on backspaceKey
-   if not handleEvent("backspaceKey", the long id of the target) then
+   if not handleEvent?("backspaceKey", the long id of the target) then
       pass backspaceKey
    end if
    
@@ -2502,7 +2502,7 @@ on backspaceKey
 end backspaceKey
 
 on deleteKey
-   if not handleEvent("deleteKey", the long id of the target) then
+   if not handleEvent?("deleteKey", the long id of the target) then
       pass deleteKey
    end if
    
@@ -2536,7 +2536,7 @@ on deleteKey
 end deleteKey
 
 on tabKey
-   if not handleEvent("tabKey", the long id of the target) then
+   if not handleEvent?("tabKey", the long id of the target) then
       pass tabKey
    end if
    
@@ -2725,7 +2725,7 @@ end pageDown
 #   and both platforms after pressing the home key we have to ensure the caret ends up in the right place.
 #   Other keys may be blocked here to prevent weird chars getting inserted into the script.
 on rawKeyDown pKey
-   if not handleEvent("rawKeyDown", the long id of the target) then
+   if not handleEvent?("rawKeyDown", the long id of the target) then
       pass rawKeyDown
    end if
    
@@ -2836,7 +2836,7 @@ on rawKeyDown pKey
    local tPass = true
    if revEnvironmentEditionProperty("autocomplete") then
       ideAutocompleteHandleArrow the long id of me, tKeyName, sObjectId, sPlaceholders, sEditPlaceholder, sEditChunks
-      put the result into tPass
+      --put the result into tPass
    end if
    
    if not scriptLocked() and tPass then
@@ -2854,7 +2854,7 @@ end rawKeyDown
 local sDragMode
 
 on dragDrop
-   if not handleEvent("dragDrop", the long id of the target) then
+   if not handleEvent?("dragDrop", the long id of the target) then
       pass dragDrop
    end if
    
@@ -2904,7 +2904,7 @@ on dragDrop
 end dragDrop
 
 on dragStart
-   if not handleEvent("dragStart", the long id of the target) then
+   if not handleEvent?("dragStart", the long id of the target) then
       pass dragStart
    end if
    

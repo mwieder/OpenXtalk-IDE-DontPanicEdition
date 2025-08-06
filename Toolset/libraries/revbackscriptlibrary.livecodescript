@@ -39,41 +39,36 @@ function revImageType pImageNo
    return ".ppm"
 end revImageType
 
-function revIsPICT pWhatPath
+function revIsPICT? pWhatPath
    --takes a valid file path and returns if PICT or not
    if not (there is a file pWhatPath) then return "error"
 
    local tData
    put char 1 to 600 of url ("binfile:"&pWhatPath) into tData
 
-   local tPICT
+   local tPICT?
    repeat with i = 1 to 7
       if charToNum(char i of tData) is 0 then
-         put true into tPICT
+         put true into tPICT?
       else
-         put false into tPict
+         put false into tPict?
          exit repeat
       end if
    end repeat
-   if tPict then
+   if tPict? then
       if charToNum(char 523 of tData) is 0 and charToNum(char 524 of tData) is 17 and charToNum(char 525 of tData) is 2 and charToNum(char 526 of tData) is 255 then
-         put true into tPict
+         put true into tPict?
       else
-         put false into tPict
+         put false into tPict?
       end if
 
       local tFinal
-#      if tPict then
-#         put true into tFinal
-#      else
-#         put false into tFinal
-#      end if
-      put tPict into tFinal
+      put tPict? into tFinal
    else
       put false into tFinal
    end if
    return tFinal
-end revIsPICT
+end revIsPICT?
 
 on revCheckQuit
    global gREVShutDownList, gREVShutDown
@@ -1774,8 +1769,8 @@ function revAllSameType2 pObjects
    --first line true or false
    --second line the object type
 
-   local tAllSame
-   put true into tAllSame
+   local tAllSame?
+   put true into tAllSame?
 
    local tFirstObject
    put line 1 of pObjects into tFirstObject
@@ -1785,12 +1780,12 @@ function revAllSameType2 pObjects
 
    repeat for each line l in pObjects
       if revDiscernObjectType(l) is not tFirstObjectType then
-         put false into tAllSame
+         put false into tAllSame?
          exit repeat
       end if
    end repeat
 
-   return tAllSame & cr & tFirstObjectType
+   return tAllSame? & cr & tFirstObjectType
 end revAllSameType2
 
 function revDiscernObjectType pObject
@@ -1875,61 +1870,61 @@ end revDiscernObjectType
 
 ----------------------------------------------
 
-on revReloadBreakpoints
-   exit revReloadBreakpoints
+--on revReloadBreakpoints
+--   exit revReloadBreakpoints
 
-   local tStacksList
-   put the mainStacks into tStacksList
-   repeat for each line l in tStacksList
-      if not (there is a stack l) then next repeat -- stack saved on another machine with file path wrong
-      local tList
-      put the cREVGeneral["debugObjects"] of stack l into tList
-      if the number of lines in tList > 250 then
-         answer error "It appears your breakPoint information has been corrupted.  Fixing this will remove all breakPoints from this stack.  If you don't fix this, LiveCode may not work correctly.  Please file a bug report as this problem should not occur." with "Don't fix" or "Fix"
-         if it is "fix" then
-            set the cREVGeneral["debugObjects"] of stack l to empty
-            put empty into tList
-         end if
-      end if
-      repeat for each line x in tList
-         if not exists(x) then next repeat
-         set the cREVGeneral["breakPoints"] of x to the cREVGeneral["breakPoints"] of x
-      end repeat
-   end repeat
-end revReloadBreakpoints
+--   local tStacksList
+--   put the mainStacks into tStacksList
+--   repeat for each line l in tStacksList
+--      if not (there is a stack l) then next repeat -- stack saved on another machine with file path wrong
+--      local tList
+--      put the cREVGeneral["debugObjects"] of stack l into tList
+--      if the number of lines in tList > 250 then
+--         answer error "It appears your breakPoint information has been corrupted.  Fixing this will remove all breakPoints from this stack.  If you don't fix this, LiveCode may not work correctly.  Please file a bug report as this problem should not occur." with "Don't fix" or "Fix"
+--         if it is "fix" then
+--            set the cREVGeneral["debugObjects"] of stack l to empty
+--            put empty into tList
+--         end if
+--      end if
+--      repeat for each line x in tList
+--         if not exists(x) then next repeat
+--         set the cREVGeneral["breakPoints"] of x to the cREVGeneral["breakPoints"] of x
+--      end repeat
+--   end repeat
+--end revReloadBreakpoints
 
-on revClearAllBreakPoints
-   # OK-2008-02-21 : Removed to prevent interference with new debugger
-   exit revClearAllBreakpoints
+--on revClearAllBreakPoints
+--   # OK-2008-02-21 : Removed to prevent interference with new debugger
+--   exit revClearAllBreakpoints
 
-   local tStacksList
-   put the mainStacks into tStacksList
-   put revFilterStacksList(tStacksList) into tStacksList
+--   local tStacksList
+--   put the mainStacks into tStacksList
+--   put revFilterStacksList(tStacksList) into tStacksList
 
-   local tList
-   repeat for each line l in tStacksList
-      put the cREVGeneral["debugObjects"] of stack l into tList
-      repeat for each line x in tList
-         set the cREVGeneral["breakPoints"] of x to empty
-      end repeat
-   end repeat
-end revClearAllBreakPoints
+--   local tList
+--   repeat for each line l in tStacksList
+--      put the cREVGeneral["debugObjects"] of stack l into tList
+--      repeat for each line x in tList
+--         set the cREVGeneral["breakPoints"] of x to empty
+--      end repeat
+--   end repeat
+--end revClearAllBreakPoints
 
 function revAllSameType pObjects
    --first line true or false
    --second line the object type
-   local tAllSame
-   put true into tAllSame
+   local tAllSame?
+   put true into tAllSame?
 
    local tFirstObjectType
    put revDiscernObjectType(line 1 of pObjects) into tFirstObjectType
    repeat for each line l in pObjects
       if revDiscernObjectType(l) is not tFirstObjectType then
-         put false into tAllSame
+         put false into tAllSame?
          exit repeat
       end if
    end repeat
-   return tAllSame & cr & tFirstObjectType
+   return tAllSame? & cr & tFirstObjectType
 end revAllSameType
 
 function revObjectTabs pObjects
@@ -2235,12 +2230,12 @@ on revImportImageFile pStack
       end if
 
       repeat for each line tFilePath in tFilePaths
-         local tConvertPICT
-         put false into tConvertPICT
+         local tConvertPICT?
+         put false into tConvertPICT?
 
          if the platform is "MacOS" then
-            if revIsPICT(tFilePath) then
-               put true into tConvertPICT
+            if revIsPICT?(tFilePath) is true then
+               put true into tConvertPICT?
                if not (the cNOPICTWarning of stack "revPreferences") then
                   answer warning "This file is in Macintosh PICT format, which can only be displayed on Mac OS systems.  " & \
                   "LiveCode can convert the imported image to PNG format, which can be displayed cross platform. " & \
@@ -2254,7 +2249,7 @@ on revImportImageFile pStack
                      set the cNOPICTWarning of stack "revPreferences" to true
                   end if
                   if it is "Don't Convert" then
-                     put false into tConvertPICT
+                     put false into tConvertPICT?
                   end if
                end if
             end if
@@ -2265,7 +2260,7 @@ on revImportImageFile pStack
                set the defaultStack to the short name of tStack
 
                import paint from file tFilePath
-               if tConvertPICT then
+               if tConvertPICT? then
                   import snapshot from last image
                   set the name of last image to the short name of image (the number of images -1)
                   delete image (the number of images -1)
@@ -2278,8 +2273,8 @@ on revImportImageFile pStack
             end if
          else
             # Windows and Unix
-            if revIsPICT(tFilePath) then
-               put true into tConvertPICT
+            if revIsPICT?(tFilePath) is true then
+               put true into tConvertPICT?
                if not (the cNOPICTWarning of stack "revPreferences") then
                   answer warning "This file is in Macintosh PICT format.  This format can only be displayed on Mac OS systems." with "Don't Show Again" or "Cancel" or "Continue"
                   if it is "Cancel" then
@@ -2289,7 +2284,7 @@ on revImportImageFile pStack
                      set the cNOPICTWarning of stack "revPreferences" to true
                   end if
                   if it is "No" then
-                     put false into tConvertPICT
+                     put false into tConvertPICT?
                   end if
                end if
             end if
@@ -2346,7 +2341,7 @@ function revExternalVersion pExternal
 
    local tExternalList
    put empty into tExternalList
-   -- Win,OSX and Unix
+   -- Win,OSX and linux
    local tCheckExternals
    put the externals of stack "home" into tCheckExternals
 
@@ -2508,7 +2503,7 @@ end revDatabaseDriverList
 
 -- MW-2013-06-13: [[ CloneAndRun ]] If we aren't installed, then generate the externals
 --   list by hand.
-private function revExternalsBuildList
+private function ExternalsBuildList
    local tList
    put empty into tList
    repeat for each item tExternal in revIDEExternalsMapping()
@@ -2521,10 +2516,10 @@ private function revExternalsBuildList
    end repeat
    delete the last char of tList
    return tList
-end revExternalsBuildList
+end ExternalsBuildList
 
-function revExternalsList
-   local tPath,tSave,tDrivers
+function ExternalsList
+   local tDrivers
 
    -- MW-2013-06-13: [[ CloneAndRun ]] Special-case when not an installation.
    local tEnvironmentFile
@@ -2545,7 +2540,7 @@ function revExternalsList
          put item 1 of l & cr after tDrivers
       end repeat
    else
-      put revExternalsBuildList() into tEnvironmentDrivers
+      put ExternalsBuildList() into tEnvironmentDrivers
    end if
 
    repeat for each line tDriver in tEnvironmentDrivers
@@ -2555,7 +2550,7 @@ function revExternalsList
    end repeat
    delete last char of tDrivers # remove the trailing cr
    return tDrivers
-end revExternalsList
+end ExternalsList
 
 constant kDriverIndexName = "Database Drivers.txt"
 constant kDriverIndexSubFolder = "Database Drivers"
@@ -2654,7 +2649,7 @@ end revDBDriverPath
 function revExternalPath pDriver, pPlatform, pArchitecture
    -- returns path to external from runtime or user runtime folder
    -- will be a folder on Mac OS X, a list of files on Windows
-
+   
    -- MW-2013-06-13: [[ CloneAndRun ]] If we aren't an installed environment then compute
    --    relative to the build folder.
    if not revEnvironmentIsInstalled() then
@@ -2663,16 +2658,16 @@ function revExternalPath pDriver, pPlatform, pArchitecture
             pPlatform is "Windows" and the platform is not "win32" then
          return empty
       end if
-
-      repeat for each line tLine in revExternalsBuildList()
+      
+      repeat for each line tLine in ExternalsBuildList()
          if item 1 of tLine is pDriver then
             return revEnvironmentBinariesPath() & slash & item 2 of tLine
          end if
       end repeat
-
+      
       return empty
    end if
-
+   
    # OK-2009-01-31 : Bug 7433 - Added support for legacy externals.
    local tEnvironmentfile, tUserFile, tLegacyFile
    local tArch
@@ -2683,53 +2678,53 @@ function revExternalPath pDriver, pPlatform, pArchitecture
             put "Universal" into pArchitecture
          end if
          put "Mac OS X" into tArch
-#         put revEnvironmentRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-#         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-#         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+         #         put revEnvironmentRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         #         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+         #         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
          break
-#      case "Windows"
-#         put revEnvironmentRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-#         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-#         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-#         break
+         #      case "Windows"
+         #         put revEnvironmentRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         #         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+         #         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+         #         break
          # OK-2007-08-14 : Linux support reinstated
-#      case "Linux"
-#         put revEnvironmentRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-#         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-#         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-#         break
+         #      case "Linux"
+         #         put revEnvironmentRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         #         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+         #         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+         #         break
    end switch
-         put revEnvironmentRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
-         put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
-         put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-
+   put revEnvironmentRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+   put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
+   put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
+   
    local tUserDrivers
    put url ("file:" & tUserFile) into tUserDrivers
-
+   
    local tEnvironmentDrivers
    put url ("file:" & tEnvironmentFile) into tEnvironmentDrivers
-
+   
    # OK-2009-01-31 : Bug 7433
    local tLegacyDrivers
    if the cREVUseLegacyDrivers of stack "revPreferences" then
       put url ("file:" & tLegacyFile) into tLegacyDrivers
    end if
-
+   
    # OK-2009-01-31 : Bug 7433 - If we're set to use legacy drivers, check them first,
    # if no legacy driver was found for the required libray, then we just default to the normal one.
    local tLineNo, tBasePath
    if the cREVUseLegacyDrivers of stack "revPreferences" then
-
+      
       put lineOffset(pDriver & comma, tLegacyDrivers) into tLineNo
       if tLineNo <> 0 then
          put line tLineNo of tLegacyDrivers into tLine
          put tLegacyFile into tBasePath
       end if
    end if
-
+   
    if tLineNo is empty or tLineNo is 0 then
       put lineOffset(pDriver & comma, tUserDrivers) into tLineNo
-
+      
       if tLineNo is not 0 then
          put line tLineNo of tUserDrivers into tLine
          put tUserFile into tBasePath
@@ -2741,14 +2736,14 @@ function revExternalPath pDriver, pPlatform, pArchitecture
          end if
       end if
    end if
-
+   
    set the itemDelimiter to slash
    delete item -1 of tBasePath
    set the itemDelimiter to comma
-
+   
    local tReturn
-#   repeat with i = 2 to the number of items in tLine
-#      put tBasePath & slash & item i of tLine & cr after tReturn
+   #   repeat with i = 2 to the number of items in tLine
+   #      put tBasePath & slash & item i of tLine & cr after tReturn
    delete item 1 of tLine
    repeat for each item tItem in tLine
       put tBasePath & slash & tItem & cr after tReturn
@@ -3352,18 +3347,18 @@ private function utilityCanonicalizePath pPath
    set the wholeMatches to true
    put lineOffset(tFilename, tFiles) into tLineNumber
 
-   local tExists
+   local tExists?
    if tLineNumber = 0 then
-      put false into tExists
+      put false into tExists?
    else
-      put true into tExists
+      put true into tExists?
    end if
 
    local tCanonicalFolder
    put the defaultFolder into tCanonicalFolder
    revIDEPopDefaultFolder
 
-   if tExists then
+   if tExists? then
       return tCanonicalFolder & slash & line tLineNumber of tFiles
    else
       return empty

@@ -223,17 +223,17 @@ end commandKeyDown
 * returnKey
 */
 on returnKey
-  # TH-2008-03-06 : Fix for bug 6014
-  if not errorDisplayIsTopmost?() then
-    if the tool is "pointer tool" and (the selObj) is not empty \
-        and (((the selectedLine) is empty and (the selectedText) is empty) \
-        or the short name of the topStack is revTargetStack(line 1 of (the selObj)))
-    then dispatch "mouseDoubleUp" to the selObj
-  end if
-
-  if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
-    pass returnKey
-  end if
+   # TH-2008-03-06 : Fix for bug 6014
+   if not errorDisplayIsTopmost?() then
+      if the tool is "pointer tool" and (the selObj) is not empty \
+            and (((the selectedLine) is empty and (the selectedText) is empty) \
+            or the short name of the topStack is revTargetStack(line 1 of (the selObj)))
+      then dispatch "mouseDoubleUp" to the selObj
+   end if
+   
+   if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+      pass returnKey
+   end if
 end returnKey
 
 /**

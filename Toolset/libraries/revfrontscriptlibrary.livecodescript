@@ -516,27 +516,27 @@ on mouseDown pWhich
 end mouseDown
 
 on mouseUp pWhich
-  local tTarget
-  put the long id of the target into tTarget
-
-  local tResult
-  revIDEHandleMouseUp pWhich, tTarget
-  put the result into tResult
-
-  switch tResult
-  case "pass"
-    pass mouseUp
-    break
-  case "exit"
-    exit mouseUp
-    break
-  case "exit to top"
-    exit to top
-  default
-    if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
-      pass mouseUp
-    end if
-  end switch
+   local tTarget
+   put the long id of the target into tTarget
+   
+   local tResult
+   revIDEHandleMouseUp pWhich, tTarget
+   put the result into tResult
+   
+   switch tResult
+      case "pass"
+         pass mouseUp
+         break
+      case "exit"
+         exit mouseUp
+         break
+      case "exit to top"
+         exit to top
+      default
+         if not gREVSuppressMessages or (gREVSuppressMessages and revOKTarget()) then
+            pass mouseUp
+         end if
+   end switch
 end mouseUp
 
 on mouseDoubleUp pButtonNo, pTarget

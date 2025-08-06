@@ -1384,90 +1384,67 @@ private function librariesToUse
    put cr & "revhtml5urllibrary" after tLoadList
    if revEnvironmentEditionProperty("autocomplete_pro") then
 # mdw
-#      put cr & "autocomplete-pro" after tLoadList
+      put cr & "autocomplete-pro" after tLoadList
    end if
 
    if revEnvironmentEditionProperty("autocomplete") then
-#      put cr & "autocomplete" after tLoadList
+      put cr & "autocomplete" after tLoadList
    end if
    return tLoadList
 end librariesToUse
 
+constant kBACKSCRIPTS = "revidedeveloperextensionlibrary,revsaveasstandalone,revsaveasiosstandalone,revsaveasandroidstandalone,revsaveasemscriptenstandalone,revOnlineLibrary,revCore"
 private function backScriptLibraries
    local tBackList
-   put "revidedeveloperextensionlibrary" into tBackList
-   put cr & "revsaveasstandalone" after tBackList
-   put cr & "revsaveasiosstandalone" after tBackList
-   put cr & "revsaveasandroidstandalone" after tBackList
-   put cr & "revsaveasemscriptenstandalone" after tBackList
-   put cr & "revOnlineLibrary" after tBackList
-   put cr & "revCore" after tBackList
+   
+   repeat for each item tLibrary in kBACKSCRIPTS
+      put tLibrary & cr after tBackList
+   end repeat
+   delete the last char of tBackList
+   
+   --   put "revidedeveloperextensionlibrary" into tBackList
+   --   put cr & "revsaveasstandalone" after tBackList
+   --   put cr & "revsaveasiosstandalone" after tBackList
+   --   put cr & "revsaveasandroidstandalone" after tBackList
+   --   put cr & "revsaveasemscriptenstandalone" after tBackList
+   --   put cr & "revOnlineLibrary" after tBackList
+   --   put cr & "revCore" after tBackList
    return tBackList
 end backScriptLibraries
 
 private command initialiseLibraries
    revInternal__Log "Enter", "Libraries Initialisation"
-
+   
    try
       insert script of stack "revInitialisationLibrary" into back
    catch tError
       revInternal__Log "Error", "Error loading initialisation library" & cr & tError
    end try
-
+   
    revInternal_SetJAVA_HOME
-
+   
    local tLoadList
    put librariesToUse() into tLoadList
-   #   put "revCommonLibrary" into tLoadList
-   #   put cr & "revDatabaseLibrary" after tLoadList
-   #   put cr & "revIDEDocumentationLibrary" after tLoadList
-   #   put cr & "revMetadataLibrary" after tLoadList
-   #   put cr & "revSBLibrary" after tLoadList
-   #   put cr & "revIDELibrary" after tLoadList
-   #   put cr & "revidemessagehandlerlibrary" after tLoadList
-   #   put cr & "revBackScriptLibrary" after tLoadList
-   #   put cr & "revDeployLibrary" after tLoadList
-   #   put cr & "revDebuggerLibrary" after tLoadList
-   #   put cr & "revLibUrl" after tLoadList
-   #   put cr & "revPrintLibrary" after tLoadList
-   #   put cr & "revAnimationLibrary" after tLoadList
-   #   put cr & "revGeometryLibrary" after tLoadList
-   #   put cr & "revXMLRPCLibrary" after tLoadList
-   #   put cr & "revProfilesLibrary" after tLoadList
-   #   put cr & "revTableLibrary" after tLoadList
-   #   put cr & "revhtml5urllibrary" after tLoadList
-
-   #   if revEnvironmentEditionProperty("autocomplete_pro") then
-   #      put cr & "autocomplete-pro" after tLoadList
-   #   end if
-
-   #   if revEnvironmentEditionProperty("autocomplete") then
-   #      put cr & "autocomplete" after tLoadList
-   #   end if
-
+   
    # set up the backscript libraries
    local tBackList
    put backScriptLibraries() into tBackList
-   #   put "revidedeveloperextensionlibrary" into tBackList
-   #   put cr & "revsaveasstandalone" after tBackList
-   #   put cr & "revsaveasiosstandalone" after tBackList
-   #   put cr & "revsaveasandroidstandalone" after tBackList
-   #   put cr & "revsaveasemscriptenstandalone" after tBackList
-   #   put cr & "revOnlineLibrary" after tBackList
-   #   put cr & "revCore" after tBackList
-
+   
    # AL-2015-09-02: [[ Bug 15841 ]] Temporarily add project browser library to prevent preference errors
    put cr & "revIDEProjectBrowserLibrary" after tBackList
-
+   
    local tLib
    repeat for each line tLib in tLoadList
       revInternal__Log "Message", "Loading library" && tLib
       revInternal__LoadLibrary tLib
       if the result is not empty then
-         revInternal__Log "Error", the result
+         if it is "no stack for library" && tLib then
+         else
+            revInternal__Log "Error", the result
+         end if
       end if
    end repeat
-
+   
    repeat for each line tLib in tBackList
       try
          insert script of stack tLib into back
@@ -1475,74 +1452,74 @@ private command initialiseLibraries
          revInternal__Log "Error", "Error loading backscript" && tLib & return & tError
       end try
    end repeat
-
+   
    # MW-2010-10-13: [[ Bug 8600 ]] Make sure the handler lists of the rev frontscript, backscript and shortcuts script
    #    are all up to date (used by revNoMessages script).
    set the cREVGeneral["handlerlist"] of stack "revBackScriptLibrary" to internal__FilterHandlerList(the revAvailableHandlers of stack "revBackScriptLibrary")
-
+   
    # Now we have the IDE scripts in place, initiaize the deployment platforms
    try
       revIDEDeployInitialize
    end try
-
+   
    -- Load libraries in the Ext externals bundle
    if there is a folder revEnvironmentExtPath() then
       local tOldFolder
       put the folder into tOldFolder
-
+      
       set the folder to revEnvironmentExtPath()
       repeat for each line tExternal in the folders
          if tExternal is empty or tExternal is "." or tExternal is ".." then
             next repeat
          end if
          set the folder to revEnvironmentExtPath() & "/" & tExternal
-
+         
          local tFiles
          put the files into tFiles
          filter tFiles with "*.livecodescript"
-
+         
          repeat for each line tFile in tFiles
             if there is a stack tFile then
                revInternal__LoadIfLibrary the short name of stack tFile
             end if
          end repeat
       end repeat
-
+      
       set the folder to tOldFolder
    end if # there is a folder revEnvironmentExtPath()
-
-#   When not installed, any integrated merg externals with libraries
-#   will be in the respository path, with their libraries matching
-#   merg*.livecodescript.
+   
+   #   When not installed, any integrated merg externals with libraries
+   #   will be in the respository path, with their libraries matching
+   #   merg*.livecodescript.
    if not revEnvironmentIsInstalled() then
       local tMergFolders
       put folders(revEnvironmentRepositoryPath()) into tMergFolders
       filter tMergFolders with "revmerg*"
-
+      
       repeat for each line tFolder in tMergFolders
          local tMergSrcFolder
          put (revEnvironmentRepositoryPath() & slash & tFolder & slash & "src") \
                into tMergSrcFolder
-
+         
          local tMergFiles
          put files(tMergSrcFolder) into tMergFiles
          filter tMergFiles with "*.livecodescript"
-
+         
          repeat for each line tFile in tMergFiles
             local tMergLibraryFile
             put tMergSrcFolder & slash & tFile into tMergLibraryFile
-
+            
             if there is a stack tMergLibraryFile then
-#               Load the stack
+               #               Load the stack
                revInternal__LoadIfLibrary \
                      the short name of stack tMergLibraryFile
             end if
          end repeat
       end repeat
    end if # not revEnvironmentIsInstalled()
-
+   
    revInternal__Log "Leave", "Libraries Initialisation"
-
+   
    return true
 end initialiseLibraries
 
@@ -1597,7 +1574,7 @@ private command setupExternals
          repeat for each line tFile in tFiles
             # TODO: MDW 2023.12.06 can we load this?
             if "tsNet" is not in tExternal then
-               put revEnvironmentExtPath() & "/" & tExternal & "/" & tFile & return after tExternals
+               put revEnvironmentExtPath() & "/" & tExternal & "/" & tFile & cr after tExternals
             end if
          end repeat
       end repeat
@@ -1610,7 +1587,7 @@ private command setupExternals
          if tExternal is empty or tExternal is "." or tExternal is ".." then
             next repeat
          end if
-         put revEnvironmentUserExternalsPath() & "/" & tExternal & return after tExternals
+         put revEnvironmentUserExternalsPath() & "/" & tExternal & cr after tExternals
       end repeat
    end if
 
