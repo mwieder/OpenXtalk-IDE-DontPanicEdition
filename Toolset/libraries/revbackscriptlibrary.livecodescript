@@ -1263,24 +1263,28 @@ end exitField
 
 on closeField
    selectionChanged
-   if the opaque of the target is false then
-      set the lockText of the target to true
-      set the autohilite of the target to false
-      set the traversalOn of the target to false
-   end if
-   if the cREVGetsUpdate of stack revTargetStack() is not empty then
-      set the backPattern of the target to empty
-   end if
+#   if the opaque of the target is false then
+#      set the lockText of the target to true
+#      set the autohilite of the target to false
+#      set the traversalOn of the target to false
+#   end if
+#   if the cREVGetsUpdate of stack revTargetStack() is not empty then
+#      set the backPattern of the target to empty
+#   end if
    if dontSuppressMessage?() then
       pass closeField
    end if
 end closeField
 
+/**
+* Allow editing a locked label field by double-clicking
+*/
 on mouseDoubleUp pButtonNo, pTarget
    local tName
    put the name of the mousecontrol into tName
    if word 1 of tName is "field" and the environment is "development" then
       if the lockText of tName is true then
+         # unlock the text, prepare to edit the label text
          set the lockText of tName to false
          set the autohilite of tName to true
          set the traversalOn of tName to true
@@ -1298,7 +1302,7 @@ end mouseDoubleUp
 
 on libraryStack
    if the mode of stack "Message Box" is not 0 \
-         and the short name of this cd of stack "Message Box" is "stacksInUse"
+         and the short name of this card of stack "Message Box" is "stacksInUse"
    then
       dispatch "revUpdateLibraryStacks" to this card of stack "Message Box"
    end if
@@ -1320,7 +1324,7 @@ end releaseStack
 on keyDown pWhich
    if word 1 of the target is "card" and \
          the mode of stack "Message Box" is not 0 \
-         and the short name of this cd of stack "Message Box" is among the items of "Single Line,Multiple Lines" then
+         and the short name of this card of stack "Message Box" is among the items of "Single Line,Multiple Lines" then
       dispatch "revIDEFocusOnMessageBox" to stack "Message Box" with pWhich
    end if
    pass keyDown
@@ -2649,7 +2653,7 @@ end revDBDriverPath
 function revExternalPath pDriver, pPlatform, pArchitecture
    -- returns path to external from runtime or user runtime folder
    -- will be a folder on Mac OS X, a list of files on Windows
-   
+
    -- MW-2013-06-13: [[ CloneAndRun ]] If we aren't an installed environment then compute
    --    relative to the build folder.
    if not revEnvironmentIsInstalled() then
@@ -2658,16 +2662,16 @@ function revExternalPath pDriver, pPlatform, pArchitecture
             pPlatform is "Windows" and the platform is not "win32" then
          return empty
       end if
-      
+
       repeat for each line tLine in ExternalsBuildList()
          if item 1 of tLine is pDriver then
             return revEnvironmentBinariesPath() & slash & item 2 of tLine
          end if
       end repeat
-      
+
       return empty
    end if
-   
+
    # OK-2009-01-31 : Bug 7433 - Added support for legacy externals.
    local tEnvironmentfile, tUserFile, tLegacyFile
    local tArch
@@ -2697,34 +2701,34 @@ function revExternalPath pDriver, pPlatform, pArchitecture
    put revEnvironmentRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
    put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
    put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-   
+
    local tUserDrivers
    put url ("file:" & tUserFile) into tUserDrivers
-   
+
    local tEnvironmentDrivers
    put url ("file:" & tEnvironmentFile) into tEnvironmentDrivers
-   
+
    # OK-2009-01-31 : Bug 7433
    local tLegacyDrivers
    if the cREVUseLegacyDrivers of stack "revPreferences" then
       put url ("file:" & tLegacyFile) into tLegacyDrivers
    end if
-   
+
    # OK-2009-01-31 : Bug 7433 - If we're set to use legacy drivers, check them first,
    # if no legacy driver was found for the required libray, then we just default to the normal one.
    local tLineNo, tBasePath
    if the cREVUseLegacyDrivers of stack "revPreferences" then
-      
+
       put lineOffset(pDriver & comma, tLegacyDrivers) into tLineNo
       if tLineNo <> 0 then
          put line tLineNo of tLegacyDrivers into tLine
          put tLegacyFile into tBasePath
       end if
    end if
-   
+
    if tLineNo is empty or tLineNo is 0 then
       put lineOffset(pDriver & comma, tUserDrivers) into tLineNo
-      
+
       if tLineNo is not 0 then
          put line tLineNo of tUserDrivers into tLine
          put tUserFile into tBasePath
@@ -2736,11 +2740,11 @@ function revExternalPath pDriver, pPlatform, pArchitecture
          end if
       end if
    end if
-   
+
    set the itemDelimiter to slash
    delete item -1 of tBasePath
    set the itemDelimiter to comma
-   
+
    local tReturn
    #   repeat with i = 2 to the number of items in tLine
    #      put tBasePath & slash & item i of tLine & cr after tReturn
