@@ -296,27 +296,34 @@ function validateIdentifier pIdentifier
    return matchText(pIdentifier, "(?i)^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$")
 end validateIdentifier
 
-# ??? not used? mdw 2025.08.03
---on revUpdateStandaloneProgress pMessage
---   lock screen
---   put pMessage into field 1 of stack "revStandaloneProgress"
---   if the mode of stack "revStandaloneProgress" is 0 then
---      lock messages
---      modeless "revStandaloneProgress"
---      set the loc of stack "revStandaloneProgress" to the screenLoc
---      unlock messages
---   end if
---   unlock screen
---   wait 0 ticks with messages -- allow for progress update
---end revUpdateStandaloneProgress
+/*
+* UpdateStandaloneProgress
+* dispatched from revSBLibrary
+*/
+command UpdateStandaloneProgress pMessage
+   lock screen
+   put pMessage into field 1 of stack "revStandaloneProgress"
+   if the mode of stack "revStandaloneProgress" is 0 then
+      lock messages
+      modeless "revStandaloneProgress"
+      set the loc of stack "revStandaloneProgress" to the screenLoc
+      unlock messages
+   end if
+   unlock screen
+   wait 0 ticks with messages -- allow for progress update
+end UpdateStandaloneProgress
 
-# ??? not used? mdw 2025.08.03
---command revConfirmInclusion pName, @rInclude, @rSilenceWarning
---   set the cInclusion of stack "revStandaloneInclusionWarning" to pName
---   modal stack "revStandaloneInclusionWarning"
---   put the cInclude of stack "revStandaloneInclusionWarning" into rInclude
---   put the cSilenceWarning of stack "revStandaloneInclusionWarning" into rSilenceWarning
---end revConfirmInclusion
+/*
+* ConfirmInclusion
+* dispatched from revSBLibrary
+*/
+constant kWARNINGSTACK = "StandaloneInclusionWarning"
+command ConfirmInclusion pName, @rInclude?, @rSilenceWarning?
+   set the cInclusion of stack kWARNINGSTACK to pName
+   modal stack kWARNINGSTACK
+   put the cInclude of stack kWARNINGSTACK into rInclude?
+   put the cSilenceWarning of stack kWARNINGSTACK into rSilenceWarning?
+end ConfirmInclusion
 
 function selectImageFile pDimensions
    local tFile
@@ -329,7 +336,6 @@ function selectImageFile pDimensions
    if pDimensions is not empty then
       if getImageDimensions(tFile) is not pDimensions then
          answer warning "Image is not of the required dimensions (" & pDimensions & ")"
-         --exit chooseImageFileWithDimension
       end if
    end if
    
