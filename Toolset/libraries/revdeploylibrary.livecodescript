@@ -128,7 +128,7 @@ command revIDEDeploySetTarget pTarget # = browser
    
    put sDeployTargetPlatforms[pTarget] into tPlatform
    delete item itemOffset(tPlatform, sDeployPlatforms) of sDeployPlatforms
-   put tPlatform, sDeployPlatforms into sDeployPlatforms
+   put tPlatform,sDeployPlatforms into sDeployPlatforms
    set the cDeployPlatforms of stack "revPreferences" to sDeployPlatforms
    
    put pTarget into sDeployTargets[tPlatform]
@@ -166,8 +166,12 @@ function revIDEDeployGetTarget
    return empty
 end revIDEDeployGetTarget
 
+/*
 -- This method is called on startup to initialize the deployment library. This includes
 -- attempting to auto-configure any SDKs and such if necessary.
+*
+* only called from the home stack
+*/
 command revIDEDeployInitialize
    repeat for each item tPlatform in kSupportedPlatforms
       if there is not a stack ("revDeployLibrary"&tPlatform) then
