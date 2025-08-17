@@ -1,4 +1,4 @@
-﻿script "revMessageBoxBehavior"
+﻿script "revMessageBoxBehavior" with behavior "revPaletteBehavior"
 ##GH created 12/11/2014
 ##GH last updated 31/12/2014
 
@@ -9,11 +9,17 @@ constant kExternalErrorCode = 0
 
 local sLastMsg
 
+/**
+*
+*/
 on setAsBehavior pTarget
    set the behavior of pTarget to the long id of this me
    setBehaviors
 end setAsBehavior
 
+/**
+*
+*/
 on setBehaviors
    dispatch "setAsBehavior" to revIDEFrameBehavior() with the long id of this me
 end setBehaviors
@@ -27,6 +33,9 @@ private command addFooterItem pName, pLabel, pIcon, pParameter
    hideFrameItem pName
 end addFooterItem
 
+/**
+*
+*/
 on openStack
    lock screen
    lock messages
@@ -60,7 +69,7 @@ on openStack
    addFooterItem "cancelAll", "Cancel all messages", "remove", "cancelAllMessages"
    addFooterItem "addStack", "Add library stack", "plus", "addLibraryStack"
 
-/*
+   /*
    addFrameItem "outputSource",          "footer",     "action",      "Show last output source",    "bullseye",     "bullseye",    "showOutputSource",the long id of me
    addFrameItem "lockDefaultStack",     "footer",     "action",      "Lock the defaultStack",         "unlock alt",     "unlock alt",    "lockDefaultStack",    the long id of me
    addFrameItem "unlockDefaultStack", "footer",     "action",      "Unlock the defaultStack",     "lock",     "lock",    "unlockDefaultStack",the long id of me
@@ -81,7 +90,7 @@ on openStack
    hideFrameItem "update"
    hideFrameItem "cancelAll"
    hideFrameItem "addStack"
-*/
+   */
 
    #Preferences
    --frame item: Name                                            Location  Type              Label                                           Value Type  Value                                         Callback Message      Callback Target
@@ -125,6 +134,9 @@ on openStack
    unlock screen
 end openStack
 
+/**
+*
+*/
 on ideMsgChanged pTarget, pHandler, pLine, pMsg
    lock messages
    lock screen
@@ -156,18 +168,27 @@ on ideMsgChanged pTarget, pHandler, pLine, pMsg
    unlock messages
 end ideMsgChanged
 
-
---PM-2016-04-29: [[ Bug 17534 ]] Make sure the correct handler is called
+/**
+*
+*
+* PM-2016-04-29: [[ Bug 17534 ]] Make sure the correct handler is called
+*/
 on moveMsgBoxStack
    --set the position of the stack as a custom property so when it is reopened/different card is selected it remains in the same location
    set the cREVLeft of me to the left of me
    set the cREVTop of me to the top of me
 end moveMsgBoxStack
 
+/**
+*
+*/
 on closeStack
    moveMsgBoxStack
 end closeStack
 
+/**
+*
+*/
 command setUpDataView
    --setting up a data view for cards "Pending Messages","Front Scripts", "Back Scripts" and "Pending Messages"
 
@@ -195,6 +216,9 @@ command setUpDataView
    unlock screen
 end setUpDataView
 
+/**
+*
+*/
 command showCard pCard
    lock screen
    put pCard into lSelectedCard
@@ -204,13 +228,16 @@ command showCard pCard
    set the title of me to "Message Box" && "(" & lSelectedCard & ")"
 
    --get message history for Single Line and Multiple Lines
-    if pCard is among the items of "Single Line,Multiple Lines" then
+   if pCard is among the items of "Single Line,Multiple Lines" then
       replace space with "" in pCard
       put "IDE" & pCard & "MessageHistory" into lCardHistoryPref
    end if
    unlock screen
 end showCard
 
+/**
+*
+*/
 command lockDefaultStack
    --locks the default stack to the stack selected in the "Open STacks" button
    lock screen
@@ -224,6 +251,9 @@ command lockDefaultStack
    unlock screen
 end lockDefaultStack
 
+/**
+*
+*/
 command unlockDefaultStack
    --default stack is not locked
    lock screen
@@ -236,6 +266,9 @@ command unlockDefaultStack
    unlock screen
 end unlockDefaultStack
 
+/**
+*
+*/
 command showOutputSource
    --opens the script at the line that has put something into the message box
    global gRevDevelopment
@@ -247,6 +280,9 @@ command showOutputSource
    edit script of sLastMsg["target"] at sLastMsg["line"]
 end showOutputSource
 
+/**
+*
+*/
 on removeSelected
    if lSelectedCard is not "Global Variables" then exit removeSelected
 
@@ -264,6 +300,9 @@ on removeSelected
    end if
 end removeSelected
 
+/**
+*
+*/
 command removeAll
    lock screen
    switch lSelectedCard
@@ -274,7 +313,7 @@ command removeAll
          if revIDERequireWarning(tFrontScripts) is true then
             ##GH : will need localising
             --answer warning revIDELocalisedString("Are you sure you want to remove all front scripts? & cr & cr & "Some of the front scripts belong to the IDE and removing them could cause the IDE to become unstable") with \
-               --revIDELocalisedString("Yes") or revIDELocalisedString("No")
+            --revIDELocalisedString("Yes") or revIDELocalisedString("No")
             --if it is "No" then exit removeAll
             answer warning "Are you sure you wish to remove all front scripts?" & cr & cr & \
                   "Some of the front scripts belong to the IDE and removing them could cause the IDE to become unstable." with "Yes" or "No"
@@ -293,7 +332,7 @@ command removeAll
          if revIDERequireWarning(tBackScripts) is true then
             ##will need localising
             --answer warning revIDELocalisedString("Are you sure you wish to remove all back scripts?" & cr & cr & "Some of the back scripts belong to the IDE and removing them could cause the IDE to become unstable.") with \
-               --revIDELocalisedString("Yes") or revIDELocalisedString("No")
+            --revIDELocalisedString("Yes") or revIDELocalisedString("No")
             --if it is "No" then exit removeAll
             answer warning "Are you sure you wish to remove all back scripts?" & cr & cr & \
                   "Some of the back scripts belong to the IDE and removing them could cause the IDE to become unstable." with "Yes" or "No"
@@ -312,12 +351,15 @@ command removeAll
          repeat for each line tStack in tStacksInUse
             stop using stack tStack
          end repeat
-         revIDEUpdateStacksInUse
+         msg.UpdateStacksInUse
          break
    end switch
    unlock screen
 end removeAll
 
+/**
+*
+*/
 on revIDEFocusOnMessageBox pChar
    if lSelectedCard is among the items of "Single Line,Multiple Lines" then
       if there is a field "message" of card lSelectedCard then
@@ -329,6 +371,9 @@ on revIDEFocusOnMessageBox pChar
    end if
 end revIDEFocusOnMessageBox
 
+/**
+*
+*/
 command scriptAction pID, pName
    switch the short name of the target
       case "scriptLines"
@@ -367,6 +412,9 @@ command scriptAction pID, pName
    end switch
 end scriptAction
 
+/**
+*
+*/
 command addGlobalVariable
    local tNewVariable
    if lSelectedCard is not "Global Variables" then exit addGlobalVariable
@@ -390,11 +438,14 @@ command addGlobalVariable
    revIDEAddGlobal tNewVariable,"Global Variables"
 end addGlobalVariable
 
+/**
+*
+*/
 command revIDEAddGlobal pNewGlobal, pCard
    local tDoString
    if pCard is not "Global Variables" then exit revIDEAddGlobal
 
-   put "global" && pNewGlobal & return & "put empty into" && pNewGlobal into tDoString
+   put "global" && pNewGlobal & cr & "put empty into" && pNewGlobal into tDoString
    do tDoString
    lock messages
    set the hilitedLine of field "type" to lineOffset(pNewGlobal, field "type")
@@ -402,12 +453,18 @@ command revIDEAddGlobal pNewGlobal, pCard
    revIDEUpdateGlobalVariables
 end revIDEAddGlobal
 
+/**
+*
+*/
 command updateMessages
    lock screen
    revIDEPendingMessagesRefresh
    unlock screen
 end updateMessages
 
+/**
+*
+*/
 command cancelAllMessages
    local tPendingMessages, tMessage
    if lSelectedCard is not "Pending Messages" then exit cancelAllMessages
@@ -423,6 +480,9 @@ command cancelAllMessages
    unlock screen
 end cancelAllMessages
 
+/**
+*
+*/
 command addLibraryStack
    local tNewLibStack
    modal stack "revAddLibraryStack"
@@ -441,11 +501,14 @@ command addLibraryStack
    lock messages
    start using stack tNewLibStack
    go card "Stacks in Use"
-   revIDEUpdateStacksInUse
+   msg.UpdateStacksInUse
    unlock messages
    unlock screen
 end addLibraryStack
 
+/**
+*
+*/
 on preferenceChanged pPreference, pValue
    lock screen
    switch pPreference
@@ -463,6 +526,9 @@ on preferenceChanged pPreference, pValue
    unlock screen
 end preferenceChanged
 
+/**
+*
+*/
 on idePreferenceChanged pPreference, pValue
    lock screen
    switch pPreference
@@ -521,6 +587,9 @@ private command __UpdateMessageColors
    set the backgroundColor of field "script" of card "Multiple Lines" of me to tColor
 end __UpdateMessageColors
 
+/**
+*
+*/
 command positionOpenStacksButton
    lock screen
 
@@ -569,7 +638,10 @@ command positionOpenStacksButton
    unlock screen
 end positionOpenStacksButton
 
-function revIDEAutoComplete pSearchTerm
+/**
+*
+*/
+function msg.AutoComplete pSearchTerm
    local tMessageHistory, tNumChars, tLine, tMatchesList
    put revIDEGetPreference("IDESingleLineMessageHistory") into tMessageHistory
    put number of chars of pSearchTerm into tNumChars
@@ -580,45 +652,56 @@ function revIDEAutoComplete pSearchTerm
       end repeat
    end if
    return tMatchesList
-end revIDEAutoComplete
+end msg.AutoComplete
 
-command revIDEAcceptAutoComplete
-   if lSelectedCard is not "Single Line" then exit revIDEAcceptAutoComplete
-   if field "auto complete" is empty then exit revIDEAcceptAutoComplete
-
-   lock screen
-   lock messages
-   put field "auto complete" into field "message" of card "Single Line" of me
-   put empty into field "auto complete" of card "Single Line" of me
-   select after field "message" of card "Single Line" of me
-   dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of field "message" of card "Single Line" of me
-   unlock messages
-   unlock screen
-end revIDEAcceptAutoComplete
-
-command revIDEConsoleHistoryAdd pScript
-   local tMessageHistory, tLine, tCount, tInHistory
-   if pScript is empty then exit revIDEConsoleHistoryAdd
-
-   put revIDEGetPreference(lCardHistoryPref) into tMessageHistory
-
-   --check if pScript is already in the message history and remove it if it is
-   put 0 into tCount
-   repeat for each line tLine in tMessageHistory
-      add 1 to tCount
-      if tLine is pScript then
-         put true into tInHistory
-         exit repeat
+/**
+* msg.AcceptAutoComplete
+*/
+command msg.AcceptAutoComplete
+   if lSelectedCard is "Single Line" then
+      if field "auto complete" is not empty then
+         lock screen
+         lock messages
+         put field "auto complete" into field "message" of card "Single Line" of me
+         put empty into field "auto complete" of card "Single Line" of me
+         select after field "message" of card "Single Line" of me
+         dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of field "message" of card "Single Line" of me
+         unlock messages
+         unlock screen
       end if
-   end repeat
-   if tInHistory is true then delete line tCount of tMessageHistory
+   end if
+end msg.AcceptAutoComplete
 
-   --add pScript to the top of the message history
-   put pScript & return before tMessageHistory
-   if the number of lines in tMessageHistory > kHistoryMax then delete line (kHistoryMax+1) to -1 of tMessageHistory
-   revIDESetPreference lCardHistoryPref,tMessageHistory
-end revIDEConsoleHistoryAdd
+/**
+*
+*/
+command msg.ConsoleHistoryAdd pScript
+   local tMessageHistory, tLine, tCount, tInHistory
+   if pScript is not empty then
 
+      put revIDEGetPreference(lCardHistoryPref) into tMessageHistory
+
+      --check if pScript is already in the message history and remove it if it is
+      put 0 into tCount
+      repeat for each line tLine in tMessageHistory
+         add 1 to tCount
+         if tLine is pScript then
+            put true into tInHistory
+            exit repeat
+         end if
+      end repeat
+      if tInHistory is true then delete line tCount of tMessageHistory
+
+      --add pScript to the top of the message history
+      put pScript & return before tMessageHistory
+      if the number of lines in tMessageHistory > kHistoryMax then delete line (kHistoryMax+1) to -1 of tMessageHistory
+      revIDESetPreference lCardHistoryPref,tMessageHistory
+   end if
+end msg.ConsoleHistoryAdd
+
+/**
+*
+*/
 command ideMessageBoxExecuteScript pScript
    lock messages
    if exists(card lSelectedCard of me) then
@@ -652,6 +735,9 @@ command ideMessageBoxExecuteScript pScript
    return tValidScript
 end ideMessageBoxExecuteScript
 
+/**
+*
+*/
 function ideMessageBoxFormatErrorForDisplay pErrorTrace, pErrorType
    --if there is an error, then this will be formatted and then displayed in the results field
    ##GH : will need localising
@@ -659,9 +745,9 @@ function ideMessageBoxFormatErrorForDisplay pErrorTrace, pErrorType
    put line 1 of pErrorTrace into tError
    if item 1 of tError is a number and item 1 of tError >= 0 then
       if pErrorType is "compile error" then
-         put "Script compile error:" & cr & "Error description:" && revIDELookupError("compilation", pErrorTrace) into tErrorDisplay
+         put "Script compile error:" & cr & "Error description:" && ide.LookupError("compilation", pErrorTrace) into tErrorDisplay
       else
-         put "Message execution error:" & cr & "Error description:" && revIDELookupError("execution", pErrorTrace)  & cr & \
+         put "Message execution error:" & cr & "Error description:" && ide.LookupError("execution", pErrorTrace)  & cr & \
                "Hint:" && item 4 to -1 of line 1 of tError into tErrorDisplay
       end if
    else
@@ -670,6 +756,9 @@ function ideMessageBoxFormatErrorForDisplay pErrorTrace, pErrorType
    return tErrorDisplay
 end ideMessageBoxFormatErrorForDisplay
 
+/**
+*
+*/
 private command __UpdateIntelligenceDisplay
    lock screen
    local tIntelligence
@@ -698,14 +787,23 @@ private command __UpdateIntelligenceDisplay
    unlock screen
 end __UpdateIntelligenceDisplay
 
+/**
+*
+*/
 on ideSelectedObjectChanged
    __UpdateIntelligenceDisplay
 end ideSelectedObjectChanged
 
+/**
+*
+*/
 on ideMouseMove
    __UpdateIntelligenceDisplay
 end ideMouseMove
 
+/**
+*
+*/
 command revIDEUpdateIntelligenceObject
    local tIntelligence
    put revIDEGetPreference("ideMessageBox_intelligenceobject") into tIntelligence
@@ -722,10 +820,16 @@ command revIDEUpdateIntelligenceObject
    __UpdateIntelligenceDisplay
 end revIDEUpdateIntelligenceObject
 
+/**
+*
+*/
 on ideActiveStacksChanged
    __UpdateIntelligenceDisplay
 end ideActiveStacksChanged
 
+/**
+* revIDESetActiveStack
+*/
 command revIDESetActiveStack
    local tMode, tTraceStack, tLock, tLink, tTopStack
 
@@ -765,6 +869,9 @@ command revIDESetActiveStack
    unlock screen
 end revIDESetActiveStack
 
+/**
+* revUpdateActiveStack
+*/
 command revUpdateActiveStack pOldName, pNewName
    if revIDEGetPreference("IDELockedToStack") is false then
       send "revSetActiveStacks" to stack "revfrontscriptlibrary"
@@ -788,6 +895,9 @@ command revUpdateActiveStack pOldName, pNewName
    end if
 end revUpdateActiveStack
 
+/**
+* revIDEUpdateGlobalVariables
+*/
 command revIDEUpdateGlobalVariables
    local tVariableNames, tShow, tFilteredVariables
 
@@ -811,37 +921,53 @@ command revIDEUpdateGlobalVariables
    unlock screen
 end revIDEUpdateGlobalVariables
 
+/**
+* revIDEPendingMessagesRefresh
+*/
 command revIDEPendingMessagesRefresh
    lock screen
-   send "getDataArray" to card "Pending Messages" of me
-   send "renderView" to group "objectList" of card "Pending Messages" of me
-   send "revAutoRefresh" to card "Pending Messages" of me
+   dispatch "getDataArray" to card "Pending Messages" of me
+   dispatch "renderView" to group "objectList" of card "Pending Messages" of me
+   dispatch "revAutoRefresh" to card "Pending Messages" of me
    unlock screen
 end revIDEPendingMessagesRefresh
 
+/**
+* revIDEUpdateFrontScripts
+*/
 command revIDEUpdateFrontScripts
    lock screen
-   send "getDataArray" to card "Front Scripts" of me
-   send "renderView" to group "objectList" of card "Front Scripts" of me
+   dispatch "getDataArray" to card "Front Scripts" of me
+   dispatch "renderView" to group "objectList" of card "Front Scripts" of me
    unlock screen
 end revIDEUpdateFrontScripts
 
+/**
+* revIDEUpdateBackScripts
+*/
 command revIDEUpdateBackScripts
    lock screen
-   send "getDataArray" to card "Back Scripts" of me
-   send "renderView" to group "objectList" of card "Back Scripts" of me
+   dispatch "getDataArray" to card "Back Scripts" of me
+   dispatch "renderView" to group "objectList" of card "Back Scripts" of me
    unlock screen
 end revIDEUpdateBackScripts
 
-command revIDEUpdateStacksInUse
+/**
+* msg.UpdateStacksInUse
+*/
+command msg.UpdateStacksInUse
    lock screen
-   send "getDataArray" to card "Stacks In Use" of me
-   send "renderView" to group "objectList" of card "Stacks In Use" of me
+   dispatch "getDataArray" to card "Stacks In Use" of me
+   dispatch "renderView" to group "objectList" of card "Stacks In Use" of me
    unlock screen
-end revIDEUpdateStacksInUse
+end msg.UpdateStacksInUse
 
+/**
+* revIDERequireWarning
+*
+* returns true if the object is part of the IDE and false otherwise
+*/
 function revIDERequireWarning pObjects
-   --returns true if the object is part of the IDE and false otherwise
    local tObject
    repeat for each line tObject in pObjects
       if char 1 to 3 of the short name of tObject is "rev" then
@@ -851,13 +977,25 @@ function revIDERequireWarning pObjects
    return false
 end revIDERequireWarning
 
+/**
+* rawKeyDown
+*/
 on rawKeyDown pKey
    if word 1 of the target is not "field" then pass rawKeyDown
-   if pKey is 65308 then scrollUp
-   else if pKey is 65309 then scrollDown
-   else if pKey is 65310 then scrollLeft
-   else if pKey is 65311 then scrollRight
-   else
-      pass rawKeyDown
-   end if
+   switch pKey
+      case 65308
+         scrollUp
+         break
+      case 65309
+         scrollDown
+         break
+      case 65310
+         scrollLeft
+         break
+      case 65311
+         scrollRight
+         break
+      default
+         pass rawKeyDown
+   end switch
 end rawKeyDown

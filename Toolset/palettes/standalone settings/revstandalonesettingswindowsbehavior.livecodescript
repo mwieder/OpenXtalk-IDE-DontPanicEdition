@@ -66,7 +66,6 @@ end initializeFonts
 # Adavanced Settings would be run, a new UUID would be generated.
 on checkUUId
    if getSetting("Windows,UUID") is empty then
-      #setSetting "Windows,UUID", revSBGenerateUUID()
       setSetting "Windows,UUID", uuid()
    end if
 end checkUUId

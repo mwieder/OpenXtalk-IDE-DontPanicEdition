@@ -409,8 +409,8 @@ on checkSettingsCompatible pName, pValue
             put tProfile["appid"] into tVars[1]
             put tID into tVars[2]
             
-            answer error revIDELocalise("The chosen provisioning profile requires an app ID matching %1" & return & return & \
-                  "Would you like to change to %2", tVars) with revIDELocalise("OK") or revIDELocalise("Cancel")
+            answer error ide.Localise("The chosen provisioning profile requires an app ID matching %1" & return & return & \
+                  "Would you like to change to %2", tVars) with ide.Localise("OK") or ide.Localise("Cancel")
             
             if it is "OK" then
                setSetting "ios,bundle id", tID

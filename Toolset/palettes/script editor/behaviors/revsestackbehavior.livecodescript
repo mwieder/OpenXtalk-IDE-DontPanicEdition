@@ -1,6 +1,9 @@
 ﻿script "revSEStackBehavior"
 
 
+/**
+*
+*/
 on setBehaviors
    set the behavior of group "Editor" of me to the long id of stack revIDEScriptEditorBehavior("editor")
    set the behavior of group "Menubar" of me to the long id of stack revIDEScriptEditorBehavior("menubar")
@@ -41,18 +44,21 @@ local sLastShownExecutionPoint
 #
 #################################################################################
 
+/**
+*
 # Parameters
 #   pObject : reference to an object that is being edited by this script editor
 #   pStartingLine : optional line number to seek to.
 # Description
 #   Sets the current object to edit to pObject. If pStartingLine is given, then seeks to that line
 #   otherwise seeks to the last selected line.
+*/
 command revSESetCurrentObject pObject, pStartingLine, pDontSendCallbacks
    lock screen
 
    revSEGetCurrentObject
    if the result is not empty and the long id of pObject is the long id of the result then
-       exit revSESetCurrentObject
+      exit revSESetCurrentObject
    end if
    # Check that pObject is one of the target objects, if not then just do nothing
    local tTargetObjects
@@ -86,8 +92,11 @@ command revSESetCurrentObject pObject, pStartingLine, pDontSendCallbacks
    unlock screen
 end revSESetCurrentObject
 
+/**
+*
 # Description
 #   Returns the object currently being edited
+*/
 command revSEGetCurrentObject
    local tObject
    call "getCurrentTab" to group "Script Tabs" of me
@@ -95,8 +104,11 @@ command revSEGetCurrentObject
    return tObject
 end revSEGetCurrentObject
 
+/**
+*
 # Description
 #   Returns a list of scripts being edited
+*/
 command revSEGetTargetObjects
    local tObjects
    send "listTabs" to group "Script Tabs" of me
@@ -104,11 +116,14 @@ command revSEGetTargetObjects
    return tObjects
 end revSEGetTargetObjects
 
+/**
+*
 # Parameters
 #   pObject : reference to any object
 # Description
 #   Adds the specified object to this script editor as a new tab. Does not automatically set the newly
 #   added object as the current object, this must be done with a call to revSESetCurrentObject.
+*/
 command revSEAddTargetObject pObject
    # If the object is already present in revSEGetTargetObjects then just don't do anything,
    # its up to the caller to decide if the object should be set as current or not.
@@ -142,6 +157,8 @@ command revSEAddTargetObject pObject
    end try
 end revSEAddTargetObject
 
+/**
+*
 # Parameters
 #   pObject : reference to the object to remove
 #   pDontWarn : whether or not to warn the user of losing unapplied changes (optional, defaults to false)
@@ -150,6 +167,7 @@ end revSEAddTargetObject
 # Description
 #   Removes the specified object from this script editor. If the removed object is the current
 #   editing object, then changes the current object to the last selected object.
+*/
 command revSERemoveTargetObject pObject, pDontWarn, pDontCloseIfLast, pDontChangeTab
    local tState
    put seGetObjectState(pObject) into tState
@@ -172,7 +190,7 @@ command revSERemoveTargetObject pObject, pDontWarn, pDontCloseIfLast, pDontChang
    revIDEStopEditingScriptOfObjects pObject
 
    local tCurrentTab
-   send "getCurrentTab" to group "Script Tabs" of me
+   dispatch "getCurrentTab" to group "Script Tabs" of me
    put the result into tCurrentTab
 
    if tCurrentTab is not empty then
@@ -208,15 +226,18 @@ command revSERemoveTargetObject pObject, pDontWarn, pDontCloseIfLast, pDontChang
       # OK-2008-09-11 : Only cancel pending messages if the object no longer exists, otherwise
       # gutter updates will be lost without cause.
       # Any pending messages must be cancelled as they may refer to the deleted object
-      send "cancelPendingMessages" to group "Editor" of me
+      dispatch "cancelPendingMessages" to group "Editor" of me
    end if
 end revSERemoveTargetObject
 
 local sMode
 
+/**
+*
 # Description
 #   Returns the current mode of this script editor. The possible options are
 #   "edit" and "debug".
+*/
 command revSEGetMode
    # The mode will be stored in a script local variable, just return this.
    if sMode is empty then
@@ -226,10 +247,13 @@ command revSEGetMode
    return sMode
 end revSEGetMode
 
+/**
+*
 # Parameters
 #   pMode : the mode to set to, either "edit" or "debug"
 # Description
 #   Sets the mode of this script editor.
+*/
 command revSESetMode pMode
    # Note, sMode should be set first because the various update messages
    # sent to components may check the mode, and we want them to update
@@ -237,12 +261,12 @@ command revSESetMode pMode
    put pMode into sMode
 
    if pMode is "edit" then
-      send "scriptUnlock" to group "Editor" of me
+      dispatch "scriptUnlock" to group "Editor" of me
 
       # This means if a line was selected by the debugger to show the user where the current
       # execution point was, it will be deselected here. If the user selected something themselves,
       # this will not be effected.
-      send "deselectLastGoneToLine" to group "Editor" of me
+      dispatch "deselectLastGoneToLine" to group "Editor" of me
 
       sePrefSet "debug,lastcontext", empty
    end if
@@ -268,16 +292,19 @@ command revSESetMode pMode
    end if
 
    send "setCurrentTab tLastSelectedPane" to group "Pane Tabs" of me
-   send "update" to group "Toolbar" of me
+   dispatch "update" to group "Toolbar" of me
 
    actionResizeStack
 end revSESetMode
 
+/**
+*
 # Parameters
 #   pPrefsChanged : whether or not the script editor preferences have changed or not, if empty, assumes they *have* changed.
 # Description
 #   Updates the script editor menu, toolbar and panes etc in response to something
 #   changing, eg execution context.
+*/
 command revSEUpdate pPrefsChanged
    # Reinitialize the preferences in case they have been changed
    if pPrefsChanged is not "false" then
@@ -308,11 +335,13 @@ command revSEUpdate pPrefsChanged
 
    if pPrefsChanged is not "false" then
       seUpdateLeftBar
-      send "reapplyPreferences" to group "Editor" of of me
-      send "reapplyPreferences" to group "Variables" of me
+      dispatch "reapplyPreferences" to group "Editor" of of me
+      dispatch "reapplyPreferences" to group "Variables" of me
    end if
 end revSEUpdate
 
+/**
+*
 # Parameters
 #   pObject : reference to the object executing. Must be an open object in the script editor.
 #   pLine : the line number to go to
@@ -321,6 +350,7 @@ end revSEUpdate
 # Description
 #   Goes to the execution point specified by pObject and pLine. The line is highlighted
 #   if pHighlight is true. If pObject is not one of the current target objects does nothing.
+*/
 command revSEGoExecutionPoint pObject, pLine, pHighlight, pOpenIfNeeded
    local tTargetObjects
    revSEGetTargetObjects
@@ -342,30 +372,44 @@ command revSEGoExecutionPoint pObject, pLine, pHighlight, pOpenIfNeeded
    put pLine into sLastShownExecutionPoint
 end revSEGoExecutionPoint
 
+/**
+*
 # Description
 #   Returns the last selected string in the editor group
+*/
 command revSEGetLastSelection
    dispatch "getLastSelection" to group "Editor" of me
    return the result
 end revSEGetlastSelection
 
+/**
+*
+*/
 command revSEGetLastSelectedWord
    dispatch "getLastSelectedWord" to group "Editor" of me
    return the result
 end revSEGetLastSelectedWord
 
+/**
+*
 # Description
 #   Initializes the script editor's find system. Should be called before beginning a search.
+*/
 command revSEFindInitialize
    dispatch "findInitialize" to group "Editor" of me
 end revSEFindInitialize
 
+/**
+*
 # Description
 #   Finalizes the script editor's find system. Should be called when a search is finished
+*/
 command revSEFindFinalize
    dispatch "findFinalize" to group "Editor" of me
 end revSEFindFinalize
 
+/**
+*
 # Parameters
 #   pQuery : the string to search for
 #   pIsRegExp : whether or not pQuery is a regular expression
@@ -374,10 +418,12 @@ end revSEFindFinalize
 #   pTarget : whether to search in all tabs or just the current tab
 # Description
 #   Searches for the next match according to the specified search criteria. Highlights the match if found.
+*/
 command revSEFindNext pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget
    send "showNextFindResult pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, false, pTarget" to group "Editor" of me
 end revSEFindNext
 
+/**
 # Parameters
 #   pQuery : the string to search for
 #   pIsRegExp : whether or not pQuery is a regular expression
@@ -387,10 +433,12 @@ end revSEFindNext
 #   pCallback : optional. The name of a command to send with a message saying what state the search is in
 # Description
 #   Searches for all matches for the specified search and displays them in the "Search Results" pane.
+*/
 command revSEFindAll pQuery, pIsRegExp, pUseWildCards, pWholeMatches, pIgnoreCase, pTarget, pCallback, pCallbackTarget
    send "showAllFindResults pQuery, pIsRegExp, pUseWildCards, pWholeMatches, pIgnoreCase, pTarget, pCallback, pCallbackTarget" to group "Editor" of me
 end revSEFindAll
 
+/**
 # Parameters
 #   pQuery : the string to search for
 #   pReplaceString : the string to replace with
@@ -400,10 +448,12 @@ end revSEFindAll
 #   pTarget : whether to search in all tabs or just the current tab
 # Description
 #   Replaces the currently highlighted search term with pReplaceString, then searches for the next match.
+*/
 command revSEReplaceCurrent pQuery, pReplaceString, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget
    send "replaceOnceAndFind pQuery, pReplaceString, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget" to group "Editor" of me
 end revSEReplaceCurrent
 
+/**
 # Parameters
 #   pQuery : the string to search for
 #   pIsRegExp : whether or not pQuery is a regular expression
@@ -414,6 +464,7 @@ end revSEReplaceCurrent
 # The current undo system does not support doing this on multiple tabs...
 # Returns
 #   The number of replacements made
+*/
 command revSEReplaceAll pQuery, pString, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget, pCallback, pCallbackTarget
    local tReplacementCount
    send "replaceAll pQuery, pString, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget, pCallback, pCallbackTarget" to group "Editor" of me
@@ -423,23 +474,28 @@ command revSEReplaceAll pQuery, pString, pIsRegExp, pUseWildCards, pWholeMatch, 
    return tReplacementCount
 end revSEReplaceAll
 
+/**
 # Parameters
 #   pStart : the number of the first char to mark
 #   pEnd : the number of the last char to mark
 # Description
 #   Marks the chunk of text specified by pStart and pEnd. Unmarks any previously marked text
+*/
 command revSEMarkText pStart, pEnd
    dispatch "findClearResults" to group "Editor" of me
    send "findMarkResult pStart, pEnd, false" to group "Editor" of me
 end revSEMarkText
 
+/**
 # Description
 #   Called when the name of one or more of the target objects has changed
 #   Updates the script editor to display the object's new names.
+*/
 command revSERefreshObjectNames
    dispatch "refreshTabStates" to group "Script Tabs" of me
 end revSERefreshObjectNames
 
+/**
 # Parameters
 #   pObject : reference to the object that had its id changed
 #   pOldId : the object's old id
@@ -448,6 +504,7 @@ end revSERefreshObjectNames
 #   Sent when an object being edited by this script editor has had its id changed.
 #   Updates stored references to the object and any UI elements that are displaying
 #   the object's id. Note that only images can have their ids changed.
+*/
 command revSEObjectIdChanged pObject, pOldId, pNewId
    send "updateObjectId pObject, pOldId, pNewId" to group "Script Tabs" of me
 
@@ -459,6 +516,7 @@ end revSEObjectIdChanged
 # OK-2008-08-19 : Bug 6947 - Store script checksums to detect whether the user has modified the script externally.
 local sScriptChecksums
 
+/**
 # Parameters
 #   pObject : reference to the object that had its rugged id changed.
 #   pOldRuggedId : the old rugged id of the object
@@ -469,6 +527,7 @@ local sScriptChecksums
 #      2. The user changes the mainstack of the stack that owns (or is) one of the objects being edited.
 #   Updates the script editor by changing stored references to the object and any UI elements that
 #   are displaying parts of the object's rugged id.
+*/
 command revSEObjectRuggedIdChanged pObject, pOldRuggedId
    local tObject
    put seGetRuggedId(pObject) into tObject
@@ -507,8 +566,10 @@ command revSEObjectRuggedIdChanged pObject, pOldRuggedId
    dispatch "refreshTabStates" to group "Script Tabs" of me
 end revSEObjectRuggedIdChanged
 
+/**
 # Description
 #   Returns the handler list for the current object, in the same format as the revAvailableHandlers.
+*/
 command revSEGetHandlerList
    local tHandlers
    dispatch "getHandlerList" to group "Editor" of me
@@ -516,11 +577,13 @@ command revSEGetHandlerList
    return tHandlers
 end revSEGetHandlerList
 
+/**
 # Parameters
 #   pDontUpdate : if true, the selected handler is not updated and is assumed to be up to date.
 # Description
 #   Returns the currently selected handler for the current object, or the last selected handler if none
 #   is selected or the information is unavailable.
+*/
 command revSEGetSelectedHandler pDontUpdate
    local tHandler
    call "getSelectedHandler pDontUpdate" to group "Editor" of me
@@ -528,8 +591,10 @@ command revSEGetSelectedHandler pDontUpdate
    return tHandler
 end revSEGetSelectedHandler
 
+/**
 # Description
 #   Returns the number of lines of the current script being edited
+*/
 command revSEGetLineCount
    local tLineCount
    dispatch "scriptGetLineCount" to group "Editor" of me
@@ -537,6 +602,7 @@ command revSEGetLineCount
    return tLineCount
 end revSEGetLineCount
 
+/**
 # Parameters
 #   pObjectList : a list of the objects that are being closed
 # Description
@@ -544,6 +610,7 @@ end revSEGetLineCount
 #   objects. If the user answers yes, applies the scripts of the objects without showing any
 #   errors. If the user answers no, does nothing and returns empty. If the user answers cancel
 #   then does nothing and returns "cancel"
+*/
 command revSEWarnBeforeClosing pObjectList
    if pObjectList is empty then
       return empty
@@ -581,6 +648,7 @@ command revSEWarnBeforeClosing pObjectList
    return empty
 end revSEWarnBeforeClosing
 
+/**
 # Parameters
 #   pError : a string representing the execution error, in the standard Revolution format.
 #   pObject : the object that threw the error. If empty, the current script editor object is assumed.
@@ -588,6 +656,7 @@ end revSEWarnBeforeClosing
 #   pObject should normally be one of the objects being edited. The script editor will not change the
 #   current object to pObject, this should be done by the caller.
 #   Shows the errors pane with a description of the error.
+*/
 command revSEDisplayExecutionError pError, pObject
    if pObject is empty then
       local tObject
@@ -610,6 +679,7 @@ command revSEDisplayExecutionError pError, pObject
    dispatch "expandCurrentPane" to group "Panes" of me
 end revSEDisplayExecutionError
 
+/**
 # Parameters
 #   pObjectList : a list of object references that are being edited by this script editor
 #   pIgnoreErrors : whether to ignore compilation errors or not.
@@ -618,6 +688,7 @@ end revSEDisplayExecutionError
 #   does not show any compile errors.
 # Returns
 #   Empty if application was successful, a list of scripts that failed otherwise
+*/
 command revSEApplyAll pObjectList, pIgnoreErrors
    local tCompilationErrors, tResult, tFailedScripts
    repeat for each line tObject in pObjectList
@@ -639,21 +710,27 @@ end revSEApplyAll
 # the script editor is suspended allows us to disregard these messages.
 local sSuspended
 
+/**
 # Description
 #   Called just before the script editor is about to be suspended (by suspend development tools menu item)
 #   Prepares the script editor for this.
+*/
 command revSESuspend
    set the destroyStack of me to false
    put true into sSuspended
 end revSESuspend
 
+/**
 # Description
 #   Called just *after* the script editor resumes from suspension
+*/
 command revSERestore
    set the destroyStack of me to true
    put false into sSuspended
 end revSERestore
 
+/**
+*/
 command revSEFormatSnippet pScript
    dispatch "scriptFormatSnippet" to group "Editor" of me with pScript
    return the result
@@ -668,12 +745,14 @@ end revSEFormatSnippet
 ################################################################################
 
 
+/**
 # Returns
 #   A list of the debug contexts available to this script editor. This is the same as the list returned
 #   by the debugger library except without any contexts with this stack as their target. This means
 #   that it is not possible to debug the script editor in the same instance that is being debugged,
 #   but does not prevent debugging using a different instance. revLibrary should reflect this by
 #   not allowing a script editor to edit its own scripts, but forcing a new instance.
+*/
 function seDebugContexts
    local tContexts
    put revDebuggerContexts() into tContexts
@@ -704,7 +783,7 @@ function seDebugContexts
       end if
 
       if the short name of stack revTargetStack(tArray["object"]) is the short name of me then
-      	next repeat
+         next repeat
       end if
 
       if tArray["behavior"] is not empty then
@@ -723,10 +802,16 @@ function seDebugContexts
 end seDebugContexts
 
 local sDebugContext
+/**
+*
+*/
 function seGetSelectedDebugContext
    return sDebugContext
 end seGetSelectedDebugContext
 
+/**
+*
+*/
 function seGetDebugContext
    local tMode
    revSEGetMode
@@ -742,7 +827,10 @@ function seGetDebugContext
    end if
 end seGetDebugContext
 
-on seSetDebugContext pContext
+/**
+*
+*/
+command seSetDebugContext pContext
    lock screen
    put pContext into sDebugContext
    dispatch "refreshCurrentPane" to group "Panes" of this card
@@ -754,8 +842,10 @@ end seSetDebugContext
 # The situation where this makes a difference is when the script contains a template automatically
 # filled in by the script editor. In this context, such a script is no longer viewed as modified.
 
+/**
 # Returns
 #   A list of the target objects with unapplied changes to their scripts that were made by the user.
+*/
 command revSEGetModifiedObjects
    local tObjects
    send "listTabs" to group "Script Tabs" of me
@@ -781,11 +871,13 @@ end revSEGetModifiedObjects
 
 local sObjectStates
 
+/**
 # Parameters
 #   pObject : reference to one of the target objects of the script editor.
 # Returns
 #   The state of the script of the specified object. This can
 #   currently either be "edited" "applied" or "error"
+*/
 function seGetObjectState pObject
    local tState
    put sObjectStates[seGetRuggedId(pObject)] into tState
@@ -796,12 +888,14 @@ function seGetObjectState pObject
    return tState
 end seGetObjectState
 
+/**
 # Parameters
 #   pObject : reference to one of the target objects of the script editor.
 #   pState : either "edited" or "applied"
 # Description
 #   Stores the specified state for the object for later use. And updates any
 #   script editor components that may depend on this information.
+*/
 command seSetObjectState pObject, pState
    if pState is "edited" then
       local tObj
@@ -829,14 +923,18 @@ command seSetObjectState pObject, pState
    end if
 end seSetObjectState
 
+/**
 # Returns
 #  A comma delimited list of the panes that are available, in order. This may be extended to allow user panes to be added etc.
+*/
 function seAvailablePanes
    return "Errors,Variables,Documentation,Breakpoints,Search Results"
 end seAvailablePanes
 
+/**
 # Returns
 #   A comma delimited list of the panes that are currently visible.
+*/
 function seVisiblePanes
    local tPreferedList
    put sePrefGet("panes,visiblelist") into tPreferedList
@@ -848,8 +946,10 @@ function seVisiblePanes
    end if
 end seVisiblePanes
 
+/**
 # Description
 #  Updates the panes in response to something changing that might affect them.
+*/
 command sePanesUpdate
    local tPane
    send "getCurrentTab" to group "Pane Tabs" of me
@@ -880,14 +980,18 @@ command sePanesUpdate
    --   end if
 end sePanesUpdate
 
+/**
+*/
 command seRefreshCurrentPaneIfItsBreakpoints
-   send "refreshCurrentPaneIfItsBreakpoints" to group "Panes" of me
+   dispatch "refreshCurrentPaneIfItsBreakpoints" to group "Panes" of me
 end seRefreshCurrentPaneIfItsBreakpoints
 
+/**
 # Parameters
 #   pPane : the name of the pane to show
 # Description
 #   Shows the specified pane
+*/
 command sePaneShow pPane
    if pPane is not among the items of seAvailablePanes() then
       exit sePaneShow
@@ -908,28 +1012,36 @@ end sePaneShow
 # but the script editor will resize other objects in order to attempt to preserve this.
 constant kEditorMinimumHeight = 100
 
+/**
+*
+*/
 function sePaneMaximumHeight
    return the bottom of this card of me - the bottom of group "Script Tabs" of me - the height of button "Resizer" of me - kEditorMinimumHeight
 end sePaneMaximumHeight
 
 
+/**
 # Parameters
 #   pType : either "compilation", "execution" or "warning"
 #   pErrorId : the error string
 # Returns
 #   The description of the specified error.
+*/
 function seErrorDescription pType, pError
-   return revIDELookupError(pType, pError)
+   return ide.LookupError(pType, pError)
 end seErrorDescription
 
+/**
 # Parameters
 #   pObject : a valid object reference
 # Description
 #   Returns a friendly form of the object name suitable for displaying on tabs, etc.
+*/
 function seFriendlyObject pObject
    return revDebuggerObjectName(pObject)
 end seFriendlyObject
 
+/**
 # Parameters
 #   pObject : reference to the object that the breakpoint is owned by
 #   pLine : the line number that the breakpoint is on
@@ -938,6 +1050,7 @@ end seFriendlyObject
 #   Line 1 is whether the breakpoint should be displayed as active or not, (i.e will it actually trigger?)
 #   Line 2 is whether the breakpoint is on a valid line or not
 #   Line 3 is a string explaining the breakpoint's status, suitable for displaying to the user. This will be empty if the breakpoint is active.
+*/
 function seBreakpointDisplayInformation pObject, pLine
    if not revDebuggerEnabled() then
       return ("inactive" & return & "false" & return & "this breakpoint will not trigger because script debug mode is currently turned off")
@@ -982,7 +1095,7 @@ function seBreakpointDisplayInformation pObject, pLine
       else
          put line tLineNumber of tStates into tBreakpointState
          if tBreakpointState is "inactive" then
-            return ("inactive" & return & "false" & return & "this breakpoint is currently disabled")
+            return ("inactive" & cr & "false" & cr & "this breakpoint is currently disabled")
          end if
       end if
    end if
@@ -1009,16 +1122,18 @@ function seBreakpointDisplayInformation pObject, pLine
       put "this breakpoint will not trigger because it is currently on an empty line of code" into tMessage
    end if
 
-   return (tBreakpointState & return & tBreakpointInvalid & return & tMessage)
+   return (tBreakpointState & return & tBreakpointInvalid & cr & tMessage)
 end seBreakpointDisplayInformation
 
 
 local sHistory
 
+/**
 # Parameters
 #   pObject : reference to an object whose script was edited
 # Description
 #   Adds the specified object to the script editor history
+*/
 command seHistoryAdd pObject
    if the number of lines of sHistory >= sePrefGet("historysize") then
       # First remove any non-existing objects, if there is still no room, remove the last item on the list
@@ -1035,10 +1150,12 @@ command seHistoryAdd pObject
    end if
 end seHistoryAdd
 
+/**
 # Parameters
 #   pObject : reference to the object to remove from the history
 # Description
 #   Removes the specified object from the history list. Leaving the order of other items as it was
+*/
 command seHistoryRemove pObject
    # Just to avoid error messages when working on the template
    if there is no pObject then
@@ -1054,9 +1171,11 @@ command seHistoryRemove pObject
    delete line tLineNumber of sHistory
 end seHistoryRemove
 
+/**
 # Description
 #    Cleans the script editor history by removing objects that don't exist and
 #    ensuring the history is trimmed to the maximum size.
+*/
 command seHistoryClean
    local tCleanedHistory
    local tItemCount
@@ -1074,23 +1193,29 @@ command seHistoryClean
    put tCleanedHistory into sHistory
 end seHistoryClean
 
+/**
 # Description
 #   Loads the history from the Revolution preferences stack into sHistory
+*/
 command seHistoryLoad
    put the cScriptEditorHistory of stack "revPreferences" into sHistory
 end seHistoryLoad
 
+/**
 # Description
 #   Saves sHistory in the Revolution preferences stack. Cleans it first to avoid
 #   storing invalid information there.
+*/
 command seHistorySave
    seHistoryClean
    set the cScriptEditorHistory of stack "revPreferences" to sHistory
 end seHistorySave
 
+/**
 # Returns
 #    The current history in a valid form, i.e. with all excess / deleted objects removed
 #    Note this is not private as it is called by
+*/
 function seHistoryGet
    seHistoryClean
    return sHistory
@@ -1099,45 +1224,61 @@ end seHistoryGet
 # This variable keeps track of whether or not the handler list is showing
 local sHandlerListShowing = "false"
 
+/**
 # Description
 #   Shows the handler list
+*/
 command seShowHandlerList
    put true into sHandlerListShowing
-   send "showHandlerList" to group "Toolbar" of me
+   dispatch "showHandlerList" to group "Toolbar" of me
 end seShowHandlerList
 
+/**
 # Description
 #   Hides the handler list
+*/
 command seHideHandlerList
    put false into sHandlerListShowing
    call "hideHandlerList" to group "Toolbar" of me
 end seHideHandlerList
 
+/**
 # Returns
 #   A reference to the object that represents the handler list. This is currently a group on the main card.
+*/
 function seHandlerListObject
    return the long id of group "Handler List" of card "Main" of me
 end seHandlerListObject
 
+/**
 # Returns
 #   Whether or not the handler list is showing.
+*/
 function seHandlerListIsShowing
    return sHandlerListShowing
 end seHandlerListIsShowing
 
+/**
+*
+*/
 function seLocateHandler pName, pProposedPosition, pType
    send "locateHandler pName, pProposedPosition, pType" to group "Editor" of me
    return the result
 end seLocateHandler
 
+/**
+*
+*/
 function seStackId
    return the long id of me
 end seStackId
 
+/**
 # Parameters
 #   pType : the type of breakpoint to show in the dialog initially. This is either "breakpoint" or "watch"
 # Description
 #   Shows the new breakpoint dialog
+*/
 command seNewBreakpointDialog pType
    local tDialog
    put the long id of stack "revSEEditBreakpoint" into tDialog
@@ -1160,6 +1301,7 @@ command seNewBreakpointDialog pType
    modal tDialog
 end seNewBreakpointDialog
 
+/**
 # Parameters
 #   pType : the type of breakpoint that we are editing. This is either "breakpoint" or "watch"
 #   pLine : the line number (if pType is "breakpoint", otherwise ignored)
@@ -1169,6 +1311,7 @@ end seNewBreakpointDialog
 #   pObject : the object that the watch or breakpoint is associated with.
 # Desription
 #   Shows the edit breakpoint dialog. (This is the same as the new breakpoint one, but with different properties set.)
+*/
 command seEditBreakpointDialog pType, pLine, pVariable, pHandler, pCondition, pObject
    local tDialog
    put the long id of stack "revSEEditBreakpoint" into tDialog
@@ -1191,11 +1334,13 @@ command seEditBreakpointDialog pType, pLine, pVariable, pHandler, pCondition, pO
    revSEUpdate false
 end seEditBreakpointDialog
 
+/**
 # Parameters
 #   pAction : the name of a script editor action. E.g. "Cut", "LaunchMessageBox"
 # Returns
 #   A string representing the keyboard shortcut(s) associated with the specified action E.g. "command shift x"
 #   Multiple shortcuts will be separated by returns.
+*/
 function seLookupShortcut pAction
    # List the available shortcut actions
    local tShortcut
@@ -1203,10 +1348,12 @@ function seLookupShortcut pAction
    return tShortcut
 end seLookupShortcut
 
+/**
 # Parameters
 #   pAction : the name of a script editor action. E.g. "Cut", "LaunchMessageBox"
 # Returns
 #   A friendly form of the shortcut suitable for displaying in tooltips etc.
+*/
 function seFriendlyShortcut pAction
    local tShortcuts
    put seLookupShortcut(pAction) into tShortcuts
@@ -1255,6 +1402,7 @@ function seFriendlyShortcut pAction
    return tFriendlyStrings
 end seFriendlyShortcut
 
+/**
 # Parameters
 #   pText : the word to search for, note this is not necessarily a handler name
 #   pObject : reference to the object containing the text
@@ -1263,6 +1411,7 @@ end seFriendlyShortcut
 #   A list, one per line, of the matching handler definitions
 #   for pText. Empty if none could be found.
 #   Note that for now, only handler definitions are returned.
+*/
 function seMatchingDefinitions pText, pObject, pHandler
    local tObject
 
@@ -1315,9 +1464,12 @@ function seMatchingDefinitions pText, pObject, pHandler
    return tMatches
 end seMatchingDefinitions
 
-function seFriendlyHandlerType pType, pIsPrivate
+/**
+*
+*/
+function seFriendlyHandlerType pType, pIsPrivate?
    local tType
-   if pIsPrivate then
+   if pIsPrivate? then
       put "private " into tType
    end if
 
@@ -1325,16 +1477,16 @@ function seFriendlyHandlerType pType, pIsPrivate
       case "M"
       case "C"
          put "message" after tType
-      break
+         break
       case "F"
          put "function" after tType
-      break
+         break
       case "S"
          put "setprop" after tType
-      break
+         break
       case "G"
          put "getprop" after tType
-      break
+         break
    end switch
 
    return toUpper(char 1 of tType) & char 2 to -1 of tType
@@ -1347,10 +1499,12 @@ end seFriendlyHandlerType
 #
 ################################################################################
 
+/**
 # Description
 #   Called when the script editor stack is resized. First resizes each script editor object,
 #   then sends a "resize" message to each object to allow the object to resize its controls
 #   appropriately to its new size.
+*/
 command actionResizeStack pInitializing
    # Hide the handler list if its showing
    seHideHandlerList
@@ -1412,6 +1566,9 @@ command actionResizeStack pInitializing
    end if
 end actionResizeStack
 
+/**
+*
+*/
 command seResizeCardBottom
    # OK-2009-02-05 : Bug 7681 - It seems that under certain circumstances the card rect is not updated
    # properly at this point. To work around this bug, we calculate the card rect ourselves from the stack.
@@ -1453,6 +1610,7 @@ command seResizeCardBottom
    dispatch "resize" to group "Left Bar" of me
 end seResizeCardBottom
 
+/**
 # Parameters
 #   pObject : the object to apply the script of
 #   pIgnoreErrors : causes errors in setting the script not to be displayed in the errors pane and IDE scripts to be set regardless of errors
@@ -1463,6 +1621,7 @@ end seResizeCardBottom
 # Description
 #   Attempts to set the script of the specified object to the most recent copy in this instance of the script editor.
 #   If setting the script failed due to an execution error, displays the error in the script editor errors pane (unless pIgnoreErrors is true).
+*/
 private command applyScript pObject, pIgnoreErrors?, @rCompilationErrors
    local tCompilationResult
    dispatch "scriptCompile" to group "Editor" of me with pObject
@@ -1585,6 +1744,8 @@ private command compileScript pObject, pIgnoreErrors?
    end if
 end compileScript
 
+/**
+*
 # Parameters
 #   pIgnoreErrors : whether or not to ignore compilation errors (optional, defaults to false)
 # Returns
@@ -1592,24 +1753,31 @@ end compileScript
 # Description
 #   Attempts to compile the script of object currently being edited. If compile errors occur, adds these to the errors pane,
 #   the script is applied regardless of whether errors ocurred or not. The stack is marked as edited.
-command actionCompile pIgnoreErrors
+*/
+command actionCompile pIgnoreErrors?
    local tCurrentObject
-   send "getCurrentTab" to group "Script Tabs" of this card of me
+   dispatch "getCurrentTab" to group "Script Tabs" of this card of me
    put the result into tCurrentObject
 
-   compileScript tCurrentObject, pIgnoreErrors
+   compileScript tCurrentObject, pIgnoreErrors?
 end actionCompile
 
+/**
+*
 # Description
 #   Reverts the current script. This logically equivalent to closing the tab without saving changes
 #   and re-opening it.
+*/
 command actionRevert
-   send "revertObject" to group "Editor" of me
+   dispatch "revertObject" to group "Editor" of me
 end actionRevert
 
+/**
+*
 # Description
 #   As actionCompile, except closes the current tab if compilation suceeded. Also closes the script editor if the closed
 #  tab was the last remaining tab.
+*/
 command actionApplyAndClose
    local tObject
    revSEGetCurrentObject
@@ -1636,8 +1804,11 @@ command actionApplyAndClose
    end if
 end actionApplyAndClose
 
+/**
+*
 # Description
 #   Removes the current tab
+*/
 command actionCloseTab
    local tObject
    revSEGetCurrentObject
@@ -1645,55 +1816,73 @@ command actionCloseTab
    revSERemoveTargetObject tObject
 end actionCloseTab
 
+/**
+*
 # Description
 #   Undoes the last action on the current script.
+*/
 command actionUndo
    # OK-2009-01-17 : Bug 7597 - Run the default undo action for controls other than the editing field
    if the long id of the owner of the focusedObject is the long id of group "Editor" of me then
-      send "actionUndo" to group "Editor" of me
+      dispatch "actionUndo" to group "Editor" of me
    else
       undo
    end if
 end actionUndo
 
+/**
+*
 # Description
 #   Redoes the last undone action on the current script
+*/
 command actionRedo
    if the long id of the owner of the focusedObject is the long id of group "Editor" of me then
-      send "actionRedo" to group "Editor" of me
+      dispatch "actionRedo" to group "Editor" of me
    else
       # Cannot redo...
    end if
 end actionRedo
 
+/**
+*
 # Description
 #   Performs the "copy" action, placing the currently selected text in the script editor onto the clipboard.
+*/
 command actionCopy
    copy
 end actionCopy
 
+/**
+*
 # Description
 #   Performs the "cut" action, deleting the currently selected text in the script editor and placing
 #   it onto the keyboard.
+*/
 command actionCut
    # OK-2009-01-17 : Bug 7597 - Run the default cut action for controls other than the editing field
    if the long id of the owner of the focusedObject is the long id of group "Editor" of me then
-      send "actionCut" to group "Editor" of me
+      dispatch "actionCut" to group "Editor" of me
    else
       cut
    end if
 end actionCut
 
+/**
+*
 # Description
 #   Performs the "select all" action, selecting all text in current script
+*/
 command actionSelectAll
    if the long id of the owner of the focusedObject is the long id of group "Editor" of me then
-      send "actionSelectAll" to group "Editor" of me
+      dispatch "actionSelectAll" to group "Editor" of me
    end if
 end actionSelectAll
 
+/**
+*
 # Description
 #   Performs the "save" action, saving the stack that owns the current object
+*/
 command actionSave
    local tObject
    revSEGetCurrentObject
@@ -1711,8 +1900,11 @@ command actionSave
    end if
 end actionSave
 
+/**
+*
 # Description
 #   Saves the stack that the current editing script is owned by, first applying all open scripts which are contained within that stack.
+*/
 command actionApplyAndSave
    # OK-2008-12-20: Bug 7511 - Previously this action only applied the current script, now it applies all scripts in the stack being saved.
    local tObject
@@ -1752,14 +1944,20 @@ command actionApplyAndSave
    actionSave
 end actionApplyAndSave
 
+/**
+*
 # Description
 #   Performs the "paste" action, pasting the clipboard text into the script editor.
+*/
 command actionPaste
-  send "actionPaste" to group "Editor" of me
+   dispatch "actionPaste" to group "Editor" of me
 end actionPaste
 
+/**
+*
 # Description
 #   Prints the current script
+*/
 command actionPrint
    local tObject
    revSEGetCurrentObject
@@ -1794,16 +1992,22 @@ command actionPrint
    reset the templateField
 end actionPrint
 
+/**
+*
 # Description
 #  Shows the find and replace dialog
+*/
 command actionFindDialog
    set the loc of stack "revSEFind" to the loc of me
    set the cCaller of stack "revSEFind" to the long id of me
    palette stack "revSEFind"
 end actionFindDialog
 
+/**
+*
 # Description
 #   Shows the go to line dialog
+*/
 command actionGoDialog
    local tLineCount
    send "scriptGetLineCount" to group "Editor" of me
@@ -1821,27 +2025,39 @@ command actionGoDialog
    put tChosenLine into sLastShownExecutionPoint
 end actionGoDialog
 
+/**
+*
 # Description
 #   Shows the interactive find in the editor group
+*/
 command actionInteractiveFind
-  send "goInteractiveFind" to group "Editor" of me
+   dispatch "goInteractiveFind" to group "Editor" of me
 end actionInteractiveFind
 
+/**
+*
 # Description
 #   Comments the selection in the current script
+*/
 command actionComment
-  send "scriptComment" to group "Editor" of me
+   dispatch "scriptComment" to group "Editor" of me
 end actionComment
 
+/**
+*
 # Description
 #   Uncomments the selection in the current script
+*/
 command actionUncomment
-   send "scriptUncomment" to group "Editor" of me
+   dispatch "scriptUncomment" to group "Editor" of me
 end actionUncomment
 
+/**
+*
 # Description
 #   If there was a previous search to resume, highlights the next search result for that search.
 #   Otherwise, shows the interactive find dialog to allow the user to start a search.
+*/
 command actionFindNext
    local tCurrentString
    put "current" into tCurrentString
@@ -1851,8 +2067,11 @@ command actionFindNext
    send "showNextFindResult empty, empty, empty, empty, empty, tFalseString, tCurrentString" to group "Editor" of me
 end actionFindNext
 
+/**
+*
 # Description
 #   Finds the previous search result
+*/
 command actionFindPrevious
    local tCurrentString
    put "current" into tCurrentString
@@ -1860,8 +2079,11 @@ command actionFindPrevious
    send "showPreviousFindResult empty, empty, empty, empty, empty, tCurrentString" to group "Editor" of me
 end actionFindPrevious
 
+/**
+*
 # Description
 #   Searches for the last selected string using the interactive find.
+*/
 command actionFindSelection
    local tSelection
    send "getLastSelection" to group "Editor" of me
@@ -1880,34 +2102,49 @@ command actionFindSelection
    actionInteractiveFind
 end actionFindSelection
 
+/**
+*
 # Description
 #   Selects the next tab. If the last tab is reached, moves back round to the first one
+*/
 command actionNextScriptTab
-   send "goNextTab" to group "Script Tabs" of me
+   dispatch "goNextTab" to group "Script Tabs" of me
 end actionNextScriptTab
 
+/**
+*
 # Description
 #   Selects the previous tab. If the first tab is reached, moves round to the last one.
+*/
 command actionPreviousScriptTab
-   send "goPreviousTab" to group "Script Tabs" of me
+   dispatch "goPreviousTab" to group "Script Tabs" of me
 end actionPreviousScriptTab
 
+/**
+*
 # Description
 #   Sends the current window to the back.
+*/
 command actionSendWindowToBack
    revIDESendCurrentWindowToBack
 end actionSendWindowToBack
 
+/**
+*
 # Description
 #   Brings up a dialog that allows the user to specify which handler is called when the "run" button is pressed
 # Returns
 #   Either "saved" or "cancelled" depending on whether the user clicked the OK or Cancel button in the dialog
+*/
 command actionEditDebugEntry
    set the cCaller of stack "revSEDebugEntryDialog" to the long id of me
    modal stack "revSEDebugEntryDialog"
    return the cResult of stack "revSEDebugEntryDialog"
 end actionEditDebugEntry
 
+/**
+*
+*/
 command actionToggleBreakpoint
    local tObject
    revSEGetCurrentObject
@@ -1946,8 +2183,11 @@ end actionToggleBreakpoint
 
 # Debugger actions. None of these have any effect if the debugger is not currently running
 
+/**
+*
 # Description
 #   Shows the next statement to be executed in the debugger.
+*/
 command actionDebugShowNext
    local tMode
    revSEGetMode
@@ -1990,6 +2230,8 @@ command actionDebugShowNext
    send "goLine tLine, true" to group "Editor" of me
 end actionDebugShowNext
 
+/**
+*
 # Description
 #   This action does one of two possible things. If we are already debugging, it
 #   performs the debugger "Run" function. Continues executing the script
@@ -1999,6 +2241,7 @@ end actionDebugShowNext
 #   in order to begin execution. The message sent and its parameters are stored as metadata on the object
 #   and the user can configure them via the actionEditDebugEntry action. If an entry point has not been
 #   configured, then a dialog is shown in order to do so.
+*/
 command actionDebugRun
    local tMode
    revSEGetMode
@@ -2054,18 +2297,24 @@ command actionDebugRun
    end if
 end actionDebugRun
 
+/**
+*
 # Description
 #   Performs the debugger "Stop" function. Terminates the script being debugged.
+*/
 command actionDebugStop
    revDebuggerStop
    revSESetMode "edit"
    seSetDebugContext empty
 end actionDebugStop
 
+/**
+*
 # Description
 #   Performs the debugger "Step Into" function. Moving into the block called by the next statement
 #   if applicable. If the next statement cannot be stepped into e.g. because its an engine command
 #   then the effect is the same as "Step Over"
+*/
 command actionDebugStepInto
    local tCurrentObject
    revSEGetCurrentObject
@@ -2074,9 +2323,12 @@ command actionDebugStepInto
    seSetDebugContext empty
 end actionDebugStepInto
 
+/**
+*
 # Description
 #   Performs the debugger "Step Over" function. Executing the next statement and continuing to the one beneath it
 #   unless a breakpoint is hit or execution terminates.
+*/
 command actionDebugStepOver
    local tCurrentObject
    revSEGetCurrentObject
@@ -2085,25 +2337,34 @@ command actionDebugStepOver
    seSetDebugContext empty
 end actionDebugStepOver
 
+/**
+*
 # Description
 #   Performs the debugger "Step Out" function. Executes the remainder of the current block and breaks at the
 #   statement immediately following where the current block was called.
+*/
 command actionDebugStepOut
-  local tCurrentObject
-  revSEGetCurrentObject
-  put the result into tCurrentObject
-  revDebuggerStepOut tCurrentObject
-  seSetDebugContext empty
+   local tCurrentObject
+   revSEGetCurrentObject
+   put the result into tCurrentObject
+   revDebuggerStepOut tCurrentObject
+   seSetDebugContext empty
 end actionDebugStepOut
 
+/**
+*
 # Description
 #   Shows the handler list
+*/
 command actionShowHandlerList
    seShowHandlerList
 end actionShowHandlerList
 
+/**
+*
 # Description
 #   Shows the script editor preferences. For now this is a separate stack, It will be integrated into the Revolution prefs.
+*/
 command actionShowPreferences
    modeless stack "revPreferencesGUI"
 
@@ -2113,8 +2374,11 @@ command actionShowPreferences
    send "revPrefsGoSection tSection" to stack "revPreferencesGUI"
 end actionShowPreferences
 
+/**
+*
 # Description
 #   Closes the script editor, may prompt the user if unsaved changes exist
+*/
 command actionClose
    local tModifiedObjects
    revSEGetModifiedObjects
@@ -2135,16 +2399,25 @@ command actionClose
    close me
 end actionClose
 
+/**
+*
 # Desription
 #   Quits Revolution, may prompth the user if unsaved changes exist
+*/
 command actionQuit
    quit
 end actionQuit
 
+/**
+*
+*/
 command actionAutocompleteSnippetManager
    modeless "com.livecode.palette.autocomplete-pro"
 end actionAutocompleteSnippetManager
 
+/**
+*
+*/
 command actionLaunchMessageBox
    revIDEOpenPalette "Message Box"
 end actionLaunchMessageBox
@@ -2161,14 +2434,14 @@ end actionLaunchMessageBox
 #   The name of the key that should be used to search for an associated action
 private function shortcutResolveKey pKey
    switch pKey
-   case "65360"
-      return "home"
-   break
-   case "65367"
-      return "end"
-   break
-   default
-      return pKey
+      case "65360"
+         return "home"
+         break
+      case "65367"
+         return "end"
+         break
+      default
+         return pKey
    end switch
 end shortcutResolveKey
 
@@ -2252,9 +2525,12 @@ private function shortcutFindAction pKey, pCommandKey, pOptionKey, pShiftKey, pC
    end if
 end shortcutFindAction
 
+/**
+*
 # Description
 #   Called when the script editor is about to be closed. Saves various things to make sure the script
 #   editor's state is correctly preserved when its re-opened.
+*/
 command seFinalize
 
    # Notify the IDE
@@ -2278,21 +2554,27 @@ command seFinalize
    put empty into sDebugContext
 end seFinalize
 
+/**
+*
 # Returns
 #   Whether or not undo is available, i.e something has been changed in the current script
+*/
 function seUndoAvailable
    # OK-2009-01-17 : Bug 7597 - We have no way of knowing if undo is available for controls
    # other than the editing field, but we assume it *is* available, in order to let it work for other controls.
    if the long id of the owner of the focusedObject is the long id of group "Editor" of me then
       call "undoAvailable" to group "Editor" of me
-       return the result
+      return the result
    else
       return true
    end if
 end seUndoAvailable
 
+/**
+*
 # Returns
 #   Whether or not redo is available, i.e. something has been undone in the current script
+*/
 function seRedoAvailable
    # OK-2009-01-17 : Bug 7597 - For controls other than the editing field, there is no redo
    if the long id of the owner of the focusedObject is the long id of group "Editor" of me then
@@ -2328,22 +2610,31 @@ private command seInitLeftBar
    seUpdateLeftBar
 end seInitLeftBar
 
+/**
+*
 # Description
 #   Updates the left bar of the script editor.
+*/
 command seUpdateLeftBar
-    call "update" to group "Left Bar" of me
- end seUpdateLeftBar
+   call "update" to group "Left Bar" of me
+end seUpdateLeftBar
 
- # Description
- #   Updates the toolbar of the script editor
- command seUpdateToolbar
-    send "update" to group "Toolbar" of me
- end seUpdateToolbar
+/**
+*
+# Description
+#   Updates the toolbar of the script editor
+*/
+command seUpdateToolbar
+   send "update" to group "Toolbar" of me
+end seUpdateToolbar
 
- # Description
- #   Called on resumeStack, checks that all the script editor's target objects are still in existence
- #   as some users may delete them with messages locked. Any objects that are found not to exist
- #   anymore are just removed from the script editor for now.
+/**
+*
+# Description
+#   Called on resumeStack, checks that all the script editor's target objects are still in existence
+#   as some users may delete them with messages locked. Any objects that are found not to exist
+#   anymore are just removed from the script editor for now.
+*/
 command seCheckTargetsExist
    local tObjects
    revSEGetTargetObjects
@@ -2365,9 +2656,12 @@ command seCheckTargetsExist
    end if
 end seCheckTargetsExist
 
+/**
+*
 # OK-2008-08-19 : Bug 6947 - Its possible that one or more of the target scripts could have been modified outside
 # the script editor while it was suspended. Use the stored checksums to detect if this is the case, and if so, prompt the
 # user to either reload the script, or just carry on editing it.
+*/
 command seCheckTargetChecksums
    local tObjects
    revSEGetTargetObjects
@@ -2400,6 +2694,9 @@ command seCheckTargetChecksums
    end if
 end seCheckTargetChecksums
 
+/**
+*
+*/
 command seWarnExternallyModifiedObjects pModifiedObjects
    set the cObjects of stack "revSEModifiedExternallyDialog" to pModifiedObjects
    modal stack "revSEModifiedExternallyDialog"
@@ -2437,6 +2734,9 @@ command seWarnExternallyModifiedObjects pModifiedObjects
    end if
 end seWarnExternallyModifiedObjects
 
+/**
+*
+*/
 private function binaryEquals p1, p2
    if (the length of p1 = the length of p2) and (p1 contains p2) then
       return true
@@ -2452,23 +2752,32 @@ end binaryEquals
 #
 ################################################################################
 
+/**
+*
 # Description
 #   Sent when the script editor stack is resized. First resizes each script editor object,
 #   then sends a "resize" message to each object to allow the object to resize its controls
 #   appropriately to its new size.
+*/
 on resizeStack
    revIDESetPaletteRectPreference the short name of me
    actionResizeStack
 end resizeStack
 
+/**
+*
 # Description
 #    Sent when the script editor is moved. Saves the new size in the preferences.
+*/
 on moveStack
    revIDESetPaletteRectPreference the short name of me
 end moveStack
 
+/**
+*
 # Description
 #   Sent when the stack loses focus, restores the message box etc if appropriate
+*/
 on suspendStack
    revSEShowPalettes
 
@@ -2479,12 +2788,18 @@ on suspendStack
    sePrefSave
 end suspendStack
 
+/**
+*
+*/
 on desktopChanged
    revIDEEnsureOnscreen the short name of this stack
 end desktopChanged
 
+/**
+*
 # Description
 #   Sent when the stack gains focus, hides the message box etc if appropriate
+*/
 on resumeStack
    revSEHidePalettes
 
@@ -2507,13 +2822,19 @@ on resumeStack
    end if
 end resumeStack
 
+/**
+*
 # Description
 #   Sent when the script editor stack is opened. Initialises the stack...
+*/
 on preOpenStack pDontCheckTarget
    revSEInitialize pDontCheckTarget
 end preOpenStack
 
+/**
+*
 # OK-2008-08-20 : Bug 6971 - This must use a non-engine message as suppress messages will block it otherwise due to the use of "call" instead of "send"
+*/
 command revSEInitialize pDontCheckTarget
    if (pDontCheckTarget is not "true") and (the short name of the target is not the short name of me) and (the short name of the target is not the short name of this card of me) then
       exit revSEInitialize
@@ -2580,6 +2901,9 @@ command revSEInitialize pDontCheckTarget
    set the showInvisibles of me to false
 end revSEInitialize
 
+/**
+*
+*/
 on idePreferenceChanged pPreference, pValue
    switch pPreference
       case "cREVScriptDebugMode"
@@ -2588,6 +2912,9 @@ on idePreferenceChanged pPreference, pValue
    end switch
 end idePreferenceChanged
 
+/**
+*
+*/
 on closeStackRequest
    if the long id of the target is not the long id of this card of me then
       pass closeStackRequest
@@ -2609,9 +2936,12 @@ on closeStackRequest
    end if
 end closeStackRequest
 
+/**
+*
 # Description
 #   This handles tabKey based keyboard shortcuts. The only one by default is to switch between tabs
 #   Note that only command + tab shortcuts are allowed to prevent interference with other functions.
+*/
 on tabKey
    # bhall2001-2017-07-18: Bug 18366 On MacOS, Use control+tab to cycle between tabs
    if (the commandKey is not "down") and (the platform is not "MacOS") then
@@ -2632,34 +2962,43 @@ on tabKey
 end tabKey
 
 
+/**
+*
 # Description
 #   This handles commandKey based keyboard shortcuts.
+*/
 on commandKeyDown pKey
-  local tAction
-  put shortcutFindAction(pKey, true, (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
+   local tAction
+   put shortcutFindAction(pKey, true, (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
 
-  if tAction is empty then
-    pass commandKeydown
-  else
-    do tAction
-  end if
+   if tAction is empty then
+      pass commandKeydown
+   else
+      do tAction
+   end if
 end commandKeyDown
 
+/**
+*
 # Description
 #   This handles functionKey based keyboard shortcuts
+*/
 on functionKey pKey
-  local tAction
-  put shortcutFindAction(("f" & pKey), (the commandKey is "down"), (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
+   local tAction
+   put shortcutFindAction(("f" & pKey), (the commandKey is "down"), (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
 
-  if tAction is empty then
-    pass functionKey
-  else
-    do tAction
-  end if
+   if tAction is empty then
+      pass functionKey
+   else
+      do tAction
+   end if
 end functionKey
 
+/**
+*
 # Description
 #   This handles enter based keyboard shortcuts, along with enterKey. Which one is sent depends whether a field is focused or not.
+*/
 on enterInField
    local tAction
    put shortcutFindAction("enter", (the commandKey is "down"), (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
@@ -2671,8 +3010,11 @@ on enterInField
    end if
 end enterInField
 
+/**
+*
 # Description
 #   This handles enter based keyboard shortcuts, along with enterInField. Which one is sent depends whether a field is focused or not.
+*/
 on enterKey
    local tAction
    put shortcutFindAction("enter", (the commandKey is "down"), (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
@@ -2684,10 +3026,13 @@ on enterKey
    end if
 end enterKey
 
+/**
+*
 # Description
 #   This handles return based keyboard shortcuts, along with returnInField. Which one is sent depends on whether a field is focused or not.
 #   Note that one of the default shortcuts is COMMAND + RETURN, to apply scripts. When the user presses this combination of keys, a returnKey
 #   or returnInField is generated, not a commandKeyDown as one might expect.
+*/
 on returnKey
    local tAction
    put shortcutFindAction("return", (the commandKey is "down"), (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
@@ -2699,10 +3044,13 @@ on returnKey
    end if
 end returnKey
 
+/**
+*
 # Description
 #   This handles return based keyboard shortcuts, along with returnKey. Which one is sent depends on whether a field is focused or not.
 #   Note that one of the default shortcuts is COMMAND + RETURN, to apply scripts. When the user presses this combination of keys, a returnKey
 #   or returnInField is generated, not a commandKeyDown as one might expect.
+*/
 on returnInField
    local tAction
    put shortcutFindAction("return", (the commandKey is "down"), (the optionKey is "down"), (the shiftKey is "down"), the long id of the focusedObject) into tAction
@@ -2714,8 +3062,11 @@ on returnInField
    end if
 end returnInField
 
+/**
+*
 # Description
 #   Handles the event when the user presses the escape key. This is not part of the shortcuts system, its behavior is not configurable
+*/
 on escapeKey
    # If there is a handler list open, close it and exit
    if seHandlerListIsShowing() then
@@ -2733,9 +3084,12 @@ on escapeKey
    send "hideInteractiveFind" to group "Editor" of me
 end escapeKey
 
+/**
+*
 # Description
 #    Handles the event when the user presses one of the arrow keys. At the moment this is done only for the variable
 #    watcher pane when debugging, to allow variables to be scrolled through without using the mouse
+*/
 on arrowKey pKey
    local tMode
    revSEGetMode
@@ -2761,16 +3115,22 @@ on arrowKey pKey
    pass arrowKey
 end arrowKey
 
+/**
+*
 # Returns
 #   The current script in a form suitable for displaying on a web page with CSS. This is designed for a specific
 #   task and should not be called in any main script editor code.
+*/
 function seScriptAsHtml
    send "scriptGetAsHtml" to group "Editor" of me
    return the result
 end seScriptAsHtml
 
+/**
+*
 # Description
 #   Updates the script editor's window title.
+*/
 command seUpdateWindowTitle pObject
    if sMode is "debug" then
       set the title of me to seCreateWindowTitle(pObject) & " (debugging)"
@@ -2779,29 +3139,42 @@ command seUpdateWindowTitle pObject
    end if
 end seUpdateWindowTitle
 
+/**
+*
 # Parameters
 #   pObject : a valid reference to an object
 # Returns
 #   The title that the script editor window should have if pObject is the current object
 #   being edited.
+*/
 function seCreateWindowTitle pObject
    return revDebuggerObjectLongName(pObject) & " - Code Editor"
 end seCreateWindowTitle
 
+/**
+*
+*/
 command seUpdateCheckSum pObject, @pScript
    local tChecksum
    put seGenerateChecksum(pScript) into tChecksum
    put tChecksum into sScriptChecksums[pObject]
 end seUpdateCheckSum
 
+/**
+*
+*/
 function seGenerateChecksum @pScript
    return md5digest(pScript)
 end seGenerateChecksum
 
+/**
+*
+*/
 function seGetCheckSum pObject
    return sScriptChecksums[pObject]
 end seGetCheckSum
 
+/**
 # Parameters
 #   pObject : reference to an object
 #   pHandler : the specification of a public handler in the script of pObject, in the form <type>,<name>
@@ -2809,6 +3182,7 @@ end seGetCheckSum
 # Returns
 #   A piece of Revolution code that can be executed in order to trigger the specified handler in the specified
 #   object to run.
+*/
 function buildDebugEntryMessage pObject, pHandler, pParameters
    # Process the parameters. In order to keep things clean and simple, we do this by putting each parameter into a variable
    # and forming two strings, one which declares and populates these variables, and one which contains a list of them to pass
@@ -2844,7 +3218,7 @@ function buildDebugEntryMessage pObject, pHandler, pParameters
          # we do the send in 0 milliseconds to allow the script editor to fall out of the call stack before the code is executed.
          put tParameterDeclarations & return into tCommandString
          put "send " & quote & item 2 of pHandler && tParameterString & quote & " to " & pObject & " in 0 milliseconds" after tCommandString
-      break
+         break
 
       case "F"
          # functions can be evaluated using the value function, but getting the parameters working is rather tricky...
@@ -2852,18 +3226,18 @@ function buildDebugEntryMessage pObject, pHandler, pParameters
          put quote & item 2 of pHandler & "(" & tParameterExpression & ")" & quote into tExpression
          put "local tExpression" & return & "put " & tExpression & " into tExpression" & return into tCommandString
          put "get value(tExpression, " & pObject & ")" after tCommandString
-      break
+         break
 
       case "G"
          # getprops can be evaluated using the get command. For these, we ignore the parameter string.
          put "get the " & item 2 of pHandler & " of " & pObject into tCommandString
-      break
+         break
 
       case "S"
          # setprops, for now we simply create a set command to trigger these.
          put tParameterDeclarations & return into tCommandString
          put "set the " & item 2 of pHandler & " of " & pObject & " to " & item 1 of tParameterString after tCommandString
-      break
+         break
    end switch
 
    return tCommandString
@@ -2871,7 +3245,10 @@ end buildDebugEntryMessage
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+*
 # Used by the tutorial system to interact with elements of the script editor
+*/
 function absoluteRectOfObject pObject
    local tRect
    if pObject is "Apply" then
@@ -2893,6 +3270,9 @@ function absoluteRectOfObject pObject
    return tRect
 end absoluteRectOfObject
 
+/**
+*
+*/
 on highlightObject pObject
    if there is a group pObject of group "Panes" of me then
       call "setCurrentTab pObject" to group "Pane Tabs" of me
@@ -2905,27 +3285,45 @@ on highlightObject pObject
    end if
 end highlightObject
 
+/**
+*
+*/
 on revSESetScript pScript
    dispatch "textSetScript" to field "Script" of me with pScript
 end revSESetScript
 
+/**
+*
+*/
 function revSEGetScript pScript
    dispatch function "textGetScript" to field "Script" of me
    return the result
 end revSEGetScript
 
+/**
+*
+*/
 on revSEIndentScript
    dispatch "scriptFormat" to field "Script" of me with "script"
 end revSEIndentScript
 
+/**
+*
+*/
 on revSEApply pIgnoreErrors
    actionCompile pIgnoreErrors
 end revSEApply
 
+/**
+*
+*/
 function revSEGetSelectedText
    return the selectedText of field "Script" of me
 end revSEGetSelectedText
 
+/**
+*
+*/
 private command appendToList @xList, pValue
    if xList is not empty then
       put return & pValue after xList
@@ -2935,12 +3333,18 @@ private command appendToList @xList, pValue
 end appendToList
 
 local sHandlersA
+/**
+*
+*/
 private function getHandlerList pObjType
    get the keys of sHandlersA[pObjType]
    sort it
    return it
 end getHandlerList
 
+/**
+*
+*/
 private function revSEDefaultHandlerInfoForObjectType pObjType
    if sHandlersA[pObjType] is not empty then
       return getHandlerList (pObjType)
@@ -2962,7 +3366,10 @@ private function revSEDefaultHandlerInfoForObjectType pObjType
    return getHandlerList(pObjType)
 end revSEDefaultHandlerInfoForObjectType
 
-private function revSEDefaultHandlerInfoForWidget pWidgetKind
+/**
+*
+*/
+private function SE.DefaultHandlerInfo.ForWidget pWidgetKind
    if sHandlersA[pWidgetKind] is not empty then
       return getHandlerList(pWidgetKind)
    end if
@@ -2975,8 +3382,11 @@ private function revSEDefaultHandlerInfoForWidget pWidgetKind
    end repeat
    put tMessageList into sHandlersA[pWidgetKind]
    return getHandlerList(pWidgetKind)
-end revSEDefaultHandlerInfoForWidget
+end SE.DefaultHandlerInfo.ForWidget
 
+/**
+*
+*/
 function revSEDefaultHandlers
    local tObject
    revSEGetCurrentObject
@@ -2987,18 +3397,24 @@ function revSEDefaultHandlers
    return revSEDefaultHandlersForObject(tObject)
 end revSEDefaultHandlers
 
+/**
+*
+*/
 function revSEDefaultHandlersForObject pObj
    local tType
    put word 1 of the name of pObj into tType
    if tType is "widget" then
       local tKind
       put the kind of pObj into tKind
-      return revSEDefaultHandlerInfoForWidget(tKind)
+      return SE.DefaultHandlerInfo.ForWidget(tKind)
    end if
 
    return revSEDefaultHandlerInfoForObjectType(tType)
 end revSEDefaultHandlersForObject
 
+/**
+*
+*/
 function revSEConstructDefaultScript pObj, pHandler
    local tType
    put word 1 of the name of pObj into tType
@@ -3027,6 +3443,9 @@ function revSEConstructDefaultScript pObj, pHandler
    return tScript
 end revSEConstructDefaultScript
 
+/**
+*
+*/
 command revSEAddDefaultHandler pHandler
    local tDefaultScript, tObject
    revSEGetCurrentObject

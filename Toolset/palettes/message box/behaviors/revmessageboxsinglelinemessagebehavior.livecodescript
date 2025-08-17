@@ -1,14 +1,18 @@
 ﻿script "revMessageBoxSingleLineMessageBehavior"
+
 local lHistory, lHistoryIndex, lNumInHistory, lMatchingHistory, lNumMatching, lMatchingIndex
 
+/**
+*
+*/
 on returnInField
    ideMessageBoxExecuteScript(the text of me)
    if the result is not empty then
       put the result into me
       dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of me
-      revIDEConsoleHistoryAdd(the text of me)
+      msg.ConsoleHistoryAdd(the text of me)
    end if
-   revInitialise
+   msg.Single.Initialise
 
    # It's possible to close the message box or change the card while
    # the above is executing, so ensure the field is still open before
@@ -18,35 +22,47 @@ on returnInField
    end if
 end returnInField
 
+/**
+*
+*/
 on enterInField
    returnInField
 end enterInField
 
 local sColorizeMsg
 
+/**
+*
+*/
 on textChanged
    cancel sColorizeMsg
    get the long id of me
    send "revSEColorizeField it" to stack "revSEUtilities" in 100 milliseconds
    put the result into sColorizeMsg
-   revDisplayAutoComplete(the text of me)
+   displayAutoComplete(the text of me)
 end textChanged
 
+/**
+*
+*/
 on arrowKey pKey
    if pKey is "up" then
-      revNextLine
+      msg.NextLine
    else if pKey is "down" then
-      revPrevLine
+      msg.PrevLine
    else if pKey is "right" and field "auto complete" is not empty  then
-      revIDEAcceptAutoComplete
+      msg.AcceptAutoComplete
    else
       pass arrowKey
    end if
 end arrowKey
 
+/**
+*
+*/
 on commandKeyDown pKey
-   if pKey is "P" and the platform is not "MacOS" then revPrevLine
-   if pKey is "N" and the platform is not "MacOS" then revNextLine
+   if pKey is "P" and the platform is not "MacOS" then msg.PrevLine
+   if pKey is "N" and the platform is not "MacOS" then msg.NextLine
    if pKey is "U" then
       put empty into me
       put empty into field "auto complete"
@@ -54,14 +70,14 @@ on commandKeyDown pKey
    end if
    if pKey is "V" then
       put clipboardData["text"] into the selectedChunk
-      revDisplayAutoComplete clipboardData["text"]
+      displayAutoComplete clipboardData["text"]
       dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of me
    else
       pass commandKeyDown
    end if
 end commandKeyDown
 
-command revInitialise
+private command msg.Single.Initialise
    set the textStyle of me to empty
 
    local tLine, tInHistory
@@ -83,14 +99,14 @@ command revInitialise
    else # the text of me is not empty
       put 0 into lHistoryIndex
    end if
-end revInitialise
+end msg.Single.Initialise
 
 local sColorizeAutocompleteMsg
 
-command revDisplayAutoComplete pString
+private command displayAutoComplete pString
    lock screen
    local tString
-   put revIDEAutoComplete(pString) into tString
+   put msg.AutoComplete(pString) into tString
 
    if tString is not empty then
       put tString into lMatchingHistory
@@ -111,14 +127,20 @@ command revDisplayAutoComplete pString
    send "__ColorizeAutocomplete" to me in 100 milliseconds
    put the result into sColorizeAutocompleteMsg
    unlock screen
-end revDisplayAutoComplete
+end displayAutoComplete
 
+/**
+*
+*/
 on __ColorizeAutocomplete
    dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of field "auto complete"
    set the textColor of char 1 to -1 of field "auto complete" to "gray70"
 end __ColorizeAutocomplete
 
-command revNextLine
+/**
+*
+*/
+command msg.NextLine
    lock screen
    lock messages
    if field "auto complete" is empty then
@@ -138,9 +160,12 @@ command revNextLine
    _internal script colorize char 1 to (the number of chars of me) of me
    unlock messages
    unlock screen
-end revNextLine
+end msg.NextLine
 
-command revPrevLine
+/**
+*
+*/
+command msg.PrevLine
    lock screen
    lock messages
    if field "auto complete" is empty then
@@ -160,12 +185,18 @@ command revPrevLine
    _internal script colorize char 1 to (the number of chars of me) of me
    unlock messages
    unlock screen
-end revPrevLine
+end msg.PrevLine
 
+/**
+*
+*/
 on closeField
    put empty into field "auto complete"
 end closeField
 
+/**
+*
+*/
 on exitField
    put empty into field "auto complete"
 end exitField

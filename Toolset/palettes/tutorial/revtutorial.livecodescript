@@ -1295,7 +1295,7 @@ private command revTutorialSetPointer pPointer
 end revTutorialSetPointer
 
 private function revTutorialGetPointer pPointer
-  return sPointer
+   return sPointer
 end revTutorialGetPointer
 
 function revTutorialPointerDifferent pPointer
@@ -1379,7 +1379,7 @@ private function revTutorialPointerPositionCompute pPointerVertical, pPointerLef
    else
       put "right" into tLeftRight
    end if
-
+   
    if pPointerVertical then
       return tTopBottom & "-" & tLeftRight
    else
@@ -1591,7 +1591,7 @@ end revTutorialResume
 constant kPrefsToStore = "cScriptEditor,explicitvariables|cToolbarIcons|revTools_show|idePropertyInspector_labels"
 constant kBrowserWidth = 600
 constant kBrowserHeight = 450
-on revInitialiseTutorial
+on tutorial.Initialise
    set the _ideoverride of stack "revTutorial" to true
    
    lock screen
@@ -1732,7 +1732,7 @@ on revInitialiseTutorial
    revIDESubscribe "ideNameChanged"
    
    unlock screen
-end revInitialiseTutorial
+end tutorial.Initialise
 
 on ideNameChanged pOldName, pNewName, pTarget
    if word 1 of pTarget is "stack" then
@@ -1807,7 +1807,7 @@ on revTutorialUpdateProgress pStep
 end revTutorialUpdateProgress
 
 on revTutorialStartWithState pStep, pTaggedObjects
-   revInitialiseTutorial 
+   tutorial.Initialise
    
    local tTutorialInfo
    put revIDETutorialInProgress() into tTutorialInfo

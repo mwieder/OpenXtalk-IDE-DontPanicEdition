@@ -133,7 +133,7 @@ command closeAccept
    if tCondition is not empty then
       ideCompileCheck "return" && tCondition
       if the result is not empty then
-         answer error revIDELocalise("The entered condition does not compile")
+         answer error ide.Localise("The entered condition does not compile")
          exit closeAccept
       end if
    end if

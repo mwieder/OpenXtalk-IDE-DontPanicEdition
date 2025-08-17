@@ -21,6 +21,9 @@ message is sent:
 
 local lPlaceholderText
 
+/**
+*
+*/
 setProp cPlaceholderText pPlaceholderText
    put pPlaceholderText into lPlaceholderText
    if not the cFiltering of me then
@@ -53,8 +56,11 @@ private command selectAll
    select char 1 to -1 of me
 end selectAll
 
+/**
+*
 -- This does the main work of fixing up the formatting.  It also
 -- sends the registered callback message if necessary.
+*/
 on update
    if the cFiltering of me then
       set the textstyle of me to empty
@@ -84,30 +90,51 @@ end update
 --
 -- Field event handlers
 --
+/**
+*
+*/
 on textChanged
    send "update" to me
 end textChanged
 
+/**
+*
+*/
 on openField
    startFiltering
 end openField
 
+/**
+*
+*/
 on closeField
    stopFiltering
 end closeField
 
+/**
+*
+*/
 on exitField
    stopFiltering
 end exitField
 
+/**
+*
+*/
 on returnInField
    selectAll
 end returnInField
 
+/**
+*
+*/
 on enterInField
    selectAll
 end enterInField
 
+/**
+*
+*/
 command clearFilter
    put empty into me
    stopFiltering

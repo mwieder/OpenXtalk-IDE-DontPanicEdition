@@ -1,4 +1,8 @@
 ﻿script "revMessageBoxSingleLineCardBehavior"
+
+/**
+*
+*/
 on openCard
    lock screen
    --show relevant frame items
@@ -40,22 +44,34 @@ on openCard
    pass openCard
 end openCard
 
+/**
+*
+*/
 on tMsgSelect
    select text of field "message" of card "Single Line" of stack "Message Box"
 end tMsgSelect
 
+/**
+*
+*/
 on closeCard
    hideFrameItem "outputSource"
    hideFrameItem "unlockDefaultStack"
    hideFrameItem "lockDefaultStack"
 end closeCard
 
+/**
+*
+*/
 on resizeStack
    layoutCard
    # AL-2015-04-17: [[ Bug 15227 ]] Pass resizeStack so it is handled by the palette behavior
    pass resizeStack
 end resizeStack
 
+/**
+*
+*/
 on layoutCard
    set the rect of group "fields" of me to the contentRect of me
    lock screen
@@ -91,6 +107,9 @@ on layoutCard
    unlock screen
 end layoutCard
 
+/**
+*
+*/
 on closeField
    if the short name of the target is "results" then
       put the text of the target into msg

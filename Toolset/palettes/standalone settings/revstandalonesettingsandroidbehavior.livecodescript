@@ -6,8 +6,9 @@ end preOpenCard
 
 private function android.architectures
    local tAndroidPlatforms
-   dispatch function "revSBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
-   put the result into tAndroidPlatforms
+   --dispatch function "SBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
+   --put the result into tAndroidPlatforms
+   put SBPlatformArchitectures("Android") into tAndroidPlatforms
    return tAndroidPlatforms
 end android.architectures
 
@@ -16,9 +17,9 @@ on initialize
    put getSettings() into tSettings
    local tEnabled? = false
    local tAndroidPlatforms
-   #   dispatch function "revSBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
+   #   dispatch function "SBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
    #   put the result into tArchs
-   #repeat for each item tItem in revSBPlatformArchitectures("Android")
+   #repeat for each item tItem in SBPlatformArchitectures("Android")
    put android.architectures() into tAndroidPlatforms
    repeat for each item tItem in tAndroidPlatforms
       set the hilite of button ("Android" && tItem) of group "Android targets" of me to tSettings["Android",tItem] is true
@@ -145,8 +146,8 @@ on updateAndroidSettingState
    put getSettings() into tSettings
    local tEnabled? = false
    local tAndroidPlatforms
-#   dispatch function "revSBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
-#   put the result into tAndroidPlatforms
+   #   dispatch function "SBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
+   #   put the result into tAndroidPlatforms
    put android.architectures() into tAndroidPlatforms
    repeat for each item tItem in tAndroidPlatforms
       if tSettings["Android",tItem] then
@@ -156,7 +157,7 @@ on updateAndroidSettingState
    set the enabled of group "Android Settings" of me to tEnabled?
    set the visible of button "Androidchecked" to tEnabled?
    set the opaque of button "Androidchecked" to false
-
+   
    -- splash screen is not supported in Indy and Business editions
    --if revLicenseType() is "commercial" \
    --or revLicenseType() is "professional" then
@@ -167,16 +168,16 @@ end updateAndroidSettingState
 on updateAndroidArch pArch, pBuild
    local tSettingsA
    put getSettings() into tSettingsA
-
+   
    put pBuild into tSettingsA["Android",pArch]
-
+   
    local tEnabled = false
    local tAndroidPlatforms
-#   dispatch function "revSBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
-#   put it into tAndroidPlatforms
+   #   dispatch function "SBPlatformArchitectures" to stack "revStandaloneSettings" with "Android"
+   #   put it into tAndroidPlatforms
    put android.architectures() into tAndroidPlatforms
    repeat for each item tItem in tAndroidPlatforms
-   #repeat for each item tItem in revSBPlatformArchitectures("Android")
+      #repeat for each item tItem in SBPlatformArchitectures("Android")
       if tSettingsA["Android",tItem] then
          put true into tEnabled
          exit repeat
@@ -184,11 +185,11 @@ on updateAndroidArch pArch, pBuild
    end repeat
    put tEnabled into tSettingsA["Android"]
    setSettings tSettingsA
-
+   
    if tEnabled then
       buildForEnabled "android"
    end if
-
+   
    revSetEdit
    updateAndroidSettingState
 end updateAndroidArch

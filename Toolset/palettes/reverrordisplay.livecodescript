@@ -153,13 +153,13 @@ on preOpenCard
       unlock messages
       exit to top
    end if
-
-
+   
+   
    if gREVExit then
       put false into gREVExit
       exit preOpenCard
    end if
-
+   
    set the lockCursor to false
    if the platform is "MacOS" then
       local tStackName
@@ -175,27 +175,27 @@ on preOpenCard
    end if
    local tError
    put the executionError of this stack into tError
-
+   
    local tScriptError
    put the scriptError of this stack into tScriptError
-
+   
    local tObject
    put the errorObject of this stack into tObject
    set the executionError of this stack to empty
    set the scriptError of this stack to empty
    set the errorObject of this stack to empty
-
+   
    lock screen
    set the textHeight of field "Error" of group "errorDisplay" of me to 16
    --debug mode stuff
-
+   
    local tfieldContent
    put the htmlText of field 1 into tfieldContent
-
+   
    local tProfile
    put "Master" into tProfile
    global gREVProfileReadOnly
-
+   
    local tReturnReadOnly
    put gREVProfileReadOnly into tReturnReadOnly
    put true into gREVProfileReadOnly
@@ -219,24 +219,24 @@ on preOpenCard
    set the htmlText of field 1 to tfieldContent
    resizeStack
    --end debug mode stuff
-
+   
    local tNumber
    if tError is not empty then
       local tErrorString
       put "     " & tab & "executing at" && the long time & cr into tErrorString
-
+      
       if item 2 of line 1 of tError is 0 then -- go down until error is found
          repeat with i = 1 to the number of lines in tError
             if item 2 of line i of tError is not 0 then exit repeat
          end repeat
-
+         
          local tErrorLine
          put i into tErrorLine
       else
          put 1 into tErrorLine
       end if
       put "Type" & tab after tErrorString
-
+      
       put item 1 of line 1 of tError into tNumber -- look up number based on line 1 always
       if tNumber is not a number then
          close stack "revErrorDisplay"
@@ -245,22 +245,22 @@ on preOpenCard
       if tNumber is kExternalHandlerError then
          put item 4 to -1 of line 1 of tError after tErrorString
       else
-         put revIDELookupError("execution", tError) after tErrorString
+         put ide.LookupError("execution", tError) after tErrorString
       end if
       put return after tErrorString
    else if tScriptError is not empty then
       put tScriptError into tError
       put "     " & tab & "compiling at" && the long time & return into tErrorString
-      put "Type" & tab & revIDELookupError("compilation", tError) after tErrorString
+      put "Type" & tab & ide.LookupError("compilation", tError) after tErrorString
       put return after tErrorString
    end if
-
+   
    if tObject is empty then exit to top -- bogus error
    put "Object" & tab & the short name of tObject & return after tErrorString
-
+   
    local tTargetStack
    put revTargetStack(tObject) into tTargetStack
-
+   
    if not the passkey of stack tTargetStack then
       local tPrompt
       put "There was an error executing a script in stack" && tTargetStack \
@@ -270,7 +270,7 @@ on preOpenCard
       close stack "revErrorDisplay"
       exit to top
    end if
-
+   
    if tNumber is kExtensionErrorCode then
       put "LCB Error" & tab & item 4 to -1 of line 2 of tError into line 2 of tErrorString
       put "LCB File" & tab & item 4 to -1 of line 3 of tError & cr after tErrorString
@@ -285,7 +285,7 @@ on preOpenCard
       end if
       put "Line" & tab & tScriptLine & return after tErrorString
       set the cLastError of this cd to line -2 of tErrorString & cr & tObject
-
+      
       local tExit?
       put false into tExit?
       repeat for each line l in tError
@@ -309,7 +309,7 @@ on preOpenCard
    if tUIError and gREVDevelopment is not true then
       local tLogString
       put cr & cr & cr & "*** --Internal error" & cr & tErrorString into tLogString
-
+      
       if tError is not empty then
          put cr & tError after tLogString
       else
@@ -336,7 +336,7 @@ on preOpenCard
    if tUIError then
       --
    end if
-
+   
    local tField, tFormattedWidth, tWidth
    put the long id of field "Error" of group "errorDisplay" of me into tField
    put the formattedWidth of tField into tFormattedWidth
@@ -348,7 +348,7 @@ on preOpenCard
    end if
    set the vScroll of tField to 0
    set the hScroll of tField to 0
-
+   
    local tUniqueChunk
    put base64encode(line 1 to 5 of field "Error" of group "errorDisplay" of me) into tUniqueChunk
    if tError is not empty then
@@ -426,16 +426,16 @@ setProp cCurrentObject pWhat
    else
       put false into tScriptError?
    end if
-
+   
    local tObject
    put last line of pWhat into tObject
-
+   
    local tParsedData
    repeat for each line l in (line 1 to -2 of pWhat)
       if tScriptError? then
-         put "     " & tab & revIDELookupError("compilation", l) after tParsedData
+         put "     " & tab & ide.LookupError("compilation", l) after tParsedData
       else
-         put "Type" & tab & revIDELookupError("execution", l) after tParsedData
+         put "Type" & tab & ide.LookupError("execution", l) after tParsedData
       end if
       put cr after tParsedData
       put word 1 to -1 of line (item 2 of l) of the script of tObject & cr after tParsedData

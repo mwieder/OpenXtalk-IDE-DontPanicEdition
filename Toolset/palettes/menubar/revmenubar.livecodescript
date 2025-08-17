@@ -2958,7 +2958,7 @@ end menubar.ContextMenuPick
 private command menubar.ContextMenuPickTarget pWhich, pTarget
    local tTargetStack
    put revIDEStackOfObject(line 1 of pTarget) into tTargetStack
-
+   
    set the itemdelimiter to "|"
    switch item 1 of pWhich
       ######## OBJECTS #########
@@ -3040,7 +3040,7 @@ private command menubar.ContextMenuPickTarget pWhich, pTarget
       case "Pause"
          revIDETogglePauseOfPlayer
          break
-
+         
          ######## MENU SPECIFIC #########
       case "TopLevel Panel Stack"
          toplevel the menuname of pTarget
@@ -3078,7 +3078,7 @@ private command menubar.ContextMenuPickTarget pWhich, pTarget
          revIDEStandaloneSettingsForStack tTargetStack
          break
       case "Save As Standalone Application..."
-         revIDESaveAsStandalone tTargetStack
+         ide.SaveAsStandalone tTargetStack
          break
       case "Start Profiling Scripts"
          scriptprofilerStartProfiler the short name of tTargetStack
@@ -3135,7 +3135,7 @@ private command menubar.FileMenu.Pick pWhich
          revIDEActionSaveStackAs the long id of the topStack
          break
       case "Save As Standalone Application..."
-         revIDESaveAsStandalone the long id of the topStack
+         ide.SaveAsStandalone the long id of the topStack
          break
       case "Share this stack..."
          revIDEShareStack the long id of the topStack
@@ -3150,7 +3150,7 @@ private command menubar.FileMenu.Pick pWhich
          revIDERevertToSavedStack the long id of the topStack
          break
       case "Page Setup..."
-         revIDEPrintPageSetup
+         ide.PrintPageSetup
          break
       case "Print Card..."
          revIDEPrintCurrentCard

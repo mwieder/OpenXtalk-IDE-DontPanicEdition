@@ -8361,7 +8361,7 @@ private command _ReportBehaviorError pError
       if _ControlType() is "table" then put "column" into theBehaviorType
       else put "row" into theBehaviorType
       answer "An error has occurred in behavior for the " & theBehaviorType & " template:" & cr & \
-            revIDELookupError("execution", pError) with "OK" or "Edit Script" 
+            ide.LookupError("execution", pError) with "OK" or "Edit Script" 
       if it is "Edit Script" then
          repeat for each line theLine in pError
             if there is a (item 4 of theLine) then
