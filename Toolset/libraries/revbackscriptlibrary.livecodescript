@@ -1191,13 +1191,13 @@ on preOpenStack
    lock screen
    local tTargetStack
    put revIDEStackOfObject(the long id of the target) into tTargetStack
-
+   
    if revIDEStackIsIDEStack(tTargetStack) then
       # AL-2015-09-15: [[ Bug 15745 ]] Ensure palettes don't get placed off screen
-      revIDEEnsureOnScreen the short name of tTargetStack
+      ide.EnsureOnScreen the short name of tTargetStack
    end if
    unlock screen
-
+   
    if dontSuppressMessage?() then
       pass preOpenStack
    end if
@@ -1557,8 +1557,6 @@ function revScriptEditorTemplate
 end revScriptEditorTemplate
 
 function revScriptEditorMain
-   --return the long id of stack (revEnvironmentToolsetPath() & slash & "revscripteditor.rev")
-   # OK-2008-11-04 : Cannot refer to the script editor by path because it has no path in Media.
    return the long id of stack "revNewScriptEditor"
 end revScriptEditorMain
 
@@ -1609,10 +1607,10 @@ function revMenuManagerGroup pGroups
 end revMenuManagerGroup
 
 on errorDialog pWhatError, pWhatError2
-   if revTestEnvironment() then
+   if isTestEnvironment?() then
       pass errorDialog
    end if
-
+   
    ######################
    close printing
    global gREVSuppressErrors, gREVDevelopment
@@ -2419,10 +2417,10 @@ constant kDriverListFile = "Database Drivers.txt"
 
 -- MW-2013-06-13: [[ CloneAndRun ]] Construct the list of dbdrivers manually
 function revDatabaseDriverBuildList
-   if revEnvironmentIsInstalled() then
+   if environment.IsInstalled?() then
       pass revDatabaseDriverBuildList
    end if
-
+   
    local tList
    put empty into tList
    // AL-2015-02-17: [[ SB Inclusions ]] Ensure mysql module name is standard (was dbmysql)
@@ -2441,9 +2439,9 @@ end revDatabaseDriverBuildList
 function revDatabaseDriverList
    local tEnvironmentList
    local tDrivers
-
+   
    -- MW-2013-06-13: [[ CloneAndRun ]] Special-case when not an installation.
-   if revEnvironmentIsInstalled() then
+   if environment.IsInstalled?() then
       # OK-2007-09-24 : Legacy driver support. Unfortunately the legacy driver support also includes a legacy revDB external,
       # which does not support the revGetDatabaseDriverPath function. So if legacy drivers are to be used, we need to revert to the old
       # way of listing the drivers. Because the setting does not take place until LiveCode is restarted, we can't just check it
@@ -2453,16 +2451,16 @@ function revDatabaseDriverList
       try
          put revGetDatabaseDriverPath() into tDriverPaths
       catch tError
-         put revEnvironmentExternalsPath() & "/Legacy/Database Drivers" into tDriverPaths
-         put return & revEnvironmentUserExternalsPath() & "/Legacy/Database Drivers" after tDriverPaths
+         put environment.ExternalsPath() & "/Legacy/Database Drivers" into tDriverPaths
+         put cr & environment.UserExternalsPath() & "/Legacy/Database Drivers" after tDriverPaths
       end try
-
+      
       local tEnvironmentFile
       put line 1 of tDriverPaths & slash & kDriverListFile into tEnvironmentFile
-
+      
       local tUserFile
       put line 2 of tDriverPaths & slash & kDriverListFile into tUserFile
-
+      
       # OK-2007-09-24 : Legacy driver support. If legacy drivers are in use, we ignore the environment list
       # as things might get confused if we use a mixture of new and legacy drivers.
       if the cREVUseLegacyDrivers of stack "revPreferences" then
@@ -2470,38 +2468,38 @@ function revDatabaseDriverList
       else
          put url ("file:" & tEnvironmentFile) into tEnvironmentList
       end if
-
+      
       local tUserList
       put url ("file:" & tUserFile) into tUserList
-
+      
       # OK-2007-09-14 : Bug 5394 : On linux the engine does not convert the line endings
       # correctly resulting in only the first line of the drivers list being returned. We
       # work around this for now until the bug is fixed in the engine.
-# TODO: Is this fixed in the engine now?
+      # TODO: Is this fixed in the engine now?
       if the platform is "Linux" then
          # Windows line endings
          replace (numToChar(10) & numToChar(13)) with numToChar(10) in tUserList
          replace (numToChar(10) & numToChar(13)) with numToChar(10) in tEnvironmentList
-
+         
          # Mac line endings
          replace numToChar(13) with numToChar(10) in tUserList
          replace numToChar(13) with numToChar(10) in tEnvironmentList
       end if
-
+      
       repeat for each line tDriver in tUserList
          put item 1 of tDriver & cr after tDrivers
       end repeat
    else
       put revDatabaseDriverBuildList() into tEnvironmentList
    end if
-
+   
    repeat for each line tDriver in tEnvironmentList
       if item 1 of tDriver is not among the lines of tDrivers then
          put item 1 of tDriver & cr after tDrivers
       end if
    end repeat
    delete the last char of tDrivers # remove the trailing cr
-
+   
    return tDrivers
 end revDatabaseDriverList
 
@@ -2524,29 +2522,29 @@ end ExternalsBuildList
 
 function ExternalsList
    local tDrivers
-
+   
    -- MW-2013-06-13: [[ CloneAndRun ]] Special-case when not an installation.
    local tEnvironmentFile
-   if revEnvironmentIsInstalled() then
-
-      put revEnvironmentExternalsPath() & "/Externals.txt" into tEnvironmentFile
-
+   if environment.IsInstalled?() then
+      
+      put environment.ExternalsPath() & "/Externals.txt" into tEnvironmentFile
+      
       local tUserFile
-      put revEnvironmentUserExternalsPath() & "/Externals.txt" into tUserFile
-
+      put environment.UserExternalsPath() & "/Externals.txt" into tUserFile
+      
       local tUserDrivers
       put url ("file:"&tUserFile) into tUserDrivers
-
+      
       local tEnvironmentDrivers
       put url ("file:"&tEnvironmentFile) into tEnvironmentDrivers
-
+      
       repeat for each line l in tUserDrivers
          put item 1 of l & cr after tDrivers
       end repeat
    else
       put ExternalsBuildList() into tEnvironmentDrivers
    end if
-
+   
    repeat for each line tDriver in tEnvironmentDrivers
       if item 1 of tDriver is not among the lines of tDrivers then
          put item 1 of tDriver & cr after tDrivers
@@ -2561,25 +2559,25 @@ constant kDriverIndexSubFolder = "Database Drivers"
 
 function revDBDriverPath pDriver, pPlatform, pArchitecture
    -- MW-2013-06-13: [[ CloneAndRun ]] If we are not installed, special-case the request.
-   if not revEnvironmentIsInstalled() then
+   if not environment.IsInstalled?() then
       if pPlatform contains "MacOSX" and the platform is not "macos" or \
             pPlatform is "Linux" and the platform is not "linux" or \
             pPlatform is "Windows" and the platform is not "win32" then
          return empty
       end if
-
+      
       repeat for each line tLine in revDatabaseDriverBuildList()
          if item 1 of tLine is pDriver then
             return revEnvironmentBinariesPath() & slash & item 2 of tLine
          end if
       end repeat
-
+      
       return empty
    end if
-
+   
    -- returns path to database driver from runtime or user runtime folder
    -- will be a folder on Mac OS X, a list of files on Windows
-
+   
    local tPlatform, tEnvironmentFolder, tUserFolder
    put pPlatform into tPlatform
    if tPlatform is "MacOSX" then
@@ -2588,28 +2586,28 @@ function revDBDriverPath pDriver, pPlatform, pArchitecture
          put "Universal" into pArchitecture
       end if
    end if
-
-   put revEnvironmentRuntimePath() & "/" & tPlatform & "/" & pArchitecture & "/Externals" into tEnvironmentFolder
+   
+   put environment.RuntimePath() & "/" & tPlatform & "/" & pArchitecture & "/Externals" into tEnvironmentFolder
    put revEnvironmentUserRuntimePath() & "/" & tPlatform & "/" & pArchitecture & "/Externals" into tUserFolder
-
+   
    local tEnvironmentFile, tUserFile, tLegacyFile
    put tEnvironmentFolder & slash & kDriverIndexSubFolder & slash & kDriverIndexName into tEnvironmentFile
    put tUserFolder & slash & kDriverIndexSubFolder & slash & kDriverIndexName into tUserFile
    put tUserFolder & "/Legacy/" & kDriverIndexSubFolder & slash & kDriverIndexName into tLegacyFile
-
+   
    local tUserDrivers
    put url ("file:"&tUserFile) into tUserDrivers
-
+   
    local tEnvironmentDrivers
    put url ("file:" & tEnvironmentFile) into tEnvironmentDrivers
-
+   
    # OK-2009-02-03 : Bug 7433 - If using legacy drivers, this is where the index will be. Otherwise the variable
    # will simply be empty and we fall back to using the normal driver.
    local tLegacyDrivers
    if the cREVUseLegacyDrivers of stack "revPreferences" and pPlatform is not "Linux" then
       put url ("file:" & tLegacyFile) into tLegacyDrivers
    end if
-
+   
    # Attempt to locate a legacy driver if we are meant to use them, otherwise just search for the drivers as normal
    local tLineNo, tBasePath
    if the cREVUseLegacyDrivers of stack "revPreferences" and pPlatform is not "Linux" then
@@ -2619,10 +2617,10 @@ function revDBDriverPath pDriver, pPlatform, pArchitecture
          put tLegacyFile into tBasePath
       end if
    end if
-
+   
    if tLineNo is empty or tLineNo = 0 then
       put lineOffset(pDriver & comma,tUserDrivers) into tLineNo
-
+      
       if tLineNo is not 0 then
          put line tLineNo of tUserDrivers into tLine
          put tUserFile into tBasePath
@@ -2634,14 +2632,14 @@ function revDBDriverPath pDriver, pPlatform, pArchitecture
          end if
       end if
    end if
-
+   
    set the itemDel to slash
    delete item -1 of tBasePath
    set the itemDel to comma
-
+   
    local tReturn
-#   repeat with i = 2 to the number of items in tLine
-#      put tBasePath & slash & item i of tLine & cr after tReturn
+   #   repeat with i = 2 to the number of items in tLine
+   #      put tBasePath & slash & item i of tLine & cr after tReturn
    delete item 1 of tLine
    repeat for each item tItem in tLine
       put tBasePath & slash & tItem & cr after tReturn
@@ -2653,25 +2651,25 @@ end revDBDriverPath
 function revExternalPath pDriver, pPlatform, pArchitecture
    -- returns path to external from runtime or user runtime folder
    -- will be a folder on Mac OS X, a list of files on Windows
-
+   
    -- MW-2013-06-13: [[ CloneAndRun ]] If we aren't an installed environment then compute
    --    relative to the build folder.
-   if not revEnvironmentIsInstalled() then
+   if not environment.IsInstalled?() then
       if pPlatform contains "MacOSX" and the platform is not "macos" or \
             pPlatform is "Linux" and the platform is not "linux" or \
             pPlatform is "Windows" and the platform is not "win32" then
          return empty
       end if
-
+      
       repeat for each line tLine in ExternalsBuildList()
          if item 1 of tLine is pDriver then
             return revEnvironmentBinariesPath() & slash & item 2 of tLine
          end if
       end repeat
-
+      
       return empty
    end if
-
+   
    # OK-2009-01-31 : Bug 7433 - Added support for legacy externals.
    local tEnvironmentfile, tUserFile, tLegacyFile
    local tArch
@@ -2682,53 +2680,53 @@ function revExternalPath pDriver, pPlatform, pArchitecture
             put "Universal" into pArchitecture
          end if
          put "Mac OS X" into tArch
-         #         put revEnvironmentRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         #         put environment.RuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
          #         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
          #         put revEnvironmentUserRuntimePath() & "/Mac OS X/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
          break
          #      case "Windows"
-         #         put revEnvironmentRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         #         put environment.RuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
          #         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
          #         put revEnvironmentUserRuntimePath() & "/Windows/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
          #         break
          # OK-2007-08-14 : Linux support reinstated
          #      case "Linux"
-         #         put revEnvironmentRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+         #         put environment.RuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
          #         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
          #         put revEnvironmentUserRuntimePath() & "/Linux/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
          #         break
    end switch
-   put revEnvironmentRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
+   put environment.RuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tEnvironmentFile
    put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Externals.txt" into tUserFile
    put revEnvironmentUserRuntimePath() & "/" & tArch & "/" & pArchitecture & "/Externals/Legacy/Externals.txt" into tLegacyFile
-
+   
    local tUserDrivers
    put url ("file:" & tUserFile) into tUserDrivers
-
+   
    local tEnvironmentDrivers
    put url ("file:" & tEnvironmentFile) into tEnvironmentDrivers
-
+   
    # OK-2009-01-31 : Bug 7433
    local tLegacyDrivers
    if the cREVUseLegacyDrivers of stack "revPreferences" then
       put url ("file:" & tLegacyFile) into tLegacyDrivers
    end if
-
+   
    # OK-2009-01-31 : Bug 7433 - If we're set to use legacy drivers, check them first,
    # if no legacy driver was found for the required libray, then we just default to the normal one.
    local tLineNo, tBasePath
    if the cREVUseLegacyDrivers of stack "revPreferences" then
-
+      
       put lineOffset(pDriver & comma, tLegacyDrivers) into tLineNo
       if tLineNo <> 0 then
          put line tLineNo of tLegacyDrivers into tLine
          put tLegacyFile into tBasePath
       end if
    end if
-
+   
    if tLineNo is empty or tLineNo is 0 then
       put lineOffset(pDriver & comma, tUserDrivers) into tLineNo
-
+      
       if tLineNo is not 0 then
          put line tLineNo of tUserDrivers into tLine
          put tUserFile into tBasePath
@@ -2740,11 +2738,11 @@ function revExternalPath pDriver, pPlatform, pArchitecture
          end if
       end if
    end if
-
+   
    set the itemDelimiter to slash
    delete item -1 of tBasePath
    set the itemDelimiter to comma
-
+   
    local tReturn
    #   repeat with i = 2 to the number of items in tLine
    #      put tBasePath & slash & item i of tLine & cr after tReturn

@@ -35,11 +35,11 @@ on preOpenStack
 end preOpenStack
 
 on preOpenCard
-   if the editionType is "commercial" and revLicenseInfo["com.livecode.norevenuelimit"] is empty then
-      set the visible of field "License" to true
-   else
-      set the visible of field "License" to false
-   end if
+   --if the editionType is "commercial" and revLicenseInfo["com.livecode.norevenuelimit"] is empty then
+   --set the visible of field "License" to true
+   --else
+   set the visible of field "License" to false
+   --end if
 end preOpenCard
 
 on openCard

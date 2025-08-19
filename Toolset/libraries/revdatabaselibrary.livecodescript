@@ -1,15 +1,15 @@
-script "revdatabaselibrary"
+﻿script "revdatabaselibrary"
 
 on extensionInitialize
    if the target is not me then
       pass "extensionInitialize"
    end if	
    insert the script of me into front
-
+   
    -- If we are running in development mode, we must set the driver path
    if the environment is "development" then
-      if revEnvironmentIsInstalled() then
-         revSetDatabaseDriverPath revEnvironmentExternalsPath() & slash & "Database Drivers"
+      if environment.IsInstalled?() then
+         revSetDatabaseDriverPath environment.ExternalsPath() & slash & "Database Drivers"
       else
          revSetDatabaseDriverPath revEnvironmentBinariesPath()
       end if

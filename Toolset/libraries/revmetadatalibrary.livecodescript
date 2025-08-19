@@ -37,17 +37,19 @@ private function metadataPropertySetFromTypeName pType
   return kTypePrefix & toUpper(char 1 of pType) & char 2 to -1 of pType
 end metadataPropertySetFromTypeName
 
+/*
 # Parameters
 #   pObject : reference to an object
 #   pType : a metadata type
 #   pTag : the name of the metadata item to retrieve
 # Returns
 #   The value of the specified metadata item for the specified object.
+*/
 function revMetadataGet pObject, pType, pTag
    if pType is not among the items of metadataTypes() then
       throw "invalid_type: " & pType
    end if
-
+   
    local tPropertyName
    put metadataPropertySetFromTypeName(pType) & "[" & pTag & "]" into tPropertyName
    lock messages
@@ -60,6 +62,7 @@ private command log pMessage
    put pMessage & cr after msg
 end log
 
+/*
 # Parameters
 #   pObject : reference to an object
 #   pType : a metadata type
@@ -67,6 +70,7 @@ end log
 #   pValue : the new value to set the item to.
 # Description
 #   Sets the specified metadata item for pObject to pValue
+*/
 command revMetadataSet pObject, pType, pTag, pValue
    if pType is not among the items of metadataTypes() then
       throw "invalid_type: " & pType

@@ -1,4 +1,5 @@
 ﻿script "revSEEditorBehavior" with behavior "com.livecode.scripteditor.behavior.editorcommon"
+
 # Stores the following mapping
 #  <handler name>,type   => string representing the handler type eg PF for private function
 # <handler name>,start  => line offset to start of handler
@@ -13,9 +14,12 @@ local sLastFindObject
 
 constant kMinGutterWidth = 16
 
+/**
+*
 # Description
 #   Sent by the parent when the rect of this group may have changed. Resizes / positions all the controls in this group
 #   according to the group's current rect.
+*/
 command resize
    local tControls
    put the long id of group "Interactive Find" of me into tControls["find"]
@@ -80,7 +84,7 @@ command resize
    -- If the script is encrypted, display the password layer over the
    -- top.
 
-   if scriptProtected() then
+   if scriptProtected?() then
       set the loc of tControls["password"] to (item 1 of the loc of me), (item 2 of the loc of tControls["password"])
       set the top of tControls["password"] to the top of me + (the height of me div 3)
       dispatch "openControl" to tControls["password"]
@@ -98,12 +102,15 @@ end resize
 
 local sUniqueId
 
+/**
+*
 # Description
 #   Sent by the parent when editor group is about to be used for the first time
 #   Initializes the group. Note that this is also called when there are no more
 #   objects to edit, this may happen when the user has removed the last object
 #   from the script editor. This is the reason why this command saves the previous
 #   context before putting empty into getObjectID().
+*/
 command initialize
    if getObjectID() is not empty then
       contextSave
@@ -174,10 +181,13 @@ private command initializeFonts
 
 end initializeFonts
 
+/**
+*
 # Description
 #   Sent by the parent when the script editor preferences have been changed.
 #   Causes the script editor to reread preferences such as font, text size
 #   and colorization scheme, and update itself according to these.
+*/
 command reapplyPreferences
    lock screen
    initializeFonts
@@ -260,11 +270,14 @@ end contextLoad
 local sHandlerList
 local sLastSelectedHandler
 
+/**
+*
+*/
 command loadScript
    # When changing object, the gutter should update its compilation errors. The gutter is updated
    # in the call to textSetScriptRaw, however this does not update these errors for efficiency reasons
    # so an extra call is made here to make sure the errors are updated.
-   send "updateCompilationErrors" to group "Gutter" of me
+   dispatch "updateCompilationErrors" to group "Gutter" of me
 
    # OK-2008-07-07 : Bug 6746 - When loading a new script, we clear the handler list, this means that if the newly
    # loaded script cannot be compiled, a empty handler list will be shown instead of the one from the previous object.
@@ -272,7 +285,7 @@ command loadScript
    put empty into sLastSelectedHandler
 
    # If the current object is password protected, show dialog and disable script field.
-   if scriptProtected() then
+   if scriptProtected?() then
       textSetScriptRaw empty
       scriptLock
       exit loadScript
@@ -321,6 +334,9 @@ command loadScript
    selectionUpdate
 end loadScript
 
+/**
+*
+*/
 command selectionUpdate
    lock screen
    findClearResults
@@ -358,10 +374,13 @@ command selectionUpdate
    pass selectionUpdate
 end selectionUpdate
 
+/**
+*
 # Parameters
 #   pObjectId : reference to the object to set the script to. Must be one of the target objects of the script editor.
 # Description
 #   Sets the current target object of the editor group.
+*/
 command setObject pObjectId, pDontSendCallbacks?
    local tRuggedObjectId
    put seGetRuggedId(pObjectId) into tRuggedObjectId
@@ -402,19 +421,25 @@ command setObject pObjectId, pDontSendCallbacks?
    end if
 end setObject
 
+/**
+*
 # Description
 #   Reverts the script of the current object to the last applied version
+*/
 command revertObject
    loadScript
    seSetObjectState getObjectID(), "applied"
 end revertObject
 
+/**
+*
 # Parameters
 #   pObjectId : reference to the object to set the script to. Must be the same object as is currently set.
 # Description
 #   Sets the object being edited to the specified object *without* changing the script. This should be called
 #   when the object being edited has changed ids, been moved to a new stack etc, anything that might change
 #   its rugged id. It should not be called outside this situation as stuff will break.
+*/
 command setObjectRaw pObjectId
    local tOldObjectId
    put getObjectID() into tOldObjectId
@@ -437,16 +462,22 @@ command setObjectRaw pObjectId
    end if
 end setObjectRaw
 
+/**
+*
 # Description
 #   Returns a reference to the current object being edited.
+*/
 command getObject
    return getObjectID()
 end getObject
 
+/**
+*
 # Parameters
 #   pDontUpdate : if true, the selected handler is assumed to be up to date and the stored one is just returned.
 # Description
 #   Returns the last selected handler of the current object
+*/
 command getSelectedHandler pDontUpdate?
    if pDontUpdate? is not "true" then
       updateSelectedHandler
@@ -519,8 +550,11 @@ private command updateSelectedHandler
    put tMatchingHandler into sLastSelectedHandler
 end updateSelectedHandler
 
+/**
+*
 # Description
 #   Returns the handler list of the current object
+*/
 command getHandlerList
    updateHandlerList
    return sHandlerList
@@ -530,11 +564,14 @@ private command updateHandlerList
    scriptCompile getObjectID()
 end updateHandlerList
 
+/**
+*
 # Parameters
 #   pObjectId : reference to the object to set the script to. Must be one of the target objects of the script editor.
 # Description
 #   Clears the script cache for the specified object. This should be called when the object is being closed. The cache also
 #   includes selection information.
+*/
 command clearCache pObject, pDontCheckId?
    local tObject
    if pDontCheckId? then
@@ -547,8 +584,11 @@ command clearCache pObject, pDontCheckId?
    pass clearCache
 end clearCache
 
+/**
+*
 # Description
 #   Locks the script to prevent the uesr from editing it. Used by the debugger.
+*/
 command scriptLock
    set the lockText of field "Script" of me to true
    set the backgroundColor of field "Script" of me to sePrefGet("editor,debugBackgroundcolor")
@@ -556,8 +596,11 @@ command scriptLock
          of card "Main" of this stack to sePrefGet("editor,debugBackgroundcolor")
 end scriptLock
 
+/**
+*
 # Description
 #   Unlocks the script, allowing the user to edit it.
+*/
 command scriptUnlock
    set the lockText of field "Script" of me to false
    set the backgroundColor of field "Script" of me to sePrefGet("editor,backgroundColor")
@@ -566,7 +609,7 @@ end scriptUnlock
 
 # Returns
 #   Whether or not the current object script is password protected.
-private function scriptProtected
+private function scriptProtected?
    # Prevent errors when editing the script editor.
    if getObjectID() is empty then
       return false
@@ -588,10 +631,13 @@ private function scriptProtected
    catch tError
       return true
    end try
-end scriptProtected
+end scriptProtected?
 
+/**
+*
 # Description
 #   Shows error indicators for the specified compilation errors
+*/
 command setCompilationErrors pErrors, pObject
    dispatch "setCompilationErrors" to group "Gutter" of me with pErrors, pObject
    if seGetRuggedId(pObject) is getObjectID() then
@@ -599,6 +645,8 @@ command setCompilationErrors pErrors, pObject
    end if
 end setCompilationErrors
 
+/**
+*
 # OK-2009-03-03 : Bug 7450
 # Parameters
 #   pName : the name of a handler
@@ -606,6 +654,7 @@ end setCompilationErrors
 #   pType : the handler type code (e.g "F", "PM" etc)
 # Returns
 #   The line number that the handler was located at, or empty if it could not be found.
+*/
 command locateHandler pName, pProposedPosition, pType
    local tScript
    put the text of field "Script" of me into tScript
@@ -677,6 +726,8 @@ private function convertTypeCodeToSyntax pTypeCode
    end switch
 end convertTypeCodeToSyntax
 
+/**
+*
 # Parameters
 #   pObject : reference to the object to compile the script of. Must be one of the target objects.
 # Description
@@ -685,6 +736,7 @@ end convertTypeCodeToSyntax
 #   stores a map of handler names to line numbers for later use.
 # Returns
 #   Empty if compilation suceeded, otherwise a list of errors.
+*/
 command scriptCompile pObject
    lock screen
    lock messages
@@ -734,7 +786,7 @@ command scriptCompile pObject
    end if
 
    if tLiveErrors then
-      send "clearErrors" to group "Errors" of the owner of me
+      dispatch "clearErrors" to group "Errors" of the owner of me
       if tResult is empty then
          setCompilationErrors empty, pObject
       else
@@ -759,19 +811,25 @@ command scriptCompile pObject
 end scriptCompile
 
 
+/**
+*
 # Description
 #   Shows the interactive find dialog and focuses the appropriate control for the user to enter text.
 #   The dialog remains visible until the user closes it.
+*/
 command goInteractiveFind
    sePrefSet "editor,findvisible", "true"
    resize
-   send "openControl" to group "Interactive Find" of me
+   dispatch "openControl" to group "Interactive Find" of me
 end goInteractiveFind
 
+/**
+*
+*/
 command hideInteractiveFind
    sePrefSet "editor,findvisible", "false"
    resize
-   send "closeControl" to group "Interactive Find" of me
+   dispatch "closeControl" to group "Interactive Find" of me
 end hideInteractiveFind
 
 ################################################################################
@@ -785,6 +843,8 @@ end hideInteractiveFind
 --local sMetricGutterNumbersMargin
 --local sMetricGutterOverlayMargin
 
+/**
+*
 # Parameters
 #   pLineNumber : the number of a line in the current script
 # Returns
@@ -794,6 +854,7 @@ end hideInteractiveFind
 #   Otherwise the function iterates down until it finds a line that is not in
 #   a comment or a variable declaration. This does not take multi-line comments
 #   into account at the moment. Returns empty if no line can be found.
+*/
 function nextAvailableBreakpoint pLineNumber
    local tMatchingLineNumber
 
@@ -831,7 +892,7 @@ end getUniqueId
 
 private command gutterResize pRect
    set the rect of group "Gutter" of me to pRect
-   send "resize" to group "Gutter" of me
+   dispatch "resize" to group "Gutter" of me
 end gutterResize
 
 private command colorizationUpdate
@@ -858,6 +919,9 @@ private function arrayShow pArray
    return tText
 end arrayShow
 
+/**
+*
+*/
 command textInitialize
    initializeFonts
    seColorizationInit
@@ -869,8 +933,11 @@ command textInitialize
    pass textInitialize
 end textInitialize
 
+/**
+*
 # Description
 #   Updates the gutter according to the specified parameters.
+*/
 command updateGutterDo
    local tOffset, tSelectedLine, tOldLines, tNewLines, tTextChanged
 
@@ -896,8 +963,11 @@ end updateGutterDo
 
 ################################################################################
 
+/**
+*
 # Description
 #   Called when the script editor is about to be closed.
+*/
 command finalize
    cancelPendingMessages
 
@@ -907,9 +977,12 @@ command finalize
    _internal script flush field "Script" of me
 end finalize
 
+/**
+*
 # Description
 #   Sets some state variables that may be needed to update the script editor panes
 #   and calls the sePanesUpdate command to do the update.
+*/
 command paneUpdate
    sePanesUpdate
 end paneUpdate
@@ -917,6 +990,8 @@ end paneUpdate
 local sLastSelectedGoneToChunk
 local sLastGoneToLine
 
+/**
+*
 # Parameters
 #   pLine : a line number to go to, from 1 up to the number of lines in the current script.
 #   pHighlightMode :  How to highlight the specified line. If this is false or not specified, the line is not highlighted.
@@ -924,6 +999,7 @@ local sLastGoneToLine
 #   Goes to the specified line and highlights if required. The highlight mode is either false / empty for no highlight
 #   or "select" to select the line or "color" to set the line's background color. A value of "true" is treated the same
 #   as "select".
+*/
 command goLine pLine, pHighlightMode, pPosition
    local tScroll
    put the vScroll of field "Script" of me into tScroll
@@ -985,13 +1061,19 @@ command goLine pLine, pHighlightMode, pPosition
    updateGutterRequest empty, empty, empty, empty, false, false
 end goLine
 
+/**
+*
+*/
 function getLastGoneToLine
    return sLastGoneToLine
 end getLastGoneToLine
 
+/**
+*
 # Description
 #   Deselects the last line that was selected by the goLine command if there was one
 #   and it is still selected.
+*/
 command deselectLastGoneToLine
    lock screen
    get the selectedChunk
@@ -1204,7 +1286,7 @@ on menuPick pItemName
 
          if the number of lines of tMatches > 1 then
             set the cSymbols of getDisambiguatorObject() to tMatches
-            send "update" to getDisambiguatorObject()
+            dispatch "update" to getDisambiguatorObject()
             modal getDisambiguatorObject()
 
             local tResult
@@ -1222,6 +1304,9 @@ on menuPick pItemName
    end switch
 end menuPick
 
+/**
+*
+*/
 on __FindAllCallback pMessage
    wait 0 with messages
    set the cursor to busy
@@ -1328,6 +1413,9 @@ private function escapeString pString, pUseWildCard
    return pString
 end escapeString
 
+/**
+*
+*/
 command findInitialize
    put empty into sFindQuery
    put empty into sFindResults
@@ -1404,12 +1492,17 @@ private command findText pText, pGlobal?, pStartFrom, pEndAt, pSearch
    return tResult
 end findText
 
+/**
+*
+*/
 command findFinalize pResult
    findClearResults
    put false into sFindRestart -- we just did a search..
    put pResult into sFindResults
 end findFinalize
 
+/**
+*
 # Parameters
 #   pStart : the first char of the found chunk to mark
 #   pEnd : the last char of the found chunk to mark
@@ -1417,6 +1510,7 @@ end findFinalize
 # Description
 #   Marks the specified chunk of text as found. This must be done using other means than selecting
 #   the chunk because of interactive search which finds text as the user types.
+*/
 command findMarkResult pStart, pEnd, pInteractive
    set the backgroundColor of char pStart to pEnd of field "Script" of me to sePrefGet("editor,findcolor")
 
@@ -1473,15 +1567,18 @@ command findMarkResult pStart, pEnd, pInteractive
    # OK-2009-02-20: Bug 7732 - The left bar needs updating as showing a find result can change the current handler.
    local tFalseString
    put false into tFalseString
-   send "update tFalseString" to group "Left Bar" of stack (revTargetStack(the long id of me))
+   dispatch "update" to group "Left Bar" of stack (revTargetStack(the long id of me)) with tFalseString
 
    put getObjectID() into sLastFindObject
    put pStart & comma & pEnd into sLastFindLocation
 end findMarkResult
 
 
+/**
+*
 # Parameters
 #   pInteractive : whether the search was in interactive mode or not.
+*/
 command findClearResults pInteractive
    put empty into sLastFindObject
    if sLastFindLocation is not empty then
@@ -1911,7 +2008,8 @@ private function findBuildSearch pQuery, pIsRegExp, pUseWildcard, pWholeMatch, p
    return sFindQuery
 end findBuildSearch
 
-
+/**
+*
 # Parameters
 #   pQuery : the search pattern
 #   pIsRegExp : whether or not pQuery is a regular expression
@@ -1928,6 +2026,7 @@ end findBuildSearch
 #   between successive searches, and each search will begin just after the previous one.
 #   If pQuery is empty, it is assumed that the user wants to search for the next result with all the
 #   same parameters as the previous search carried it.
+*/
 command showNextFindResult pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pInteractive, pTarget
    local tObjectList, tCancelled
    put findObjectList(pTarget, "forward", empty, empty, tCancelled) into tObjectList
@@ -2006,6 +2105,8 @@ command showNextFindResult pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnor
    unlock screen
 end showNextFindResult
 
+/**
+*
 # Parameters
 #   pQuery : the search pattern
 #   pIsRegExp : whether or not pQuery is a regular expression
@@ -2013,6 +2114,7 @@ end showNextFindResult
 #   pWholeMatch : whether to match whole words only
 #   pIgnoreCase : whether to perform a case insensitive search or not
 #   pTarget : either "all" or "current"- which tabs to search in. (Currently this is ignored)
+*/
 command showPreviousFindResult pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget
    local tScript
    put textGetScript() into tScript
@@ -2057,6 +2159,9 @@ private command findDispatchCallback pCallback, pCallbackTarget, pMessage
    return tResult
 end findDispatchCallback
 
+/**
+*
+*/
 command showAllFindResults pQuery, pIsRegExp, pUseWildCards, pWholeMatches, pIgnoreCase, pTarget, pCallback, pCallbackTarget
    findDispatchCallback pCallback, pCallbackTarget, "Calculating list of objects to search"
    if the result is "cancel" then
@@ -2188,6 +2293,9 @@ command showAllFindResults pQuery, pIsRegExp, pUseWildCards, pWholeMatches, pIgn
    end repeat
 end showAllFindResults
 
+/**
+*
+*/
 command replaceOnce pString
    local tFrom, tTo
    put item 1 of sLastFindLocation into tFrom
@@ -2210,6 +2318,9 @@ command replaceOnce pString
    return (tFrom + the length of pString)
 end replaceOnce
 
+/**
+*
+*/
 command replaceOnceAndFind pQuery, pString, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget
    # OK-2009-02-16 : Bug 7712 - replaceOnce modified to return the last char of the replaced string. We should ensure
    # that the next find result doesn't happen until after this.
@@ -2224,6 +2335,9 @@ command replaceOnceAndFind pQuery, pString, pIsRegExp, pUseWildCards, pWholeMatc
    showNextFindResult pQuery, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, false, pTarget
 end replaceOnceAndFind
 
+/**
+*
+*/
 command replaceAll pQuery, pString, pIsRegExp, pUseWildCards, pWholeMatch, pIgnoreCase, pTarget, pCallback, pCallbackTarget
    # Calculate the list of objects to search in. The order is not important so we loop forwards
    # through the objects.
@@ -2358,10 +2472,13 @@ on mouseLeave
    pass mouseLeave
 end mouseLeave
 
+/**
+*
 # Description
 #   Updates the tooltip of the script field to match the token that the mouse is over.
 #   If we are in edit mode, this command has no effect, if we're in debug mode, the tooltip is set
 #   to contain the value of the variable the mouse is over (if its over one).
+*/
 command tooltipUpdate
    # For now, tooltips are limited to debug mode- where we know the script has been compiled.
    local tMode
@@ -2594,8 +2711,9 @@ constant kScriptEditorMaxCached = 10
 
 local sScriptEditorFieldCache
 
-/*
-Remove the editor field for pRuggedObjectId from the cache
+/**
+*
+* Remove the editor field for pRuggedObjectId from the cache
 */
 private command __EditorFieldCacheFlush pRuggedObjectId
    local tField
@@ -2614,8 +2732,9 @@ private command __EditorFieldCacheFlush pRuggedObjectId
    delete variable sScriptEditorFieldCache[pRuggedObjectId]
 end __EditorFieldCacheFlush
 
-/*
-Delete all cached editing fields
+/**
+*
+* Delete all cached editing fields
 */
 private command EditorFieldCacheFlushAll
    local tRuggedObjectId
@@ -2625,7 +2744,8 @@ private command EditorFieldCacheFlushAll
    end repeat
 end EditorFieldCacheFlushAll
 
-/*
+/**
+*
 If there are too many editor fields cached, randomly purge one of
 them.  Note that because the current editor field isn't in the cache, there
 is no danger of incorrectly deleting it.
@@ -2650,8 +2770,9 @@ private command __EditorFieldCacheFlushExcess
    end repeat
 end __EditorFieldCacheFlushExcess
 
-/*
-Check whether pRuggedObjectId has a cached editing field.
+/**
+*
+* Check whether pRuggedObjectId has a cached editing field.
 */
 private function __EditorFieldIsCached pRuggedObjectId
    return pRuggedObjectId is among the keys of sScriptEditorFieldCache
@@ -2714,6 +2835,8 @@ private command EditorFieldCacheSwap pOldRuggedObjectId, pNewRuggedObjectId
    __EditorFieldCacheFlushExcess
 end EditorFieldCacheSwap
 
+/**
+*
 # Parameters
 #   pRootObject : the object to list the tree for, this is a reference to any LiveCode object
 #   pIncludeSubstacks : if pRootObject is a mainstack, this determines whether or not its substacks are searched. Otherwise its ignored.
@@ -2725,6 +2848,7 @@ end EditorFieldCacheSwap
 #   If pRootObject is a stack, the object list is the stack, all its cards, and all objects on each card
 #   If pRootObject is a card the list is the card and all objects on it
 #   If pRootObject is any other control, the list is pRootObject.
+*/
 function revIDEListSearchObjectTree pRootObject, pObeyDontSearch, pMarked, pIncludeSubstacks, pIgnorePasswordProtected, pScriptsOnly, @xList
    --delete variable sAddedObjects
 

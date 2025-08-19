@@ -4,7 +4,7 @@ on moveStack
 end moveStack
 
 on ideDesktopChanged
-   revIDEEnsureOnScreen the short name of this stack
+   ide.EnsureOnScreen the short name of this stack
 end ideDesktopChanged
 
 on resizeStack
@@ -107,13 +107,13 @@ on closeStack
 end closeStack
 
 # OK-2007-11-26
-command revCloseErrorDialog
-  send "revCloseErrorDialogDo" to me in 0 milliseconds
-end revCloseErrorDialog
+command err.CloseErrorDialog
+   send "err.CloseErrorDialogDo" to me in 0 milliseconds
+end err.CloseErrorDialog
 
-command revCloseErrorDialogDo
-  close me
-end revCloseErrorDialogDo
+command err.CloseErrorDialogDo
+   close me
+end err.CloseErrorDialogDo
 
 local lExit
 
@@ -374,12 +374,12 @@ on openCard
       lock screen
       select line 1 to 5 of field "Error" of group "errorDisplay" of me
       set the hScroll of field "Error" of group "errorDisplay" of me to 0
-      send "revLineColors" to me in 20 seconds
+      send "err.LineColors" to me in 20 seconds
       unlock screen
       exit openCard
    end if
    
-   send "revLineColors" to me in 20 seconds
+   send "err.LineColors" to me in 20 seconds
    lock messages
    modeless "REVErrorDisplay"
    unlock messages
@@ -398,24 +398,30 @@ on openCard
    --   end if
 end openCard
 
-on revLineColors
+/**
+* err.LineColors
+*/
+on err.LineColors
    local tTotal
    put 0 into tTotal
    repeat for each line l in the pendingMessages
-      if "revLineColors" is in l then add 1 to tTotal
+      if "err.LineColors" is in l then add 1 to tTotal
    end repeat
-
+   
    local tLineStart
    put 1 into tLineStart
    add tTotal * 6 to tLineStart
-
+   
    set the textColor of line tLineStart to tLineStart+5 of \
          field "Error" of group "errorDisplay" of me to kErrorTextColor
    set the imageSource of char 1 of line tLineStart of \
          field "Error" of group "errorDisplay" of me to kErrorGreyIconID
+   
+end err.LineColors
 
-end revLineColors
-
+/**
+* cCurrentObject
+*/
 setProp cCurrentObject pWhat
    local tScriptError?
    if "Script Compile Error" is in (the selection) then
@@ -553,11 +559,14 @@ on mouseDoubleUp
    end if
 end mouseDoubleUp
 
+/**
+* checkScriptEditor
+*/
 command checkScriptEditor pScriptEditor, pObject, pLineNumber
    # Need to wait until the script editor has finished loading the object. This may take a while because
    # the loading is done on a timer. We only need to wait until an object has been loaded.
    local tCurrentObject
-   send "revSEGetCurrentObject" to stack pScriptEditor
+   dispatch "revSEGetCurrentObject" to stack pScriptEditor
    put the result into tCurrentObject
    if there is a tCurrentObject then
       local tTrueString?

@@ -2318,7 +2318,7 @@ on the values of the object's properties.
    end revIDEGetPreferenceOfSet
 
    command __DevPreference pPreferenceName, @rValue
-      if not revEnvironmentIsInstalled() then
+      if not environment.IsInstalled?() then
          switch pPreferenceName
             case "cScriptEditor,explicitVariables"
             case "cScriptEditor,preserveVariables"
@@ -3981,110 +3981,110 @@ on the values of the object's properties.
    local tIDEFolder
    put revIDESpecialFolderPath("IDE") into tIDEFolder
    */
-   function revIDESpecialFolderPath pKey, pParam
-      local tPath
-      set the itemdel to "/"
-      switch pKey
-         case "IDE"
-            return item 1 to -3 of the filename of stack "home"
-            break
-         case "Toolset"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset"
-            break
-         case "Toolchain"
-            if revEnvironmentIsInstalled() then
-               return item 1 to -3 of the filename of stack "home" & "/Toolchain"
-            else
-               return revEnvironmentBinariesPath()
-            end if
-            break
-         case "Object Property Definitions"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/property_definitions"
-            break
-         case "Object Default Scripts"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/default_scripts"
-            break
-         case "Standalone Settings Definitions"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/standalone_settings"
-            break
-         case "Tool Definitions"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/tool_definitions"
-            break
-         case "fonts"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/fonts"
-            break
-         case "themes"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/themes"
-            break
-         case "images"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/images"
-            break
-         case "extensions"
-            put  revEnvironmentExtensionsPath() into tPath
+function revIDESpecialFolderPath pKey, pParam
+   local tPath
+   set the itemdel to "/"
+   switch pKey
+      case "IDE"
+         return item 1 to -3 of the filename of stack "home"
+         break
+      case "Toolset"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset"
+         break
+      case "Toolchain"
+         if environment.IsInstalled?() then
+            return item 1 to -3 of the filename of stack "home" & "/Toolchain"
+         else
+            return revEnvironmentBinariesPath()
+         end if
+         break
+      case "Object Property Definitions"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/property_definitions"
+         break
+      case "Object Default Scripts"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/default_scripts"
+         break
+      case "Standalone Settings Definitions"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/standalone_settings"
+         break
+      case "Tool Definitions"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/tool_definitions"
+         break
+      case "fonts"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/fonts"
+         break
+      case "themes"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/themes"
+         break
+      case "images"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/images"
+         break
+      case "extensions"
+         put  environment.ExtensionsPath() into tPath
+         revIDEEnsurePath tPath
+         return tPath
+         break
+      case "user extensions"
+         put revEnvironmentUserExtensionsPath() into tPath
+         revIDEEnsurePath tPath
+         return tPath
+         break
+      case "temp extensions"
+         put revEnvironmentUserExtensionsPath() & "/temp" into tPath
+         revIDEEnsurePath tPath
+         return tPath
+         break
+      case "downloading extensions"
+         put revEnvironmentUserExtensionsPath() & "/downloading" into tPath
+         revIDEEnsurePath tPath
+         return tPath
+         break
+      case "uninstalled extensions"
+         put revEnvironmentUserExtensionsPath() & "/uninstalled" into tPath
+         revIDEEnsurePath tPath
+         return tPath
+         break
+      case "documentation"
+         put item 1 to -3 of the filename of stack "home" & "/Documentation" into tPath
+         return tPath
+         break
+      case "documentation cache"
+         put revEnvironmentUserDocsPath() & slash & "IDE" into tPath
+         revIDEEnsurePath tPath
+         return tPath
+         break
+      case "api"
+      case "guide"
+         if pParam is not empty then
+            put "_" & pParam after pKey
+         end if
+         put item 1 to -3 of the filename of stack "home" & "/Documentation/html_viewer/resources/data/" & tolower(pKey) into tPath
+         if not environment.IsInstalled?() then
             revIDEEnsurePath tPath
-            return tPath
-            break
-         case "user extensions"
-            put revEnvironmentUserExtensionsPath() into tPath
-            revIDEEnsurePath tPath
-            return tPath
-            break
-         case "temp extensions"
-            put revEnvironmentUserExtensionsPath() & "/temp" into tPath
-            revIDEEnsurePath tPath
-            return tPath
-            break
-         case "downloading extensions"
-            put revEnvironmentUserExtensionsPath() & "/downloading" into tPath
-            revIDEEnsurePath tPath
-            return tPath
-            break
-         case "uninstalled extensions"
-            put revEnvironmentUserExtensionsPath() & "/uninstalled" into tPath
-            revIDEEnsurePath tPath
-            return tPath
-            break
-         case "documentation"
-            put item 1 to -3 of the filename of stack "home" & "/Documentation" into tPath
-            return tPath
-            break
-         case "documentation cache"
-            put revEnvironmentUserDocsPath() & slash & "IDE" into tPath
-            revIDEEnsurePath tPath
-            return tPath
-            break
-         case "api"
-         case "guide"
-            if pParam is not empty then
-               put "_" & pParam after pKey
-            end if
-            put item 1 to -3 of the filename of stack "home" & "/Documentation/html_viewer/resources/data/" & tolower(pKey) into tPath
-            if not revEnvironmentIsInstalled() then
-               revIDEEnsurePath tPath
-            end if
-            return tPath
-            break
-         case "examples"
-            put  item 1 to -3 of the filename of stack "home" & "/Examples" into tPath
-            return tPath
-            break
-         case "tutorial"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/palettes/tutorial"
-            break
-         case "user tutorial"
-            return revEnvironmentCustomizationPath() & "/Interactive Tutorials"
-            break
-         case "globals"
-            return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/global_properties"
-            break
-         case "ide guides"
-            return item 1 to -3 of the filename of stack "home" & "/Documentation/guides" into tPath
-            break
-         case "repo guides"
-            return revEnvironmentRepositoryPath() & "/docs/guides" into tPath
-            break
-      end switch
-   end revIDESpecialFolderPath
+         end if
+         return tPath
+         break
+      case "examples"
+         put  item 1 to -3 of the filename of stack "home" & "/Examples" into tPath
+         return tPath
+         break
+      case "tutorial"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/palettes/tutorial"
+         break
+      case "user tutorial"
+         return revEnvironmentCustomizationPath() & "/Interactive Tutorials"
+         break
+      case "globals"
+         return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/global_properties"
+         break
+      case "ide guides"
+         return item 1 to -3 of the filename of stack "home" & "/Documentation/guides" into tPath
+         break
+      case "repo guides"
+         return revEnvironmentRepositoryPath() & "/docs/guides" into tPath
+         break
+   end switch
+end revIDESpecialFolderPath
 
    on revIDEEnsurePath pPath
       if there is a folder pPath then exit revIDEEnsurePath
@@ -4335,82 +4335,82 @@ default folder to the popped value.
             & "Standalone Settings,About,Dictionary,Guide,Resource Center,Preferences,Search,Snippet Viewer"
    end revIDEAvailablePalettes
 
-   function revIDEPaletteToStackName pPalette
-      # This abstraction is here because other aspects of the IDE need to know the avaiable palettes.
-      # For example, the view menu listing all the available palettes and their state. Leaving this check
-      # in, rather than having a default in the switch forces developers to add any new palettes to revIDEAvailablePalettes()
-      if pPalette is not among the items of revIDEAvailablePalettes() then
-         return __revIDEError("No available palette with name" && pPalette)
-      end if
+function revIDEPaletteToStackName pPalette
+   # This abstraction is here because other aspects of the IDE need to know the avaiable palettes.
+   # For example, the view menu listing all the available palettes and their state. Leaving this check
+   # in, rather than having a default in the switch forces developers to add any new palettes to revIDEAvailablePalettes()
+   if pPalette is not among the items of revIDEAvailablePalettes() then
+      return __revIDEError("No available palette with name" && pPalette)
+   end if
 
-      switch pPalette
-         case "menubar"
-            return "revMenuBar"
-         case "tools"
-            return "revTools"
-         case "inspector"
-            return "revInspector"
-         case "message box"
-            return "Message Box"
-         case "project browser"
-            return "revIDEProjectBrowser"
-         case "extension manager"
-            return "revIDEExtensionManager"
-         case "start center"
-            return "revStartCenter"
-         case "welcome"
-            return "revWelcome"
-         case "search"
-            return "revSearch"
-         case "preferences"
-            return "revPreferencesGUI"
-         case "menu builder"
-            return "revMenuManager"
-         case "extension builder"
-            return "revExtensionBuilder"
-         case "standalone settings"
-            return "revStandaloneSettings"
-         case "message watcher"
-            return  "revMessageWatcher"
-         case "plugin preferences"
-            return "revPlugInEditor"
-         case "about"
-            return "revAbout"
-         case "dictionary"
-         case "guide"
-            return "revDictionary"
-         case "resource center"
-            return "revResourceCenter"
-         case "snippet viewer"
-            return "revIDESnippetViewer"
-      end switch
-   end revIDEPaletteToStackName
+   switch pPalette
+      case "menubar"
+         return "revMenuBar"
+      case "tools"
+         return "revTools"
+      case "inspector"
+         return "revInspector"
+      case "message box"
+         return "Message Box"
+      case "project browser"
+         return "revIDEProjectBrowser"
+      case "extension manager"
+         return "revIDEExtensionManager"
+      case "start center"
+         return "revStartCenter"
+      case "welcome"
+         return "revWelcome"
+      case "search"
+         return "revSearch"
+      case "preferences"
+         return "revPreferencesGUI"
+      case "menu builder"
+         return "revMenuManager"
+      case "extension builder"
+         return "revExtensionBuilder"
+      case "standalone settings"
+         return "revStandaloneSettings"
+      case "message watcher"
+         return  "revMessageWatcher"
+      case "plugin preferences"
+         return "revPlugInEditor"
+      case "about"
+         return "revAbout"
+      case "dictionary"
+      case "guide"
+         return "revDictionary"
+      case "resource center"
+         return "revResourceCenter"
+      case "snippet viewer"
+         return "revIDESnippetViewer"
+   end switch
+end revIDEPaletteToStackName
 
-   on revIDEEnsureOnscreen pStackName
-      # Ensure the stack exists
-      if there is not a stack pStackName then return __revIDEError("No such stack:" && pStackName)
+on ide.EnsureOnScreen pStackName
+   # Ensure the stack exists
+   if there is not a stack pStackName then return __revIDEError("No such stack:" && pStackName)
 
-      local tScreenRect
-      put line (the screen of stack pStackName) of the working screenrects into tScreenRect
+   local tScreenRect
+   put line (the screen of stack pStackName) of the working screenrects into tScreenRect
 
-      local tScreenHeight, tScreenWidth
-      put item 4 of tScreenRect - item 2 of tScreenRect into tScreenHeight
-      put item 3 of tScreenRect - item 1 of tScreenRect into tScreenWidth
+   local tScreenHeight, tScreenWidth
+   put item 4 of tScreenRect - item 2 of tScreenRect into tScreenHeight
+   put item 3 of tScreenRect - item 1 of tScreenRect into tScreenWidth
 
-      if the left of stack pStackName < item 1 of tScreenRect then
-         set the left of stack pStackName to item 1 of tScreenRect
-      else if the right of stack pStackName > item 3 of tScreenRect and the width of stack pStackName < tScreenWidth then
-         set the right of stack pStackName to item 3 of tScreenRect
-      end if
+   if the left of stack pStackName < item 1 of tScreenRect then
+      set the left of stack pStackName to item 1 of tScreenRect
+   else if the right of stack pStackName > item 3 of tScreenRect and the width of stack pStackName < tScreenWidth then
+      set the right of stack pStackName to item 3 of tScreenRect
+   end if
 
-      if the effective top of stack pStackName < item 2 of tScreenRect then
-         set the top of stack pStackName to (item 2 of tScreenRect + abs(the top of stack pStackName - the effective top of stack pStackName))
-      else if the bottom of stack pStackName > item 4 of tScreenRect and the height of stack pStackName < tScreenHeight then
-         set the bottom of stack pStackName to item 4 of tScreenRect
-      end if
+   if the effective top of stack pStackName < item 2 of tScreenRect then
+      set the top of stack pStackName to (item 2 of tScreenRect + abs(the top of stack pStackName - the effective top of stack pStackName))
+   else if the bottom of stack pStackName > item 4 of tScreenRect and the height of stack pStackName < tScreenHeight then
+      set the bottom of stack pStackName to item 4 of tScreenRect
+   end if
 
-      revIDESetPaletteRectPreference pStackName
-   end revIDEEnsureOnscreen
+   revIDESetPaletteRectPreference pStackName
+end ide.EnsureOnScreen
 
    /*
    Positions the palette.
@@ -4419,53 +4419,53 @@ default folder to the popped value.
    If the palette is being opened for the first time, it is placed in a predetermined position
    */
    on revIDEPositionPalette pStackName
-      if there is not a stack pStackName then exit revIDEPositionPalette
+   if there is not a stack pStackName then exit revIDEPositionPalette
 
-      local tRect
-      put revIDEGetPaletteRectPreference(pStackName) into tRect
+   local tRect
+   put revIDEGetPaletteRectPreference(pStackName) into tRect
 
-      if __isRect(tRect) then
-         # A previous stored rect was found for the stack. Restore is position if possible.
-         switch pStackName
-            case "revMenuBar"
-            case "revTools"
-               set the topleft of stack pStackName to item 1 of tRect, item 2 of tRect
-               break
-            case "message box"
-            case "revDictionary"
-            default
-               set the rect of stack pStackName to tRect
-               break
-         end switch
-      else
-         # If no sizing information can be found then position the stack in the
-         # default location. Only do this for specified stacks.
-         switch pStackName
-            case "revMenuBar"
-            case "message box"
-            case "revDictionary"
+   if __isRect(tRect) then
+      # A previous stored rect was found for the stack. Restore is position if possible.
+      switch pStackName
+         case "revMenuBar"
+         case "revTools"
+            set the topleft of stack pStackName to item 1 of tRect, item 2 of tRect
+            break
+         case "message box"
+         case "revDictionary"
+         default
+            set the rect of stack pStackName to tRect
+            break
+      end switch
+   else
+      # If no sizing information can be found then position the stack in the
+      # default location. Only do this for specified stacks.
+      switch pStackName
+         case "revMenuBar"
+         case "message box"
+         case "revDictionary"
+            revIDEPositionPaletteDefault pStackName
+            break
+         case "revTools"
+            local tOldPref
+            put revIDEGetPreference("cToolsTopLeft") into tOldPref
+            if tOldPref is not empty then
+               set the topleft of stack pStackName to tOldPref
+            else
                revIDEPositionPaletteDefault pStackName
-               break
-            case "revTools"
-               local tOldPref
-               put revIDEGetPreference("cToolsTopLeft") into tOldPref
-               if tOldPref is not empty then
-                  set the topleft of stack pStackName to tOldPref
-               else
-                  revIDEPositionPaletteDefault pStackName
-               end if
-            default
-               if pStackName begins with revIDEScriptEditorPrefix() then
-                  revIDEPositionPaletteDefault pStackName
-               end if
-               break
-         end switch
-      end if
+            end if
+         default
+            if pStackName begins with revIDEScriptEditorPrefix() then
+               revIDEPositionPaletteDefault pStackName
+            end if
+            break
+      end switch
+   end if
 
-      # AL-2015-09-15: [[ Bug 15745 ]] Ensure palettes don't get placed off screen
-      revIDEEnsureOnscreen pStackName
+   # AL-2015-09-15: [[ Bug 15745 ]] Ensure palettes don't get placed off screen
+   ide.EnsureOnScreen pStackName
 
-   end revIDEPositionPalette
+end revIDEPositionPalette
 
    constant kToolsMenubarGap = 25
    on revIDEPositionPaletteDefault pStackName
@@ -4894,24 +4894,24 @@ default folder to the popped value.
    /*
    Install the given extension's API
    */
-   on revIDEInstallAPI pAPIFolder, pExtensionName, pAuthor
+on revIDEInstallAPI pAPIFolder, pExtensionName, pAuthor
 
-      local tAPIFile
-      put pAPIFolder & slash & "api.lcdoc" into tAPIFile
+   local tAPIFile
+   put pAPIFolder & slash & "api.lcdoc" into tAPIFile
 
-      # Convert the new API to a JSON array to append to API data
-      local tAPIJSON
-      dispatch function "revDocsFormatAPIAsJSON" to stack "revDocsParser" with pExtensionName, pAuthor, tAPIFile
-      put the result into tAPIJSON
-      if tAPIJSON is empty then
-         return "no documentation found"
-      end if
+   # Convert the new API to a JSON array to append to API data
+   local tAPIJSON
+   dispatch function "docs.FormatAPI.AsJSON" to stack "revDocsParser" with pExtensionName, pAuthor, tAPIFile
+   put the result into tAPIJSON
+   if tAPIJSON is empty then
+      return "no documentation found"
+   end if
 
-      revIDESetUTF8FileContents pAPIFolder & slash & "api.js", tAPIJSON
+   revIDESetUTF8FileContents pAPIFolder & slash & "api.js", tAPIJSON
 
-      # Now regenerate the built APIs
-      revIDERegenerateBuiltAPIs
-   end revIDEInstallAPI
+   # Now regenerate the built APIs
+   revIDERegenerateBuiltAPIs
+end revIDEInstallAPI
 
 /**
 *
@@ -5506,217 +5506,217 @@ default folder to the popped value.
    *  pFolder
    *  precursive? : recurse into included folders if true
    */
-   function revIDELastModifiedTimeOfFilesInFolder pFolder, pRecursive?
-      local tDetailedFiles, tMax
-      revIDEPushDefaultFolder pFolder
-      put the detailed files into tDetailedFiles
-      sort tDetailedFiles descending numeric by item 5 of each
-      put item 5 of line 1 of tDetailedFiles into tMax
-      if tMax is not a number then put 0 into tMax
-      if pRecursive? then
-         repeat for each line tFolder in the folders
-            if tFolder is ".." then next repeat
-            put max(revIDELastModifiedTimeOfFilesInFolder(pFolder & slash & tFolder, pRecursive?), tMax) into tMax
-         end repeat
-      end if
-      revIDEPopDefaultFolder
-      return tMax
-   end revIDELastModifiedTimeOfFilesInFolder
-
-   /**
-   * revIDEExtensionFolders
-   *
-   * function
-   *
-   */
-   function revIDEExtensionFolders
-      local tFoldersA
-      put revIDESpecialFolderPath("user extensions") into tFoldersA["user"]
-
-      local tCount = 0
-      repeat for each line tFolder in revEnvironmentExtensionsPaths()
-         add 1 to tCount
-         put tFolder into tFoldersA["ide" && tCount]
+function revIDELastModifiedTimeOfFilesInFolder pFolder, pRecursive?
+   local tDetailedFiles, tMax
+   revIDEPushDefaultFolder pFolder
+   put the detailed files into tDetailedFiles
+   sort tDetailedFiles descending numeric by item 5 of each
+   put item 5 of line 1 of tDetailedFiles into tMax
+   if tMax is not a number then put 0 into tMax
+   if pRecursive? then
+      repeat for each line tFolder in the folders
+         if tFolder is ".." then next repeat
+         put max(revIDELastModifiedTimeOfFilesInFolder(pFolder & slash & tFolder, pRecursive?), tMax) into tMax
       end repeat
-      return tFoldersA
-   end revIDEExtensionFolders
+   end if
+   revIDEPopDefaultFolder
+   return tMax
+end revIDELastModifiedTimeOfFilesInFolder
 
-   /**
-   * revIDEDefaultExtensionIcon
-   *
-   * function
-   *
-   * parameters:
-   *  pType
-   *  pRetina
-   *
-   */
-   function revIDEDefaultExtensionIcon pType, pIsRetina?
-      switch pType
-         case "library"
-            if pIsRetina? is true then
-               return revIDESpecialFolderPath("images") & slash & "extension-library@extra-high.png"
-            else
-               return revIDESpecialFolderPath("images") & slash & "extension-library.png"
-            end if
-         case "widget"
-         default
-            if pIsRetina? is true then
-               return revIDESpecialFolderPath("images") & slash & "extension-widget@extra-high.png"
-            else
-               return revIDESpecialFolderPath("images") & slash & "extension-widget.png"
-            end if
-      end switch
-   end revIDEDefaultExtensionIcon
+/**
+* revIDEExtensionFolders
+*
+* function
+*
+*/
+function revIDEExtensionFolders
+   local tFoldersA
+   put revIDESpecialFolderPath("user extensions") into tFoldersA["user"]
 
-   /**
-   * revIDEDefaultScript
-   *
-   * function
-   *
-   *  parameters:
-   *  pObject
-   *  pHandler
-   */
-   function revIDEDefaultScript pObject, pHandler
-      local tDefaultScript, tType
-      put ideObjectTypeFromObject(pObject) into tType
-      if word 1 of the name of pObject is "widget" then
-         put revIDEWidgetDefaultScript(tType) into tDefaultScript
-      else
-         put revIDEClassicObjectDefaultScript(tType) into tDefaultScript
-      end if
+   local tCount = 0
+   repeat for each line tFolder in environment.ExtensionsPaths()
+      add 1 to tCount
+      put tFolder into tFoldersA["ide" && tCount]
+   end repeat
+   return tFoldersA
+end revIDEExtensionFolders
 
-      lock screen
-      lock messages
-      create invisible stack "revDefaultScriptHolder"
-      try
-         set the script of it to tDefaultScript
-      catch tError
-      end try
-      local tHandlers
-      put the revAvailableHandlers of it into tHandlers
-      delete stack "revDefaultScriptHolder"
-      local tHandlerStart, tHandlerEnd, tHandlerInfo, tHandlerInfoLine
-      set the wholematches to false
-      -- Ensure we don't accidentally match a substring by putting
-      -- spaces around the handler name
-      put lineOffset(" " & pHandler & " ", tHandlers) into tHandlerInfoLine
-      put line tHandlerInfoLine of tHandlers into tHandlerInfo
-      -- We want to include any comments before the handler declaration
-      -- so find the previous handler
-      put word 3 of tHandlerInfo into tHandlerStart
-      put word 4 of tHandlerInfo into tHandlerEnd
-      repeat while word 1 of line tHandlerStart of tDefaultScript is not empty
-         subtract 1 from tHandlerStart
-      end repeat
-      unlock messages
-      unlock screen
-      return line tHandlerStart to tHandlerEnd of tDefaultScript
-   end revIDEDefaultScript
+/**
+* revIDEDefaultExtensionIcon
+*
+* function
+*
+* parameters:
+*  pType
+*  pRetina
+*
+*/
+function revIDEDefaultExtensionIcon pType, pIsRetina?
+   switch pType
+      case "library"
+         if pIsRetina? is true then
+            return revIDESpecialFolderPath("images") & slash & "extension-library@extra-high.png"
+         else
+            return revIDESpecialFolderPath("images") & slash & "extension-library.png"
+         end if
+      case "widget"
+      default
+         if pIsRetina? is true then
+            return revIDESpecialFolderPath("images") & slash & "extension-widget@extra-high.png"
+         else
+            return revIDESpecialFolderPath("images") & slash & "extension-widget.png"
+         end if
+   end switch
+end revIDEDefaultExtensionIcon
 
-   /**
-   * revIDEClassicObjectDefaultScript
-   *
-   * function
-   *
-   * parameters
-   *  pType
-   */
-   function revIDEClassicObjectDefaultScript pType
-      local tFolder
-      put revIDESpecialFolderPath("Object Default Scripts") into tFolder
-      if there is a stack (tFolder & slash & pType & ".livecodescript") then
-         return the script of stack (tFolder & slash & pType & ".livecodescript")
-      end if
-      return empty
-   end revIDEClassicObjectDefaultScript
+/**
+* revIDEDefaultScript
+*
+* function
+*
+*  parameters:
+*  pObject
+*  pHandler
+*/
+function revIDEDefaultScript pObject, pHandler
+   local tDefaultScript, tType
+   put ideObjectTypeFromObject(pObject) into tType
+   if word 1 of the name of pObject is "widget" then
+      put revIDEWidgetDefaultScript(tType) into tDefaultScript
+   else
+      put revIDEClassicObjectDefaultScript(tType) into tDefaultScript
+   end if
 
-   /**
-   * revIDEWidgetDefaultScript
-   *
-   * function
-   *
-   * parameters
-   *  pKind
-   */
-   function revIDEWidgetDefaultScript pKind
-      return revIDEExtensionProperty(pKind, "defaultScript")
-   end revIDEWidgetDefaultScript
+   lock screen
+   lock messages
+   create invisible stack "revDefaultScriptHolder"
+   try
+      set the script of it to tDefaultScript
+   catch tError
+   end try
+   local tHandlers
+   put the revAvailableHandlers of it into tHandlers
+   delete stack "revDefaultScriptHolder"
+   local tHandlerStart, tHandlerEnd, tHandlerInfo, tHandlerInfoLine
+   set the wholematches to false
+   -- Ensure we don't accidentally match a substring by putting
+   -- spaces around the handler name
+   put lineOffset(" " & pHandler & " ", tHandlers) into tHandlerInfoLine
+   put line tHandlerInfoLine of tHandlers into tHandlerInfo
+   -- We want to include any comments before the handler declaration
+   -- so find the previous handler
+   put word 3 of tHandlerInfo into tHandlerStart
+   put word 4 of tHandlerInfo into tHandlerEnd
+   repeat while word 1 of line tHandlerStart of tDefaultScript is not empty
+      subtract 1 from tHandlerStart
+   end repeat
+   unlock messages
+   unlock screen
+   return line tHandlerStart to tHandlerEnd of tDefaultScript
+end revIDEDefaultScript
 
-   /**
-   * revIDEScriptEditorBehavior
-   *
-   * parameters
-   *  pWhich
-   */
-   function revIDEScriptEditorBehavior pWhich
-      local tPathToBehaviors
-      put revIDESpecialFolderPath("Toolset") & slash & "palettes" & slash & "script editor" & slash & "behaviors" into tPathToBehaviors
-      switch pWhich
-         case "common editor"
-            return tPathToBehaviors & slash & "revsecommoneditorbehavior.livecodescript"
-         case "editor"
-            return tPathToBehaviors & slash & "revseeditorbehavior.livecodescript"
-         case "handlerlist"
-            return tPathToBehaviors & slash & "revsehandlerlistbehavior.livecodescript"
-         case "menubar"
-            return tPathToBehaviors & slash & "revsemenubarbehavior.livecodescript"
-         case "scripttabs"
-            return tPathToBehaviors & slash & "revsescripttabsbehavior.livecodescript"
-         case "toolbar"
-            return tPathToBehaviors & slash & "revsetoolbarbehavior.livecodescript"
-         case "leftbar"
-            return tPathToBehaviors & slash & "revseleftbarbehavior.livecodescript"
-         case "variablespane"
-            return tPathToBehaviors & slash & "revsevariablespanebehavior.livecodescript"
-         case "documentationpane"
-            return tPathToBehaviors & slash & "revsedocumentationpanebehavior.livecodescript"
-         case "breakpointpane"
-            return tPathToBehaviors & slash & "revsebreakpointpanebehavior.livecodescript"
-         case "errorspane"
-            return tPathToBehaviors & slash & "revseerrorspanebehavior.livecodescript"
-         case "filterfield"
-            return tPathToBehaviors & slash & "revsefilterfieldbehavior.livecodescript"
-         case "variablescheckbox"
-            return tPathToBehaviors & slash & "revsevariablescheckboxbehavior.livecodescript"
-         case "stack"
-            return tPathToBehaviors & slash & "revsestackbehavior.livecodescript"
-         case "utilities"
-            return tPathToBehaviors & slash & "revseutilities.livecodescript"
-         case "gutter"
-            return tPathToBehaviors & slash & "revsegutterbehavior.livecodescript"
-         case "interactive find"
-            return tPathToBehaviors & slash & "revseinteractivefindbehavior.livecodescript"
-         case "variable visualizer"
-            return tPathToBehaviors & slash & "revsevariablevisualizerstackbehavior.livecodescript"
-         case "edit breakpoint"
-            return tPathToBehaviors & slash & "revseeditbreakpointstackbehavior.livecodescript"
-         case "error template"
-            return tPathToBehaviors & slash & "revseerrortemplatebehavior.livecodescript"
-         case "find main card"
-            return tPathToBehaviors & slash & "revsefindmaincardbehavior.livecodescript"
-         default
-            return empty
-      end switch
-   end revIDEScriptEditorBehavior
+/**
+* revIDEClassicObjectDefaultScript
+*
+* function
+*
+* parameters
+*  pType
+*/
+function revIDEClassicObjectDefaultScript pType
+   local tFolder
+   put revIDESpecialFolderPath("Object Default Scripts") into tFolder
+   if there is a stack (tFolder & slash & pType & ".livecodescript") then
+      return the script of stack (tFolder & slash & pType & ".livecodescript")
+   end if
+   return empty
+end revIDEClassicObjectDefaultScript
 
-   function revIDEMessageBoxBehavior pWhich
-      local tPathToBehaviors
-      put revIDESpecialFolderPath("Toolset") & slash & "palettes" & slash & "message box" & slash & "behaviors" into tPathToBehaviors
-      switch pWhich
-         case "single line message"
-            return tPathToBehaviors & slash & "revmessageboxsinglelinemessagebehavior.livecodescript"
-         case "single line card"
-            return tPathToBehaviors & slash & "revmessageboxsinglelinecardbehavior.livecodescript"
-         case "multiple lines message"
-            return tPathToBehaviors & slash & "revmessageboxmultiplelinesmessagebehavior.livecodescript"
-         case "multiple lines card"
-            return tPathToBehaviors & slash & "revmessageboxmultiplelinescardbehavior.livecodescript"
-         default
-            return empty
-      end switch
-   end revIDEMessageBoxBehavior
+/**
+* revIDEWidgetDefaultScript
+*
+* function
+*
+* parameters
+*  pKind
+*/
+function revIDEWidgetDefaultScript pKind
+   return revIDEExtensionProperty(pKind, "defaultScript")
+end revIDEWidgetDefaultScript
+
+/**
+* revIDEScriptEditorBehavior
+*
+* parameters
+*  pWhich
+*/
+function revIDEScriptEditorBehavior pWhich
+   local tPathToBehaviors
+   put revIDESpecialFolderPath("Toolset") & slash & "palettes" & slash & "script editor" & slash & "behaviors" into tPathToBehaviors
+   switch pWhich
+      case "common editor"
+         return tPathToBehaviors & slash & "revsecommoneditorbehavior.livecodescript"
+      case "editor"
+         return tPathToBehaviors & slash & "revseeditorbehavior.livecodescript"
+      case "handlerlist"
+         return tPathToBehaviors & slash & "revsehandlerlistbehavior.livecodescript"
+      case "menubar"
+         return tPathToBehaviors & slash & "revsemenubarbehavior.livecodescript"
+      case "scripttabs"
+         return tPathToBehaviors & slash & "revsescripttabsbehavior.livecodescript"
+      case "toolbar"
+         return tPathToBehaviors & slash & "revsetoolbarbehavior.livecodescript"
+      case "leftbar"
+         return tPathToBehaviors & slash & "revseleftbarbehavior.livecodescript"
+      case "variablespane"
+         return tPathToBehaviors & slash & "revsevariablespanebehavior.livecodescript"
+      case "documentationpane"
+         return tPathToBehaviors & slash & "revsedocumentationpanebehavior.livecodescript"
+      case "breakpointpane"
+         return tPathToBehaviors & slash & "revsebreakpointpanebehavior.livecodescript"
+      case "errorspane"
+         return tPathToBehaviors & slash & "revseerrorspanebehavior.livecodescript"
+      case "filterfield"
+         return tPathToBehaviors & slash & "revsefilterfieldbehavior.livecodescript"
+      case "variablescheckbox"
+         return tPathToBehaviors & slash & "revsevariablescheckboxbehavior.livecodescript"
+      case "stack"
+         return tPathToBehaviors & slash & "revsestackbehavior.livecodescript"
+      case "utilities"
+         return tPathToBehaviors & slash & "revseutilities.livecodescript"
+      case "gutter"
+         return tPathToBehaviors & slash & "revsegutterbehavior.livecodescript"
+      case "interactive find"
+         return tPathToBehaviors & slash & "revseinteractivefindbehavior.livecodescript"
+      case "variable visualizer"
+         return tPathToBehaviors & slash & "revsevariablevisualizerstackbehavior.livecodescript"
+      case "edit breakpoint"
+         return tPathToBehaviors & slash & "revseeditbreakpointstackbehavior.livecodescript"
+      case "error template"
+         return tPathToBehaviors & slash & "revseerrortemplatebehavior.livecodescript"
+      case "find main card"
+         return tPathToBehaviors & slash & "revsefindmaincardbehavior.livecodescript"
+      default
+         return empty
+   end switch
+end revIDEScriptEditorBehavior
+
+function revIDEMessageBoxBehavior pWhich
+   local tPathToBehaviors
+   put revIDESpecialFolderPath("Toolset") & slash & "palettes" & slash & "message box" & slash & "behaviors" into tPathToBehaviors
+   switch pWhich
+      case "single line message"
+         return tPathToBehaviors & slash & "revmessageboxsinglelinemessagebehavior.livecodescript"
+      case "single line card"
+         return tPathToBehaviors & slash & "revmessageboxsinglelinecardbehavior.livecodescript"
+      case "multiple lines message"
+         return tPathToBehaviors & slash & "revmessageboxmultiplelinesmessagebehavior.livecodescript"
+      case "multiple lines card"
+         return tPathToBehaviors & slash & "revmessageboxmultiplelinescardbehavior.livecodescript"
+      default
+         return empty
+   end switch
+end revIDEMessageBoxBehavior
 
    on revIDEAnswerDialogClosed
       local tPopupSource
@@ -6697,468 +6697,468 @@ default folder to the popped value.
       --send "menuPick" && quote & "Help Contents" & quote to btn "Help" of stack "revMenuBar"
    end revIDEHelpKeyPressed
 
-   on revIDETogglePaletteView
-      global gRevPalettes
-      local tOpenStacks
-      put the openStacks into tOpenStacks
-      lock screen
-      if gREVPalettes is empty then
-         repeat for each line tStack in tOpenStacks
-            if tStack is revIDEPaletteToStackName("menubar") or not revIDEStackNameIsIDEStack(tStack) then next repeat
-            if the mode of stack tStack is 4 and the visible of stack tStack then
-               hide stack tStack
-               put tStack & comma & lineOffset(tStack, tOpenStacks) & return after gREVPalettes
-            end if
-         end repeat
-         delete last char of gREVPalettes
-      else
-         sort lines of gREVPalettes descending by item 2 of each
-         lock messages
-         repeat for each line tPaletteName in gREVPalettes
-            local tPalette
-            put item 1 of tPaletteName into tPalette
-            if the mode of stack tPalette is 4 and not the visible of stack tPalette then
-               show stack tPalette
-            else if the platform is not in "MacOS,Win32" and the mode of stack tPalette is 0 then
-               show stack tPalette
-               palette tPalette
-               lock messages
-            end if
-         end repeat
-         put empty into gREVPalettes
-      end if
-      unlock screen
-   end revIDETogglePaletteView
-
-   function revIDEGetAllPlugins
-      local tUserPlugins
-      put revAbsoluteFolderListing(revEnvironmentUserPluginsPath()) into tUserPlugins
-
-      local tEnvironmentPlugins
-      put revAbsoluteFolderListing(revEnvironmentPluginsPath()) into tEnvironmentPlugins
-
-      local tFinal
-      put revCombineFilePaths(tUserPlugins,tEnvironmentPlugins) into tFinal
-
-      local tDevelopmentPlugins
-      put revAbsoluteFolderListing(revEnvironmentDevelopmentPluginsPath()) into tDevelopmentPlugins
-
-      if tDevelopmentPlugins is not empty then
-         put revCombineFilePaths(tFinal,tDevelopmentPlugins) into tFinal
-      end if
-      return tFinal
-   end revIDEGetAllPlugins
-
-   on revIDEPopupContextualMenu pTargets
-      dispatch "revMenubarPopupContextualMenu" to stack revIDEPaletteToStackName("menubar") with pTargets
-   end revIDEPopupContextualMenu
-
-   local sPluginsA
-   on revIDEUpdatePlugins
-      global gREVStartupList, gREVShutdownlist, gREVDontLoadMenus
-
-      local tFinal
-      put revIDEGetAllPlugins() into tFinal
-
-      put empty into gREVStartupList
-      put empty into gREVShutdownList
-
-      local tPluginsA, tName
-      lock messages
-      repeat for each line tStack in tFinal
-         if there is a stack tStack then
-            put the short name of stack tStack into tName
-            put tStack into tPluginsA[tName]["path"]
-            if the cREVLoadInfo["load"] of stack tStack is "chosen" or the cREVLoadInfo["load"] of stack tStack is empty or the cREVLoadInfo["inMenu"] of stack tStack is true then
-               put true into tPluginsA[tName]["menu"] -- appears in menu
-            end if
-            if the cREVLoadInfo["load"] of stack tStack is "startup" then
-               put true into tPluginsA[tName]["startup"]
-            else if the cREVLoadInfo["load"] of stack tStack is "shutdown" then
-               put true into tPluginsA[tName]["shutdown"]
-            end if
-            # See bug 2031
-            # The closeStack handler in the plugin settings dialog calls this handler
-            # So only those stacks which weren't already open should be removed from memory
-            if the mode of stack tStack is 0 then
-               # See bug 10710
-               # cantDelete has been changed and was causing an error
-               set the cantDelete of stack tStack to false
-               delete stack tStack
-            end if
+on revIDETogglePaletteView
+   global gRevPalettes
+   local tOpenStacks
+   put the openStacks into tOpenStacks
+   lock screen
+   if gREVPalettes is empty then
+      repeat for each line tStack in tOpenStacks
+         if tStack is revIDEPaletteToStackName("menubar") or not revIDEStackNameIsIDEStack(tStack) then next repeat
+         if the mode of stack tStack is 4 and the visible of stack tStack then
+            hide stack tStack
+            put tStack & comma & lineOffset(tStack, tOpenStacks) & return after gREVPalettes
          end if
       end repeat
-
-      unlock messages
-
-      # Only send the plugins changed message when the details of the plugins change
-      local tPluginsChanged
-      put false into tPluginsChanged
-      if sPluginsA is empty or tPluginsA is not sPluginsA then
-         put true into tPluginsChanged
-      end if
-
-      put tPluginsA into sPluginsA
-
-      if tPluginsChanged then
-         ideMessageSend "idePluginsChanged"
-      end if
-   end revIDEUpdatePlugins
-
-   function revIDEPlugins
-      return sPluginsA
-   end revIDEPlugins
-
-   on revIDEOpenPlugin pName
-      local tStackPath
-      put sPluginsA[pName]["path"] into tStackPath
-
-      if there is not a stack tStackPath then
-         delete variable sPluginsA[pName]
-         exit revIDEOpenPlugin
-      end if
-
-      local tMode
-      if the cREVLoadInfo["mode"] of stack tStackPath is not empty then
-         put the cREVLoadInfo["mode"] of stack tStackPath into tMode
-      else
-         put "palette" into tMode
-      end if
-
-      if tMode is "invisible" then
-         go invisible stack tStackPath
-      else
-         do "go stack" && q(tStackPath) && "as" && tMode
-      end if
-   end revIDEOpenPlugin
-
-   function ide.Localise pString, pSubstitutions
-      repeat for each key tKey in pSubstitutions
-         replace ("%" & tKey) with pSubstitutions[tKey] in pString
+      delete last char of gREVPalettes
+   else
+      sort lines of gREVPalettes descending by item 2 of each
+      lock messages
+      repeat for each line tPaletteName in gREVPalettes
+         local tPalette
+         put item 1 of tPaletteName into tPalette
+         if the mode of stack tPalette is 4 and not the visible of stack tPalette then
+            show stack tPalette
+         else if the platform is not in "MacOS,Win32" and the mode of stack tPalette is 0 then
+            show stack tPalette
+            palette tPalette
+            lock messages
+         end if
       end repeat
-      --return pString && "(Localised String)"
-      return pString
-   end ide.Localise
+      put empty into gREVPalettes
+   end if
+   unlock screen
+end revIDETogglePaletteView
 
-   ########################
-   # Standard IDE Library actions
-   ########################
+function revIDEGetAllPlugins
+   local tUserPlugins
+   put revAbsoluteFolderListing(revEnvironmentUserPluginsPath()) into tUserPlugins
 
-   /*
-   Creates a new mainstack in the default location
+   local tEnvironmentPlugins
+   put revAbsoluteFolderListing(environment.PluginsPath()) into tEnvironmentPlugins
 
-   Associations: stack
+   local tFinal
+   put revCombineFilePaths(tUserPlugins,tEnvironmentPlugins) into tFinal
 
-   pWidth (optional number): The width of the newly created stack. If left empty, 400 is used
-   pHeight (optional number): The height of the newly created stack. If left empty, 400 is used
+   local tDevelopmentPlugins
+   put revAbsoluteFolderListing(environment.DevelopmentPluginsPath()) into tDevelopmentPlugins
 
-   Example:
+   if tDevelopmentPlugins is not empty then
+      put revCombineFilePaths(tFinal,tDevelopmentPlugins) into tFinal
+   end if
+   return tFinal
+end revIDEGetAllPlugins
+
+on revIDEPopupContextualMenu pTargets
+   dispatch "revMenubarPopupContextualMenu" to stack revIDEPaletteToStackName("menubar") with pTargets
+end revIDEPopupContextualMenu
+
+local sPluginsA
+on revIDEUpdatePlugins
+   global gREVStartupList, gREVShutdownlist, gREVDontLoadMenus
+
+   local tFinal
+   put revIDEGetAllPlugins() into tFinal
+
+   put empty into gREVStartupList
+   put empty into gREVShutdownList
+
+   local tPluginsA, tName
+   lock messages
+   repeat for each line tStack in tFinal
+      if there is a stack tStack then
+         put the short name of stack tStack into tName
+         put tStack into tPluginsA[tName]["path"]
+         if the cREVLoadInfo["load"] of stack tStack is "chosen" or the cREVLoadInfo["load"] of stack tStack is empty or the cREVLoadInfo["inMenu"] of stack tStack is true then
+            put true into tPluginsA[tName]["menu"] -- appears in menu
+         end if
+         if the cREVLoadInfo["load"] of stack tStack is "startup" then
+            put true into tPluginsA[tName]["startup"]
+         else if the cREVLoadInfo["load"] of stack tStack is "shutdown" then
+            put true into tPluginsA[tName]["shutdown"]
+         end if
+         # See bug 2031
+         # The closeStack handler in the plugin settings dialog calls this handler
+         # So only those stacks which weren't already open should be removed from memory
+         if the mode of stack tStack is 0 then
+            # See bug 10710
+            # cantDelete has been changed and was causing an error
+            set the cantDelete of stack tStack to false
+            delete stack tStack
+         end if
+      end if
+   end repeat
+
+   unlock messages
+
+   # Only send the plugins changed message when the details of the plugins change
+   local tPluginsChanged
+   put false into tPluginsChanged
+   if sPluginsA is empty or tPluginsA is not sPluginsA then
+      put true into tPluginsChanged
+   end if
+
+   put tPluginsA into sPluginsA
+
+   if tPluginsChanged then
+      ideMessageSend "idePluginsChanged"
+   end if
+end revIDEUpdatePlugins
+
+function revIDEPlugins
+   return sPluginsA
+end revIDEPlugins
+
+on revIDEOpenPlugin pName
+   local tStackPath
+   put sPluginsA[pName]["path"] into tStackPath
+
+   if there is not a stack tStackPath then
+      delete variable sPluginsA[pName]
+      exit revIDEOpenPlugin
+   end if
+
+   local tMode
+   if the cREVLoadInfo["mode"] of stack tStackPath is not empty then
+      put the cREVLoadInfo["mode"] of stack tStackPath into tMode
+   else
+      put "palette" into tMode
+   end if
+
+   if tMode is "invisible" then
+      go invisible stack tStackPath
+   else
+      do "go stack" && q(tStackPath) && "as" && tMode
+   end if
+end revIDEOpenPlugin
+
+function ide.Localise pString, pSubstitutions
+   repeat for each key tKey in pSubstitutions
+      replace ("%" & tKey) with pSubstitutions[tKey] in pString
+   end repeat
+   --return pString && "(Localised String)"
+   return pString
+end ide.Localise
+
+########################
+# Standard IDE Library actions
+########################
+
+/*
+Creates a new mainstack in the default location
+
+Associations: stack
+
+pWidth (optional number): The width of the newly created stack. If left empty, 400 is used
+pHeight (optional number): The height of the newly created stack. If left empty, 400 is used
+
+Example:
+revIDENewMainstack
+
+revIDENewMainstack 100,100
+
+Tags: ide
+*/
+on revIDENewMainstack pWidth, pHeight
+   # Set the width and height of the template stack
+
+   # Generate a unique name for the stack
+   local tNumber
+   put 1 into tNumber
+   repeat
+      if there is a stack ("Untitled" && tNumber) then  add 1 to tNumber
+      else exit repeat
+   end repeat
+
+   # Setup the template stack
+   set the name of the templateStack to "Untitled" && tNumber
+   set the visible of the templateStack to false
+   if pWidth > 100 then
+      set the width of the templateStack to pWidth
+   else
+      set the width of the templateStack to 400
+   end if
+   if pHeight > 100 then
+      set the height of the templateStack to pHeight
+   else
+      set the height of the templateStack to 400
+   end if
+   if revIDEGetPreference("cDestroyStack") then
+      set the destroyStack of the templateStack to true
+      set the destroyWindow of the templateStack to true
+   end if
+
+   local tToolsRight
+   put the right of stack revIDEPaletteToStackName("tools") into tToolsRight
+
+   local tLeft, tScreenRect
+   put revIDEStackScreenRect(revIDEPaletteToStackName("tools"), true) into tScreenRect
+   if tToolsRight < (item 3 of tScreenRect / 2) then put tToolsRight + 20 into tLeft
+   else put item 1 of tScreenRect + 20 into tLeft
+   set the topLeft of the templateStack to tLeft,(the bottom of stack revIDEPaletteToStackName("menubar") + 40)
+
+   # Create the new stack
+   lock messages
+   create stack
+   show stack it
+   unlock messages
+
+   # Final items
+   reset the templateStack
+
+   # Send the 'ideNewStack' message
+   ideMessageSend "ideNewStack", it
+
+   # Update the active stacks
+   ideMessageSend "ideActiveStacksChanged"
+
+   # Return the created stack long id
+   return it
+end revIDENewMainstack
+
+/*
+Summary: Get the screenLoc for a stack based on the screen the stack is on
+
+Parameters:
+pStackName (string): The name of a stack
+pWorking? (boolean): If true return the loc relative to OS screen furniture rather than the full screen
+
+Returns: The screenLoc of the screen the stack is on
+*/
+function revIDEStackScreenLoc pStackName, pWorking?
+   local tScreenRect
+   put revIDEStackScreenRect(pStackName, pWorking?) into tScreenRect
+
+   local tScreenWidth
+   put item 3 of tScreenRect - item 1 of tScreenRect into tScreenWidth
+
+   local tScreenHeight
+   put item 4 of tScreenRect - item 2 of tScreenRect into tScreenHeight
+
+   return item 1 of tScreenRect + (tScreenWidth div 2),item 2 of tScreenRect + (tScreenHeight div 2)
+end revIDEStackScreenLoc
+
+/*
+Summary: Get the screenRect for a stack based on the screen the stack is on
+
+Parameters:
+pStackName (string): The name of a stack
+pWorking? (boolean): If true return the loc relative to OS screen furniture rather than the full screen
+
+Returns: The screenRect of the screen the stack is on
+*/
+function revIDEStackScreenRect pStackName, pWorking?
+   local tRect
+   if pWorking? then
+      put line (the screen of stack pStackName) of the working screenRects into tRect
+   else
+      put line (the screen of stack pStackName) of the screenRects into tRect
+   end if
+   if tRect is empty then
+      return 0,0,0,0
+   end if
+
+   return tRect
+end revIDEStackScreenRect
+
+on revIDEActionNewMainstack pStackType
+   if  pStackType is "default" then
+      revIDENewMainstack
+   else if pStackType is "script only" then
+      revIDEActionNewScriptOnlyStack
+   else
+      # Parse the tag to look for size
+      set the itemdel to "("
+      delete item 1 of pStackType
+      delete the last char of pStackType
+      set the itemdel to "x"
+
+      # Check that the width and height are valid numbers
+      if item 1 of pStackType is a number and item 2 of pStackType is a number then
+         revIDENewMainstack item 1 of pStackType, item 2 of pStackType
+      else
+         revIDENewMainstack
+      end if
+   end if
+
+   # Return the created stack long id
+   return the result
+end revIDEActionNewMainstack
+
+on revIDEActionNewCard
+   local tFilterStack
+   put the short name of the topStack into tFilterStack
+   if revFilterStacksList(tFilterStack) is empty then
+      revIDEActionNewMainstack "default"
+   end if
+   set the defaultStack to the topStack
+   local tCardID
+   create card
+   put the long id of it into tCardID
+   revIDESetEdited the short name of this stack
+   ideMessageSend "ideNewCard tCardID"
+
+   # Return the card id
+   return tCardID
+end revIDEActionNewCard
+
+on revIDEActionDeleteCard
+   revIDEDeleteCard the long id of this card of the topStack
+end revIDEActionDeleteCard
+
+on revIDEDeleteCard pLongID
+   answer error "Are you sure you want to delete" && the long name of pLongID & "?" with "Yes" or "No"
+   if it is not "yes" then exit revIDEDeleteCard
+   delete pLongID
+
+   revIDESetEdited the short name of ideStackOfObject(pLongID)
+end revIDEDeleteCard
+
+/*
+Creates a new script only stack in memory.
+
+Associations: stack
+
+pName (String): The name of the script only stack.
+
+Example:
+revIDENewScriptOnlyStack "MyNewScriptOnlyStack"
+
+Tags: ide
+*/
+on revIDENewScriptOnlyStack pName
+   revIDENewScriptOnlyStackWithScript pName
+   if the result is empty then
+      return it for value
+   else
+      return the result for error
+   end if
+end revIDENewScriptOnlyStack
+
+/*
+Creates a new script only stack in memory with a given script.
+
+Associations: stack
+
+pName (String): The name of the script only stack.
+pScript (String): The script of the stack.
+
+Example:
+revIDENewScriptOnlyStack "MyNewScriptOnlyStack"
+
+The result:
+An error string if the stack could not be created
+
+It:
+The long id of the newly created stack
+
+Tags: ide
+*/
+on revIDENewScriptOnlyStackWithScript pName, pScript
+   if pName is empty then return __revIDEError("Script only stacks cannot be created without a name") for error
+   if there is a stack pName then return "A stack with that name already exists" for error
+
+   local tLongID
+   create script only stack pName
+   put it into tLongID
+
+   set the script of tLongID to pScript
+
+   edit the script of tLongID
+   return tLongID for value
+end revIDENewScriptOnlyStackWithScript
+
+on revIDEActionNewScriptOnlyStack
+   # Get the name of the stack
+   ask ide.Localise("Please enter a name for the script only stack")
+   if the result is "cancel" then exit revIDEActionNewScriptOnlyStack
+   if it is empty then exit revIDEActionNewScriptOnlyStack
+
+   # Create script only
+   revIDENewScriptOnlyStack it
+
+   # If an error occurred, tell the user
+   if the result is not empty then
+      answer the result
+   end if
+end revIDEActionNewScriptOnlyStack
+
+on revIDENewSubstack
+   # Get the current stack
+   local tCurrentStack
+   put the short name of the topStack into tCurrentStack
+   revIDENewSubstackOfStack tCurrentStack
+end revIDENewSubstack
+
+/*
+Creates a new substack.
+
+Associations: stack
+
+pStack (String): The long ID of the stack to attach the substack to.
+
+Example:
+revIDENewSubstackOfStack the long ID of the topstack
+
+Tags: ide
+*/
+on revIDENewSubstackOfStack pStack
+   lock screen
+   if the mainStack of stack pStack is not pStack then put the mainStack of stack pStack into pStack
+
+   # Create a new stack
    revIDENewMainstack
 
-   revIDENewMainstack 100,100
+   # Make the new stack a substack of the current stack
+   set the mainStack of the topStack to pStack
+   unlock screen
+end revIDENewSubstackOfStack
 
-   Tags: ide
-   */
-   on revIDENewMainstack pWidth, pHeight
-      # Set the width and height of the template stack
+on revIDEActionOpenStack
+   # Popup a file choose
+   revIDEAnswerFileWithTypes "stack,all"
 
-      # Generate a unique name for the stack
-      local tNumber
-      put 1 into tNumber
-      repeat
-         if there is a stack ("Untitled" && tNumber) then  add 1 to tNumber
-         else exit repeat
-      end repeat
+   # Get the path of to the file
+   local tStackFilePaths
+   put the result into tStackFilePaths
 
-      # Setup the template stack
-      set the name of the templateStack to "Untitled" && tNumber
-      set the visible of the templateStack to false
-      if pWidth > 100 then
-         set the width of the templateStack to pWidth
+   repeat for each line tStackFilePath in tStackFilePaths
+      # Check the stack exists
+      if there is not a file tStackFilePath then exit revIDEActionOpenStack
+
+      # Open the stack
+      revIDEOpenStack tStackFilePath
+   end repeat
+end revIDEActionOpenStack
+
+/*
+Closes an stack.
+
+Associations: stack
+
+pStackID (String): The long ID of the stack to close
+pDestroy (Optional Boolean): True if the stack should be deleted from memory
+
+Example:
+# Close the stack be keep in memory
+revIDECloseStack the long ID of the topstack
+
+# Close the stack completely removing it from memory
+revIDECloseStack the long ID of the topstack, true
+
+Tags: ide
+*/
+on revIDECloseStack pStackID, pDestroy
+   if not exists(pStackID) then return ide.Localise("Cannot close stack, it doesn't exist")
+
+   if revSaveCheck?(pStackID) is not false then
+      if pDestroy is true then
+         revIDERemoveFromMemory pStackID
       else
-         set the width of the templateStack to 400
+         close stack pStackID
       end if
-      if pHeight > 100 then
-         set the height of the templateStack to pHeight
-      else
-         set the height of the templateStack to 400
-      end if
-      if revIDEGetPreference("cDestroyStack") then
-         set the destroyStack of the templateStack to true
-         set the destroyWindow of the templateStack to true
-      end if
-
-      local tToolsRight
-      put the right of stack revIDEPaletteToStackName("tools") into tToolsRight
-
-      local tLeft, tScreenRect
-      put revIDEStackScreenRect(revIDEPaletteToStackName("tools"), true) into tScreenRect
-      if tToolsRight < (item 3 of tScreenRect / 2) then put tToolsRight + 20 into tLeft
-      else put item 1 of tScreenRect + 20 into tLeft
-      set the topLeft of the templateStack to tLeft,(the bottom of stack revIDEPaletteToStackName("menubar") + 40)
-
-      # Create the new stack
-      lock messages
-      create stack
-      show stack it
-      unlock messages
-
-      # Final items
-      reset the templateStack
-
-      # Send the 'ideNewStack' message
-      ideMessageSend "ideNewStack", it
-
-      # Update the active stacks
-      ideMessageSend "ideActiveStacksChanged"
-
-      # Return the created stack long id
-      return it
-   end revIDENewMainstack
-
-   /*
-   Summary: Get the screenLoc for a stack based on the screen the stack is on
-
-   Parameters:
-   pStackName (string): The name of a stack
-   pWorking? (boolean): If true return the loc relative to OS screen furniture rather than the full screen
-
-   Returns: The screenLoc of the screen the stack is on
-   */
-   function revIDEStackScreenLoc pStackName, pWorking?
-      local tScreenRect
-      put revIDEStackScreenRect(pStackName, pWorking?) into tScreenRect
-
-      local tScreenWidth
-      put item 3 of tScreenRect - item 1 of tScreenRect into tScreenWidth
-
-      local tScreenHeight
-      put item 4 of tScreenRect - item 2 of tScreenRect into tScreenHeight
-
-      return item 1 of tScreenRect + (tScreenWidth div 2),item 2 of tScreenRect + (tScreenHeight div 2)
-   end revIDEStackScreenLoc
-
-   /*
-   Summary: Get the screenRect for a stack based on the screen the stack is on
-
-   Parameters:
-   pStackName (string): The name of a stack
-   pWorking? (boolean): If true return the loc relative to OS screen furniture rather than the full screen
-
-   Returns: The screenRect of the screen the stack is on
-   */
-   function revIDEStackScreenRect pStackName, pWorking?
-      local tRect
-      if pWorking? then
-         put line (the screen of stack pStackName) of the working screenRects into tRect
-      else
-         put line (the screen of stack pStackName) of the screenRects into tRect
-      end if
-      if tRect is empty then
-         return 0,0,0,0
-      end if
-
-      return tRect
-   end revIDEStackScreenRect
-
-   on revIDEActionNewMainstack pStackType
-      if  pStackType is "default" then
-         revIDENewMainstack
-      else if pStackType is "script only" then
-         revIDEActionNewScriptOnlyStack
-      else
-         # Parse the tag to look for size
-         set the itemdel to "("
-         delete item 1 of pStackType
-         delete the last char of pStackType
-         set the itemdel to "x"
-
-         # Check that the width and height are valid numbers
-         if item 1 of pStackType is a number and item 2 of pStackType is a number then
-            revIDENewMainstack item 1 of pStackType, item 2 of pStackType
-         else
-            revIDENewMainstack
-         end if
-      end if
-
-      # Return the created stack long id
-      return the result
-   end revIDEActionNewMainstack
-
-   on revIDEActionNewCard
-      local tFilterStack
-      put the short name of the topStack into tFilterStack
-      if revFilterStacksList(tFilterStack) is empty then
-         revIDEActionNewMainstack "default"
-      end if
-      set the defaultStack to the topStack
-      local tCardID
-      create card
-      put the long id of it into tCardID
-      revIDESetEdited the short name of this stack
-      ideMessageSend "ideNewCard tCardID"
-
-      # Return the card id
-      return tCardID
-   end revIDEActionNewCard
-
-   on revIDEActionDeleteCard
-      revIDEDeleteCard the long id of this card of the topStack
-   end revIDEActionDeleteCard
-
-   on revIDEDeleteCard pLongID
-      answer error "Are you sure you want to delete" && the long name of pLongID & "?" with "Yes" or "No"
-      if it is not "yes" then exit revIDEDeleteCard
-      delete pLongID
-
-      revIDESetEdited the short name of ideStackOfObject(pLongID)
-   end revIDEDeleteCard
-
-   /*
-   Creates a new script only stack in memory.
-
-   Associations: stack
-
-   pName (String): The name of the script only stack.
-
-   Example:
-   revIDENewScriptOnlyStack "MyNewScriptOnlyStack"
-
-   Tags: ide
-   */
-   on revIDENewScriptOnlyStack pName
-      revIDENewScriptOnlyStackWithScript pName
-      if the result is empty then
-         return it for value
-      else
-         return the result for error
-      end if
-   end revIDENewScriptOnlyStack
-
-   /*
-   Creates a new script only stack in memory with a given script.
-
-   Associations: stack
-
-   pName (String): The name of the script only stack.
-   pScript (String): The script of the stack.
-
-   Example:
-   revIDENewScriptOnlyStack "MyNewScriptOnlyStack"
-
-   The result:
-   An error string if the stack could not be created
-
-   It:
-   The long id of the newly created stack
-
-   Tags: ide
-   */
-   on revIDENewScriptOnlyStackWithScript pName, pScript
-      if pName is empty then return __revIDEError("Script only stacks cannot be created without a name") for error
-      if there is a stack pName then return "A stack with that name already exists" for error
-
-      local tLongID
-      create script only stack pName
-      put it into tLongID
-
-      set the script of tLongID to pScript
-
-      edit the script of tLongID
-      return tLongID for value
-   end revIDENewScriptOnlyStackWithScript
-
-   on revIDEActionNewScriptOnlyStack
-      # Get the name of the stack
-      ask ide.Localise("Please enter a name for the script only stack")
-      if the result is "cancel" then exit revIDEActionNewScriptOnlyStack
-      if it is empty then exit revIDEActionNewScriptOnlyStack
-
-      # Create script only
-      revIDENewScriptOnlyStack it
-
-      # If an error occurred, tell the user
-      if the result is not empty then
-         answer the result
-      end if
-   end revIDEActionNewScriptOnlyStack
-
-   on revIDENewSubstack
-      # Get the current stack
-      local tCurrentStack
-      put the short name of the topStack into tCurrentStack
-      revIDENewSubstackOfStack tCurrentStack
-   end revIDENewSubstack
-
-   /*
-   Creates a new substack.
-
-   Associations: stack
-
-   pStack (String): The long ID of the stack to attach the substack to.
-
-   Example:
-   revIDENewSubstackOfStack the long ID of the topstack
-
-   Tags: ide
-   */
-   on revIDENewSubstackOfStack pStack
-      lock screen
-      if the mainStack of stack pStack is not pStack then put the mainStack of stack pStack into pStack
-
-      # Create a new stack
-      revIDENewMainstack
-
-      # Make the new stack a substack of the current stack
-      set the mainStack of the topStack to pStack
-      unlock screen
-   end revIDENewSubstackOfStack
-
-   on revIDEActionOpenStack
-      # Popup a file choose
-      revIDEAnswerFileWithTypes "stack,all"
-
-      # Get the path of to the file
-      local tStackFilePaths
-      put the result into tStackFilePaths
-
-      repeat for each line tStackFilePath in tStackFilePaths
-         # Check the stack exists
-         if there is not a file tStackFilePath then exit revIDEActionOpenStack
-
-         # Open the stack
-         revIDEOpenStack tStackFilePath
-      end repeat
-   end revIDEActionOpenStack
-
-   /*
-   Closes an stack.
-
-   Associations: stack
-
-   pStackID (String): The long ID of the stack to close
-   pDestroy (Optional Boolean): True if the stack should be deleted from memory
-
-   Example:
-   # Close the stack be keep in memory
-   revIDECloseStack the long ID of the topstack
-
-   # Close the stack completely removing it from memory
-   revIDECloseStack the long ID of the topstack, true
-
-   Tags: ide
-   */
-   on revIDECloseStack pStackID, pDestroy
-      if not exists(pStackID) then return ide.Localise("Cannot close stack, it doesn't exist")
-
-      if revSaveCheck?(pStackID) is not false then
-         if pDestroy is true then
-            revIDERemoveFromMemory pStackID
-         else
-            close stack pStackID
-         end if
-      end if
-   end revIDECloseStack
+   end if
+end revIDECloseStack
 
    private on __ideRemoveFromMemory pStackID
       # OK-2008-08-18: Bug 6932 - Update the script editor here as messages is locked when deleting the stack
@@ -9196,13 +9196,13 @@ on revIDELaunchResource pName
          launch url "https://livecode.com/resources/support/"
          break
       case "License Agreement"
-         launch document (revEnvironmentToolsPath() & slash & "License Agreement.txt")
+         launch document (environment.ToolsPath() & slash & "License Agreement.txt")
          break
       case "Release Notes"
-         launch document (revEnvironmentToolsPath() & slash & "Release Notes.pdf")
+         launch document (environment.ToolsPath() & slash & "Release Notes.pdf")
          break
       case "User Guide"
-         launch document revEnvironmentDocumentationPath() & "/pdf/LiveCode User Guide.pdf"
+         launch document environment.DocumentationPath() & "/pdf/LiveCode User Guide.pdf"
          break
       case "Sample Stacks"
          set the _ideoverride of stack "revonline" to true
@@ -9233,7 +9233,7 @@ on revIDELaunchResource pName
          launch url "http://livecode.com/links/livecode/newsletters"
          break
       case "Resources"
-         launch document revEnvironmentToolsPath() & slash & "Resources"
+         launch document environment.ToolsPath() & slash & "Resources"
          break
    end switch
 end revIDELaunchResource
@@ -11098,7 +11098,7 @@ private function revIDEGetExtensionDocsData pAPI
 
       # If we are running from source, also add the docs parser as an input
       # dependency of the docs files
-      if not revEnvironmentIsInstalled() then
+      if not environment.IsInstalled?() then
          put the effective filename of stack "revDocsParser" into \
                tInputs[the number of elements in tInputs + 1]
       end if
@@ -11131,7 +11131,7 @@ private function revIDEGetExtensionDocsData pAPI
          # Generate the docs text in lcdoc format
          local tDoc
          if tExtensionData["source_type"] is "lcb" then
-            dispatch function "revDocsGenerateDocsFileFromModularFile" to stack "revDocsParser" with \
+            dispatch function "docs.GenerateDocsFileFromModularFile" to stack "revDocsParser" with \
                   tFolder & slash & tSource
             put the result into tDoc
          else if tExtensionData["source_type"] is "lcs" then
@@ -11141,7 +11141,7 @@ private function revIDEGetExtensionDocsData pAPI
                put the password of tStack into tPassword
             end try
             if tStack is not empty and tPassword is empty then
-               dispatch function "revDocsGenerateDocsFileFromText" \
+               dispatch function "docs.GenerateDocsFile.FromText" \
                      to stack "revDocsParser" with \
                      the script of tStack, tStack
                put the result into tDoc
@@ -11166,14 +11166,16 @@ private function revIDEGetExtensionDocsData pAPI
          put revIDEUTF8FileContents(tAPIJS) into tExtensionAPI
       else if tNeedUpdate? is true then
          local tLibraryArray, Lcdoc
-         dispatch function "revDocsParseDocFileToLibraryArray" to stack "revDocsParser" \
+         dispatch function "docs.ParseDocFile.ToLibraryArray" to stack "revDocsParser" \
                with tAPIDoc, tExtensionData["title"], \
                tExtensionData["author"]
          put the result into tLibraryArray
+         --put docs.ParseDocFile.ToLibraryArray(tAPIDoc, tExtensionData["title"], tExtensionData["author"]) into tLibraryArray
 
          dispatch function "revDocsFormatLibraryDocArrayAsJSON" to stack "revDocsParser" \
                with tLibraryArray
          put the result into tExtensionAPI
+         --put docs.FormatLibraryDocArray.AsJSON(tLibraryArray) into tExtensionAPI
 
          # Update the dictionary database
          ideDocsUpdateDatabase pAPI, tLibraryArray, false
@@ -11301,12 +11303,12 @@ on revIDERegenerateBuiltAPIs
    set the lineDelimiter to "|"
    repeat for each line tAPI in kAPIs
       -- For now, the IDE API is BFS only
-      if item 2 of tAPI is "livecode_ide" and revEnvironmentIsInstalled() then
+      if item 2 of tAPI is "livecode_ide" and environment.IsInstalled?? then
          next repeat
       end if
 
       put IDEGetDocsAPIData(item 2 of tAPI) into tAPIData
-      dispatch function "revDocsCreateAPIJSON" to stack "revDocsParser" \
+      dispatch function "docs.CreateAPIJSON" to stack "revDocsParser" \
             with item 1 of tAPI, item 2 of tAPI, "", tAPIData
       if tData is empty then
          put the result into tData
@@ -11353,7 +11355,7 @@ private command ideGenerateDistributedGuide
    put revIDESpecialFolderPath("ide guides") into tGuideFoldersWithLocationA[1]["folder"]
    put "ide" into tGuideFoldersWithLocationA[1]["location"]
 
-   if not revEnvironmentIsInstalled() then
+   if not environment.IsInstalled?() then
       put revIDESpecialFolderPath("repo guides") into tGuideFoldersWithLocationA[2]["folder"]
       put "repo" into tGuideFoldersWithLocationA[2]["location"]
    end if
@@ -11377,12 +11379,12 @@ private command ideGenerateDistributedGuide
 
    local tOrderedGuidesA, tOrderFolder
    put revIDESpecialFolderPath("ide guides") into tOrderFolder
-   put revDocsOrderedGuideData(tGuideFoldersWithLocationA, tOrderFolder) into tOrderedGuidesA
+   put docs.OrderedGuideData(tGuideFoldersWithLocationA, tOrderFolder) into tOrderedGuidesA
 
    local tGuideData
    repeat for each element tGuideA in tOrderedGuidesA
       put tab & "{" after tGuideData
-      put return & revDocsFormatGuideDataAsJSON(tGuideA) after tGuideData
+      put cr & docs.FormatGuideDataAsJSON(tGuideA) after tGuideData
       put return & tab & "}," after tGuideData
    end repeat
    delete the last char of tGuideData
@@ -11456,11 +11458,11 @@ private command ideDocs.UpdateScriptDictionary.IfNecessary.From pRepoPath
    if tNeedUpdate? then
       local tScriptA
       put "LiveCode Script" into tScriptA["display name"]
-      put revDocsModifyForUrl(tScriptA["display name"]) into tScriptA["name"]
+      put docs.ModifyForURL(tScriptA["display name"]) into tScriptA["name"]
       put "LiveCode" into tScriptA["author"]
       put "dictionary" into tScriptA["type"]
       # Parse the dictionary files into a structured array
-      put revDocsParseDictionaryToLibraryArray(tFolder) into tScriptA["doc"]
+      put docs.ParseDictionaryToLibraryArray(tFolder) into tScriptA["doc"]
 
       # Update the database
       ideDocsUpdateDatabase "livecode_script", tScriptA, true
@@ -11478,7 +11480,7 @@ private command ideDocs.UpdateBuilderDocs.IfNecessary.From pRepoPath
    local tNeedUpdate?
 
    local tModuleList
-   put revDocsGetBuiltinModuleList(revEnvironmentBinariesPath() & slash & "modules" & slash & "lci", pRepoPath) into tModuleList
+   put docs.GetBuiltinModuleList(revEnvironmentBinariesPath() & slash & "modules" & slash & "lci", pRepoPath) into tModuleList
 
    set the itemdelimiter to slash
    put ideGeneratedOutputFolder("builder") into tOutput
@@ -11500,7 +11502,7 @@ private command ideDocs.UpdateBuilderDocs.IfNecessary.From pRepoPath
          if item -1 of tLine is "lcdoc" then
             get url("file:" & tLine)
          else
-            get revDocsGenerateDocsFileFromModularFile(tLine)
+            get docs.GenerateDocsFileFromModularFile(tLine)
          end if
          if it is not empty then
             put it into tModularA[tModularCount]
@@ -11511,7 +11513,7 @@ private command ideDocs.UpdateBuilderDocs.IfNecessary.From pRepoPath
       local tBuilderA
       put 1 into tModularCount
       repeat for each element tElement in tModularA
-         put revDocsParseDocText(tElement) into tParsedA
+         put docs.ParseDocText(tElement) into tParsedA
          repeat for each key tEntry in tParsedA["doc"]
             put tParsedA["doc"][tEntry] into tBuilderA["doc"][tModularCount]
             add 1 to tModularCount
@@ -11519,7 +11521,7 @@ private command ideDocs.UpdateBuilderDocs.IfNecessary.From pRepoPath
          put empty into tParsedA
       end repeat
       put "LiveCode Builder" into tBuilderA["display name"]
-      put revDocsModifyForUrl(tBuilderA["display name"]) into tBuilderA["name"]
+      put docs.ModifyForURL(tBuilderA["display name"]) into tBuilderA["name"]
       put "LiveCode" into tBuilderA["author"]
       put "dictionary" into tBuilderA["type"]
 
@@ -11549,7 +11551,7 @@ private command ideDocs.UpdateDatagridDocs.IfNecessary
    # Regenerate if necessary
    if tNeedUpdate? then
       local tLibA
-      put revDocsParseDocFileToLibraryArray(tFolder & slash & "datagrid.lcdoc", "DataGrid", "LiveCode") into tLibA
+      put docs.ParseDocFile.ToLibraryArray(tFolder & slash & "datagrid.lcdoc", "DataGrid", "LiveCode") into tLibA
 
       # Update the database
       ideDocsUpdateDatabase "livecode_script", tLibA, true
@@ -11590,7 +11592,7 @@ private command ideDocs.GenerateDictionary.IfNecessary.From pRepoPath
             put the password of tStack into tPassword
          end try
          if tStack is not empty and tPassword is empty then
-            put revDocsGenerateDocsFileFromText(the script of tStack, tStack) into tDoc
+            put docs.GenerateDocsFile.FromText(the script of tStack, tStack) into tDoc
          end if
          if tDoc is not empty then
             put tDoc into tIDEA[tIDECount]
@@ -11601,7 +11603,7 @@ private command ideDocs.GenerateDictionary.IfNecessary.From pRepoPath
       local tIDELibraryA
       put 1 into tIDECount
       repeat for each element tElement in tIDEA
-         put revDocsParseDocText(tElement) into tIDEParsedA
+         put docs.ParseDocText(tElement) into tIDEParsedA
          repeat for each key tEntry in tIDEParsedA["doc"]
             put tIDEParsedA["doc"][tEntry] into tIDELibraryA["doc"][tIDECount]
             add 1 to tIDECount
@@ -11609,7 +11611,7 @@ private command ideDocs.GenerateDictionary.IfNecessary.From pRepoPath
          put empty into tIDEParsedA
       end repeat
       put "LiveCode IDE" into tIDELibraryA["display name"]
-      put revDocsModifyForUrl(tIDELibraryA["display name"]) into tIDELibraryA["name"]
+      put docs.ModifyForURL(tIDELibraryA["display name"]) into tIDELibraryA["name"]
       put "LiveCode" into tIDELibraryA["author"]
       put "dictionary" into tIDELibraryA["type"]
 
@@ -11626,7 +11628,7 @@ end ideDocs.GenerateDictionary.IfNecessary.From
 private command ideSetFileContentsFromArray pArray, pOutputPath
    local tJSON
 
-   put revDocsFormatLibraryDocArrayAsJSON(pArray) into tJSON
+   put docs.FormatLibraryDocArray.AsJSON(pArray) into tJSON
    revIDESetUTF8FileContents pOutputPath, tJSON
 end ideSetFileContentsFromArray
 
@@ -11648,7 +11650,7 @@ private command ideGenerateDocsFromFile pFile, pFolder
    # Regenerate if necessary
    local tLibA, tJSON
    if tNeedUpdate? then
-      put revDocsParseDocFileToLibraryArray(pFolder & slash & pFile, item -2 of pFile, "LiveCode") into tLibA
+      put docs.ParseDocFile.ToLibraryArray(pFolder & slash & pFile, item -2 of pFile, "LiveCode") into tLibA
       # Update the database
       ideDocsUpdateDatabase "livecode_script", tLibA, true
       ideSetFileContentsFromArray tLibA, tOutput

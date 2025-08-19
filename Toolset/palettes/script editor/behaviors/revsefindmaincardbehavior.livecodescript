@@ -5,7 +5,7 @@ local sCancelled = "false"
 #   The long id of the stack to use as a regular expression builder
 function regularExpressionBuilder
    local tPath
-   put revEnvironmentPluginsPath() & slash & "RegExBuilder 1.6.rev" into tPath
+   put environment.PluginsPath() & slash & "RegExBuilder 1.6.rev" into tPath
    
    if there is no file tPath then
       return empty
@@ -15,12 +15,12 @@ function regularExpressionBuilder
 end regularExpressionBuilder
 
 on preOpenCard
-   send "revSEFindInitialize" to (getCaller())
+   dispatch "revSEFindInitialize" to (getCaller())
    --historyLoad
    optionsHide
    
    --set the label of button "Toggle Options" of me to "+"
-   send "resetIcon" to button "Toggle Options" of me
+   dispatch "resetIcon" to button "Toggle Options" of me
    statusSet empty
    update
    updateButtonStates
@@ -70,7 +70,7 @@ command update
    local tFindText
    put historyGet("find") into tFindText
    if tFindLabel is not empty and tFindLabel is not among the lines of tFindText then
-      put tFindLabel & return & tFindText into tFindText
+      put tFindLabel & cr & tFindText into tFindText
    end if
    
    set the text of button "Find" of me to tFindText
@@ -83,7 +83,7 @@ command update
    local tReplaceText
    put historyGet("replace") into tReplaceText
    if tReplaceLabel is not empty and tReplaceLabel is not among the lines of tReplaceText then
-      put tReplaceLabel & return & tReplaceText into tReplaceText
+      put tReplaceLabel & cr & tReplaceText into tReplaceText
    end if
    
    set the text of button "Replace" of me to tReplaceText

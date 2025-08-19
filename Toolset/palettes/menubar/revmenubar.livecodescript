@@ -6,13 +6,13 @@ on preOpenStack
       put false into gREVDontLoadMenus
       exit preOpenStack
    end if
-
+   
    subscribeMessages
-
+   
    setDefaultText
    setMenuProperties
    generateMenu
-   revMenubarBuildMenus
+   menubar.BuildMenus
    updateMenubarPreference
    layoutMenu
    revIDEPositionPalette the short name of me
@@ -31,14 +31,14 @@ private command subscribeMessages
    revIDESubscribe "idePreferenceChanged:cToolbarIcons"
    revIDESubscribe "idePreferenceChanged:cToolbarText"
    revIDESubscribe "ideToolChanged"
-
+   
    revIDESubscribe "ideToggleChanged:suppressMessages"
    revIDESubscribe "ideToggleChanged:suppressErrors"
    revIDESubscribe "ideToggleChanged:selectGrouped"
-
+   
    revIDESubscribe "idePluginsChanged"
    revIDESubscribe "ideWindowsChanged"
-
+   
    revIDESubscribe "ideTutorialProgressChanged"
    revIDESubscribe "ideActiveStacksChanged"
 end subscribeMessages
@@ -87,12 +87,12 @@ private on setupTextMenu
    put toggleMenuItem("Superscript", false) & cr after tText
    put "-" & cr after tText
    put "Font" & cr after tText
-
+   
    local tFontNames
    put the fontNames into tFontNames
    replace "/" with "\" in tFontNames
    sort lines of tFontNames
-
+   
    /* Fake fonts begin with "(", but the menu code interprets a "(" at
    the beginning of the item to mean the item is disabled.
    So, to show a "(" instead of disabling, we need to double it */
@@ -101,9 +101,9 @@ private on setupTextMenu
          put "(" before line tLine of tFontNames
       end if
    end repeat
-
+   
    put "Use Owner's Font" & cr & "-" & cr before tFontNames
-
+   
    local fontnum
    put 1 into fontnum
    repeat for each line tFontName in tFontNames
@@ -114,7 +114,7 @@ private on setupTextMenu
       end if
    end repeat
    put "Size" & cr after tText
-
+   
    local tFontSizes
    put format("Use Owner's Size\n-\n8\n9\n10\n12\n14\n18\n24\n36\n48\n-\nOther...") into tFontSizes
    repeat for each line l in tFontSizes
@@ -122,7 +122,7 @@ private on setupTextMenu
       else put "!u" & tab & l & cr after tText
    end repeat
    put "Color" & cr after tText
-
+   
    local tColors
    put format("Use Owner's Color\n-\nBlack\nWhite\nRed\nGreen\nBlue\nYellow\n-\nPen Color") into tColors
    repeat for each line tColor in tColors
@@ -133,7 +133,7 @@ private on setupTextMenu
       end if
    end repeat
    put  "-" & cr & "&Align" & cr & "!u"  & tab & "Left" & cr & "!u" & tab & "Center" & cr & "!u" & tab & "Right" after tText
-
+   
    # Cache the text menu text in non-disabled state
    put tText into sTextMenuText
    repeat for each line tLine in tText
@@ -170,12 +170,12 @@ private command setupWindowMenu
    #   This will be any script editors or the dictionary or resource center if they are open, and any user stacks.
    local tWindows
    put revIDEWindowList() into tWindows
-
+   
    if tWindows is empty then
       put empty into sWindowMenuWindows
       exit setupWindowMenu
    end if
-
+   
    // PM-2016-05-14: [[ Bug 17638 ]] Show stacks by name, unless they are instances of the script editor,
    // the Dictionary or the Resource Center. In this case show the stack title, as in LC 6.7.x
    local tMenu, tMenuLine, tStackName
@@ -185,7 +185,7 @@ private command setupWindowMenu
       if ide.StackIsIDEWindow?(tStackName) then
          put the title of tStack into tStackName
       end if
-
+      
       put "!n" & menubar.EscapeStackNameForMenu(tStackName) & "/|" & tStack into tMenuLine
       if tMenu is empty then
          put tMenuLine into tMenu
@@ -193,7 +193,7 @@ private command setupWindowMenu
          put cr & tMenuLine after tMenu
       end if
    end repeat
-
+   
    # Put a checkmark against the 'topmost' stack
    put "!c" into char 1 to 2 of line 1 of tMenu
    put tMenu into sWindowMenuWindows
@@ -207,7 +207,7 @@ private function menuBar.RecentFiles
    # Get the recent file data
    local tRecentFiles
    put revIDERecentStacks() into tRecentFiles
-
+   
    # Generate the menu
    local tMenu
    repeat with x = 1 to the number of elements of tRecentFiles
@@ -217,12 +217,12 @@ private function menuBar.RecentFiles
          put cr & tab & menubar.EscapeStackNameForMenu(tRecentFiles[x]["label"]) & "/|" & tRecentFiles[x]["filename"] after tMenu
       end if
    end repeat
-
+   
    if tMenu is not empty then
       put cr & tab & "-" after tMenu
       put cr & tab & "Clear Recent Files" & "/|" & kClearRecentFiles after tMenu
    end if
-
+   
    return tMenu
 end menuBar.RecentFiles
 
@@ -234,14 +234,14 @@ on moveStack
    end if
    revIDESetPaletteRectPreference the short name of me
    ideSetWindowBoundingRect
-
+   
    pass moveStack
 end moveStack
 
 on setMenuProperties
    set the height of me to 47
    set the resizable of me to false
-
+   
    local tTitle
    set the itemDelimiter to "-"
    put "LiveCode" && revEnvironmentEditionProperty("name") into tTitle
@@ -255,10 +255,12 @@ on setMenuProperties
    end if
    set the itemDelimiter to comma
    set the title of me to tTitle
-
+   
    local tScreenRect
    put revIDEStackScreenRect(the short name of this stack, true) into tScreenRect
-
+   
+   set the minHeight of me to 19
+   
    if the platform is not "MacOS" then
       if item 3 of the screenRect is 800 then
          set the topLeft of me to item 1 to 2 of tScreenRect
@@ -269,7 +271,7 @@ on setMenuProperties
          else set the topLeft of me to revIDEGetPreference("cREVMenuBarTopLeft")
       end if
    end if
-
+   
    if the platform is "MacOS" then
       set the decorations of me to empty
       set the topLeft of me to item 1 to 2 of tScreenRect
@@ -277,6 +279,10 @@ on setMenuProperties
       set the decorations of me to "default"
    end if
 end setMenuProperties
+      set the decorations of me to "default"
+   end if
+end setMenuProperties
+
 
 on ideSelectedObjectChanged
    updateButtonState
@@ -289,7 +295,7 @@ end ideActiveStacksChanged
 on ideTutorialProgressChanged
    highlightObject empty
    layoutMenu
-   revMenubarBuildMenus
+   menubar.BuildMenus
 end ideTutorialProgressChanged
 
 on idePreferenceChanged pPreference
@@ -333,16 +339,16 @@ private command generateMenubarUI
    if there is a group "icons" of me then
       delete group "icons" of me
    end if
-
+   
    if there is a group "toolbar" of me then
       delete group "toolbar" of me
    end if
-
+   
    reset the templatebutton
-
+   
    create group "icons"
    create group "toolbar"
-
+   
    lock messages
    # Setup the default button
    set the showname of the templatebutton to true
@@ -353,10 +359,10 @@ private command generateMenubarUI
    set the margins of the templatebutton to "4,0,4,1"
    set the traversalOn of the templatebutton to false
    set the autoHilite of the templatebutton to false
-
+   
    # Setup the default image
    set the resizequality of the templateimage to "best"
-
+   
    # Setup the default field
    set the traversalon of the templatefield to false
    set the threed of the templatefield to false
@@ -365,7 +371,7 @@ private command generateMenubarUI
    set the opaque of the templatefield to false
    set the height of the templatefield to 21
    set the locktext of the templatefield to true
-
+   
    local tDividerCount
    put 1 into tDividerCount
    repeat for each item tItem in menubar.Items()
@@ -395,10 +401,10 @@ private command generateMenubarUI
                      set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
                      break
                   case "hilited-depressed"
-                    set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
-                    break
+                     set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                     break
                   case "disabled"
-                  set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                     set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
                end switch
             else
                switch tStyle
@@ -417,25 +423,25 @@ private command generateMenubarUI
                end switch
             end if
          end repeat
-
+         
          create button tItem in group "toolbar" of me
          set the cIcon of it to the id of image tItem of group "icons" of me
          set the icon of it to the cIcon of it
          set the label of it to localizeMenuItem(tItem)
       end if
    end repeat
-
+   
    set the hilitedIcon of the templatebutton to 0
    set the disabledIcon of the templatebutton to 0
-
+   
    generateTutorialGroup
    generateUpgradeGroup
-
+   
    reset the templategraphic
    reset the templatebutton
    reset the templateimage
    reset the templatefield
-
+   
    unlock messages
 end generateMenubarUI
 
@@ -444,7 +450,7 @@ private command generateTutorialGroup
    if there is a group "tutorial" of me then
       delete group "tutorial" of me
    end if
-
+   
    create group "tutorial"
    set the margins of it to 0
    create group "progress" in group "tutorial" of me
@@ -455,12 +461,12 @@ private command generateTutorialGroup
    create graphic "Trough" in group "Progress" of group "tutorial" of me
    create graphic "Bar" in group "Progress" of group "tutorial" of me
    set the backcolor of it to "white"
-
+   
    create field "label" in group "tutorial" of me
    set the margins of it to 4
    set the textSize of it to 10
    set the traversalOn of it to false
-
+   
    create group "actions" in group "tutorial" of me
    set the margins of it to 0
    create widget "stop" as "com.livecode.widget.svgpath" in group "actions" of group "tutorial" of me
@@ -468,13 +474,13 @@ private command generateTutorialGroup
    set the height of it to kTutorialActionSize
    set the iconPresetName of it to "stop"
    set the traversalOn of it to false
-
+   
    create widget "skip" as "com.livecode.widget.svgpath" in group "actions" of group "tutorial" of me
    set the width of it to kTutorialActionSize
    set the height of it to kTutorialActionSize
    set the iconPresetName of it to "forward"
    set the traversalOn of it to false
-
+   
    hide group "tutorial" of me
    unlock screen
 end generateTutorialGroup
@@ -484,27 +490,27 @@ private command generateUpgradeGroup
    if there is a group "upgrade" of me then
       delete group "upgrade" of me
    end if
-
+   
    create group "upgrade"
    set the margins of it to 0
-
+   
    create graphic "bg" in group "upgrade" of me
    set the opaque of it to true
    set the style of it to "roundRect"
    set the lineSize of it to 0
-
+   
    local tUpgradeEdition
    put revEnvironmentEditionProperty("upgrade_edition") into tUpgradeEdition
    set the backcolor of it to revEnvironmentEditionProperty("color", tUpgradeEdition)
    set the roundRadius of it to 8
-
+   
    create field "label" in group "upgrade" of me
    set the margins of it to 4
    set the traversalOn of it to false
    set the text of it to "Upgrade Options"
    set the textStyle["bold"] of it to true
    set the textColor of it to "white"
-
+   
    hide group "upgrade" of me
    unlock screen
 end generateUpgradeGroup
@@ -515,7 +521,7 @@ private command generateMenuGroup
    if there is a group "revMenuBar" of me then
       delete group "revMenuBar" of me
    end if
-
+   
    set the traversalOn of the templatebutton to false
    set the style of the templatebutton to "menu"
    set the menumode of the templatebutton to "pulldown"
@@ -525,15 +531,15 @@ private command generateMenuGroup
    local tButtonScript
    put "on menuPick pWhich; revMenubarMenuPick pWhich; end menuPick" into tButtonScript
    set the script of the templatebutton to tButtonScript
-
+   
    local tGroupScript
-   put  "on mouseDown; revMenubarBuildMenus; end mouseDown" into tGroupScript
+   put  "on mouseDown; menubar.BuildMenus; end mouseDown" into tGroupScript
    create invisible group "revMenuBar"
    set the script of it to tGroupScript
-
+   
    set the topleft of group "revMenuBar" of me to 0,0
    set the lockloc of group "revMenuBar" of me to true
-
+   
    local tLeft
    put 1 into tLeft
    repeat for each item tItem in menubar.Menus()
@@ -549,12 +555,12 @@ private command generateMenuGroup
          set the mnemonic of it to 1
       end if
    end repeat
-
+   
    if the platform is not "macos" then
       show group "revMenuBar" of me
    end if
    set the menubar of me to "revMenuBar"
-
+   
    reset the templatebutton
    set the style of the templatebutton to "rectangle"
    set the height of the templatebutton to 2
@@ -562,7 +568,7 @@ private command generateMenuGroup
    set the showborder of the templatebutton to true
    set the borderwidth of the templatebutton to 2
    set the showname of the templatebutton to false
-
+   
    if the platform is "Linux" then
       create button "Divider" in group "revMenuBar"
    else
@@ -578,11 +584,11 @@ command generateContextMenu
    if there is a button "context" of me then
       delete button "context" of me
    end if
-
+   
    set the style of the templatebutton to "menu"
    set the menumode of the templatebutton to "popup"
    set the visible of the templatebutton to false
-
+   
    create button "context"
    unlock screen
 end generateContextMenu
@@ -597,13 +603,13 @@ constant kUpgradeButtonMarginHorizontal = 15
 on layoutMenu
    lock screen
    lock messages
-
+   
    local tDividerCount
    put 1 into tDividerCount
-
+   
    local tLeft, tTop
    put kPadding into tLeft
-
+   
    if the platform is "macos" then
       put kMenuBarTop into tTop
    else
@@ -611,7 +617,7 @@ on layoutMenu
    end if
    local tTopLeft
    put the topleft of me into tTopLeft
-
+   
    local tLastDivide
    repeat for each item tItem in menubar.Items()
       if tItem is "Divide" then
@@ -631,23 +637,23 @@ on layoutMenu
          add tWidth to tLeft
       end if
    end repeat
-
+   
    local tTutorial, tLabelWidth
    put revIDETutorialInProgress() into tTutorial
    if tTutorial is not empty then
       hide group "upgrade" of me
-
+      
       add kPadding/2 to tLeft
       show group "tutorial" of me
       show tLastDivide
       set the text of field "label" of group "tutorial" of me to tTutorial["lesson"]
       set the width of field "label" of group "tutorial" of me to 1000
       set the height of field "label" of group "tutorial" of me to the formattedHeight of field "label" of group "tutorial" of me
-
+      
       put the formattedwidth of field "label" of group "tutorial" of me into tLabelWidth
       set the width of field "label" of group "tutorial" of me to tLabelWidth
       set the topleft of field "label" of group "tutorial" of me to 0, 0
-
+      
       set the backcolor of graphic "Trough" of group "progress" of me to "white"
       set the backcolor of graphic "Bar" of group "progress" of me to "black"
       set the rect of graphic "Trough" of group "progress" of me to 0, 0, tLabelWidth, kPadding / 2
@@ -655,44 +661,44 @@ on layoutMenu
       set the rect of group "progress" of me to the formattedRect of group "progress" of me
       set the loc of group "progress" of me to the loc of field "label" of me
       set the top of group "progress" of me to the bottom of field "label" of group "tutorial" of me + kPadding / 5
-
+      
       set the topleft of widget "skip" of group "actions" of group "tutorial" of me to 0,0
       set the topleft of widget "stop" of group "actions" of group "tutorial" of me to kTutorialActionSize + kPadding / 2, 0
       set the rect of group "actions" of group "tutorial" of me to the formattedRect of group "actions" of group "tutorial" of me
       set the loc of group "actions" of group "tutorial" of me to the loc of field "label" of me
       set the top of group "actions" of group "tutorial" of me to the bottom of group "progress" of me + kPadding / 2
-
+      
       set the rect of group "tutorial" of me to the formattedRect of group "tutorial" of me
       set the loc of group "tutorial" of me to the loc of group "toolbar" of me
       set the left of group "tutorial" of me to tLeft
-
+      
       add the width of group "tutorial" of me + kPadding to tLeft
    else if ideShouldShowUpgradeOptions?() then
       hide group "tutorial" of me
-
+      
       add kPadding/2 to tLeft
       show group "upgrade" of me
       show tLastDivide
-
+      
       put the height of me into tHeight
-
+      
       local tMenuBarHeight = 0
       if the platform is not "MacOS" then
          subtract kMenuBarHeight from tHeight
          put kMenuBarHeight into tMenuBarHeight
       end if
-
+      
       set the topLeft of group "upgrade" of me to \
             tLeft, \
             tMenuBarHeight + (tHeight - the height of group "upgrade" of me) / 2
-
+      
       add the width of group "upgrade" of me + kPadding to tLeft
    else
       hide tLastDivide
       hide group "tutorial" of me
       hide group "upgrade" of me
    end if
-
+   
    set the width of me to tLeft
    set the height of group "revMenuBar" of me to kMenuBarHeight
    set the width of group "revMenuBar" of me to the width of me
@@ -700,7 +706,7 @@ on layoutMenu
    set the rect of button "Divider" of group "revMenuBar" of me to 0, kMenuBarHeight - kDividerWidth, tLeft + kPadding, kMenuBarHeight
    set the topleft of me to tTopLeft
    unlock messages
-
+   
    updateButtonState
    unlock screen
 end layoutMenu
@@ -912,7 +918,7 @@ on hConditionalDataGrid
    replace cr with "," in tCloseTheseStacks
    set the itemDelimiter to ","
    repeat 2 -- double tap!
-
+      
       repeat for each item tClose in tCloseTheseStacks
          #put tClose into tStackToClose
          if there is a stack tClose then
@@ -1054,17 +1060,17 @@ private command updateMenubarPreference
    local tShowIcons, tShowText
    put revIDEGetPreference("cToolbarIcons") is not false into tShowIcons
    put revIDEGetPreference("cToolbarText") is not false into tShowText
-
+   
    local tTopLeft
    put the topleft of me into tTopLeft
-
+   
    local tButtonRef
    repeat for each line tButton in the childControlNames of group "toolbar" of me
       if tButton is "Divide" then next repeat
       if there is not a button tButton of group "toolbar" of me then
          next repeat
       end if
-
+      
       put the long id of button tButton of group "toolbar" into tButtonRef
       if tShowIcons and tShowText then
          set the height of tButtonRef to 43
@@ -1073,7 +1079,7 @@ private command updateMenubarPreference
       else if tShowText then
          set the height of tButtonRef to 14
       end if
-
+      
       if tShowIcons then
          set the showIcon of tButtonRef to true
       else
@@ -1085,7 +1091,7 @@ private command updateMenubarPreference
          set the showName of tButtonRef to false
       end if
    end repeat
-
+   
    if the platform is "macos" then
       if tShowIcons is false and tShowText is false then
          set the height of me to 0
@@ -1110,39 +1116,39 @@ private command updateMenubarPreference
          set the height of me to 75
       end if
    end if
-
+   
    set the width of field "label" of group "upgrade" of me to 1000
    set the height of field "label" of group "upgrade" of me to the formattedHeight of field "label" of group "upgrade" of me
    local tLabelWidth
    put the formattedwidth of field "label" of group "upgrade" of me into tLabelWidth
    set the width of field "label" of group "upgrade" of me to tLabelWidth
    set the loc of field "label" of group "upgrade" of me to 0,0
-
+   
    if tShowIcons is false then
       set the visible of graphic "bg" of group "upgrade" of me to false
       set the textColor of field "label" of group "upgrade" of me to "black"
    else
       set the visible of graphic "bg" of group "upgrade" of me to true
       set the textColor of field "label" of group "upgrade" of me to "white"
-
+      
       local tHeight
       put the height of me - kPadding into tHeight
-
+      
       if the platform is not "MacOS" then
          subtract kMenuBarHeight from tHeight
       end if
-
+      
       local tRect
       put the rect of field "label" of group "upgrade" of me into tRect
       put item 1 of tRect - kUpgradeButtonMarginHorizontal, \
             -tHeight div 2, \
             item 3 of tRect + kUpgradeButtonMarginHorizontal, \
             tHeight div 2 into tRect
-
+      
       set the rect of graphic "bg" of group "upgrade" of me to tRect
    end if
    set the rect of group "upgrade" of me to the formattedRect of group "upgrade" of me
-
+   
    set the topleft of me to tTopLeft
    unlock messages
    unlock screen
@@ -1175,13 +1181,13 @@ end enableToolbar
 private command updateButtonHilite pTargetName, pValue
    lock screen
    lock messages
-
+   
    local tTargetLongID
    put the long id of button pTargetName of group "toolbar" of me into tTargetLongID
-
+   
    local tShowIcon
    put the showIcon of tTargetLongID into tShowIcon
-
+   
    setButtonHilite tTargetLongID, pValue
    set the label of tTargetLongID to menubar.ButtonText(pTargetName, pValue)
    if pValue then
@@ -1189,9 +1195,9 @@ private command updateButtonHilite pTargetName, pValue
    else
       set the icon of tTargetLongID to the cIcon of tTargetLongID
    end if
-
+   
    set the showIcon of tTargetLongID to tShowIcon
-
+   
    unlock messages
    unlock screen
 end updateButtonHilite
@@ -1204,35 +1210,35 @@ local sToolbarHighlight
 private command updateButtonState
    lock screen
    lock messages
-
+   
    enableToolbar
-
+   
    local tSelObj
    put revIDESelectedObjects() into tSelObj
-
+   
    local tControlSelected
    put tSelObj is not empty and word 1 of tSelObj \
          is not among the items of "card,stack" into tControlSelected
-
+   
    local tUserStack
    put not revIDEStackIsIDEStack(the topstack) into tUserStack
-
+   
    local tGroupHilite
    put word 1 of tSelObj is "group" and the number of lines in tSelobj is 1 into tGroupHilite
    updateButtonHilite "Group", tGroupHilite
-
+   
    -- Group button should be disabled if no controls are selected
    setToolbarButtonState "Group", tControlSelected
-
+   
    local tEditGroupHilite
    put the editBg of the topStack and word 1 of tSelObj is not "group" into tEditGroupHilite
    updateButtonHilite "Edit Group", tEditGroupHilite
-
+   
    -- If a group is selected, the Edit Group button should be enabled
    -- It should also be enabled (with label 'Stop Editing') if we're currently editing a group
    setToolbarButtonState "Edit Group", \
          tGroupHilite or the editBg of the topstack
-
+   
    # Click buttons don't stay hilited
    updateButtonHilite "Message Box", false
    updateButtonHilite "Inspector", false
@@ -1242,32 +1248,32 @@ private command updateButtonState
    updateButtonHilite "Tutorials", false
    updateButtonHilite "Resources", false
    updateButtonHilite "Dictionary", false
-
+   
    # Toggle buttons hilited according to state of property
    global gRevSuppressErrors, gRevSuppressMessages
    updateButtonHilite "Errors", gRevSuppressErrors
    updateButtonHilite "Messages", gRevSuppressMessages
    updateButtonHilite "Select Grouped", the selectGroupedControls
-
+   
    # Deal with enabled/disabled of code and inspector
    global gRevDevelopment
    local tCanInspect
    put tControlSelected or tUserStack or gRevDevelopment into tCanInspect
-
+   
    setToolbarButtonState "Code", tCanInspect
    setToolbarButtonState "Inspector", tCanInspect
-
+   
    # Deal with enabled/disabled of test
    setToolbarButtonState "Test", \
          revIDEGetPreference("cDeployPlatforms") is not empty
-
+   
    if revIDETutorialInProgress() is not empty then
       disableToolbar
       if sToolbarHighlight is not empty then
          enable button sToolbarHighlight of group "toolbar" of me
       end if
    end if
-
+   
    unlock messages
    unlock screen
 end updateButtonState
@@ -1302,7 +1308,7 @@ private function menubar.ButtonText pName, pHilited
    if pHilited is false then
       return pName
    end if
-
+   
    switch pName
       case "Group"
          return "Ungroup"
@@ -1340,7 +1346,7 @@ end localizeMenuItem
 private command setButtonDepressed pTarget
    lock screen
    lock messages
-
+   
    local tHilite, tShowIcon
    put the hilite of pTarget into tHilite
    put the showIcon of pTarget into tShowIcon
@@ -1351,7 +1357,7 @@ private command setButtonDepressed pTarget
    end if
    setButtonHilite pTarget, not the hilite of pTarget
    set the showIcon of pTarget to tShowIcon
-
+   
    unlock messages
    unlock screen
 end setButtonDepressed
@@ -1362,7 +1368,7 @@ end setButtonReleased
 
 on mouseDown
    if the short name of the owner of the target is "revMenuBar" then
-      revMenubarBuildMenus
+      menubar.BuildMenus
    else if the short name of the owner of the target is "toolbar" and the target begins with "button" then
       setButtonDepressed the long id of the target
    end if
@@ -1387,7 +1393,7 @@ on mouseUp
       else if tTarget is "skip" then
          revIDETutorialSkipToNextSkipPoint
       end if
-      else if the short name of the owner of the target is "upgrade" then
+   else if the short name of the owner of the target is "upgrade" then
       local tStartCenterClassic
       put revIDEGetPreference("StartCenterClassic") into tStartCenterClassic
       revIDESetPreference "StartCenterClassic", true
@@ -1474,7 +1480,7 @@ local sMenuHighlight
 on highlightObject pObject
    if pObject is empty or pObject is an array then
       put pObject into sMenuHighlight
-      revMenubarBuildMenus
+      menubar.BuildMenus
    else if there is a button pObject of me then
       put pObject into sToolbarHighlight
    else if pObject is "tutorial" then
@@ -1546,6 +1552,9 @@ private function menubar.Menus
    return "File,Edit,Tools,Object,Text,Development,View,Window,Help"
 end menubar.Menus
 
+/**
+* 
+*/
 on highlightMenuItem pMenu, pSubMenus
    local tMenuText
    put the text of button pMenu of group "revMenuBar" of me into tMenuText
@@ -1566,18 +1575,21 @@ on highlightMenuItem pMenu, pSubMenus
    put the text of button pMenu of group "revMenuBar" of me into tMenuText
 end highlightMenuItem
 
-command revMenubarBuildMenus
+/**
+* menubar.BuildMenus
+*/
+command menubar.BuildMenus
    local tContext
    put buildMenuContext() into tContext
-
+   
    lock screen
    lock messages
    lock menus
    repeat for each item tMenu in menubar.Menus()
-      set the text of button tMenu of group "revMenuBar" of me to revMenubarBuildMenu(tMenu, tContext)
+      set the text of button tMenu of group "revMenuBar" of me to menubar.BuildMenu(tMenu, tContext)
       enable button tMenu of group "revMenuBar"
    end repeat
-
+   
    if revIDETutorialInProgress() is not empty then
       repeat for each item tMenu in menubar.Menus()
          # Don't disable the help menu during tutorials
@@ -1586,7 +1598,7 @@ command revMenubarBuildMenus
          end if
          disable button tMenu of group "revMenuBar" of me
       end repeat
-
+      
       repeat for each key tMenu in sMenuHighlight
          enable button tMenu of group "revMenuBar" of me
          highlightMenuItem tMenu, sMenuHighlight[tMenu]
@@ -1595,9 +1607,12 @@ command revMenubarBuildMenus
    unlock menus
    unlock messages
    unlock screen
-end revMenubarBuildMenus
+end menubar.BuildMenus
 
-function revMenubarBuildMenu pMenu, pContext
+/**
+* menubar.BuildMenu
+*/
+function menubar.BuildMenu pMenu, pContext
    switch pMenu
       case "File"
          return menubar.FileMenu(pContext)
@@ -1620,9 +1635,9 @@ function revMenubarBuildMenu pMenu, pContext
       default
          break
    end switch
-
+   
    return empty
-end revMenubarBuildMenu
+end menubar.BuildMenu
 
 # Returns an array containing the context needed to build the menus. This is stuff like which images / objects / text is selected etc.
 function buildMenuContext

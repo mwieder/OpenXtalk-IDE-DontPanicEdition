@@ -2313,7 +2313,7 @@ constant kErrorRecursionLimit = 2
 #   via the throw command, or messages are suppressed, exits to top.
 #   Otherwise, launches the debugger, showing the current execution context.
 on traceError pHandler, pLine, pPosition, pError
-   if the environment contains "development" and revTestEnvironment() then
+   if the environment contains "development" and isTestEnvironment?() then
       pass traceError
    end if
    
@@ -2402,7 +2402,7 @@ end traceError
 #   nothing. Otherwise, opens a script editor for the object (unless one is
 #   already open) and updates it appropriately.
 on traceBreak pHandler, pLine
-   if the environment contains "development" and revTestEnvironment() then
+   if the environment contains "development" and isTestEnvironment?() then
       pass traceBreak
    end if
    

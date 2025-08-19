@@ -1,19 +1,20 @@
 ﻿script "revStandaloneSettingsStacksBehavior"
+
 on preOpenCard
    lock messages
-   
+
    local tEnabled?, tPlatform
    put canIncludeStackFiles() into tEnabled?
    set the enabled of group "Basic Options" to tEnabled?
    set the enabled of group "Advanced Options" to tEnabled?
-   
+
    -- Disable the stack encryption options in Community edition
    --   put (tEnabled? and revEnvironmentEditionProperty("password_protection")) into tEnabled?
    --   set the enabled of button "encrypt" to tEnabled?
    --   set the enabled of field "encrypt" to tEnabled?
    set the enabled of button "encrypt" to true
    set the enabled of field "encrypt" to true
-   
+
    local tStackFiles
    revSBRelativeStackFilesList the cRevTargetStack of this stack, tStackFiles
    put tStackFiles["relative"] into field "stackfiles"
@@ -24,7 +25,11 @@ on preOpenCard
    pass preOpenCard
 end preOpenCard
 
-on revIncludeStackFiles pIncludeList
+/**
+*
+*  revIncludeStackFiles
+*/
+command revIncludeStackFiles pIncludeList
    local tPrev, tStackFiles
    put the cStackPaths of field "stackfiles" into tPrev
    put updateIncludeStackFilesList(pIncludeList, tPrev) into tStackFiles
@@ -35,7 +40,10 @@ on revIncludeStackFiles pIncludeList
    revSetEdit
 end revIncludeStackFiles
 
--- Updates the controls on this card to reflect the values set on the target stack.
+/**
+*
+*  Updates the controls on this card to reflect the values set on the target stack.
+*/
 command updateCard
    local tSettings,tLines,tStackFiles,tHilitedFiles,tItem,tFirstStack
    put the hilitedStackFiles of field "stackfiles" of me into tHilitedFiles
@@ -65,7 +73,7 @@ command updateCard
       set the textStyle of line 1 of field "stacks" to "bold"
       enable group "selectedStack"
       set the hilitedLines of field "stacks" to 1
-      send "mouseUp" to field "stacks"
+      dispatch "mouseUp" to field "stacks"
    end if
    set the hilite of button "moveSubstacks" to (tSettings["moveSubstacks"] = true)
    set the hilite of button "renameFiles" to (tSettings["renameGeneric"] = true)

@@ -20,11 +20,11 @@ end ideDocsEnsureDatabase
 
 local sConnectionsA
 command ideDocsInitialize pDistributed?
-   If pDistributed? is true and revEnvironmentIsInstalled() then
+   If pDistributed? is true and environment.IsInstalled?() then
       ideThrow "can't write to installed IDE"
       return empty
    end if
-
+   
    local tConnection, tLocation, tKey
    if pDistributed? is true then
       put "ide" into tKey
@@ -35,17 +35,17 @@ command ideDocsInitialize pDistributed?
       ideDocsEnsureDatabase tLocation
    end if
    put sConnectionsA[tKey] into tConnection
-
+   
    if tConnection is among the items of revOpenDatabases() then
       return tConnection
    end if
-
-   dispatch "revDocsOpenAPIDatabase" to stack "revDocsParser" with tLocation
+   
+   dispatch "docs.OpenAPIDatabase" to stack "revDocsParser" with tLocation
    put the result into tConnection
    if tConnection is not a number then
       ideThrow "unable to open database", tConnection
    end if
-
+   
    put tConnection into sConnectionsA[tKey]
    return tConnection
 end ideDocsInitialize
@@ -424,24 +424,24 @@ function ideDocsFetchExtensionEntries pID
 end ideDocsFetchExtensionEntries
 
 on ideDocsUpdateDatabase pAPI, pLibraryA, pDistributed?
-   if pDistributed? is true and revEnvironmentIsInstalled() then
+   if pDistributed? is true and environment.IsInstalled?() then
       exit ideDocsUpdateDatabase
    end if
-
+   
    local tConnection
    ideDocsInitialize pDistributed?
    put the result into tConnection
-
+   
    local tResult
    revExecuteSQL tConnection,"BEGIN TRANSACTION"
-   dispatch "revDocsUpdateDatabase" to stack "revDocsParser" with tConnection, pAPI, pLibraryA
+   dispatch "docs.UpdateDatabase" to stack "revDocsParser" with tConnection, pAPI, pLibraryA
    put the result into tResult
-
+   
    if tResult is not empty then
       revExecuteSQL tConnection,"ROLLBACK"
       return tResult
    end if
-
+   
    revExecuteSQL tConnection, "COMMIT"
    return empty
 end ideDocsUpdateDatabase

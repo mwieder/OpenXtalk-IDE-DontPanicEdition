@@ -1359,11 +1359,11 @@ end _revFontApplyStylesToObject
 
 # This is wrapped for now as its good for testing.
 private function _revFontGetPlatform
-   return   _revEnvironmentPlatform()
+   return   _environment.Platform()
 end _revFontGetPlatform
 
 # Duplicated from home stack to make available in standalones for now.
-private function _revEnvironmentPlatform
+private function _environment.Platform
    local tPlatform
    
    switch the platform
@@ -1395,7 +1395,7 @@ private function _revEnvironmentPlatform
    end switch
    
    return tPlatform
-end _revEnvironmentPlatform
+end _environment.Platform
 
 # Parameters
 #   pPath : Any valid path that can be ensured

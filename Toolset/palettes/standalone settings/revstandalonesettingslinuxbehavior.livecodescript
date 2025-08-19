@@ -1,4 +1,5 @@
 ﻿script "revStandaloneSettingsLinuxBehavior"
+
 on preOpenCard
    local tStandaloneSettingsA
    put getSettings() into tStandaloneSettingsA

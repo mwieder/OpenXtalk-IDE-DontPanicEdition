@@ -545,7 +545,7 @@ after resizeStack
 end resizeStack
 
 on ideDesktopChanged
-   revIDEEnsureOnScreen the short name of this stack
+   ide.EnsureOnScreen the short name of this stack
 end ideDesktopChanged
 
 after openCard

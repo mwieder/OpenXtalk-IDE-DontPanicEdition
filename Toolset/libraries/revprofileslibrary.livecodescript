@@ -12,96 +12,101 @@ on extensionFinalize
    end if
 end extensionFinalize
 
+# NOTE: WTF? Almost no functionality in this script
+
 # OK-2008-04-14 : Added variable declarations when investigating a bug
 
-on revSetCardProfile pWhich, pWhichStack
-  lock screen
-  if pWhichStack is not empty then
-      set the defaultStack to pWhichStack
-  else
-      set the defaultStack to the topStack
-   end if
+--on revSetCardProfile pWhich, pWhichStack
+--  lock screen
+--  if pWhichStack is not empty then
+--      set the defaultStack to pWhichStack
+--  else
+--      set the defaultStack to the topStack
+--   end if
 
-  local tList
-  repeat with i = 1 to the number of controls
-    put (the id of control i) & cr after tList
-  end repeat
-  delete last char of tList
-  repeat for each line tControl in tList
-    set the cREVGeneral["profile"] of control id tControl to pWhich
-  end repeat
-  set the cREVGeneral["profile"] of this card to pWhich
-  unlock screen
-end revSetCardProfile
+--  local tList
+--  repeat with i = 1 to the number of controls
+--    put (the id of control i) & cr after tList
+--  end repeat
+--  delete last char of tList
+--  repeat for each line tControl in tList
+--    set the cREVGeneral["profile"] of control id tControl to pWhich
+--  end repeat
+--  set the cREVGeneral["profile"] of this card to pWhich
+--  unlock screen
+--end revSetCardProfile
 
-on revSetStackProfile pWhich, pWhichStack
-  lock screen
-  if pWhichStack is not empty then
-      set the defaultStack to pWhichStack
-  else
-      set the defaultStack to the topStack
-   end if
+--on revSetStackProfile pWhich, pWhichStack
+--  lock screen
+--  if pWhichStack is not empty then
+--      set the defaultStack to pWhichStack
+--  else
+--      set the defaultStack to the topStack
+--   end if
 
-  local tList
-   repeat for each line tCardID in the cardIDs of this stack
-#  repeat with x = 1 to the number of cards
-    put empty into tList
-#    repeat with i = 1 to the number of controls on card x
-#      put the id of control i of card x & cr after tList
-    repeat with i = 1 to the number of controls on card id tCardID
-      put the id of control i of card id tCardID & cr after tList
-    end repeat
-    delete last char of tList
-    repeat for each line l in tList
-#      set the cREVGeneral["profile"] of control id l of card x to pWhich
-      set the cREVGeneral["profile"] of control id l of card id tCardID to pWhich
-    end repeat
-#    set the cREVGeneral["profile"] of card x to pWhich
-    set the cREVGeneral["profile"] of card id tCardID to pWhich
-  end repeat
-  set the cREVGeneral["profile"] of this stack to pWhich
-  unlock screen
-end revSetStackProfile
+--  local tList
+--   repeat for each line tCardID in the cardIDs of this stack
+--#  repeat with x = 1 to the number of cards
+--    put empty into tList
+--#    repeat with i = 1 to the number of controls on card x
+--#      put the id of control i of card x & cr after tList
+--    repeat with i = 1 to the number of controls on card id tCardID
+--      put the id of control i of card id tCardID & cr after tList
+--    end repeat
+--    delete last char of tList
+--    repeat for each line l in tList
+--#      set the cREVGeneral["profile"] of control id l of card x to pWhich
+--      set the cREVGeneral["profile"] of control id l of card id tCardID to pWhich
+--    end repeat
+--#    set the cREVGeneral["profile"] of card x to pWhich
+--    set the cREVGeneral["profile"] of card id tCardID to pWhich
+--  end repeat
+--  set the cREVGeneral["profile"] of this stack to pWhich
+--  unlock screen
+--end revSetStackProfile
 
-on revSetStackFileProfile pWhich, pWhichSTack
-   lock screen
-   if pWhichStack is not empty then set the defaultStack to pWhichStack
-   else set the defaultStack to the topStack
+--on revSetStackFileProfile pWhich, pWhichSTack
+--   lock screen
+--   if pWhichStack is not empty then set the defaultStack to pWhichStack
+--   else set the defaultStack to the topStack
 
-   local tMainStackName
-   put the mainStack of this stack into tMainStackName
+--   local tMainStackName
+--   put the mainStack of this stack into tMainStackName
 
-   local tStacksList
-   put tMainStackName & cr & the subStacks of stack tMainStackName into tStacksList
-   if charToNum(last char of tStacksList) is 10 then
-      delete last char of tStacksList
-   end if
-   repeat for each line l in tStacksList
-      set the cREVGeneral["profile"] of stack l to pWhich
+--   local tStacksList
+--   put tMainStackName & cr & the subStacks of stack tMainStackName into tStacksList
+--   if charToNum(last char of tStacksList) is 10 then
+--      delete last char of tStacksList
+--   end if
+--   repeat for each line l in tStacksList
+--      set the cREVGeneral["profile"] of stack l to pWhich
 
-      local tList
-#      repeat with x = 1 to the number of cds in stack l
-      repeat for each line tCardID in the cardIDs of stack l
-         set the cREVGeneral["profile"] of card id tCardID of stack l to pWhich
-#         set the cREVGeneral["profile"] of cd x of stack l to pWhich
-         put empty into tList
-#         repeat with i = 1 to the number of controls on cd x of stack l
-#            put the id of control i of cd x of stack l & cr after tList
-         repeat with i = 1 to the number of controls on card id tCardID of stack l
-            put the id of control i of card id tCardID of stack l & cr after tList
-         end repeat
-         delete last char of tList
-         repeat for each line y in tList
-            -- answer "preparing to set profile" && i && the name of control i of cd x of stack l && "card " & x && cr & l & cr & pWhich
---            set the cREVGeneral["profile"] of control id y of cd x of stack l to pWhich
-            set the cREVGeneral["profile"] of control id y of card id tCardID of stack l to pWhich
-         end repeat
-      end repeat
-   end repeat
-   unlock screen
-end revSetStackFileProfile
+--      local tList
+--#      repeat with x = 1 to the number of cds in stack l
+--      repeat for each line tCardID in the cardIDs of stack l
+--         set the cREVGeneral["profile"] of card id tCardID of stack l to pWhich
+--#         set the cREVGeneral["profile"] of cd x of stack l to pWhich
+--         put empty into tList
+--#         repeat with i = 1 to the number of controls on cd x of stack l
+--#            put the id of control i of cd x of stack l & cr after tList
+--         repeat with i = 1 to the number of controls on card id tCardID of stack l
+--            put the id of control i of card id tCardID of stack l & cr after tList
+--         end repeat
+--         delete last char of tList
+--         repeat for each line y in tList
+--            -- answer "preparing to set profile" && i && the name of control i of cd x of stack l && "card " & x && cr & l & cr & pWhich
+----            set the cREVGeneral["profile"] of control id y of cd x of stack l to pWhich
+--            set the cREVGeneral["profile"] of control id y of card id tCardID of stack l to pWhich
+--         end repeat
+--      end repeat
+--   end repeat
+--   unlock screen
+--end revSetStackFileProfile
 
-on revNewProfile pWhichProfile, pWhichObject
+/**
+* revNewProfile
+*/
+command revNewProfile pWhichProfile, pWhichObject
    global gREVTemplateMasterName
 
    local tObjectsList
@@ -190,70 +195,70 @@ function revUpdateProfileListings pObjects
    return tFinalList
 end revUpdateProfileListings
 
-function revReturnCurrentProfile pObjects
-   global gREVTemplateMasterName
+--function revReturnCurrentProfile pObjects
+--   global gREVTemplateMasterName
 
-   local tVar
-   put empty into tVar
-   if pObjects is empty then
-      put (the selObj) into pObjects
-   end if
+--   local tVar
+--   put empty into tVar
+--   if pObjects is empty then
+--      put (the selObj) into pObjects
+--   end if
 
-   repeat for each line tObjectId in pObjects
-      # OK-2008-04-14 : The selectedObject function will return invalid references
-      # to objects if in edit group mode. These references are converted into "rugged ids".
-      local tObject
-      put revRuggedId(tObjectId) into tObject
+--   repeat for each line tObjectId in pObjects
+--      # OK-2008-04-14 : The selectedObject function will return invalid references
+--      # to objects if in edit group mode. These references are converted into "rugged ids".
+--      local tObject
+--      put revRuggedId(tObjectId) into tObject
 
-      if tVar is empty then
-         put the cREVGeneral["profile"] of tObject into tVar
-         if tVar is empty then
-            put "Master" into tVar
-         end if
-         if tVar is "Master" then
-            if the cREVGeneral["masterName"] of tObject is not empty then
-               put the cREVGeneral["masterName"] of tObject into tVar
-            else if gREVTemplateMasterName is not empty then put gREVTemplateMasterName into tVar
-         end if
-      else
-         local tProfile
-         put the cREVGeneral["profile"] of tObject into tProfile
-         if tProfile is empty
-         then put "Master" into tProfile
-         if tProfile is "Master" and the cREVGeneral["masterName"] of tObject is not empty
-         then put the cREVGeneral["masterName"] of tObject into tProfile
-         if tProfile is not tVar
-         then return space
-      end if
-   end repeat
-   if tVar is empty then return "Master" else return tVar
-end revReturnCurrentProfile
+--      if tVar is empty then
+--         put the cREVGeneral["profile"] of tObject into tVar
+--         if tVar is empty then
+--            put "Master" into tVar
+--         end if
+--         if tVar is "Master" then
+--            if the cREVGeneral["masterName"] of tObject is not empty then
+--               put the cREVGeneral["masterName"] of tObject into tVar
+--            else if gREVTemplateMasterName is not empty then put gREVTemplateMasterName into tVar
+--         end if
+--      else
+--         local tProfile
+--         put the cREVGeneral["profile"] of tObject into tProfile
+--         if tProfile is empty
+--         then put "Master" into tProfile
+--         if tProfile is "Master" and the cREVGeneral["masterName"] of tObject is not empty
+--         then put the cREVGeneral["masterName"] of tObject into tProfile
+--         if tProfile is not tVar
+--         then return space
+--      end if
+--   end repeat
+--   if tVar is empty then return "Master" else return tVar
+--end revReturnCurrentProfile
 
-function revCurrentProfileTypes pObjects
-   local tMasterProfiles
-   put 0 into tMasterProfiles
+--function revCurrentProfileTypes pObjects
+--   local tMasterProfiles
+--   put 0 into tMasterProfiles
 
-   local tStandardProfiles
-   put 0 into tStandardProfiles
+--   local tStandardProfiles
+--   put 0 into tStandardProfiles
 
-   local tProfile
-   repeat for each line l in pObjects
-      put the cREVGeneral["profile"] of l into tProfile
-      if tProfile is "Master" or tProfile is empty
-      then add 1 to tMasterProfiles
-      else add 1 to tStandardProfiles
-   end repeat
+--   local tProfile
+--   repeat for each line l in pObjects
+--      put the cREVGeneral["profile"] of l into tProfile
+--      if tProfile is "Master" or tProfile is empty
+--      then add 1 to tMasterProfiles
+--      else add 1 to tStandardProfiles
+--   end repeat
 
-   local tNumObjects
-   put the number of lines in pObjects into tNumObjects
-   switch
-      case tMasterProfiles is tNumObjects
-         return "Master"
-      break
-      case tStandardProfiles is tNumObjects
-         return "Standard"
-      break
-      default
-         return "Mixed"
-   end switch
-end revCurrentProfileTypes
+--   local tNumObjects
+--   put the number of lines in pObjects into tNumObjects
+--   switch
+--      case tMasterProfiles is tNumObjects
+--         return "Master"
+--      break
+--      case tStandardProfiles is tNumObjects
+--         return "Standard"
+--      break
+--      default
+--         return "Mixed"
+--   end switch
+--end revCurrentProfileTypes

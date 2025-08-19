@@ -987,19 +987,19 @@ end __extensionLoad
 
 private command __MapCodeLibraryForIDE pFolder
    local tLibraries
-   if revEnvironmentIsInstalled() and \
-         pFolder begins with revEnvironmentToolsPath() and \
+   if environment.IsInstalled?() and \
+         pFolder begins with environment.ToolsPath() and \
          the platform is "MacOS" then
       -- special case bundled extensions must load code from within MacOS dir
       -- the libs to load should be in Contents/MacOS/<extension>/
       local tExtension
       set the itemDelimiter to slash
       put item -2 of pFolder into tExtension
-
+      
       put files(specialFolderPath("engine") & "/" & tExtension) & return & \
             folders(specialFolderPath("engine") & "/" & tExtension) into tLibraries
       filter tLibraries without ".*"
-
+      
       if tLibraries is not empty then
          set the itemDelimiter to "."
          repeat for each line tLibrary in tLibraries
@@ -1012,7 +1012,7 @@ private command __MapCodeLibraryForIDE pFolder
          end repeat
       end if
    end if
-
+   
    -- code folders should be platform ID triples however for the
    -- time being as we have no way to access the data required to
    -- determine the options section of the platform ID so we filter only
@@ -1031,7 +1031,7 @@ private command __MapCodeLibraryForIDE pFolder
          filter tCodeFolders with "*-"& toLower(the platform) & "*"
          break
    end switch
-
+   
    local tFilteredCodeFolders
    filter tCodeFolders with the processor & "-*" into tFilteredCodeFolders
    split tFilteredCodeFolders by return as set
@@ -1044,12 +1044,12 @@ private command __MapCodeLibraryForIDE pFolder
       split tUniveralFilteredCodeFolders by return as set
       union tFilteredCodeFolders with tUniveralFilteredCodeFolders
    end if
-
+   
    repeat for each key tFolder in tFilteredCodeFolders
       put files(pFolder & "/" & tFolder) & return & \
             folders(pFolder & "/" & tFolder) into tLibraries
       filter tLibraries without ".*"
-
+      
       if tLibraries is not empty then
          set the itemDelimiter to "."
          repeat for each line tLibrary in tLibraries
@@ -1128,13 +1128,13 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    # Find entry in the cache if it exists
    local tCacheIndex
    put __extensionCacheID("install_path", pFolder) into tCacheIndex
-
+   
    # If no entry is in the cache, create one
    if tCacheIndex is not a number then
       put the number of elements of sExtensions + 1 into tCacheIndex
       __extensionPropertySet tCacheIndex, "install_path", pFolder
    end if
-
+   
    local tSupportFiles
    put pAdditionalInfoA["support_files"] into tSupportFiles
    local tLoadOnStartup
@@ -1144,7 +1144,7 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    end if
    if not pIsStartup or tLoadOnStartup is not false then
       __LoadExtension tCacheIndex, pAdditionalInfoA["type"], "lcb", pSourceFile, \
-         pFolder, pStatus, pError
+            pFolder, pStatus, pError
       -- If we have an error loading, try to recompile the extension
       if pError is not empty then
          if not pIsIDEExtension and pSourceFile is not empty then
@@ -1153,7 +1153,7 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
             if the result is empty then
                local tNewError
                __LoadExtension tCacheIndex, pAdditionalInfoA["type"], "lcb", \
-                  pSourceFile, pFolder, pStatus, tNewError
+                     pSourceFile, pFolder, pStatus, tNewError
                put tNewError into pError
             end if
          end if
@@ -1161,7 +1161,7 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    else
       __extensionPropertySet tCacheIndex, "status", "unloaded"
    end if
-
+   
    # Update name, status, error, and whether the extension comes with the IDE
    __extensionPropertySet tCacheIndex, "name", pID
    __extensionPropertySet tCacheIndex, "type_id", pID  & "." & pVersion
@@ -1169,21 +1169,21 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    __extensionPropertySet tCacheIndex, "source_file", pSourceFile
    __extensionPropertySet tCacheIndex, "source_type", "lcb"
    __extensionPropertySet tCacheIndex, "support_files", tSupportFiles
-
+   
    # Check for sample stacks
    __extensionPropertySet tCacheIndex, "samples", __extensionSampleStacks(pID,pFolder)
-
+   
    __extensionSetCommonProperties tCacheIndex, pId, pFolder
-
+   
    # Store the extension's metadata
    revIDEExtensionSetInfo pID
-
+   
    local tUserVisiblePref
    put revIDEGetPreferenceOfSet(pID, "uservisible") into tUserVisiblePref
    if tUserVisiblePref is not empty then
       __extensionPropertySet tCacheIndex, "uservisible", tUserVisiblePref
    end if
-
+   
    # Deal with the various icon possibilities
    if sExtensionProperties[pID]["svgicon"] is empty then
       local tIconPath
@@ -1192,18 +1192,18 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
          __extensionPropertySet tCacheIndex, "icon", tIconPath
       end if
    end if
-
+   
    # Load the default script if there is one
    local tDefaultScript
    put revIDEExtensionFetchDefaultScript(pFolder, pID, true) into tDefaultScript
    __extensionPropertySet tCacheIndex, "defaultScript", tDefaultScript
-
+   
    # Generate extension API from source if there is not one present in the folder
    # Don't do in an installed IDE as we might not be able to generate the files in the appropriate location
-   if not revEnvironmentIsInstalled() and not there is a file (pFolder & slash & "api.lcdoc") then
+   if not environment.IsInstalled?() and not there is a file (pFolder & slash & "api.lcdoc") then
       revIDEExtensionUpdateAPI pFolder, pSourceFile
    end if
-
+   
    return pError
 end __revIDELCBExtensionLoad
 
@@ -1492,14 +1492,14 @@ on revIDEExtensionUpdateAPI pFolder, pExtensionSource
       if tFiles is empty then exit revIDEExtensionUpdateAPI
       put line 1 of tFiles into pExtensionSource
    end if
-
+   
    # Check timestamps to see if API  is out of date.
    local tNeedUpdate?, tError, tSource
    put pFolder & slash & pExtensionSource into tSource
    put revIDEIsFilesetStale?(tSource, \
          pFolder & slash & "api.lcdoc", false, tError) into tNeedUpdate?
    if tNeedUpdate? is empty then put true into tNeedUpdate?
-
+   
    if tNeedUpdate? then
       local tText
       if there is a stack tSource then
@@ -1508,9 +1508,9 @@ on revIDEExtensionUpdateAPI pFolder, pExtensionSource
       else
          put textDecode(url("binfile:" & tSource), "utf-8") into tText
       end if
-
+      
       local tAPI
-      dispatch function "revDocsGenerateDocsFileFromText" to stack "revDocsParser" with tText, tSource
+      dispatch function "docs.GenerateDocsFile.FromText" to stack "revDocsParser" with tText, tSource
       put the result into tAPI
       put textEncode(tAPI, "utf-8") into url ("binfile:" & pFolder & slash & "api.lcdoc")
       return "updated"
@@ -1677,6 +1677,8 @@ on ideOpenStack pCard
       revIDEUnsubscribe "ideOpenStack"
    end if
 end ideOpenStack
+
+
 
 
 command revIDEExtensionLaunchSampleStack pSampleStack
