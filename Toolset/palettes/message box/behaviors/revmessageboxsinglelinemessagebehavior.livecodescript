@@ -3,7 +3,7 @@
 local lHistory, lHistoryIndex, lNumInHistory, lMatchingHistory, lNumMatching, lMatchingIndex
 
 /**
-*
+* returnInField
 */
 on returnInField
    ideMessageBoxExecuteScript(the text of me)
@@ -23,7 +23,7 @@ on returnInField
 end returnInField
 
 /**
-*
+* enterInField
 */
 on enterInField
    returnInField
@@ -32,7 +32,7 @@ end enterInField
 local sColorizeMsg
 
 /**
-*
+* textChanged
 */
 on textChanged
    cancel sColorizeMsg
@@ -43,7 +43,7 @@ on textChanged
 end textChanged
 
 /**
-*
+* arrowKey
 */
 on arrowKey pKey
    if pKey is "up" then
@@ -58,7 +58,7 @@ on arrowKey pKey
 end arrowKey
 
 /**
-*
+* commandKeyDown
 */
 on commandKeyDown pKey
    if pKey is "P" and the platform is not "MacOS" then msg.PrevLine
@@ -130,7 +130,7 @@ private command displayAutoComplete pString
 end displayAutoComplete
 
 /**
-*
+* syntax  __ColorizeAutocomplete
 */
 on __ColorizeAutocomplete
    dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of field "auto complete"
@@ -138,7 +138,7 @@ on __ColorizeAutocomplete
 end __ColorizeAutocomplete
 
 /**
-*
+* msg.NextLine
 */
 command msg.NextLine
    lock screen
@@ -163,7 +163,7 @@ command msg.NextLine
 end msg.NextLine
 
 /**
-*
+* msg.PrevLine
 */
 command msg.PrevLine
    lock screen
@@ -188,14 +188,14 @@ command msg.PrevLine
 end msg.PrevLine
 
 /**
-*
+* closeField
 */
 on closeField
    put empty into field "auto complete"
 end closeField
 
 /**
-*
+* exitField
 */
 on exitField
    put empty into field "auto complete"
