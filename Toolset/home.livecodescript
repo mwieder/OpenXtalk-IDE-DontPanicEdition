@@ -2182,7 +2182,6 @@ function revEnvironmentEditionProperty pProp, pEdition
                return there is a stack "autocomplete"
             case "autocomplete_pro"
                return there is a stack "autocomplete-pro"
-               --return false
             case "script_profiler"
                return false
          end switch
@@ -2218,9 +2217,9 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "edition_external_url"
                return "https://livecode.com/products/community-plus-edition/"
             case "autocomplete"
-               return true
+               return there is a stack "autocomplete"
             case "autocomplete_pro"
-               return false
+               return there is a stack "autocomplete-pro"
             case "script_profiler"
                return false
          end switch
@@ -2257,8 +2256,9 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "edition_external_url"
                return "https://livecode.com/products/indy-edition/"
             case "autocomplete"
+               return there is a stack "autocomplete"
             case "autocomplete_pro"
-               return true
+               return there is a stack "autocomplete-pro"
             case "script_profiler"
                return false
          end switch
@@ -2296,8 +2296,9 @@ function revEnvironmentEditionProperty pProp, pEdition
             case "edition_external_url"
                return "https://livecode.com/products/business-edition/"
             case "autocomplete"
+               return there is a stack "autocomplete"
             case "autocomplete_pro"
-               return true
+               return there is a stack "autocomplete-pro"
             case "script_profiler"
                return true
          end switch
