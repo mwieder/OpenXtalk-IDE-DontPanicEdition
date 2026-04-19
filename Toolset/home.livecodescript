@@ -4,7 +4,7 @@ constant kImportantTextColor = "#569e54"
 constant kEdition = "OpenXTalk"
 
 on startup
-   setTestEnvironment $TRAVIS is true # tperry
+//   setTestEnvironment $TRAVIS is true # tperry
    
    -- MW-2011-03-13: Make sure the externals are empty on startup
    set the externals of me to empty
@@ -44,7 +44,7 @@ on relaunch
    repeat with x = 1 to the paramCount
       put param(x) into tParameters[x]
    end repeat
-   dispatch "revHookLaunchInstance" to me with tParameters
+   dispatch command "revHookLaunchInstance" to me with tParameters
    if it is "handled" then
       if the result is empty then
          pass relaunch
@@ -77,8 +77,8 @@ on saveStackRequest
    pass saveStackRequest
 end saveStackRequest
 
+local sLogPath
 on preOpenStack
-   local tSplashPath
    if the short name of the owner of the target is not "Home" then
       pass preOpenStack
    end if
@@ -100,6 +100,10 @@ on openStack
    
    revInternal__Log "Leave", "Open Stack"
 end openStack
+
+on CloseStack
+   close file sLogPath
+end CloseStack
 
 local sSplashStartTime
 private command revInternal__openStack
@@ -538,35 +542,20 @@ private command setupPaths
          put item 1 to -2 of tEnginePath into tEnginePath
          break
       case "MacOS X"
-         put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Enterprise" into sOldPreferencesPath
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Studio" into sOldPreferencesPath
-         end if
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Media" into sOldPreferencesPath
-         end if
-         put specialFolderPath("Preferences") & "/RunRev" into sPreferencesPath
-         put specialFolderPath("cusr") & "/Library/Application Support/RunRev/Cache" into sCachePath
-         put specialFolderPath("cusr") & "/Library/Application Support/RunRev/Crash Logs" into sCrashLogPath
-         put specialFolderPath("cusr") & "/Library/Application Support/RunRev/Documentation Cache" into sUserDocsPath
+         put specialFolderPath("Preferences") & "/HyperXTalk" into sPreferencesPath
+         put specialFolderPath("cusr") & "/Library/Application Support/HyperXTalk/Cache" into sCachePath
+         put specialFolderPath("cusr") & "/Library/Application Support/HyperXTalk/Crash Logs" into sCrashLogPath
+         put specialFolderPath("cusr") & "/Library/Application Support/HyperXTalk/Documentation Cache" into sUserDocsPath
          
          -- MW-2013-06-13: Adjust the engine path for Mac
          put item 1 to -5 of tEnginePath into tEnginePath
          break
-      case "Windows"
-         -- We put prefereces into the 'Roaming' AppData folder.
-         put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Enterprise/Preferences" into sOldPreferencesPath
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Studio/Preferences" into sOldPreferencesPath
-         end if
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Media/Preferences" into sOldPreferencesPath
-         end if
-         put specialFolderPath(0x001a) & "/RunRev/Preferences" into sPreferencesPath
+     case "Windows"
+         put specialFolderPath(0x001a) & "/HyperXTalk/Preferences" into sPreferencesPath
          -- We put everything else in the 'Local' AppData folder.
-         put specialFolderPath(0x001c) & "/RunRev/Cache" into sCachePath
-         put specialFolderPath(0x001c) & "/RunRev/Crash Logs" into sCrashLogPath
-         put specialFolderPath(0x001c) & "/RunRev/Documentation Cache" into sUserDocsPath
+         put specialFolderPath(0x001c) & "/HyperXTalk/Cache" into sCachePath
+         put specialFolderPath(0x001c) & "/HyperXTalk/Crash Logs" into sCrashLogPath
+         put specialFolderPath(0x001c) & "/HyperXTalk/Documentation Cache" into sUserDocsPath
          
          -- MW-2013-06-13: Adjust the engine path for Windows
          put item 1 to -2 of tEnginePath into tEnginePath
